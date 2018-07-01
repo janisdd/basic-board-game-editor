@@ -14,7 +14,7 @@ import {
 import {globalMinimalZoom, globalZoomStep} from "../../../constants";
 import {SyntheticEvent} from "react";
 import {getI18n} from "../../../../i18n/i18nRoot";
-import ToolTip from '../../helpers/TooTip'
+import ToolTip from '../../helpers/ToolTip'
 
 //const css = require('./styles.styl');
 

@@ -28,7 +28,7 @@ import {
   set_simulation_simulationStatus
 } from "../../state/reducers/simulation/actions";
 import {getI18n, KnownLangs} from "../../../i18n/i18nRoot";
-import IconTooTip from '../helpers/IconTooTip'
+import IconToolTip from '../helpers/IconToolTip'
 
 //const css = require('./styles.styl');
 
@@ -150,7 +150,7 @@ class simulationOverview extends React.Component<Props, any> {
         <Form as="div">
           <Form.Field>
             <label>{getI18n(this.props.langId, "Random seed number")}
-              <IconTooTip message={getI18n(this.props.langId,
+              <IconToolTip message={getI18n(this.props.langId,
                 "You can specify a random seed (a number). Every simulations initializes a random generator. If you specify the same number every simulation run will generate the same sequence of random numbers. For multiple simulations the random generator is only initialized at once. E.g. if you set the seed to 100 and then start the simulation your dice values will be e.g. 5, 3, 2, 6. If you start the simulation again and the seed is still set to 100 then the dice values will be the same (in the same order). If you don't specify a seed you will get different dice values every run.")}
                           wide="very"
               />
@@ -194,7 +194,7 @@ class simulationOverview extends React.Component<Props, any> {
                 {
                   getI18n(this.props.langId, "Max total steps per simulation")
                 }
-                <IconTooTip message={getI18n(this.props.langId,
+                <IconToolTip message={getI18n(this.props.langId,
                   "The max steps for the simulation (in total over all players). After we exceed this value an error is thrown. This is useful if the game has an infinite loop")}/>
               </label>
               <input style={{width: '150px'}}
@@ -224,7 +224,7 @@ class simulationOverview extends React.Component<Props, any> {
                 {
                   getI18n(this.props.langId, "Run X simulations automatic")
                 }
-                <IconTooTip message={getI18n(this.props.langId,
+                <IconToolTip message={getI18n(this.props.langId,
                   "The simulation will be run X times in a separate thread and the results are added to the statistic")}/>
               </label>
               <input style={{width: '150px'}}
@@ -351,7 +351,7 @@ class simulationOverview extends React.Component<Props, any> {
                 {
                   getI18n(this.props.langId, "Update ui after X results")
                 }
-                <IconTooTip message={getI18n(this.props.langId,
+                <IconToolTip message={getI18n(this.props.langId,
                   "Updating the ui is costly (performance wise) so update the ui after X simulations have finished")}/>
               </label>
               <input style={{width: '150px'}}
@@ -507,7 +507,7 @@ class simulationOverview extends React.Component<Props, any> {
               {
                 getI18n(this.props.langId, "Speed in ms delay per step")
               }
-              <IconTooTip message={getI18n(this.props.langId,
+              <IconToolTip message={getI18n(this.props.langId,
                 "One step is taken then we pause for delay ms and then take the next step. This is only done for automatic single simulations")}/>
             </label>
             <input value={this.props.simulationState.simulationSpeedInDelayInMsBetweenSteps} min={10} max={2000}

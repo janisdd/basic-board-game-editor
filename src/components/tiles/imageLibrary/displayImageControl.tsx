@@ -7,7 +7,7 @@ import {ImgStorage} from "../../../externalStorage/imgStorage";
 import {Card, Divider, Button, Icon} from 'semantic-ui-react'
 import {imgLibrary_removeImg} from "../../../state/reducers/imgLibrary/actions";
 import {getI18n} from "../../../../i18n/i18nRoot";
-import ToolTip from '../../helpers/TooTip'
+import ToolTip from '../../helpers/ToolTip'
 import {ImageAssetSurrogate} from "../../../types/world";
 
 //const css = require('./styles.styl');

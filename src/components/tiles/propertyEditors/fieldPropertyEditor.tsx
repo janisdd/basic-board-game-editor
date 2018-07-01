@@ -7,9 +7,9 @@ import {Form, Button, Icon, Input, Divider, Popup} from 'semantic-ui-react'
 import {AnchorPoint, FieldShape, FieldSymbol, HorizontalAlign, VerticalAlign} from "../../../types/drawing";
 import {swapZIndexInTile} from "../../../helpers/someIndexHelper";
 import {DuplicateHelper} from "../../../helpers/duplicateHelper";
-import ToolTip from '../../helpers/TooTip'
+import ToolTip from '../../helpers/ToolTip'
 import {getI18n, getRawI18n} from "../../../../i18n/i18nRoot";
-import IconTooTip, {horizontalIconPopupOffsetInPx} from "../../helpers/IconTooTip";
+import IconToolTip, {horizontalIconPopupOffsetInPx} from "../../helpers/IconToolTip";
 import {ChromePicker} from 'react-color';
 import ImageLibrary from '../imageLibrary/imageLibrary'
 import EditorWrapper, {editorInstancesMap} from "../../helpers/editorWrapper";
@@ -298,7 +298,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
             <Form.Field>
               <label>{getI18n(this.props.langId, "Command text")}
-                <IconTooTip
+                <IconToolTip
                   message={'Click to validate the code syntactically'}
                   icon="code"
                   onClick={() => {
@@ -339,7 +339,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
                   }}
                 >
-                </IconTooTip>
+                </IconToolTip>
               </label>
               <EditorWrapper
                 id={fieldCmdTextEditorId}
@@ -449,7 +449,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           isSomeFieldBasedOnSymbol === false && <Form.Group widths='equal'>
             <Form.Field>
               <label>{getI18n(this.props.langId, "Color")}
-                <IconTooTip message={getI18n(this.props.langId,
+                <IconToolTip message={getI18n(this.props.langId,
                   "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
                 )}/>
               </label>
@@ -489,7 +489,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             </Form.Field>
             <Form.Field>
               <label>{getI18n(this.props.langId, "Background color")}
-                <IconTooTip message={getI18n(this.props.langId,
+                <IconToolTip message={getI18n(this.props.langId,
                   "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
                 )}/>
               </label>
@@ -518,7 +518,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                 />
 
                 <div className="hoverable">
-                  <IconTooTip
+                  <IconToolTip
                     message={getI18n(this.props.langId, "Transparent color")}
                     icon="circle outline"
                     onClick={() => {
@@ -537,7 +537,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           isSomeFieldBasedOnSymbol === false && <Form.Group widths='equal'>
             <Form.Field>
               <label>{getI18n(this.props.langId, "Border color")}
-                <IconTooTip message={getI18n(this.props.langId,
+                <IconToolTip message={getI18n(this.props.langId,
                   "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
                 )}/>
               </label>
@@ -1033,7 +1033,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                 <Form.Group>
                   <Form.Field>
                     <label>{getI18n(this.props.langId, "Anchor point")} {index + 1} x in %
-                      <IconTooTip message={getI18n(
+                      <IconToolTip message={getI18n(
                         this.props.langId,
                         "Anchor points are used to snap lines to fields. When they are snapped then they are connected"
                       )}/>
@@ -1060,7 +1060,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                   </Form.Field>
                   <Form.Field>
                     <label>{getI18n(this.props.langId, "Anchor point")} {index + 1} y in %
-                      <IconTooTip message={getI18n(
+                      <IconToolTip message={getI18n(
                         this.props.langId,
                         "Anchor points are used to snap lines to fields. When they are snapped then they are connected"
                       )}/>
@@ -1126,7 +1126,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
         {isSymbol === false && isSingleField && <Form.Field>
           <label>{getI18n(this.props.langId, "Connected lines")}
-            <IconTooTip message={getI18n(this.props.langId, "The connected lines via anchor points")}/>
+            <IconToolTip message={getI18n(this.props.langId, "The connected lines via anchor points")}/>
           </label>
           <Input
             value={connectedPointsList} readOnly

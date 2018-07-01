@@ -15,8 +15,8 @@ import {
 import {DuplicateHelper} from "../../../helpers/duplicateHelper";
 import {MajorLineDirection} from "../../../state/reducers/tileEditor/tileEditorReducer";
 import {getI18n} from "../../../../i18n/i18nRoot";
-import ToolTip from '../../helpers/TooTip'
-import IconTooTip, {horizontalIconPopupOffsetInPx} from "../../helpers/IconTooTip";
+import ToolTip from '../../helpers/ToolTip'
+import IconToolTip, {horizontalIconPopupOffsetInPx} from "../../helpers/IconToolTip";
 import {ChromePicker} from "react-color";
 
 //const css = require('./styles.styl');
@@ -225,7 +225,7 @@ class linePropertyEditor extends React.Component<Props, any> {
             <Form.Group widths='equal'>
               <Form.Field>
                 <label>{getI18n(this.props.langId, "Color")}
-                  <IconTooTip message={getI18n(this.props.langId, "To use transparent set the color to black (0, 0, 0) and then set alpha to 0")}/>
+                  <IconToolTip message={getI18n(this.props.langId, "To use transparent set the color to black (0, 0, 0) and then set alpha to 0")}/>
                 </label>
                 <Popup
                   trigger={

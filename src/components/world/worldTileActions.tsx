@@ -10,7 +10,7 @@ import {
 } from "../../state/reducers/world/actions";
 import {set_editor_isCreatingNewTile} from "../../state/reducers/tileEditor/actions";
 import {set_app_activeTabIndex} from "../../state/reducers/actions";
-import TooTip from '../helpers/TooTip'
+import ToolTip from '../helpers/ToolTip'
 import {getI18n} from "../../../i18n/i18nRoot";
 import {Logger} from "../../helpers/logger";
 import {set_world_tiles} from "../../state/reducers/world/tileSurrogates/actions";
@@ -71,7 +71,7 @@ class worldTileActions extends React.Component<Props, any> {
       >
         <div className="flexed">
 
-          <TooTip
+          <ToolTip
             message={getI18n(this.props.langId, "Set tile into the selected area")}
           >
             <Button icon onClick={() => {
@@ -79,11 +79,11 @@ class worldTileActions extends React.Component<Props, any> {
             }}>
               <Icon name='add'/>
             </Button>
-          </TooTip>
+          </ToolTip>
 
           {
             tileSurrogate !== undefined &&
-            <TooTip
+            <ToolTip
               message={getI18n(this.props.langId, "Edit tile in the selected area")}
             >
               <Button icon disabled={this.props.isTileEditorDisplayed}
@@ -102,14 +102,14 @@ class worldTileActions extends React.Component<Props, any> {
                       }}>
                 <Icon name="write"/>
               </Button>
-            </TooTip>
+            </ToolTip>
           }
 
 
           {
             tileSurrogate !== undefined &&
 
-            <TooTip
+            <ToolTip
               message={getI18n(this.props.langId, "Remove tile from the selected area")}
             >
               <Button icon onClick={() => {
@@ -122,7 +122,7 @@ class worldTileActions extends React.Component<Props, any> {
               }}>
                 <Icon name="x"/>
               </Button>
-            </TooTip>
+            </ToolTip>
           }
 
         </div>

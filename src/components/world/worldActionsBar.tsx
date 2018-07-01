@@ -15,13 +15,12 @@ import {IoHelper} from "../../helpers/ioHelper";
 import {SyntheticEvent} from "react";
 import ControlSimulationBar from '../tiles/controlSimulationBar'
 import {Logger} from "../../helpers/logger";
-import TooTip from '../helpers/TooTip'
+import ToolTip from '../helpers/ToolTip'
 import {getI18n} from "../../../i18n/i18nRoot";
 import {PrintHelper} from "../../helpers/printHelper";
 import {world_tileSurrogates_redo, world_tileSurrogates_undo} from "../../state/reducers/world/tileSurrogates/actions";
 import {AvailableAppTabs} from "../../state/reducers/appReducer";
 import {Simulator} from "../../../simulation/simulator";
-import ToolTip from '../helpers/TooTip'
 
 //const css = require('./styles.styl');
 
@@ -199,7 +198,7 @@ class worldActionsBar extends React.Component<Props, any> {
 
         <div>
 
-          <TooTip
+          <ToolTip
             message={getI18n(this.props.langId, "Import world")}
           >
             <Button icon
@@ -209,14 +208,14 @@ class worldActionsBar extends React.Component<Props, any> {
             >
               <Icon name="download"/>
             </Button>
-          </TooTip>
+          </ToolTip>
           <input ref={(i) => this.importInput = i} type="file" className="collapsed"
                  accept={'.' + worldFileExtensionWithoutDot}
                  multiple={false}
                  onChange={(e: SyntheticEvent<HTMLInputElement>) => this.onImportWorld(e)}/>
         </div>
 
-        <TooTip
+        <ToolTip
           message={getI18n(this.props.langId, "Export world. This will also export all images in the library")}>
           <Button disabled={tiles.length === 0} icon
                   onClick={() => {
@@ -225,10 +224,10 @@ class worldActionsBar extends React.Component<Props, any> {
           >
             <Icon name="upload"/>
           </Button>
-        </TooTip>
+        </ToolTip>
 
 
-        <TooTip
+        <ToolTip
           message={getI18n(this.props.langId, "Print world & all found variables")}>
           <Button disabled={tiles.length === 0} icon onClick={() => {
 
@@ -256,9 +255,9 @@ class worldActionsBar extends React.Component<Props, any> {
           }}>
             <Icon name="print"/>
           </Button>
-        </TooTip>
+        </ToolTip>
 
-        <TooTip
+        <ToolTip
           message={getI18n(this.props.langId, "Export as svg (experimental)")}>
           <Button disabled={tiles.length === 0} icon onClick={() => {
 
@@ -274,28 +273,28 @@ class worldActionsBar extends React.Component<Props, any> {
               <Icon corner name='image'/>
             </Icon.Group>
           </Button>
-        </TooTip>
+        </ToolTip>
 
       </div>
 
       <div className="mar-left flexed">
-        <TooTip
+        <ToolTip
           message={getI18n(this.props.langId, "Undo the last tile placement")}>
           <Button disabled={this.props.tileSurrogatesState.past.length === 0} icon onClick={() => {
             this.props.world_tileSurrogates_undo()
           }}>
             <Icon name="undo"/>
           </Button>
-        </TooTip>
+        </ToolTip>
 
-        <TooTip
+        <ToolTip
           message={getI18n(this.props.langId, "Redo the last tile placement")}>
           <Button disabled={this.props.tileSurrogatesState.future.length === 0} icon onClick={() => {
             this.props.world_tileSurrogates_redo()
           }}>
             <Icon name="redo"/>
           </Button>
-        </TooTip>
+        </ToolTip>
 
       </div>
 

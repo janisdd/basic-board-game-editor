@@ -34,7 +34,7 @@ import {
 } from "../../state/reducers/simulation/actions";
 import ControlSimulationBar from './controlSimulationBar'
 import {getI18n} from "../../../i18n/i18nRoot";
-import TooTip from "../helpers/TooTip";
+import ToolTip from "../helpers/ToolTip";
 import {redo_shapeEditor, undo_shapeEditor} from "../../state/reducers/tileEditor/shapesReducer/actions";
 
 //const css = require('./styles.styl');
@@ -115,7 +115,7 @@ class tileActionsBar extends React.Component<Props, any> {
 
           <div className="flexed">
 
-            <TooTip
+            <ToolTip
               message={getI18n(this.props.langId, "Add field")}
             >
               <Button icon
@@ -133,9 +133,9 @@ class tileActionsBar extends React.Component<Props, any> {
               >
                 <Icon name='cube'/>
               </Button>
-            </TooTip>
+            </ToolTip>
 
-            <TooTip
+            <ToolTip
               message={getI18n(this.props.langId, "Add line")}
             >
               <Button icon
@@ -159,10 +159,10 @@ class tileActionsBar extends React.Component<Props, any> {
               >
                 <Icon name='exchange'/>
               </Button>
-            </TooTip>
+            </ToolTip>
 
 
-            <TooTip
+            <ToolTip
               message={getI18n(this.props.langId, "Add image")}
             >
               <Button icon onClick={() => {
@@ -170,7 +170,7 @@ class tileActionsBar extends React.Component<Props, any> {
               }}>
                 <Icon name='image'/>
               </Button>
-            </TooTip>
+            </ToolTip>
 
             <ImageLibrary
               isCreatingNewImgShape={true}
@@ -201,17 +201,26 @@ class tileActionsBar extends React.Component<Props, any> {
           />
 
           <div className="flexed">
-            <Button disabled={this.props.shapeReducerState.past.length === 0} icon onClick={() => {
-              this.props.undo_shapeEditor()
-            }}>
-              <Icon name="undo"/>
-            </Button>
 
-            <Button disabled={this.props.shapeReducerState.future.length === 0} icon onClick={() => {
-              this.props.redo_shapeEditor()
-            }}>
-              <Icon name="redo"/>
-            </Button>
+            <ToolTip
+              message={getI18n(this.props.langId, "Undo the last shape/symbol edit operation (experimental)")}
+            >
+              <Button disabled={this.props.shapeReducerState.past.length === 0} icon onClick={() => {
+                this.props.undo_shapeEditor()
+              }}>
+                <Icon name="undo"/>
+              </Button>
+            </ToolTip>
+
+            <ToolTip
+              message={getI18n(this.props.langId, "Redo the last shape/symbol edit operation (experimental)")}
+            >
+              <Button disabled={this.props.shapeReducerState.future.length === 0} icon onClick={() => {
+                this.props.redo_shapeEditor()
+              }}>
+                <Icon name="redo"/>
+              </Button>
+            </ToolTip>
           </div>
 
 

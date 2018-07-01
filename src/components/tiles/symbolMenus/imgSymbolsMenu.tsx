@@ -16,9 +16,9 @@ import {ui_helpPopupDelayInMs} from "../../../constants";
 import {ImgShape, ImgSymbol} from "../../../types/drawing";
 import {Button, Icon, Popup} from "semantic-ui-react";
 import {getNextShapeId} from "../../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
-import TooTip from '../../helpers/TooTip'
+import ToolTip from '../../helpers/ToolTip'
 import {getI18n} from "../../../../i18n/i18nRoot";
-import IconTooTip from "../../helpers/IconTooTip";
+import IconToolTip from "../../helpers/IconToolTip";
 
 //const css = require('./styles.styl');
 
@@ -71,7 +71,7 @@ class imgSymbolsMenu extends React.Component<Props, any> {
                 "What is a symbol")
             }
           </span>
-          <IconTooTip iconSize="large" message={getI18n(this.props.langId,
+          <IconToolTip iconSize="large" message={getI18n(this.props.langId,
             "A symbol is like a plan for a shape, it defines properties. If you create an instance of this symbol then the created shape will keep a connection to the symbol and use the symbol properties instead of its own properties. Thus when you change the symbol all connected shapes will update too! Symbol instances are marked with a small indicator in the corner. To add a symbol select a shape and create a symbol from shape")}/>
         </div>
 
@@ -88,7 +88,7 @@ class imgSymbolsMenu extends React.Component<Props, any> {
 
                   <div>
 
-                    <TooTip
+                    <ToolTip
                       message={getI18n(this.props.langId, "Adds a new shape with the props of the symbol")}
                     >
                       <Button icon
@@ -100,9 +100,9 @@ class imgSymbolsMenu extends React.Component<Props, any> {
                       >
                         <Icon name="add"/>
                       </Button>
-                    </TooTip>
+                    </ToolTip>
 
-                    <TooTip
+                    <ToolTip
                       message={getI18n(this.props.langId,
                         "Adds a new shape that is linked to the symbol. When the symbol changes the shape will changetoo. Can be changed later")}
                     >
@@ -114,7 +114,7 @@ class imgSymbolsMenu extends React.Component<Props, any> {
                       >
                         <Icon name="clone"/>
                       </Button>
-                    </TooTip>
+                    </ToolTip>
 
                     <Button icon
                             onClick={() => {
@@ -125,7 +125,7 @@ class imgSymbolsMenu extends React.Component<Props, any> {
                       <Icon name="write"/>
                     </Button>
 
-                    <TooTip
+                    <ToolTip
                       message={getI18n(this.props.langId,
                         "Removing a symbol will disconnect all shapes from that symbol. The shapes will stay but use its own properties again")}
                     >
@@ -136,7 +136,7 @@ class imgSymbolsMenu extends React.Component<Props, any> {
                       >
                         <Icon name="trash"/>
                       </Button>
-                    </TooTip>
+                    </ToolTip>
 
                   </div>
 

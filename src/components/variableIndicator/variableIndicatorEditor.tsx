@@ -22,7 +22,7 @@ import * as graphics from '../../../graphics/graphicsCore'
 import {PrintHelper} from "../../helpers/printHelper";
 import {printVariableIndicatorBorderColor} from "../../constants";
 import {getI18n} from "../../../i18n/i18nRoot";
-import TooTip from '../helpers/TooTip'
+import ToolTip from '../helpers/ToolTip'
 
 //const css = require('./styles.styl');
 
@@ -140,7 +140,7 @@ class variableIndicatorEditor extends React.Component<Props, any> {
             <Icon name="print"/>
           </Button>
 
-          <TooTip
+          <ToolTip
             message={getI18n(this.props.langId, "Reset to defaults")}
           >
             <Button icon
@@ -150,7 +150,7 @@ class variableIndicatorEditor extends React.Component<Props, any> {
             >
               <Icon name="refresh"/>
             </Button>
-          </TooTip>
+          </ToolTip>
         </div>
 
         <div className="flexed">

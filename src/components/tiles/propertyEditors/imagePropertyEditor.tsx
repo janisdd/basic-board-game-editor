@@ -9,8 +9,8 @@ import {ImgShape, ImgSymbol} from "../../../types/drawing";
 import ImageLibrary from '../imageLibrary/imageLibrary'
 import {DuplicateHelper} from "../../../helpers/duplicateHelper";
 import {getI18n} from "../../../../i18n/i18nRoot";
-import ToolTip from '../../helpers/TooTip'
-import IconTooTip from '../../helpers/IconTooTip'
+import ToolTip from '../../helpers/ToolTip'
+import IconToolTip from '../../helpers/IconToolTip'
 
 //const css = require('./styles.styl');
 
@@ -463,7 +463,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                         }}
               />
 
-              <IconTooTip message={getI18n(this.props.langId,
+              <IconToolTip message={getI18n(this.props.langId,
                 "If checked you cannot longer select the shape with a mouse click. Use the tile outline to select the shape. This is useful if you want to set the shape as background. It might be good to set the z-index to the lowest possible")}/>
             </Form.Field>
           }

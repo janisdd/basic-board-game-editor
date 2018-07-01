@@ -13,7 +13,7 @@ import {
   set_editor_rightBorderPoint, set_editor_topBorderPoints
 } from "../../state/reducers/tileEditor/actions";
 import {getI18n} from "../../../i18n/i18nRoot";
-import IconTooTip from "../helpers/IconTooTip";
+import IconToolTip from "../helpers/IconToolTip";
 
 //const css = require('./styles.styl');
 
@@ -96,7 +96,7 @@ class tileBorderPointsView extends React.Component<Props, any> {
 
                         <Form.Field>
                           <label>{getI18n(this.props.langId, "Next field id or empty")}
-                            <IconTooTip message={ getI18n(this.props.langId, "The next field id is used for simulation to know where we need to go next if we step on this border point")} />
+                            <IconToolTip message={ getI18n(this.props.langId, "The next field id is used for simulation to know where we need to go next if we step on this border point")} />
                           </label>
                           <Input type="number" placeholder='' value={point.nextFieldId === null ? '' : point.nextFieldId} style={{width: '135px'}}
                                  onChange={(e: SyntheticEvent<HTMLInputElement>) => {
@@ -189,7 +189,7 @@ class tileBorderPointsView extends React.Component<Props, any> {
 
                         <Form.Field>
                           <label>{getI18n(this.props.langId, "Next field id or empty")}
-                            <IconTooTip message={ getI18n(this.props.langId, "The next field id is used for simulation to know where we need to go next if we step on this border point")} />
+                            <IconToolTip message={ getI18n(this.props.langId, "The next field id is used for simulation to know where we need to go next if we step on this border point")} />
                           </label>
                           <Input type="number" placeholder='' value={point.nextFieldId === null ? '' : point.nextFieldId} style={{width: '135px'}}
                                  onChange={(e: SyntheticEvent<HTMLInputElement>) => {
@@ -282,7 +282,7 @@ class tileBorderPointsView extends React.Component<Props, any> {
 
                         <Form.Field>
                           <label>{getI18n(this.props.langId, "Next field id or empty")}
-                            <IconTooTip message={ getI18n(this.props.langId, "The next field id is used for simulation to know where we need to go next if we step on this border point")} />
+                            <IconToolTip message={ getI18n(this.props.langId, "The next field id is used for simulation to know where we need to go next if we step on this border point")} />
                           </label>
                           <Input type="number" placeholder='' value={point.nextFieldId === null ? '' : point.nextFieldId} style={{width: '135px'}}
                                  onChange={(e: SyntheticEvent<HTMLInputElement>) => {
@@ -375,7 +375,7 @@ class tileBorderPointsView extends React.Component<Props, any> {
 
                         <Form.Field>
                           <label>{getI18n(this.props.langId, "Next field id or empty")}
-                            <IconTooTip message={ getI18n(this.props.langId, "The next field id is used for simulation to know where we need to go next if we step on this border point")} />
+                            <IconToolTip message={ getI18n(this.props.langId, "The next field id is used for simulation to know where we need to go next if we step on this border point")} />
                           </label>
                           <Input type="number" placeholder='' value={point.nextFieldId === null ? '' : point.nextFieldId} style={{width: '135px'}}
                                  onChange={(e: SyntheticEvent<HTMLInputElement>) => {

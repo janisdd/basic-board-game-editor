@@ -14,7 +14,7 @@ import {
   set_world_stageScale
 } from "../../../state/reducers/world/worldSettings/actions";
 
-import TooTip from '../../helpers/TooTip'
+import ToolTip from '../../helpers/ToolTip'
 import {getI18n} from "../../../../i18n/i18nRoot";
 
 //const css = require('./styles.styl');
@@ -121,7 +121,7 @@ class worldEditorSettingsArea extends React.Component<Props, any> {
         </Input>
 
 
-        <TooTip
+        <ToolTip
           message={getI18n(this.props.langId, "World settings")}
         >
           <Button icon onClick={() => {
@@ -131,7 +131,7 @@ class worldEditorSettingsArea extends React.Component<Props, any> {
           }}>
             <Icon name="setting"/>
           </Button>
-        </TooTip>
+        </ToolTip>
 
       </div>
     )

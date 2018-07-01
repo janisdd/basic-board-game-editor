@@ -19,7 +19,7 @@ import {tileFileExtensionWithoutDot} from "../../../constants";
 import {DragEvent} from "react";
 import {getGuid} from "../../../helpers/guid";
 import {WorldTileSurrogate} from "../../../../simulation/machine/machineState";
-import TooTip from '../../helpers/TooTip'
+import ToolTip from '../../helpers/ToolTip'
 import {getI18n, getRawI18n} from "../../../../i18n/i18nRoot";
 import {Logger} from "../../../helpers/logger";
 import {set_world_tiles} from "../../../state/reducers/world/tileSurrogates/actions";
@@ -296,7 +296,7 @@ class tileLibrary extends React.Component<Props, any> {
                         <div className="flex-left-right">
                           {
                             this.props.selectedTilePos !== null &&
-                            <TooTip
+                            <ToolTip
                               message={getI18n(this.props.langId, "Add tile to world")}
                             >
                               <Button icon onClick={() => {
@@ -332,11 +332,11 @@ class tileLibrary extends React.Component<Props, any> {
                               }}>
                                 <Icon name="add"/>
                               </Button>
-                            </TooTip>
+                            </ToolTip>
                           }
 
 
-                          <TooTip
+                          <ToolTip
                             message={getI18n(this.props.langId,
                               "Edit tile. This will also change all instances of this the in the map. If you want to change only 1 instance then create a clone first and exchange the tile with the clone")}
                           >
@@ -352,9 +352,9 @@ class tileLibrary extends React.Component<Props, any> {
                             }}>
                               <Icon name="write"/>
                             </Button>
-                          </TooTip>
+                          </ToolTip>
 
-                          <TooTip
+                          <ToolTip
                             message={getI18n(this.props.langId, "Export single tile. This will export the tile, only the symbols & only the used images")}
                           >
                             <Button icon onClick={() => {
@@ -364,9 +364,9 @@ class tileLibrary extends React.Component<Props, any> {
                             }}>
                               <Icon name="upload"/>
                             </Button>
-                          </TooTip>
+                          </ToolTip>
 
-                          <TooTip
+                          <ToolTip
                             message={getI18n(this.props.langId, "Clone tile")}
                           >
                             <Button icon onClick={() => {
@@ -381,9 +381,9 @@ class tileLibrary extends React.Component<Props, any> {
                             }}>
                               <Icon name="clone"/>
                             </Button>
-                          </TooTip>
+                          </ToolTip>
 
-                          <TooTip
+                          <ToolTip
                             message={getI18n(this.props.langId,
                               "Delete tile. This will also delete all instances of this tile in the world")}
                           >
@@ -398,7 +398,7 @@ class tileLibrary extends React.Component<Props, any> {
                             >
                               <Icon name="trash"/>
                             </Button>
-                          </TooTip>
+                          </ToolTip>
                         </div>
 
 

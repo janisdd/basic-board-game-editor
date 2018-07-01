@@ -55,9 +55,9 @@ import {FieldShape, ImgShape, LineShape} from "../../types/drawing";
 import {DuplicateHelper} from "../../helpers/duplicateHelper";
 import TileRightActionBar from './tileRightActionBar'
 import {getI18n, getRawI18n} from "../../../i18n/i18nRoot";
-import TooTip from '../helpers/TooTip'
+import ToolTip from '../helpers/ToolTip'
 import {RightTileEditorTabs} from "../../state/reducers/tileEditor/tileEditorReducer";
-import {horizontalIconPopupOffsetInPx} from "../helpers/IconTooTip";
+import {horizontalIconPopupOffsetInPx} from "../helpers/IconToolTip";
 import {redo_shapeEditor, undo_shapeEditor} from "../../state/reducers/tileEditor/shapesReducer/actions";
 import {CSSProperties} from "react";
 import {PrintHelper} from "../../helpers/printHelper";
@@ -612,7 +612,7 @@ class tileEditor extends React.Component<Props, any> {
 
 
             <div className="mar-left">
-              <TooTip
+              <ToolTip
                 message={getI18n(this.props.langId, "Export as svg (experimental)")}>
                 <Button icon onClick={() => {
 
@@ -650,7 +650,7 @@ class tileEditor extends React.Component<Props, any> {
                     <Icon corner name='image' />
                   </Icon.Group>
                 </Button>
-              </TooTip>
+              </ToolTip>
             </div>
 
           </div>

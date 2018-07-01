@@ -17,7 +17,7 @@ import {
   set_simulation_simulationSpeedInDelayInMsBetweenSteps,
   set_simulation_simulationStatus
 } from "../../state/reducers/simulation/actions";
-import TooTip from '../helpers/TooTip'
+import ToolTip from '../helpers/ToolTip'
 import {getI18n} from "../../../i18n/i18nRoot";
 import {AbstractMachine} from "../../../simulation/machine/AbstractMachine";
 import * as mousetrap from "mousetrap";
@@ -195,7 +195,7 @@ class controlSimulationBar extends React.Component<Props, any> {
         {
           //start / resume simulation till end
         }
-        <TooTip
+        <ToolTip
           message={getI18n(this.props.langId,
             "Start automatic simulation till end. This parses all fields before starting the simulation. We expect 1 start field and at least 1 end field")}
         >
@@ -307,11 +307,11 @@ class controlSimulationBar extends React.Component<Props, any> {
                   }}>
             <Icon name='bug'/>
           </Button>
-        </TooTip>
+        </ToolTip>
         {
           //pause running simulation
         }
-        <TooTip
+        <ToolTip
           message={getI18n(this.props.langId, "Pause the running simulation")}
         >
           <Button icon className="mar-right-half"
@@ -326,13 +326,13 @@ class controlSimulationBar extends React.Component<Props, any> {
                   }}>
             <Icon name='pause'/>
           </Button>
-        </TooTip>
+        </ToolTip>
         {
           //start debug (step through) simulation
           //does not do a full parse check
           //only a start field needs to be set
         }
-        <TooTip
+        <ToolTip
           message={getI18n(this.props.langId, "Start step by step simulation")}
         >
           <Button icon
@@ -353,13 +353,13 @@ class controlSimulationBar extends React.Component<Props, any> {
                   }}>
             <Icon name='play'/>
           </Button>
-        </TooTip>
+        </ToolTip>
 
         {
           //do 1 step
           //do the same as Simulation.runSimulationTillEnd (same flow)
         }
-        <TooTip
+        <ToolTip
           message={getI18n(this.props.langId, "Do 1 simulation step")}
         >
           <Button icon
@@ -371,11 +371,11 @@ class controlSimulationBar extends React.Component<Props, any> {
                   }}>
             <Icon name='step forward'/>
           </Button>
-        </TooTip>
+        </ToolTip>
         {
           //stop / end simulation
         }
-        <TooTip
+        <ToolTip
           message={getI18n(this.props.langId, "Stop simulation and discard all results")}
         >
           <Button icon
@@ -386,7 +386,7 @@ class controlSimulationBar extends React.Component<Props, any> {
                   }}>
             <Icon name='stop'/>
           </Button>
-        </TooTip>
+        </ToolTip>
 
       </div>
     )

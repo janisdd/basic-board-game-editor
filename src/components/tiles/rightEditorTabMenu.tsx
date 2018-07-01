@@ -14,7 +14,7 @@ import SimulationOverview from './simulationOverview'
 import {Tile} from "../../types/world";
 import {SyntheticEvent} from "react";
 import {getI18n} from "../../../i18n/i18nRoot";
-import IconTooTip from "../helpers/IconTooTip";
+import IconToolTip from "../helpers/IconToolTip";
 
 //const css = require('./styles.styl');
 
@@ -84,7 +84,7 @@ class rightEditorTabMenu extends React.Component<Props, any> {
 
             <Form.Field>
               <label>{getI18n(this.props.langId, "Additional tile editor simulation start field or empty")}
-                <IconTooTip message={getI18n(this.props.langId,
+                <IconToolTip message={getI18n(this.props.langId,
                   "When you edit a tile that is not a original start tile (has no game start command) and you don't want to add one (because you might forget to remove it later for testing (simulating) the tile), then use this option to define a temporary start field. This option will be ignored for all world simulations")}/>
               </label>
               <Input type="number" placeholder=''
@@ -104,7 +104,7 @@ class rightEditorTabMenu extends React.Component<Props, any> {
 
             <Form.Field>
               <label>{getI18n(this.props.langId, "Additional tile editor simulation end fields")}
-                <IconTooTip message={getI18n(this.props.langId,
+                <IconToolTip message={getI18n(this.props.langId,
                   "You can add additional end fields. This option is ignored for all world simulations")}/>
               </label>
               {

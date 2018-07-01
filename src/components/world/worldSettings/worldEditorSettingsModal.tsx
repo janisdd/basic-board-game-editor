@@ -37,8 +37,8 @@ import {
 } from "../../../state/reducers/world/actions";
 import {getI18n, getRawI18n} from "../../../../i18n/i18nRoot";
 import {CheckboxData} from "../../../types/ui";
-import IconTooTip from "../../helpers/IconTooTip";
-import TooTip from "../../helpers/TooTip";
+import IconToolTip from "../../helpers/IconToolTip";
+import ToolTip from "../../helpers/ToolTip";
 import {AbstractMachine, SimulationTimes} from "../../../../simulation/machine/AbstractMachine";
 import EditorWrapper, {editorInstancesMap} from '../../helpers/editorWrapper'
 import {Simulator} from "../../../../simulation/simulator";
@@ -187,7 +187,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                       this.props.set_world_printGameAsOneImageAction(data.checked)
                                     }}
                           />
-                          <IconTooTip
+                          <IconToolTip
                             message={getI18n(this.props.langId,
                               "If enable this will print all game tiles combined into one image. The variables will be put into separate images.")}
                           />
@@ -196,7 +196,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                         <Form.Field>
 
                           <label>{getI18n(this.props.langId, "Game setup code")}
-                            <IconTooTip
+                            <IconToolTip
                               message={'Click to validate the code'}
                               icon="code"
                               onClick={() => {
@@ -239,7 +239,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                               }}
                             >
-                            </IconTooTip>
+                            </IconToolTip>
                           </label>
                           <EditorWrapper
                             id={editorId}

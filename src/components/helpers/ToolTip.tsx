@@ -32,7 +32,7 @@ const stateProps = returntypeof(mapStateToProps);
 const dispatchProps = returntypeof(mapDispatchToProps);
 type Props = typeof stateProps & typeof dispatchProps;
 
-class TooTip extends React.Component<Props, any> {
+class ToolTip extends React.Component<Props, any> {
   render(): JSX.Element {
     return (
       <Popup
@@ -47,4 +47,4 @@ class TooTip extends React.Component<Props, any> {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(TooTip)
+export default connect(mapStateToProps, mapDispatchToProps)(ToolTip)

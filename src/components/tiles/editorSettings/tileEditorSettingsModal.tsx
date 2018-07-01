@@ -41,7 +41,7 @@ import {BorderPoint} from "../../../types/drawing";
 import {getNextShapeId} from "../../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
 import {MajorLineDirection} from "../../../state/reducers/tileEditor/tileEditorReducer";
 import {getI18n} from "../../../../i18n/i18nRoot";
-import IconTooTip from "../../helpers/IconTooTip";
+import IconToolTip from "../../helpers/IconToolTip";
 
 //const css = require('./styles.styl');
 
@@ -142,7 +142,7 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
 
               <Form.Field>
                 <label>{getI18n(this.props.langId, "Tile auto insert line direction")}
-                  <IconTooTip message={getI18n(this.props.langId,
+                  <IconToolTip message={getI18n(this.props.langId,
                     "When automatic inserting lines from the commands how the main flow is (where to connect the ingoing & outgoing lines to the shapes)")}/>
                 </label>
                 <Dropdown placeholder='Select Friend' fluid selection options={majorLineDirectionOptions}
@@ -203,7 +203,7 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
                             this.props.setEditor_splitLargeTileForPrint(data.checked)
                           }}
                 />
-                <IconTooTip
+                <IconToolTip
                   message={getI18n(this.props.langId,
                     "If enabled and the tile size is larger than the print tile size then the tile will be split into smaller pieces when printing. When disabled the printing tab will display the tile as one image")}
                 />

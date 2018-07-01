@@ -13,7 +13,7 @@ import {DialogHelper} from "../../helpers/dialogHelper";
 import {Simulator} from "../../../simulation/simulator";
 import {Logger} from "../../helpers/logger";
 import {getI18n} from "../../../i18n/i18nRoot";
-import ToolTip from '../helpers/TooTip'
+import ToolTip from '../helpers/ToolTip'
 
 //const css = require('./styles.styl');
 

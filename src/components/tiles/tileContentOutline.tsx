@@ -14,10 +14,10 @@ import {removeFieldShape} from "../../state/reducers/tileEditor/fieldProperties/
 import {removeLineShape} from "../../state/reducers/tileEditor/lineProperties/actions";
 import {removeImageShape} from "../../state/reducers/tileEditor/imgProperties/actions";
 import {getI18n} from "../../../i18n/i18nRoot";
-import TooTip from '../helpers/TooTip'
+import ToolTip from '../helpers/ToolTip'
 import {RightTileEditorTabs} from "../../state/reducers/tileEditor/tileEditorReducer";
 import {DialogHelper} from "../../helpers/dialogHelper";
-import IconTooTip from '../helpers/IconTooTip'
+import IconToolTip from '../helpers/IconToolTip'
 
 //const css = require('./styles.styl');
 
@@ -77,7 +77,7 @@ class tileContentOutline extends React.Component<Props, any> {
       <div className="property-editor-left">
 
         <div>
-          <IconTooTip iconSize="large" message={getI18n(this.props.langId,
+          <IconToolTip iconSize="large" message={getI18n(this.props.langId,
             "Note that almost all operations are much slower when the tile outline is displayed. This is an open issue")}/>
         </div>
 
@@ -88,7 +88,7 @@ class tileContentOutline extends React.Component<Props, any> {
               <List.Header>{getI18n(this.props.langId, "Fields")} ({this.props.fieldShapes.length})
                 {
                   this.props.fieldShapes.length > 0 &&
-                  <TooTip
+                  <ToolTip
                     message={getI18n(this.props.langId, "Delete all fields in tile")}
                   >
                     <Icon style={{marginLeft: '1em'}} name="trash" className="clickable"
@@ -113,12 +113,12 @@ class tileContentOutline extends React.Component<Props, any> {
                             }
                           }}
                     />
-                  </TooTip>
+                  </ToolTip>
                 }
 
                 {
                   this.props.fieldShapes.length > 0 &&
-                  <TooTip
+                  <ToolTip
                     message={getI18n(this.props.langId, "Select all fields in tile")}
                   >
                     <Icon style={{marginLeft: '1em'}} name="mouse pointer" className="clickable"
@@ -126,7 +126,7 @@ class tileContentOutline extends React.Component<Props, any> {
                             this.props.setSelectedFieldShapeIds(this.props.fieldShapes.map(p => p.id))
                           }}
                     />
-                  </TooTip>
+                  </ToolTip>
                 }
 
               </List.Header>
@@ -146,7 +146,7 @@ class tileContentOutline extends React.Component<Props, any> {
 
                         <List.Content>
                           <List.Header>
-                            <TooTip
+                            <ToolTip
                               message={getI18n(this.props.langId, "Select shape in tile")}
                             >
                               <Button icon labelPosition='left' size='mini'
@@ -158,7 +158,7 @@ class tileContentOutline extends React.Component<Props, any> {
                                 <Icon name='mouse pointer'/>
                                 {p.text} [id: {p.id}]
                               </Button>
-                            </TooTip>
+                            </ToolTip>
 
                           </List.Header>
                         </List.Content>
@@ -188,7 +188,7 @@ class tileContentOutline extends React.Component<Props, any> {
               <List.Header>{getI18n(this.props.langId, "Lines")} ({this.props.lineShapes.length})
                 {
                   this.props.lineShapes.length > 0 &&
-                  <TooTip
+                  <ToolTip
                     message={getI18n(this.props.langId, "Delete all lines in tile")}
                   >
                     <Icon style={{marginLeft: '1em'}} name="trash" className="clickable"
@@ -211,11 +211,11 @@ class tileContentOutline extends React.Component<Props, any> {
                             }
                           }}
                     />
-                  </TooTip>
+                  </ToolTip>
                 }
                 {
                   this.props.lineShapes.length > 0 &&
-                  <TooTip
+                  <ToolTip
                     message={getI18n(this.props.langId, "Select all lines in tile")}
                   >
                     <Icon style={{marginLeft: '1em'}} name="mouse pointer" className="clickable"
@@ -223,7 +223,7 @@ class tileContentOutline extends React.Component<Props, any> {
                             this.props.setSelectedLineShapeIds(this.props.lineShapes.map(p => p.id))
                           }}
                     />
-                  </TooTip>
+                  </ToolTip>
                 }
               </List.Header>
               <List.List>
@@ -243,7 +243,7 @@ class tileContentOutline extends React.Component<Props, any> {
 
                         <List.Content>
                           <List.Header>
-                            <TooTip
+                            <ToolTip
                               message={getI18n(this.props.langId, "Select shape in tile")}
                             >
                               <Button icon labelPosition='left' size='mini'
@@ -255,7 +255,7 @@ class tileContentOutline extends React.Component<Props, any> {
                                 <Icon name='mouse pointer'/>
                                 {getI18n(this.props.langId, "Line, Points")}: {p.points.length + 1} [id: {p.id}]
                               </Button>
-                            </TooTip>
+                            </ToolTip>
                           </List.Header>
                         </List.Content>
 
@@ -286,7 +286,7 @@ class tileContentOutline extends React.Component<Props, any> {
               <List.Header>{getI18n(this.props.langId, "Images")} ({this.props.imgShapes.length})
                 {
                   this.props.imgShapes.length > 0 &&
-                  <TooTip
+                  <ToolTip
                     message={getI18n(this.props.langId, "Delete all images in tile")}
                   >
                     <Icon style={{marginLeft: '1em'}} name="trash" className="clickable"
@@ -309,11 +309,11 @@ class tileContentOutline extends React.Component<Props, any> {
                             }
                           }}
                     />
-                  </TooTip>
+                  </ToolTip>
                 }
                 {
                   this.props.imgShapes.length > 0 &&
-                  <TooTip
+                  <ToolTip
                     message={getI18n(this.props.langId, "Select all images in tile")}
                   >
                     <Icon style={{marginLeft: '1em'}} name="mouse pointer" className="clickable"
@@ -321,7 +321,7 @@ class tileContentOutline extends React.Component<Props, any> {
                             this.props.setSelectedImageShapeIds(this.props.imgShapes.map(p => p.id))
                           }}
                     />
-                  </TooTip>
+                  </ToolTip>
                 }
               </List.Header>
               <List.List>
@@ -341,7 +341,7 @@ class tileContentOutline extends React.Component<Props, any> {
 
                         <List.Content>
                           <List.Header>
-                            <TooTip
+                            <ToolTip
                               message={getI18n(this.props.langId, "Select shape in tile")}
                             >
                               <Button icon labelPosition='left' size='mini'
@@ -353,7 +353,7 @@ class tileContentOutline extends React.Component<Props, any> {
                                 <Icon name='mouse pointer'/>
                                 {getI18n(this.props.langId, "Image")} {p.id} [id: {p.id}]
                               </Button>
-                            </TooTip>
+                            </ToolTip>
                           </List.Header>
                         </List.Content>
 
@@ -363,7 +363,7 @@ class tileContentOutline extends React.Component<Props, any> {
                             display: 'inline-block',
                             visibility: p.isMouseSelectionDisabled ? 'initial' : 'collapse'
                           }}>
-                            <IconTooTip
+                            <IconToolTip
                               message={getI18n(this.props.langId, "Is disabled for mouse selection")}
                               iconGroup={
                                 <Icon.Group>

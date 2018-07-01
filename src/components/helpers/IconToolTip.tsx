@@ -42,7 +42,7 @@ type Props = typeof stateProps & typeof dispatchProps;
 //of some reason in labels this is not properly placed
 export const horizontalIconPopupOffsetInPx = 9
 
-class IconTooTip extends React.Component<Props, any> {
+class IconToolTip extends React.Component<Props, any> {
   render(): JSX.Element {
     return (
       <Popup
@@ -76,4 +76,4 @@ class IconTooTip extends React.Component<Props, any> {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(IconTooTip)
+export default connect(mapStateToProps, mapDispatchToProps)(IconToolTip)
