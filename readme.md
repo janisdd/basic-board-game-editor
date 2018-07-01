@@ -3,6 +3,8 @@
 is a basic board game editor with some simulation capabilities
 
 
+![Screenshot](screenshot.png)
+
 ## usage
 
 open the file `dist/index.html` in your preferred browser
@@ -64,9 +66,6 @@ some of the notable issues are
 
 - when a line is connected to a field anchor point then moving the field/line undo is bugged
   - this could also mess up the field connected lines list
-
-- when svg is used we need to have width & height set in px, % won't work for selection
-    - if % is used then we cannot select the svg in the editor by mouse click...
 
 - printing (vars) maybe not all vars are found
 
