@@ -4,6 +4,7 @@
 
 - add more dev docs
 
+- add an icon
 
 
 ISSUES
@@ -128,6 +129,8 @@ maybe
 
 
 DOCS
+- publish to github pages `git subtree push --prefix dist origin gh-pages`
+  - from http://stephenplusplus.github.io/yeoman.io/deployment.html
 - img transparent pixels are now clickable because a bug with svg width="100%" height="100%" viewBox="0 0 41 103"
   - the easeljs hittest will fail for such svgs so we used an extra hitTest object (rectangle)
   --> as a downside we no longer respect transparent pixels on clicks for imgs

@@ -2,6 +2,7 @@
 
 is a basic board game editor with some simulation capabilities
 
+[Demo](https://janisdd.github.io/basic-board-game-editor/)
 
 ![Screenshot](screenshot.png)
 
