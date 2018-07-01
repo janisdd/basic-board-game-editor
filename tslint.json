@@ -1,0 +1,51 @@
+{
+  "extends": [
+    "tslint-immutable"
+  ],
+  "rules": {
+
+    // Recommended built-in rules
+    "no-var-keyword": true,
+    "typedef": [true, "call-signature"],
+
+    // Immutability rules
+    "readonly-keyword": true,
+    "readonly-array": true,
+    "no-let": true,
+
+    //    "max-line-length": {
+    //      "options": [120]
+    //    },
+    "jsdoc-format": true,
+    "new-parens": true,
+    "no-arg": true,
+    "no-construct": true,
+    "no-magic-numbers": [true, -2, -1, 0, 1, 2, 3, 4, 10, 1000], //10 for parseInt radix, 4 for tab size, 1000 delay
+    "no-inferrable-types": true,
+    "no-empty-interface": false,
+    "promise-function-async": true,
+    "await-promise": true,
+    "forin": true,
+    "no-floating-promises": true,
+    "no-string-throw": true,
+    "no-this-assignment": [true, {"allowed-names": ["^self$"]}],
+    "no-duplicate-variable": [true, "check-parameters"],
+    "prefer-object-spread": true,
+    "no-bitwise": true,
+    "radix": true,
+    "switch-default": true,
+    "triple-equals": true,
+    "use-isnan": true,
+    "typeof-compare": true,
+    "prefer-conditional-expression": true,
+    "no-conditional-assignment": true,
+    "no-consecutive-blank-lines": false,
+    "no-console": {
+      "options": [
+        "time",
+        "timeEnd",
+        "trace"
+      ]
+    }
+  }
+}

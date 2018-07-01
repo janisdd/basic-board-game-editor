@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Plain Parser</title>
+</head>
+<body>
+
+
+<div>
+    output & errors are displayed in the console only
+</div>
+
+<div>
+
+<textarea style="width: 800px;height: 300px" id="text">
+int x {15} = 3
+int y {15} = 3
+
+int z {15} = x + y
+log(z) /* this won't output anything because we only construct the ast and not interpret the nodes */
+
+</textarea>
+    <button onclick="runProgram()">run</button>
+</div>
+
+
+<script>
+  //because we don' use some module loader fake the export
+  let exports = {}
+</script>
+<script src="../../simulation/builder/executionUnitBuilder.js"></script>
+<script src="../../simulation/model/executionUnit.js"></script>
+<script src="../../simulation/compiler/cliLangCompiler.js"></script>
+<script>
+
+    let interpreter = cliLangCompiler
+    interpreter.yy = {
+      ExecutionUnitBuilder,
+      convertNumber,
+    }
+
+    function runProgram() {
+      let area = document.getElementById('text')
+      let text = area.value
+
+     // try {
+        const gameUnits = interpreter.parse(text)
+
+        console.log('--- result as ast nodes ---')
+        console.log(gameUnits)
+      // } catch(err) {
+      //     alert(err.message)
+      // }
+
+    }
+
+</script>
+
+</body>
+</html>

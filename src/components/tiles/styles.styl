@@ -1,0 +1,137 @@
+
+.tile-editor {
+
+}
+
+//the main area wrapper
+//3x1 grid (cols x rows)
+.tile-editor-content {
+
+  display: grid
+  grid-column-gap 0.5em
+  grid-row-gap 0.5em
+  overflow auto
+
+  .left-tab-menu {
+    grid-column-start 1
+    grid-column-end 1
+    grid-row-start 1
+    grid-row-end 1
+    justify-self left
+  }
+
+  .tile-editor-center-area {
+    grid-column-start 2
+    grid-column-end 2
+    grid-row-start 1
+    grid-row-end 1
+    justify-self center
+  }
+
+  .right-tab-menu {
+    grid-column-start 3
+    grid-column-end 3
+    grid-row-start 1
+    grid-row-end 1
+    justify-self right
+  }
+
+}
+
+//a 3x3 grid
+.tile-editor-center-area {
+  display grid
+  grid-column-gap 0.5em
+  grid-row-gap 0.5em
+  height 100%
+
+  .top-bar {
+    grid-column-start 2
+    grid-column-end 2
+    grid-row-start 1
+    grid-row-end 1
+  }
+  .left-bar {
+    grid-column-start 1
+    grid-column-end 1
+    grid-row-start 2
+    grid-row-end 3
+  }
+  .right-bar {
+    grid-column-start 3
+    grid-column-end 3
+    grid-row-start 2
+    grid-row-end 3
+  }
+  .bottom-bar {
+    grid-column-start 2
+    grid-column-end 2
+    grid-row-start 3
+    grid-row-end 3
+  }
+
+  .render-area {
+    grid-column-start 2
+    grid-column-end 2
+    grid-row-start 2
+    grid-row-end 2
+  }
+}
+
+$dragHandleWidth = 10px
+$dragHandleHeight = 10px
+$selectionBorderSize = 5px
+
+.drag-handles-container {
+  position absolute
+
+  > div {
+    position absolute
+    background-color black
+    width $dragHandleWidth
+    height $dragHandleHeight
+  }
+
+  > div.top-left {
+    //top (0 - $dragHandleHeight - $selectionBorderSize)
+    //left (0 - $dragHandleWidth - $selectionBorderSize)
+    cursor nw-resize
+  }
+  > div.top-center {
+    //top (0 - $dragHandleHeight - $selectionBorderSize)
+    //left "calc(50% - %s)" % ($dragHandleWidth / 2)
+    cursor ns-resize
+  }
+  > div.top-right {
+    //top (0 - $dragHandleHeight - $selectionBorderSize)
+    //right (0 - $dragHandleWidth - $selectionBorderSize)
+    cursor ne-resize
+  }
+
+  > div.left-center {
+    //top "calc(50% - %s)" % ($dragHandleHeight / 2)
+    //left (0 - $dragHandleWidth - $selectionBorderSize)
+    cursor ew-resize
+  }
+  > div.right-center {
+    //top "calc(50% - %s)" % ($dragHandleHeight / 2)
+    //right (0 - $dragHandleWidth - $selectionBorderSize)
+    cursor ew-resize
+  }
+
+  > div.bottom-left {
+    //bottom (0 - $dragHandleHeight - $selectionBorderSize)
+    //left (0 - $dragHandleWidth - $selectionBorderSize)
+    cursor sw-resize
+  }
+  > div.bottom-center {
+    //bottom (0 - $dragHandleHeight - $selectionBorderSize)
+    //left "calc(50% - %s)" % ($dragHandleWidth / 2)
+    cursor ns-resize
+  }
+  > div.bottom-right {
+    //bottom (0 - $dragHandleHeight - $selectionBorderSize)
+    //right (0 - $dragHandleWidth - $selectionBorderSize)
+    cursor se-resize
+  }
+}

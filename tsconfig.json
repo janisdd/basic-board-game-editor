@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "target": "es5",
+    "sourceMap": true,
+    "jsx": "react",
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "lib": ["es2015", "dom","es5","scripthost"],
+    "allowJs": true,
+    "importHelpers": true
+  },
+  "include": [
+    "./src/**/*",
+    "./graphics/**/*",
+    "./simulation/**/*",
+    "./i18n/**/*",
+    "./libs/ace-editor/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "node_modules/@types/react/index.d.ts"
+  ]
+
+}

@@ -1,0 +1,225 @@
+//also change in the html index template
+$appBarHeight = 50px
+
+body {
+  height "calc(100% - %s)" % $appBarHeight
+}
+
+#app-bar {
+  height $appBarHeight
+  position absolute
+  top 0
+  left 0
+  right 0
+
+  div {
+    border-radius 0
+  }
+}
+
+#app-content-wrapper {
+  height 100%
+  margin-top $appBarHeight
+}
+
+.left-tab-menu {
+  border-right 1px solid #dddddd
+  border-top 1px solid #dddddd
+  border-bottom 1px solid #dddddd
+
+  height 657px //TODO make this stretch to bottom but without site scrollbar
+  overflow visible
+  //padding 1em
+
+}
+
+.right-tab-menu {
+  border-left 1px solid #dddddd
+  border-top 1px solid #dddddd
+  border-bottom 1px solid #dddddd
+
+  height 657px //TODO make this stretch to bottom but without site scrollbar
+  overflow visible
+}
+
+.property-editor-right {
+  width 350px
+  //max-height 600px //TODO make this stretch to bottom but without site scrollbar
+  height 600px
+  overflow auto
+  padding 0.5em
+}
+
+.property-editor-left {
+  width 416px
+  //max-height 600px  //TODO make this stretch to bottom but without site scrollbar
+  height 600px
+  overflow auto
+  padding 0.5em
+  display flex
+  flex-wrap wrap
+  flex-direction column
+  margin-top 1.2em
+}
+
+.symbol-menu-item {
+  padding 0.5em
+}
+
+.tile-canvas {
+  border 1px solid #c9c9c9
+  user-select none
+  -webkit-user-select: none;
+}
+
+.tile-outline-selected {
+  background rgba(0, 0, 0, 0.08)
+
+}
+
+.tile-outline-line-icon {
+  margin auto
+}
+
+.library-add-div {
+  border 1px dashed #d0d0d0
+  color #d0d0d0
+  text-align center
+  cursor pointer
+  height 100%
+}
+
+.imgLibDropAreaEffect * {
+  pointer-events none
+}
+
+.library-add-div-drop {
+  border 3px dashed #d0d0d0 !important
+  color #d0d0d0 !important
+  text-align center
+  cursor pointer
+  height 100%
+}
+
+.img-library-generic-img-div {
+  border 1px solid #d0d0d0
+  color #d0d0d0
+  text-align center
+  cursor pointer
+  height 100%
+}
+
+$imgHeight = 100px
+.img-library-img-wrapper {
+  height 100%
+  padding 0.5em
+  padding-bottom 1em
+
+  > .ui.card {
+    width unset
+    max-width 300px
+  }
+}
+
+.img-library-img-wrapper-inner {
+  height 100%
+  min-width 150px
+  padding 5px
+  display table
+}
+
+.img-library-img {
+  //width calc(210px - (5px*2))
+  height 'calc(%s - (5px*2))' % $imgHeight
+  display table-cell
+  vertical-align middle
+  margin auto
+  max-width 290px
+}
+
+.img-caption {
+  max-width 200px
+  text-overflow ellipsis
+  white-space nowrap
+  overflow hidden
+}
+
+.padding-inputs {
+
+  display flex
+  justify-content space-evenly
+
+  div.ui.input {
+    display block
+    margin auto
+    width auto !important
+  }
+
+  input {
+    width 70px !important
+  }
+}
+
+.tile-library-add-item-wrapper {
+  height 100%
+  padding 0.5em
+  padding-bottom 1em
+}
+
+.tile-library-item {
+  margin 1em
+  display flex
+  flex-direction column
+}
+
+.active-player {
+  border-bottom 2px solid #008888
+}
+
+.is-selecting-next-field-cursor {
+  cursor crosshair
+}
+
+  //from https://gist.github.com/jeromyanglim/3952143
+.keys {
+  white-space: nowrap;
+  color: #000;
+  background: #eee;
+  border-style: solid;
+  border-color: #ccc #aaa #888 #bbb;
+  padding: 2px 6px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+  -moz-box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 0 1px #ffffff inset;
+  -webkit-box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 0 1px #ffffff inset;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 0 1px #ffffff inset;
+  background-color: #FAFAFA;
+  border-color: #CCCCCC #CCCCCC #FFFFFF;
+  border-style: solid solid none;
+  border-width: 1px 1px medium;
+  color: #444444;
+  font-family: 'Helvetica Neue', Helvetica, Arial, Sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.vertical-centered {
+  margin-top auto
+  margin-bottom auto
+}
+
+
+.vertical-stacked-icons {
+  i.icon:not(:last-child) {
+    margin-bottom 4px
+  }
+}
+
+//monaco fix
+.inputarea {
+  display none
+}

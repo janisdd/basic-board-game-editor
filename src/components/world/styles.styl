@@ -1,0 +1,56 @@
+
+.world-editor {
+  display flex
+  flex-direction column
+}
+
+.world-editor-settings-bar {
+  margin-bottom 0.5em
+
+  > div:nth-child(1) {
+    float left
+  }
+
+  > div:nth-child(2) {
+    float right
+  }
+}
+
+.settings-area {
+
+  display flex
+
+  div {
+    margin-right 1em
+  }
+
+}
+
+#world-renderer-canvas {
+  //width calc(100% - 5px)
+  //height calc(100% - 5px)
+}
+
+.world-editor-main-area {
+  display grid
+  grid-column-gap 0.5em
+  grid-row-gap 0.5em
+  overflow auto
+
+  .left-area {
+    grid-column-start 1
+    grid-column-end 1
+    grid-row-start 1
+    grid-row-end 1
+    justify-self center
+  }
+
+  .right-area {
+    grid-column-start 2
+    grid-column-end 2
+    grid-row-start 1
+    grid-row-end 1
+    justify-self right
+  }
+
+}

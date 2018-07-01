@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Basic Board Game Editor</title>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="../node_modules/semantic-ui-css/semantic.css">
+    <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.css[0] %>">
+</head>
+<body>
+<div id="root" style="height: 100%">
+</div>
+
+
+<script src="../node_modules/ace-builds/src/ace.js"></script>
+<script src="../node_modules/ace-builds/src/theme-chrome.js"></script>
+
+<script src="../libs/ace-editor/bbgel-mode.js"></script>
+
+<script src="../node_modules/react/dist/react.js"></script>
+<script src="../node_modules/react-dom/dist/react-dom.js"></script>
+<script src="../node_modules/createjs-easeljs/lib/easeljs-0.8.2.combined.js"></script>
+
+<script src="../libs/SVGExporter/SVGExporter.js"></script>
+
+
+
+<% for(var i = 0; i < htmlWebpackPlugin.files.js.length;i++) { %>
+
+<script src="<%= htmlWebpackPlugin.files.js[i] %>"></script>
+
+<%}%>
+
+</body>
+</html>

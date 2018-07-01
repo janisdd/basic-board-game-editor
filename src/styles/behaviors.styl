@@ -1,0 +1,61 @@
+@require "common.styl"
+
+.clickable {
+  opacity 0.7 !important
+  cursor pointer !important
+}
+
+.clickable:hover {
+  opacity 1 !important
+}
+
+.clickable:active {
+  opacity 1 !important
+  color $accentColor
+}
+
+.no-link {
+  color inherit !important
+}
+
+.hoverable-disabled {
+  opacity 0.2 !important
+  cursor pointer !important
+}
+
+.toggled-colored {
+  color $accentColor
+}
+
+.clickable-toggled {
+  opacity 0.8
+  cursor pointer
+  color $accentColor
+}
+
+.toggled-active--color {
+  color $accentColor
+  cursor auto !important
+  opacity 1 !important
+
+  > i {
+    color $accentColor
+  }
+  > a {
+    color $accentColor
+  }
+  > a:hover {
+    color $accentColor
+  }
+}
+
+/*normally used for tooltips hover*/
+.hoverable {
+  opacity 0.7 !important
+  cursor pointer
+}
+
+.hoverable:hover {
+  opacity 1 !important
+  color $accentColor
+}
