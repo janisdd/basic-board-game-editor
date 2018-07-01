@@ -359,7 +359,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <ToolTip
               message={getRawI18n(
                 this.props.langId,
-                "Enables the next field mode. When you then click on a field (the next field) then a control goto statement is added to the command text and the next field is selected. To quit the mode click elsewhere on the canvas. Shortcut: <div class='keys'>ctrl+n</div>, <div class='keys'>cmd+n</div>. Press the shortcut again to disable the mode or <div class='keys'>esc</div>."
+                "Enables the next field mode. When you then click on a field (the next field) or a border point then a control goto statement is added to the command text and the next field is selected. To quit the mode click elsewhere on the canvas. Shortcut: <div class='keys'>ctrl+n</div>, <div class='keys'>cmd+n</div>. Press the shortcut again to disable the mode or <div class='keys'>esc</div>."
               )}
             >
               <Button icon

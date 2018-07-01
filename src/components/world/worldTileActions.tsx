@@ -57,10 +57,13 @@ type Props = typeof stateProps & typeof dispatchProps;
 class worldTileActions extends React.Component<Props, any> {
   render(): JSX.Element {
 
-    const tileSurrogate = this.props.worldTiles.find(p =>
-      p.x === this.props.selectedTilePos.x &&
-      p.y === this.props.selectedTilePos.y
-    )
+    const tileSurrogate =
+      this.props.selectedTilePos === null
+        ? undefined
+        : this.props.worldTiles.find(p =>
+        p.x === this.props.selectedTilePos.x &&
+        p.y === this.props.selectedTilePos.y
+        )
 
     return (
       <div
@@ -86,17 +89,17 @@ class worldTileActions extends React.Component<Props, any> {
               <Button icon disabled={this.props.isTileEditorDisplayed}
                       onClick={() => {
 
-                const tile = this.props.allTiles.find(p => p.guid === tileSurrogate.tileGuid)
+                        const tile = this.props.allTiles.find(p => p.guid === tileSurrogate.tileGuid)
 
-                if (!tile) {
-                  Logger.fatal(`cannot find tile from surrogate, guid: ${tileSurrogate.tileGuid}`)
-                }
+                        if (!tile) {
+                          Logger.fatal(`cannot find tile from surrogate, guid: ${tileSurrogate.tileGuid}`)
+                        }
 
-                this.props.set_editor_isCreatingNewTile(false, tile)
-                this.props.set_world_isTileEditorDisplayed(true)
-                this.props.set_app_activeTabIndex(AvailableAppTabs.tileEditor)
+                        this.props.set_editor_isCreatingNewTile(false, tile)
+                        this.props.set_world_isTileEditorDisplayed(true)
+                        this.props.set_app_activeTabIndex(AvailableAppTabs.tileEditor)
 
-              }}>
+                      }}>
                 <Icon name="write"/>
               </Button>
             </TooTip>
@@ -110,8 +113,6 @@ class worldTileActions extends React.Component<Props, any> {
               message={getI18n(this.props.langId, "Remove tile from the selected area")}
             >
               <Button icon onClick={() => {
-
-                console.log(this.props.selectedTilePos)
 
                 this.props.set_world_tiles(this.props.worldTiles.filter(p =>
                   p.x !== this.props.selectedTilePos.x ||

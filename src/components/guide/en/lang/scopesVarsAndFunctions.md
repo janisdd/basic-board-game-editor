@@ -1,9 +1,9 @@
-# Variables & Scopes
+# Scopes, vars and functions
 
 if you already know some oop language(s) code scopes can be interpret as the following java-ish code
 
 ```java
-public class Main {
+public class GameAndPlayers {
 
   public static [game/global vars]
   public [player vars]
@@ -145,10 +145,10 @@ end_scope()
 
 if we don't declare any variables before `limit_scope()` then this is like a real function. After `limit_scope()` we cannot longer access the outer scopes variables (e.g. local variables inside main method).
 
-if you do this for every function then we can interpret the code as 
+if you do this for every function then we can interpret the code as
 
 ```java
-public class Main {
+public class GameAndPlayers {
 
   public static [game/global vars]
   public [player vars]
@@ -156,9 +156,13 @@ public class Main {
   public static void main() {
 
     //game code
+    [local vars]
 
   }
 
-  public  [functions]
+  public [function] ... {
+    [local vars]
+  }
+  
 }
 ```

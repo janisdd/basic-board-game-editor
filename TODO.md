@@ -93,6 +93,10 @@ harder
 - http://www.unfocus.com/2014/03/03/hidpiretina-for-createjs-flash-pro-html5-canvas/
 
 maybe
+- how do we know the id of the border points??
+  - currently we can only use the select next field mode to get the border point
+- add some tile settings to the tile itself?
+  - e.g. tile auto insert line direction should be saved on every tile?
 - create a marketplace for tiles/worlds?
 - enable ts lint?
 - printing tab is constantly loading ... but works??

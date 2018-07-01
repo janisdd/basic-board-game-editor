@@ -10,6 +10,8 @@ is a basic board game editor with some simulation capabilities
 
 open the file `dist/index.html` in your preferred browser
 
+(after you downloaded/cloned the project or just the dist folder)
+
 
 ## setup
 

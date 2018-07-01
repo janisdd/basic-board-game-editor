@@ -72,7 +72,7 @@ type Props = typeof stateProps & typeof dispatchProps;
 
 const expressionsAndVars: string = require('./en/lang/expressionsAndVars.md')
 const lang: string = require('./en/lang/lang.md')
-const scopesAndFunctions: string = require('./en/lang/scopesAndFunctions.md')
+const scopesAndFunctions: string = require('./en/lang/scopesVarsAndFunctions.md')
 const endBehaviors: string = require('./en/gameEndBehaviors.md')
 const simulation: string = require('./en/simulation.md')
 const faq: string = require('./en/faq.md')
@@ -120,7 +120,7 @@ class guide extends React.Component<Props, any> {
           <div className="markdown-body" dangerouslySetInnerHTML={{__html: md.render(expressionsAndVars)}}></div>
       },
       {
-        menuItem: 'Scopes and functions',
+        menuItem: 'Scopes, vars and functions',
         render: () =>
           <div className="markdown-body" dangerouslySetInnerHTML={{__html: md.render(scopesAndFunctions)}}></div>
       },

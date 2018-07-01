@@ -130,7 +130,6 @@ export interface LangObj {
   "Removes the selected shapes": string
   "Copy all selected shapes and increment the first found number in the field text (if enabled in tile editor settings & you selected fields) from left to right": string
   "Copy all selected shapes and increment the first found number in the field text (if enabled in tile editor settings & you selected fields) from right to left": string
-  "Enables the next field mode. When you then click on a field (the next field) then a control goto statement is added to the command text and the next field is selected. To quit the mode click elsewhere on the canvas. Press the shortcut again to disable the mode or <div class='keys'>esc</div>.": string
   "Quits the selected next field mode if active. If not deselects all shapes & symbols": string
   "Hold": string
   "Drag tile": string
@@ -186,7 +185,7 @@ export interface LangObj {
   "Copy this shape and increment the first found number in the field text (if enabled in tile editor settings & you selected fields) for all selected shapes from right to left. Shortcut <div class='keys'>ctrl+shift+d</div>, <div class='keys'>cmd+shift+d</div>": string
   "Command text": string
   "Click to validate the code syntactically": string
-  "Enables the next field mode. When you then click on a field (the next field) then a control goto statement is added to the command text and the next field is selected. To quit the mode click elsewhere on the canvas. Shortcut: <div class='keys'>ctrl+n</div>, <div class='keys'>cmd+n</div>. Press the shortcut again to disable the mode or <div class='keys'>esc</div>.": string
+  "Enables the next field mode. When you then click on a field (the next field) or a border point then a control goto statement is added to the command text and the next field is selected. To quit the mode click elsewhere on the canvas. Shortcut: <div class='keys'>ctrl+n</div>, <div class='keys'>cmd+n</div>. Press the shortcut again to disable the mode or <div class='keys'>esc</div>.": string
   "Height": string
   "Width": string
   "Color": string
