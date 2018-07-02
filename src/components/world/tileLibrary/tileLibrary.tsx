@@ -197,7 +197,7 @@ class tileLibrary extends React.Component<Props, any> {
         {
           //without this we get no parent error
           this.props.isTileLibraryModelDisplayed &&
-          <Modal closeIcon={true}
+          <Modal closeIcon={true} centered={false}
                  open={this.props.isTileLibraryModelDisplayed}
                  onClose={() => {
                    this.props.set_world_isTileLibraryModalDisplayed(false)

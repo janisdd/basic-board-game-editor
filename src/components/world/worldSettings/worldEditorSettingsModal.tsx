@@ -51,11 +51,10 @@ import {DialogHelper} from "../../../helpers/dialogHelper";
 export interface MyProps {
 }
 
-const mapStateToProps = (rootState: RootState, props: MyProps) => {
+const mapStateToProps = (rootState: RootState,/* props: MyProps*/) => {
   return {
     //test0: rootState...
     //test: props.test
-    ...props,
     worldSettings: rootState.worldSettingsState,
     isDisplayed: rootState.worldState.isWorldSettingsModalDisplayed,
     simulationState: rootState.simulationState,
@@ -111,10 +110,11 @@ const editorId = 'worldSettingsEditor'
 
 class worldEditorSettingsModal extends React.Component<Props, any> {
   render(): JSX.Element {
+
     return (
       <div>
 
-        <Modal closeIcon={true}
+        <Modal closeIcon={true} centered={false}
                open={this.props.isDisplayed}
                onClose={() => {
                  this.props.set_world_isWorldSettingsModalDisplayed(false)
@@ -241,12 +241,14 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                             >
                             </IconToolTip>
                           </label>
+
                           <EditorWrapper
                             id={editorId}
                             value={this.props.worldSettings.worldCmdText}
                             onLostFocus={(val) => this.props.set_world_worldCmdTextAction(val)}
                             height='300px'
                           />
+
                         </Form.Field>
 
 

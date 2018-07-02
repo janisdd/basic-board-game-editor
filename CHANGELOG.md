@@ -4,6 +4,7 @@
 
 already changed but version has not changed
 
+- modals are no placed not centered to resolve the flashing when some setting is changed
 - renamed all TooTips to ToolTips
 - importing a `.world` has produced some errors because there was no selected tile
 - setting the next point to 0 for a border point was not displayed (because we used val || '' which is bad for falsy values ...)

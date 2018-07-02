@@ -117,7 +117,7 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
 
     return (
       <div>
-        <Modal closeIcon={true}
+        <Modal closeIcon={true} centered={false}
                open={this.props.settings.isTileEditorSettingsModalDisplayed}
                onClose={() => {
                  this.props.set_editor_isTileEditorSettingsModalDisplayed(false)
