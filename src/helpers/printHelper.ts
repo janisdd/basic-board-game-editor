@@ -21,6 +21,7 @@ import {WorldTilesHelper} from "./worldTilesHelper";
 import fileSaver = require("file-saver");
 import {LangHelper} from "./langHelper";
 import {VarType} from "../../simulation/model/executionUnit";
+import Stage = createjs.Stage;
 
 
 declare var SVGExporter: any
@@ -305,6 +306,18 @@ export class PrintHelper {
     stage.scaleX = stage.scaleY = scaleFactor
     stage.update()
 
+    if (splitLargeTileForPrint) {
+      this.printTileBorders(
+        stage,
+        fullTileWidth,
+        fillTileHeight,
+        preferredSubTileWidth,
+        preferredSubTileHeight,
+        gridStrokeThicknessInPx,
+        'black',
+      )
+    }
+
     printWindow.document.body.appendChild(canvas)
 
     const stageData = (stage.canvas as HTMLCanvasElement).toDataURL(printLargeTileBgColor, 'image/png')//stage.toDataURL(printLargeTileBgColor, 'image/png')
@@ -379,7 +392,7 @@ export class PrintHelper {
                                fieldSymbols: ReadonlyArray<FieldSymbol>,
                                imgSymbols: ReadonlyArray<ImgSymbol>,
                                lineSymbols: ReadonlyArray<LineSymbol>,
-                               canvas: HTMLCanvasElement, drawGrid: boolean, gridSizeInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string, worldSettings: WorldSettings
+                               canvas: HTMLCanvasElement, drawGrid: boolean, gridSizeInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string, worldSettings: WorldSettings,
   ): createjs.Stage {
 
     const zIndexCache: ZIndexCache = {}
@@ -426,6 +439,47 @@ export class PrintHelper {
 
     return stage
 
+  }
+
+
+  /**
+   * use this to print the lines where we need to cut (where we split the img)
+   */
+  private static printTileBorders(stage: Stage,
+                                  fullTileWidth: number,
+                                  fillTileHeight: number,
+                                  preferredSubTileWidth: number,
+                                  preferredSubTileHeight: number,
+                                  gridStrokeThicknessInPx: number,
+                                  gridStrokeColor: string,
+  ): void {
+
+    for (let x = 1; x * preferredSubTileWidth < fullTileWidth; x++) {
+
+      let topToBottomPrintGuide = new createjs.Shape()
+      topToBottomPrintGuide.graphics
+        .setStrokeStyle(gridStrokeThicknessInPx)
+        .beginStroke(gridStrokeColor)
+        .moveTo(x * preferredSubTileWidth, 0)
+        .lineTo(x * preferredSubTileWidth, fillTileHeight)
+
+      topToBottomPrintGuide.mouseEnabled = false
+      stage.addChild(topToBottomPrintGuide)
+    }
+
+    for (let y = 1; y * preferredSubTileHeight < fillTileHeight; y++) {
+      let topToBottomPrintGuide = new createjs.Shape()
+      topToBottomPrintGuide.graphics
+        .setStrokeStyle(gridStrokeThicknessInPx)
+        .beginStroke(gridStrokeColor)
+        .moveTo(0, y * preferredSubTileHeight)
+        .lineTo(fullTileWidth, y * preferredSubTileHeight)
+
+      topToBottomPrintGuide.mouseEnabled = false
+      stage.addChild(topToBottomPrintGuide)
+    }
+
+    stage.update()
   }
 
 

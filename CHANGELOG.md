@@ -4,6 +4,7 @@
 
 already changed but version has not changed
 
+- we now add always borders to tiles when we split one large tile into pieces
 - fixed issue with z index
   was always the amount of shapes on the tile but when some shape was deleted that the new z index was invalid
   - we now recreate all z indices of we add/delete/set shapes (not in the actions but we call renewAllZIndicesInTile before every call
