@@ -69,7 +69,7 @@ module.exports = {
       hash: true,
       filename: 'index.html',
       template: 'htmlTemplates/index_deploy.ejs',
-      inject: false,
+      inject: true,
       cache: false,
       //this is only for the template file
       minify: {
