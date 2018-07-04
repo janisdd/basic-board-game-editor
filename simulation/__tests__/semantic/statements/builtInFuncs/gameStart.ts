@@ -34,6 +34,11 @@ describe('game start', () => {
 
     if (stat.type === "start") {
 
+      if (stat.startCondition === null) {
+        expect(stat.startCondition).not.toEqual(null)
+        return
+      }
+
       const tuple = AbstractMachine.execExpression(stat.startCondition, AbstractMachine.createNewMachineState())
       expect(tuple.boolVal).toEqual(true)
 

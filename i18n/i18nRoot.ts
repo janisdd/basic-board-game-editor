@@ -153,6 +153,7 @@ export interface LangObj {
   "Print tile width in px": string
   "Print tile height in px": string
   "Auto increment field text that contain numbers on duplication": string
+  "Display print guides": string
   "top to bottom": string
   "bottom to top": string
   "left to right": string

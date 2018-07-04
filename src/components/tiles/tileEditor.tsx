@@ -62,6 +62,7 @@ import {redo_shapeEditor, undo_shapeEditor} from "../../state/reducers/tileEdito
 import {CSSProperties} from "react";
 import {PrintHelper} from "../../helpers/printHelper";
 import {AvailableAppTabs} from "../../state/reducers/appReducer";
+import {renewAllZIndicesInTile} from "../../helpers/someIndexHelper";
 
 
 export interface MyProps {
@@ -215,18 +216,24 @@ class tileEditor extends React.Component<Props, any> {
       for (const id of this.props.selectedFieldShapeIds) {
         this.props.removeFieldShape(id)
       }
+      renewAllZIndicesInTile()
+      this.props.set_editor_restoreRightTabActiveIndex()
     }
 
     if (this.props.selectedImageShapeIds.length > 0) {
       for (const id of this.props.selectedImageShapeIds) {
         this.props.removeImageShape(id)
       }
+      renewAllZIndicesInTile()
+      this.props.set_editor_restoreRightTabActiveIndex()
     }
 
     if (this.props.selectedLineShapeIds.length > 0) {
       for (const id of this.props.selectedLineShapeIds) {
         this.props.removeLineShape(id)
       }
+      renewAllZIndicesInTile()
+      this.props.set_editor_restoreRightTabActiveIndex()
     }
   }
 
@@ -246,6 +253,8 @@ class tileEditor extends React.Component<Props, any> {
         this.props.settings.autoIncrementFieldTextNumbersOnDuplicate, e.shiftKey)
       this.props.setPropertyEditor_fieldsShapes(this.props.fieldShapes.concat(copies))
       this.props.setSelectedFieldShapeIds(copies.map(p => p.id))
+
+      renewAllZIndicesInTile()
     }
 
     if (this.props.selectedImageShapeIds.length > 0) {
@@ -258,6 +267,8 @@ class tileEditor extends React.Component<Props, any> {
       const copies = DuplicateHelper.duplicateImgShapes(selectedImgShapes, this.props.amountOfShapesInTile)
       this.props.setPropertyEditor_imgShapes(this.props.imgShapes.concat(copies))
       this.props.setSelectedImageShapeIds(copies.map(p => p.id))
+
+      renewAllZIndicesInTile()
     }
 
     if (this.props.selectedLineShapeIds.length > 0) {
@@ -270,6 +281,7 @@ class tileEditor extends React.Component<Props, any> {
       this.props.setPropertyEditor_lineShapes(this.props.lineShapes.concat(copies))
       this.props.setSelectedLineShapeIds(copies.map(p => p.id))
 
+      renewAllZIndicesInTile()
     }
   }
 
@@ -646,8 +658,8 @@ class tileEditor extends React.Component<Props, any> {
 
                 }}>
                   <Icon.Group>
-                    <Icon name='upload' />
-                    <Icon corner name='image' />
+                    <Icon name='upload'/>
+                    <Icon corner name='image'/>
                   </Icon.Group>
                 </Button>
               </ToolTip>
@@ -680,6 +692,9 @@ class tileEditor extends React.Component<Props, any> {
 
             <TileRenderer
 
+              printLargeTilePreferredWidthInPx={this.props.settings.printLargeTilePreferredWidthInPx}
+              printLargeTilePreferredHeightInPx={this.props.settings.printLargeTilePreferredHeightInPx}
+              displayPrintGuidesDisplayed={this.props.settings.arePrintGuidesDisplayed}
               isSelectingNextField={this.props.isSelectingNextField}
               sourceForSelectingNextField={this.props.sourceForSelectingNextField}
               setPropertyEditor_FieldCmdText={(fieldId, cmdText) => {

@@ -13,7 +13,7 @@ import {
   LineSymbol,
   PlainPoint
 } from "../../types/drawing";
-import {swapDisplayIndex, swapDisplayIndexWithGuid} from "../../helpers/someIndexHelper";
+import {renewAllZIndicesInTile, swapDisplayIndex, swapDisplayIndexWithGuid} from "../../helpers/someIndexHelper";
 import FieldPropertyEditor from './propertyEditors/fieldPropertyEditor'
 import LinePropertyEditor from './propertyEditors/linePropertyEditor'
 import ImagePropertyEditor from './propertyEditors/imagePropertyEditor'
@@ -60,7 +60,9 @@ import {
 } from "../../state/reducers/tileEditor/lineProperties/actions";
 import {
   set_editor_isSelectingNextField,
-  set_editor_leftTabActiveIndex, setEditor_isChooseFieldShapeBackgroundImageLibraryDisplayed,
+  set_editor_leftTabActiveIndex,
+  set_editor_restoreRightTabActiveIndex,
+  setEditor_isChooseFieldShapeBackgroundImageLibraryDisplayed,
   setEditor_IsChooseImgShapeImageLibraryDisplayed,
   setSelectedFieldShapeIds,
   setSelectedImageShapeIds,
@@ -125,6 +127,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
 
   setEditor_IsChooseImgShapeImageLibraryDisplayed,
   setEditor_isChooseFieldShapeBackgroundImageLibraryDisplayed,
+  set_editor_restoreRightTabActiveIndex,
 
   //--field props editor
   setPropertyEditor_fieldsShapes,
@@ -280,6 +283,8 @@ class propertyEditorsView extends React.Component<Props, any> {
               onDuplicateFields={newFieldShapes => {
                 this.props.setPropertyEditor_fieldsShapes(this.props.fieldShapes.concat(newFieldShapes))
                 this.props.setSelectedFieldShapeIds(newFieldShapes.map(p => p.id))
+
+                renewAllZIndicesInTile()
               }}
 
               setPropertyEditor_FieldBorderColor={(oldColor, newColor) => {
@@ -377,6 +382,9 @@ class propertyEditorsView extends React.Component<Props, any> {
                 for (const fieldShape of selectedFieldShapes) {
                   this.props.removeFieldShape(fieldShape.id)
                 }
+
+                renewAllZIndicesInTile()
+                this.props.set_editor_restoreRightTabActiveIndex()
               }}
 
               setPropertyEditor_FieldPadding={(oldPaddingTop, oldPaddingRight, oldPaddingBottom, oldPaddingLeft, newPaddingTop, newPaddingRight, newPaddingBottom, newPaddingLeft) => {
@@ -394,7 +402,11 @@ class propertyEditorsView extends React.Component<Props, any> {
                   )
                 }
               }}
-              setPropertyEditor_setSelectedFieldToNull={() => this.props.setSelectedFieldShapeIds([])}
+              setPropertyEditor_setSelectedFieldToNull={() => {
+
+                this.props.setSelectedFieldShapeIds([])
+                this.props.set_editor_restoreRightTabActiveIndex()
+              }}
               onAddFieldSymbol={() => {
 
                 if (selectedFieldShapes.length === 1) {
@@ -460,6 +472,8 @@ class propertyEditorsView extends React.Component<Props, any> {
                                  onDuplicateImgs={newImgShape => {
                                    this.props.setPropertyEditor_imgShapes(this.props.imgShapes.concat(newImgShape))
                                    this.props.setSelectedImageShapeIds(newImgShape.map(p => p.id))
+
+                                   renewAllZIndicesInTile()
                                  }}
 
                                  setPropertyEditor_ImageX={(oldX, newX) => {
@@ -503,10 +517,15 @@ class propertyEditorsView extends React.Component<Props, any> {
                                    for (const imgShape of selectedImgShapes) {
                                      this.props.removeImageShape(imgShape.id)
                                    }
+
+                                   renewAllZIndicesInTile()
+                                   this.props.set_editor_restoreRightTabActiveIndex()
                                  }}
 
-                                 setPropertyEditor_setSelectedImageToNull={() => this.props.setSelectedImageShapeIds(
-                                   [])}
+                                 setPropertyEditor_setSelectedImageToNull={() => {
+                                   this.props.setSelectedImageShapeIds([])
+                                   this.props.set_editor_restoreRightTabActiveIndex()
+                                 }}
                                  onAddImgSymbol={() => {
 
                                    if (selectedImgShapes.length === 1) {
@@ -567,9 +586,14 @@ class propertyEditorsView extends React.Component<Props, any> {
                                 onDuplicateLines={newLineShapes => {
                                   this.props.setPropertyEditor_lineShapes(this.props.lineShapes.concat(newLineShapes))
                                   this.props.setSelectedLineShapeIds(newLineShapes.map(p => p.id))
+
+                                  renewAllZIndicesInTile()
                                 }}
 
-                                setPropertyEditor_setSelectedLineToNull={() => this.props.setSelectedLineShapeIds([])}
+                                setPropertyEditor_setSelectedLineToNull={() => {
+                                  this.props.setSelectedLineShapeIds([])
+                                  this.props.set_editor_restoreRightTabActiveIndex()
+                                }}
 
                                 setPropertyEditor_LineThicknessInPx={(oldThicknessInPx, newThicknessInPx) => {
                                   for (const lineShape of selectedLineShapes) {
@@ -643,6 +667,9 @@ class propertyEditorsView extends React.Component<Props, any> {
                                   for (const lineShape of selectedLineShapes) {
                                     this.props.removeLineShape(lineShape.id)
                                   }
+
+                                  renewAllZIndicesInTile()
+                                  this.props.set_editor_restoreRightTabActiveIndex()
                                 }}
 
                                 onAddLineSymbol={() => {

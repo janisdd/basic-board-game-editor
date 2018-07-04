@@ -241,6 +241,9 @@ class tileLibrary extends React.Component<Props, any> {
                     return (
                       <div key={index} className="tile-library-item">
                         <TileRenderer
+                          printLargeTilePreferredHeightInPx={0}
+                          printLargeTilePreferredWidthInPx={0}
+                          displayPrintGuidesDisplayed={false}
                           setTileEditorSelectingNextField={nop}
                           setPropertyEditor_FieldCmdText={nop}
                           sourceForSelectingNextField={null}

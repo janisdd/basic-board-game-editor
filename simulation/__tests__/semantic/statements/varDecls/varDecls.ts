@@ -1,4 +1,4 @@
-import {runForLocalVar} from "../../../initForTests";
+import {runForLocalVar, runForState} from "../../../initForTests";
 
 describe('var decls', () => {
 

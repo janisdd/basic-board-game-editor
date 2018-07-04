@@ -43,8 +43,8 @@ export interface MyProps {
   readonly setPropertyEditor_FieldAbsoluteZIndex: (zIndex: number) => void
   readonly setPropertyEditor_FieldCornerRadiusInPx: (oldCornerRadiusInPx: number, newCornerRadiusInPx: number) => void
   readonly setPropertyEditor_FieldPadding: (oldPaddingTop: number, oldPaddingRight: number, oldPaddingBottom: number,
-    oldPaddingLeft: number, newPaddingTop: number, newPaddingRight: number, newPaddingBottom: number,
-    newPaddingLeft: number
+                                            oldPaddingLeft: number, newPaddingTop: number, newPaddingRight: number, newPaddingBottom: number,
+                                            newPaddingLeft: number
   ) => void
 
   readonly setPropertyEditor_FieldBorderColor: (oldColor: string, newColor: string) => void
@@ -148,12 +148,12 @@ class fieldPropertyEditor extends React.Component<Props, any> {
     }
 
     const fieldSymbol: FieldSymbol | null = isSymbol
-                                            ? this.props.fieldShape as FieldSymbol
-                                            : null
+      ? this.props.fieldShape as FieldSymbol
+      : null
     //we need to specify an old val when we have multiple fields to we take the first
     const singleField: FieldShape | null = isSymbol === false
-                                           ? (this.props.fieldShape as ReadonlyArray<FieldShape>)[0]
-                                           : null
+      ? (this.props.fieldShape as ReadonlyArray<FieldShape>)[0]
+      : null
 
     const isSomeFieldBasedOnSymbol = isSingleField && singleField !== null && singleField.createdFromSymbolGuid !== null || areFieldShapes && (this.props.fieldShape as ReadonlyArray<FieldShape>).some(
       p => p.createdFromSymbolGuid !== null)
@@ -344,10 +344,10 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               <EditorWrapper
                 id={fieldCmdTextEditorId}
                 value={(isSymbol
-                        ? fieldSymbol.cmdText
-                        : isSingleField
-                          ? singleField.cmdText
-                          : singleField.cmdText) || ''}
+                  ? fieldSymbol.cmdText
+                  : isSingleField
+                    ? singleField.cmdText
+                    : singleField.cmdText) || ''}
                 height={'100px'}
                 onLostFocus={val => {
                   this.props.setPropertyEditor_FieldCmdText(val)
@@ -385,12 +385,12 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>X</label>
             <input type="number"
                    value={isSymbol
-                          ? fieldSymbol.x
-                          : singleField.x}
+                     ? fieldSymbol.x
+                     : singleField.x}
 
                    onChange={(e) => this.props.setPropertyEditor_FieldX(isSymbol
-                                                                        ? fieldSymbol.x
-                                                                        : singleField.x,
+                     ? fieldSymbol.x
+                     : singleField.x,
                      parseInt(e.currentTarget.value)
                    )}
             />
@@ -399,12 +399,12 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>Y</label>
             <input type="number"
                    value={isSymbol
-                          ? fieldSymbol.y
-                          : singleField.y}
+                     ? fieldSymbol.y
+                     : singleField.y}
 
                    onChange={(e) => this.props.setPropertyEditor_FieldY(isSymbol
-                                                                        ? fieldSymbol.y
-                                                                        : singleField.y,
+                     ? fieldSymbol.y
+                     : singleField.y,
                      parseInt(e.currentTarget.value)
                    )}
             />
@@ -417,13 +417,13 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               <label>{getI18n(this.props.langId, "Height")}</label>
               <input type="number"
                      value={isSymbol
-                            ? fieldSymbol.height
-                            : isSingleField
-                              ? singleField.height
-                              : singleField.height}
+                       ? fieldSymbol.height
+                       : isSingleField
+                         ? singleField.height
+                         : singleField.height}
                      onChange={(e) => this.props.setPropertyEditor_FieldHeight(isSymbol
-                                                                               ? fieldSymbol.height
-                                                                               : singleField.height,
+                       ? fieldSymbol.height
+                       : singleField.height,
                        parseInt(e.currentTarget.value)
                      )}
               />
@@ -432,13 +432,13 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               <label>{getI18n(this.props.langId, "Width")}</label>
               <input type="number"
                      value={isSymbol
-                            ? fieldSymbol.width
-                            : isSingleField
-                              ? singleField.width
-                              : singleField.width}
+                       ? fieldSymbol.width
+                       : isSingleField
+                         ? singleField.width
+                         : singleField.width}
                      onChange={(e) => this.props.setPropertyEditor_FieldWidth(isSymbol
-                                                                              ? fieldSymbol.width
-                                                                              : singleField.width,
+                       ? fieldSymbol.width
+                       : singleField.width,
                        parseInt(e.currentTarget.value)
                      )}
               />
@@ -474,14 +474,14 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                 offset={horizontalIconPopupOffsetInPx}
                 content={<ChromePicker
                   color={isSymbol
-                         ? fieldSymbol.color
-                         : isSingleField
-                           ? singleField.color
-                           : singleField.color}
+                    ? fieldSymbol.color
+                    : isSingleField
+                      ? singleField.color
+                      : singleField.color}
                   onChangeComplete={color => {
                     this.props.setPropertyEditor_FieldColor(isSymbol
-                                                            ? fieldSymbol.color
-                                                            : singleField.color, color.hex)
+                      ? fieldSymbol.color
+                      : singleField.color, color.hex)
                   }}
                 />}
               />
@@ -505,14 +505,14 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                   offset={horizontalIconPopupOffsetInPx}
                   content={<ChromePicker
                     color={isSymbol
-                           ? fieldSymbol.bgColor
-                           : isSingleField
-                             ? singleField.bgColor
-                             : singleField.bgColor}
+                      ? fieldSymbol.bgColor
+                      : isSingleField
+                        ? singleField.bgColor
+                        : singleField.bgColor}
                     onChangeComplete={color => {
                       this.props.setPropertyEditor_FieldBgColor(isSymbol
-                                                                ? fieldSymbol.bgColor
-                                                                : singleField.bgColor, color.hex)
+                        ? fieldSymbol.bgColor
+                        : singleField.bgColor, color.hex)
                     }}
                   />}
                 />
@@ -523,8 +523,8 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                     icon="circle outline"
                     onClick={() => {
                       this.props.setPropertyEditor_FieldBgColor(isSymbol
-                                                                ? fieldSymbol.bgColor
-                                                                : singleField.bgColor, 'transparent')
+                        ? fieldSymbol.bgColor
+                        : singleField.bgColor, 'transparent')
                     }}
                   />
                 </div>
@@ -551,14 +551,14 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                 offset={horizontalIconPopupOffsetInPx}
                 content={<ChromePicker
                   color={isSymbol
-                         ? fieldSymbol.borderColor
-                         : isSingleField
-                           ? singleField.borderColor
-                           : singleField.borderColor}
+                    ? fieldSymbol.borderColor
+                    : isSingleField
+                      ? singleField.borderColor
+                      : singleField.borderColor}
                   onChangeComplete={color => {
                     this.props.setPropertyEditor_FieldBorderColor(isSymbol
-                                                                  ? fieldSymbol.bgColor
-                                                                  : singleField.bgColor, color.hex)
+                      ? fieldSymbol.bgColor
+                      : singleField.bgColor, color.hex)
                   }}
                 />}
               />
@@ -567,14 +567,14 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               <label>{getI18n(this.props.langId, "Border size in px")}</label>
               <input type="number"
                      value={isSymbol
-                            ? fieldSymbol.borderSizeInPx
-                            : isSingleField
-                              ? singleField.borderSizeInPx
-                              : singleField.borderSizeInPx}
+                       ? fieldSymbol.borderSizeInPx
+                       : isSingleField
+                         ? singleField.borderSizeInPx
+                         : singleField.borderSizeInPx}
 
                      onChange={(e) => this.props.setPropertyEditor_FieldBorderSizeInPx(isSymbol
-                                                                                       ? fieldSymbol.borderSizeInPx
-                                                                                       : singleField.borderSizeInPx,
+                       ? fieldSymbol.borderSizeInPx
+                       : singleField.borderSizeInPx,
                        parseInt(e.currentTarget.value)
                      )}
               />
@@ -587,13 +587,13 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               <label>{getI18n(this.props.langId, "Font name")}</label>
               <input type="text"
                      value={isSymbol
-                            ? fieldSymbol.fontName
-                            : isSingleField
-                              ? singleField.fontName
-                              : singleField.fontName}
+                       ? fieldSymbol.fontName
+                       : isSingleField
+                         ? singleField.fontName
+                         : singleField.fontName}
                      onChange={(e) => this.props.setPropertyEditor_FieldFontName(isSymbol
-                                                                                 ? fieldSymbol.fontName
-                                                                                 : singleField.fontName,
+                       ? fieldSymbol.fontName
+                       : singleField.fontName,
                        e.currentTarget.value
                      )}
               />
@@ -602,14 +602,14 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               <label>{getI18n(this.props.langId, "Font size in px")}</label>
               <input type="number"
                      value={isSymbol
-                            ? fieldSymbol.fontSizeInPx
-                            : isSingleField
-                              ? singleField.fontSizeInPx
-                              : singleField.fontSizeInPx}
+                       ? fieldSymbol.fontSizeInPx
+                       : isSingleField
+                         ? singleField.fontSizeInPx
+                         : singleField.fontSizeInPx}
 
                      onChange={(e) => this.props.setPropertyEditor_FieldFontSizeInPx(isSymbol
-                                                                                     ? fieldSymbol.fontSizeInPx
-                                                                                     : singleField.fontSizeInPx,
+                       ? fieldSymbol.fontSizeInPx
+                       : singleField.fontSizeInPx,
                        parseInt(e.currentTarget.value)
                      )}
               />
@@ -622,37 +622,37 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <Button.Group>
               <Button
                 active={isSymbol
-                        ? fieldSymbol.isFontBold
-                        : isSingleField
-                          ? singleField.isFontBold
-                          : singleField.isFontBold}
+                  ? fieldSymbol.isFontBold
+                  : isSingleField
+                    ? singleField.isFontBold
+                    : singleField.isFontBold}
                 icon
                 onClick={() => {
                   this.props.setPropertyEditor_FieldIsFontBold(
                     isSymbol
-                    ? fieldSymbol.isFontBold
-                    : singleField.isFontBold, !(isSymbol
-                                                ? fieldSymbol.isFontBold
-                                                : singleField.isFontBold))
+                      ? fieldSymbol.isFontBold
+                      : singleField.isFontBold, !(isSymbol
+                      ? fieldSymbol.isFontBold
+                      : singleField.isFontBold))
                 }}
               >
                 <Icon name='bold'/>
               </Button>
               <Button
                 active={isSymbol
-                        ? fieldSymbol.isFontItalic
-                        : isSingleField
-                          ? singleField.isFontItalic
-                          : singleField.isFontItalic}
+                  ? fieldSymbol.isFontItalic
+                  : isSingleField
+                    ? singleField.isFontItalic
+                    : singleField.isFontItalic}
                 icon
                 onClick={() => {
 
                   this.props.setPropertyEditor_FieldIsFontItalic(
                     isSymbol
-                    ? fieldSymbol.isFontItalic
-                    : singleField.isFontItalic, !(isSymbol
-                                                  ? fieldSymbol.isFontItalic
-                                                  : singleField.isFontItalic))
+                      ? fieldSymbol.isFontItalic
+                      : singleField.isFontItalic, !(isSymbol
+                      ? fieldSymbol.isFontItalic
+                      : singleField.isFontItalic))
                 }}
               >
                 <Icon name='italic'/>
@@ -677,13 +677,13 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           <label>{getI18n(this.props.langId, "Text")}</label>
           <textarea rows={2}
                     value={isSymbol
-                           ? fieldSymbol.text
-                           : isSingleField
-                             ? singleField.text
-                             : singleField.text}
+                      ? fieldSymbol.text
+                      : isSingleField
+                        ? singleField.text
+                        : singleField.text}
                     onChange={(e) => this.props.setPropertyEditor_FieldText(isSymbol
-                                                                            ? fieldSymbol.text
-                                                                            : singleField.text, e.currentTarget.value)}
+                      ? fieldSymbol.text
+                      : singleField.text, e.currentTarget.value)}
           />
         </Form.Field>}
 
@@ -694,10 +694,10 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               <Button.Group>
                 <Button
                   active={(isSymbol
-                           ? fieldSymbol.horizontalTextAlign
-                           : isSingleField
-                             ? singleField.horizontalTextAlign
-                             : singleField.horizontalTextAlign) === HorizontalAlign.left}
+                    ? fieldSymbol.horizontalTextAlign
+                    : isSingleField
+                      ? singleField.horizontalTextAlign
+                      : singleField.horizontalTextAlign) === HorizontalAlign.left}
                   icon
                   onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.left)}
                 >
@@ -705,10 +705,10 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                 </Button>
                 <Button
                   active={(isSymbol
-                           ? fieldSymbol.horizontalTextAlign
-                           : isSingleField
-                             ? singleField.horizontalTextAlign
-                             : singleField.horizontalTextAlign) === HorizontalAlign.center}
+                    ? fieldSymbol.horizontalTextAlign
+                    : isSingleField
+                      ? singleField.horizontalTextAlign
+                      : singleField.horizontalTextAlign) === HorizontalAlign.center}
                   icon
                   onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.center)}
                 >
@@ -716,10 +716,10 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                 </Button>
                 <Button
                   active={(isSymbol
-                           ? fieldSymbol.horizontalTextAlign
-                           : isSingleField
-                             ? singleField.horizontalTextAlign
-                             : singleField.horizontalTextAlign) === HorizontalAlign.right}
+                    ? fieldSymbol.horizontalTextAlign
+                    : isSingleField
+                      ? singleField.horizontalTextAlign
+                      : singleField.horizontalTextAlign) === HorizontalAlign.right}
                   icon
                   onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.right)}
                 >
@@ -732,10 +732,10 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               <Button.Group>
                 <Button
                   active={(isSymbol
-                           ? fieldSymbol.verticalTextAlign
-                           : isSingleField
-                             ? singleField.verticalTextAlign
-                             : singleField.verticalTextAlign) === VerticalAlign.top}
+                    ? fieldSymbol.verticalTextAlign
+                    : isSingleField
+                      ? singleField.verticalTextAlign
+                      : singleField.verticalTextAlign) === VerticalAlign.top}
                   icon
                   onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.top)}
                 >
@@ -743,10 +743,10 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                 </Button>
                 <Button
                   active={(isSymbol
-                           ? fieldSymbol.verticalTextAlign
-                           : isSingleField
-                             ? singleField.verticalTextAlign
-                             : singleField.verticalTextAlign) === VerticalAlign.center}
+                    ? fieldSymbol.verticalTextAlign
+                    : isSingleField
+                      ? singleField.verticalTextAlign
+                      : singleField.verticalTextAlign) === VerticalAlign.center}
                   icon
                   onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.center)}
                 >
@@ -754,10 +754,10 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                 </Button>
                 <Button
                   active={(isSymbol
-                           ? fieldSymbol.verticalTextAlign
-                           : isSingleField
-                             ? singleField.verticalTextAlign
-                             : singleField.verticalTextAlign) === VerticalAlign.bottom}
+                    ? fieldSymbol.verticalTextAlign
+                    : isSingleField
+                      ? singleField.verticalTextAlign
+                      : singleField.verticalTextAlign) === VerticalAlign.bottom}
                   icon
                   onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.bottom)}
                 >
@@ -774,29 +774,29 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <div className="padding-inputs">
               <Input type="number"
                      value={isSymbol
-                            ? fieldSymbol.padding.left
-                            : isSingleField
-                              ? singleField.padding.left
-                              : singleField.padding.left}
+                       ? fieldSymbol.padding.left
+                       : isSingleField
+                         ? singleField.padding.left
+                         : singleField.padding.left}
 
                      onChange={(e) => this.props.setPropertyEditor_FieldPadding(isSymbol
-                                                                                ? fieldSymbol.padding.top
-                                                                                : singleField.padding.top, isSymbol
-                                                                                                           ? fieldSymbol.padding.right
-                                                                                                           : singleField.padding.right,
-                       isSymbol
-                       ? fieldSymbol.padding.bottom
-                       : singleField.padding.bottom, isSymbol
-                                                     ? fieldSymbol.padding.left
-                                                     : singleField.padding.left,
-
-                       isSymbol
                        ? fieldSymbol.padding.top
                        : singleField.padding.top, isSymbol
-                                                  ? fieldSymbol.padding.right
-                                                  : singleField.padding.right, isSymbol
-                                                                               ? fieldSymbol.padding.bottom
-                                                                               : singleField.padding.bottom,
+                       ? fieldSymbol.padding.right
+                       : singleField.padding.right,
+                       isSymbol
+                         ? fieldSymbol.padding.bottom
+                         : singleField.padding.bottom, isSymbol
+                         ? fieldSymbol.padding.left
+                         : singleField.padding.left,
+
+                       isSymbol
+                         ? fieldSymbol.padding.top
+                         : singleField.padding.top, isSymbol
+                         ? fieldSymbol.padding.right
+                         : singleField.padding.right, isSymbol
+                         ? fieldSymbol.padding.bottom
+                         : singleField.padding.bottom,
                        parseInt(e.currentTarget.value)
                      )}
               />
@@ -804,86 +804,86 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               <div>
                 <Input type="number"
                        value={isSymbol
-                              ? fieldSymbol.padding.top
-                              : isSingleField
-                                ? singleField.padding.top
-                                : singleField.padding.top}
+                         ? fieldSymbol.padding.top
+                         : isSingleField
+                           ? singleField.padding.top
+                           : singleField.padding.top}
                        onChange={(e) => this.props.setPropertyEditor_FieldPadding(isSymbol
-                                                                                  ? fieldSymbol.padding.top
-                                                                                  : singleField.padding.top, isSymbol
-                                                                                                             ? fieldSymbol.padding.right
-                                                                                                             : singleField.padding.right,
+                         ? fieldSymbol.padding.top
+                         : singleField.padding.top, isSymbol
+                         ? fieldSymbol.padding.right
+                         : singleField.padding.right,
                          isSymbol
-                         ? fieldSymbol.padding.bottom
-                         : singleField.padding.bottom, isSymbol
-                                                       ? fieldSymbol.padding.left
-                                                       : singleField.padding.left,
+                           ? fieldSymbol.padding.bottom
+                           : singleField.padding.bottom, isSymbol
+                           ? fieldSymbol.padding.left
+                           : singleField.padding.left,
 
                          parseInt(e.currentTarget.value), isSymbol
-                                                          ? fieldSymbol.padding.right
-                                                          : singleField.padding.right, isSymbol
-                                                                                       ? fieldSymbol.padding.bottom
-                                                                                       : singleField.padding.bottom,
+                           ? fieldSymbol.padding.right
+                           : singleField.padding.right, isSymbol
+                           ? fieldSymbol.padding.bottom
+                           : singleField.padding.bottom,
                          isSymbol
-                         ? fieldSymbol.padding.left
-                         : singleField.padding.left
+                           ? fieldSymbol.padding.left
+                           : singleField.padding.left
                        )}
                 />
                 <br/>
                 <Input type="number"
                        value={isSymbol
-                              ? fieldSymbol.padding.bottom
-                              : isSingleField
-                                ? singleField.padding.bottom
-                                : singleField.padding.bottom}
-                       onChange={(e) => this.props.setPropertyEditor_FieldPadding(isSymbol
-                                                                                  ? fieldSymbol.padding.top
-                                                                                  : singleField.padding.top, isSymbol
-                                                                                                             ? fieldSymbol.padding.right
-                                                                                                             : singleField.padding.right,
-                         isSymbol
                          ? fieldSymbol.padding.bottom
-                         : singleField.padding.bottom, isSymbol
-                                                       ? fieldSymbol.padding.left
-                                                       : singleField.padding.left,
-
-                         isSymbol
+                         : isSingleField
+                           ? singleField.padding.bottom
+                           : singleField.padding.bottom}
+                       onChange={(e) => this.props.setPropertyEditor_FieldPadding(isSymbol
                          ? fieldSymbol.padding.top
                          : singleField.padding.top, isSymbol
-                                                    ? fieldSymbol.padding.right
-                                                    : singleField.padding.right, parseInt(e.currentTarget.value),
+                         ? fieldSymbol.padding.right
+                         : singleField.padding.right,
                          isSymbol
-                         ? fieldSymbol.padding.left
-                         : singleField.padding.left
+                           ? fieldSymbol.padding.bottom
+                           : singleField.padding.bottom, isSymbol
+                           ? fieldSymbol.padding.left
+                           : singleField.padding.left,
+
+                         isSymbol
+                           ? fieldSymbol.padding.top
+                           : singleField.padding.top, isSymbol
+                           ? fieldSymbol.padding.right
+                           : singleField.padding.right, parseInt(e.currentTarget.value),
+                         isSymbol
+                           ? fieldSymbol.padding.left
+                           : singleField.padding.left
                        )}
                 />
               </div>
 
               <Input type="number"
                      value={isSymbol
-                            ? fieldSymbol.padding.right
-                            : isSingleField
-                              ? singleField.padding.right
-                              : singleField.padding.right}
+                       ? fieldSymbol.padding.right
+                       : isSingleField
+                         ? singleField.padding.right
+                         : singleField.padding.right}
                      onChange={(e) => this.props.setPropertyEditor_FieldPadding(isSymbol
-                                                                                ? fieldSymbol.padding.top
-                                                                                : singleField.padding.top, isSymbol
-                                                                                                           ? fieldSymbol.padding.right
-                                                                                                           : singleField.padding.right,
+                       ? fieldSymbol.padding.top
+                       : singleField.padding.top, isSymbol
+                       ? fieldSymbol.padding.right
+                       : singleField.padding.right,
                        isSymbol
-                       ? fieldSymbol.padding.bottom
-                       : singleField.padding.bottom, isSymbol
-                                                     ? fieldSymbol.padding.left
-                                                     : singleField.padding.left,
+                         ? fieldSymbol.padding.bottom
+                         : singleField.padding.bottom, isSymbol
+                         ? fieldSymbol.padding.left
+                         : singleField.padding.left,
 
                        isSymbol
-                       ? fieldSymbol.padding.top
-                       : singleField.padding.top, parseInt(e.currentTarget.value), isSymbol
-                                                                                   ? fieldSymbol.padding.bottom
-                                                                                   : singleField.padding.bottom,
+                         ? fieldSymbol.padding.top
+                         : singleField.padding.top, parseInt(e.currentTarget.value), isSymbol
+                         ? fieldSymbol.padding.bottom
+                         : singleField.padding.bottom,
                        isSymbol
-                       ? fieldSymbol.padding.left
-                       : singleField.padding.left
+                         ? fieldSymbol.padding.left
+                         : singleField.padding.left
                      )}
               />
             </div>
@@ -897,13 +897,13 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               <label>{getI18n(this.props.langId, "Corner radius in px")}</label>
               <input type="number"
                      value={isSymbol
-                            ? fieldSymbol.cornerRadiusInPx
-                            : isSingleField
-                              ? singleField.cornerRadiusInPx
-                              : singleField.cornerRadiusInPx}
+                       ? fieldSymbol.cornerRadiusInPx
+                       : isSingleField
+                         ? singleField.cornerRadiusInPx
+                         : singleField.cornerRadiusInPx}
                      onChange={(e) => this.props.setPropertyEditor_FieldCornerRadiusInPx(isSymbol
-                                                                                         ? fieldSymbol.cornerRadiusInPx
-                                                                                         : singleField.cornerRadiusInPx,
+                       ? fieldSymbol.cornerRadiusInPx
+                       : singleField.cornerRadiusInPx,
                        parseInt(e.currentTarget.value)
                      )}
               />
@@ -961,20 +961,20 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Rotation in degree")}</label>
             <Input
               value={isSymbol
-                     ? fieldSymbol.rotationInDegree
-                     : isSingleField
-                       ? singleField.rotationInDegree
-                       : singleField.rotationInDegree}
+                ? fieldSymbol.rotationInDegree
+                : isSingleField
+                  ? singleField.rotationInDegree
+                  : singleField.rotationInDegree}
               type="number"
               onChange={(e) => this.props.setPropertyEditor_FieldRotationInDegree(isSymbol
-                                                                                  ? fieldSymbol.rotationInDegree
-                                                                                  : singleField.rotationInDegree,
+                ? fieldSymbol.rotationInDegree
+                : singleField.rotationInDegree,
                 parseInt(e.currentTarget.value)
               )}
               label={<Button icon onClick={() => {
                 this.props.setPropertyEditor_FieldRotationInDegree(isSymbol
-                                                                   ? fieldSymbol.rotationInDegree
-                                                                   : singleField.rotationInDegree, 0)
+                  ? fieldSymbol.rotationInDegree
+                  : singleField.rotationInDegree, 0)
               }}>
                 <Icon name="undo"/>
               </Button>}
@@ -990,12 +990,12 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               <input
                 readOnly
                 value={fieldSymbol
-                       ? fieldSymbol.backgroundImgGuid === null
-                         ? ''
-                         : fieldSymbol.backgroundImgGuid
-                       : singleField.backgroundImgGuid === null
-                         ? ''
-                         : singleField.backgroundImgGuid}
+                  ? fieldSymbol.backgroundImgGuid === null
+                    ? ''
+                    : fieldSymbol.backgroundImgGuid
+                  : singleField.backgroundImgGuid === null
+                    ? ''
+                    : singleField.backgroundImgGuid}
               />
               <Button icon onClick={() => {
                 this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(true)
@@ -1007,8 +1007,8 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               isCreatingNewImgShape={false}
               onImageTaken={(imgSurrogate) => {
                 this.props.setPropertyEditor_field_backgroundImgGuid(isSymbol
-                                                                     ? fieldSymbol.backgroundImgGuid
-                                                                     : singleField.backgroundImgGuid, imgSurrogate.guid)
+                  ? fieldSymbol.backgroundImgGuid
+                  : singleField.backgroundImgGuid, imgSurrogate.guid)
 
                 this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(false)
               }}
@@ -1044,11 +1044,11 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
                              const newPercentageX = parseInt(e.currentTarget.value)
                              const newList = (isSymbol
-                                              ? fieldSymbol
-                                              : singleField).anchorPoints.map((p, i) => {
+                               ? fieldSymbol
+                               : singleField).anchorPoints.map((p, i) => {
                                return i !== index
-                                      ? p
-                                      : {
+                                 ? p
+                                 : {
                                    ...p,
                                    percentX: newPercentageX
                                  }
@@ -1071,11 +1071,11 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
                              const newPercentageY = parseInt(e.currentTarget.value)
                              const newList = (isSymbol
-                                              ? fieldSymbol
-                                              : singleField).anchorPoints.map((p, i) => {
+                               ? fieldSymbol
+                               : singleField).anchorPoints.map((p, i) => {
                                return i !== index
-                                      ? p
-                                      : {
+                                 ? p
+                                 : {
                                    ...p,
                                    percentY: newPercentageY
                                  }
@@ -1090,8 +1090,8 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                     <Button color="red" icon
                             onClick={() => {
                               this.props.setPropertyEditor_FieldAnchorPoints((isSymbol
-                                                                              ? fieldSymbol
-                                                                              : singleField).anchorPoints.filter(
+                                ? fieldSymbol
+                                : singleField).anchorPoints.filter(
                                 ((p, i) => i !== index)))
                             }}
                     >
@@ -1114,8 +1114,8 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                       }
 
                       this.props.setPropertyEditor_FieldAnchorPoints((isSymbol
-                                                                      ? fieldSymbol
-                                                                      : singleField).anchorPoints.concat(newPoint))
+                        ? fieldSymbol
+                        : singleField).anchorPoints.concat(newPoint))
                     }}
             >
               <Icon name="add"/>

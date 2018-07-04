@@ -75,6 +75,9 @@ class symbolRenderer extends React.Component<Props, any> {
     return (
       <div>
         <TileRenderer
+          printLargeTilePreferredHeightInPx={0}
+          printLargeTilePreferredWidthInPx={0}
+          displayPrintGuidesDisplayed={false}
           setPropertyEditor_FieldCmdText={nop}
           setTileEditorSelectingNextField={nop}
           isSelectingNextField={false}

@@ -247,10 +247,10 @@ export const defaultLineShape: LineShape = {
   id: -1, //will be set when added
   zIndex: -1, //will be set when added
   color: lineShapeDefaultColor,
-  hasEndArrow: false,
+  hasEndArrow: true,
   hasStartArrow: false,
   lineThicknessInPx: 3,
-  dashArray: [15],
+  dashArray: [],
   startPoint: { //will be set when added
     id: -1,
     x: -1,

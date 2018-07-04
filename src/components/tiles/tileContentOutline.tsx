@@ -10,14 +10,19 @@ import {
   setSelectedImageShapeIds,
   setSelectedLineShapeIds
 } from "../../state/reducers/tileEditor/actions";
-import {removeFieldShape} from "../../state/reducers/tileEditor/fieldProperties/actions";
-import {removeLineShape} from "../../state/reducers/tileEditor/lineProperties/actions";
-import {removeImageShape} from "../../state/reducers/tileEditor/imgProperties/actions";
+import {
+  clearAllConnectedLinesFromAllFields,
+  removeFieldShape,
+  setPropertyEditor_fieldsShapes
+} from "../../state/reducers/tileEditor/fieldProperties/actions";
+import {removeLineShape, setPropertyEditor_lineShapes} from "../../state/reducers/tileEditor/lineProperties/actions";
+import {removeImageShape, setPropertyEditor_imgShapes} from "../../state/reducers/tileEditor/imgProperties/actions";
 import {getI18n} from "../../../i18n/i18nRoot";
 import ToolTip from '../helpers/ToolTip'
 import {RightTileEditorTabs} from "../../state/reducers/tileEditor/tileEditorReducer";
 import {DialogHelper} from "../../helpers/dialogHelper";
 import IconToolTip from '../helpers/IconToolTip'
+import {renewAllZIndicesInTile} from "../../helpers/someIndexHelper";
 
 //const css = require('./styles.styl');
 
@@ -50,6 +55,13 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   setSelectedFieldShapeIds,
   setSelectedLineShapeIds,
   setSelectedImageShapeIds,
+
+
+  //for removing many
+  setPropertyEditor_fieldsShapes,
+  setPropertyEditor_lineShapes,
+  clearAllConnectedLinesFromAllFields,
+  setPropertyEditor_imgShapes,
 
   removeFieldShape,
   removeLineShape,
@@ -108,9 +120,13 @@ class tileContentOutline extends React.Component<Props, any> {
                             //select null else the property editor would try to display the undefined obj
                             this.props.setSelectedFieldShapeIds([])
 
-                            for (const item of this.props.fieldShapes) {
-                              this.props.removeFieldShape(item.id)
-                            }
+                            //too slow
+                            // for (const item of this.props.fieldShapes) {
+                            //   this.props.removeFieldShape(item.id)
+                            // }
+                            this.props.setPropertyEditor_fieldsShapes([])
+
+                            renewAllZIndicesInTile()
                           }}
                     />
                   </ToolTip>
@@ -168,6 +184,8 @@ class tileContentOutline extends React.Component<Props, any> {
                                   onClick={() => {
                                     this.props.setSelectedFieldShapeIds([])
                                     this.props.removeFieldShape(p.id)
+
+                                    renewAllZIndicesInTile()
                                   }}
                           >
                             <Icon name="trash"/>
@@ -206,9 +224,18 @@ class tileContentOutline extends React.Component<Props, any> {
 
                             //select null else the property editor would try to display the undefined obj
                             this.props.setSelectedLineShapeIds([])
-                            for (const item of this.props.lineShapes) {
-                              this.props.removeLineShape(item.id)
-                            }
+
+                            //too slow
+                            // for (const item of this.props.lineShapes) {
+                            //   this.props.removeLineShape(item.id)
+                            // }
+
+                            //but we need to clear all connected lines maps (from all fields)
+                            //because we removed all
+                            this.props.setPropertyEditor_lineShapes([])
+                            this.props.clearAllConnectedLinesFromAllFields()
+
+                            renewAllZIndicesInTile()
                           }}
                     />
                   </ToolTip>
@@ -264,6 +291,8 @@ class tileContentOutline extends React.Component<Props, any> {
                                   onClick={() => {
                                     this.props.setSelectedLineShapeIds([])
                                     this.props.removeLineShape(p.id)
+
+                                    renewAllZIndicesInTile()
                                   }}
                           >
                             <Icon name="trash"/>
@@ -304,9 +333,12 @@ class tileContentOutline extends React.Component<Props, any> {
 
                             //select null else the property editor would try to display the undefined obj
                             this.props.setSelectedImageShapeIds([])
-                            for (const item of this.props.imgShapes) {
-                              this.props.removeImageShape(item.id)
-                            }
+                            //too slow
+                            // for (const item of this.props.imgShapes) {
+                            //   this.props.removeImageShape(item.id)
+                            // }
+                            this.props.setPropertyEditor_imgShapes([])
+                            renewAllZIndicesInTile()
                           }}
                     />
                   </ToolTip>
@@ -378,6 +410,8 @@ class tileContentOutline extends React.Component<Props, any> {
                                   onClick={() => {
                                     this.props.setSelectedImageShapeIds([])
                                     this.props.removeImageShape(p.id)
+
+                                    renewAllZIndicesInTile()
                                   }}
                           >
                             <Icon name="trash"/>

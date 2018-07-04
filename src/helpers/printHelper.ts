@@ -6,7 +6,7 @@ import {
   appProperties, defaultGameInitCode,
   maxPrintTileHeight,
   maxPrintTileWidth,
-  printLargeTileBgColor, tileFileExtensionWithoutDot,
+  printLargeTileBgColor,
   worldTileBorderColor
 } from "../constants";
 import {WorldSettings} from "../state/reducers/world/worldSettings/worldSettingsReducer";
@@ -21,7 +21,6 @@ import {WorldTilesHelper} from "./worldTilesHelper";
 import fileSaver = require("file-saver");
 import {LangHelper} from "./langHelper";
 import {VarType} from "../../simulation/model/executionUnit";
-import {Logger} from "./logger";
 
 
 declare var SVGExporter: any

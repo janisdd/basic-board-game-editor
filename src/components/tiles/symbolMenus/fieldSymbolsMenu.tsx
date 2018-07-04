@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../../state";
-import {swapDisplayIndex, swapDisplayIndexWithGuid} from "../../../helpers/someIndexHelper";
+import {renewAllZIndicesInTile, swapDisplayIndex, swapDisplayIndexWithGuid} from "../../../helpers/someIndexHelper";
 import {newField_x, newField_y, ui_helpPopupDelayInMs} from "../../../constants";
 import {FieldShape, FieldSymbol} from "../../../types/drawing";
 import {Button, Icon, Popup} from "semantic-ui-react";
@@ -14,11 +14,12 @@ import {
   set_fieldSymbol_displayIndex
 } from "../../../state/reducers/tileEditor/symbols/fieldSymbols/actions";
 import {set_selectedFieldSymbolGuid} from "../../../state/reducers/tileEditor/symbols/actions";
-import {setSelectedFieldShapeIds} from "../../../state/reducers/tileEditor/actions";
+import {set_editor_rightTabActiveIndex, setSelectedFieldShapeIds} from "../../../state/reducers/tileEditor/actions";
 import SymbolRenderer from '../symbols/symbolRenderer'
 import {getI18n} from "../../../../i18n/i18nRoot";
 import ToolTip from '../../helpers/ToolTip'
 import IconToolTip from "../../helpers/IconToolTip";
+import {RightTileEditorTabs} from "../../../state/reducers/tileEditor/tileEditorReducer";
 
 
 //const css = require('./styles.styl');
@@ -40,15 +41,17 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
 const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   //imported reducer funcs here
 
-  set_selectedFieldSymbolId: set_selectedFieldSymbolGuid,
+  set_selectedFieldSymbolGuid,
 
-  setSelectedFieldShapeId: setSelectedFieldShapeIds,
+  setSelectedFieldShapeIds,
 
   addFieldShape,
 
   set_fieldSymbol_displayIndex,
 
   remove_fieldSymbol,
+
+  set_editor_rightTabActiveIndex,
 
 }, dispatch)
 
@@ -99,6 +102,7 @@ class fieldSymbolsMenu extends React.Component<Props, any> {
                                 const field = createNewFieldShapeFromSymbol(symbol, this.props.amountOfShapesInTile,
                                   false)
                                 this.props.addFieldShape(field)
+                                renewAllZIndicesInTile()
                               }}
                       >
                         <Icon name="add"/>
@@ -122,8 +126,9 @@ class fieldSymbolsMenu extends React.Component<Props, any> {
 
                     <Button icon
                             onClick={() => {
-                              this.props.setSelectedFieldShapeId(null) //hide normal props editor
-                              this.props.set_selectedFieldSymbolId(symbol.guid)
+                              this.props.setSelectedFieldShapeIds([]) //hide normal props editor
+                              this.props.set_selectedFieldSymbolGuid(symbol.guid)
+                              this.props.set_editor_rightTabActiveIndex(RightTileEditorTabs.propertyEditorTab)
                             }}
                     >
                       <Icon name="write"/>

@@ -165,6 +165,11 @@ export type State = {
 
   readonly isLeftTabMenuExpanded: boolean
 
+  /**
+   * the lines where we would split the tile
+   */
+  readonly arePrintGuidesDisplayed: boolean
+
 }
 
 export interface SimulationResult {
@@ -227,7 +232,9 @@ export const initial: State = {
 
   majorLineDirection: MajorLineDirection.topToBottom,
 
-  isLeftTabMenuExpanded: false
+  isLeftTabMenuExpanded: false,
+
+  arePrintGuidesDisplayed: true
 
 }
 
@@ -296,6 +303,8 @@ export enum ActionType {
 
   SET_editor_isLeftTabMenuExpanded = 'tileEditorReducer_SET_editor_isLeftTabMenuExpanded',
 
+  SET_editor_arePrintGuidesDisplayed = 'tileEditorReducer_SET_editor_arePrintGuidesDisplayed',
+
 
   RESET = 'tileEditorReducer_RESET',
 }
@@ -353,6 +362,7 @@ export interface SET_editor_rightTabActiveIndexAction extends ActionBase {
   readonly type: ActionType.SET_editor_rightTabActiveIndex
   readonly rightTabActiveIndex: RightTileEditorTabs
 }
+
 export interface SET_editor_lastRightTabActiveIndexAction extends ActionBase {
   readonly type: ActionType.SET_editor_lastRightTabActiveIndex
   readonly lastRightTabActiveIndex: RightTileEditorTabs
@@ -452,6 +462,11 @@ export interface SET_editor_majorLineDirectionAction extends ActionBase {
   readonly majorLineDirection: MajorLineDirection
 }
 
+export interface SET_editor_arePrintGuidesDisplayedAction extends ActionBase {
+  readonly type: ActionType.SET_editor_arePrintGuidesDisplayed
+  readonly arePrintGuidesDisplayed: boolean
+}
+
 
 //-- tile props
 
@@ -548,6 +563,7 @@ export type AllActions =
   | SET_editor_splitLargeTileForPrintAction
   | SET_editor_autoIncrementFieldTextNumbersOnDuplicateAction
   | SET_editor_majorLineDirectionAction
+  | SET_editor_arePrintGuidesDisplayedAction
 
 
 export function reducer(state: State = initial, action: AllActions): State {
@@ -811,6 +827,11 @@ export function reducer(state: State = initial, action: AllActions): State {
       return {
         ...state,
         isLeftTabMenuExpanded: action.isLeftTabMenuExpanded,
+      }
+    case ActionType.SET_editor_arePrintGuidesDisplayed:
+      return {
+        ...state,
+        arePrintGuidesDisplayed: action.arePrintGuidesDisplayed,
       }
 
 

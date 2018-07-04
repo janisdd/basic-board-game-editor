@@ -2,7 +2,7 @@ import {AnchorPoint, FieldShape, HorizontalAlign, VerticalAlign} from "../../../
 import {
   ActionBase,
   ActionType,
-  ADD_fieldShapeAction,
+  ADD_fieldShapeAction, CLEAR_fieldShape_connectedLinesAction,
   Edit_fieldShapeRedo,
   Edit_fieldShapeUndo,
   REMOVE_fieldShapeAction,
@@ -34,6 +34,7 @@ import {
 } from "./fieldPropertyReducer";
 import {MultiActions} from "../../../../types/ui";
 import {adjustLinesFromAnchorPoints} from "../../../../helpers/interactionHelper";
+import {Logger} from "../../../../helpers/logger";
 
 
 export function setPropertyEditor_fieldsShapes(fields: ReadonlyArray<FieldShape>): SET_fieldsArrayAction {
@@ -54,6 +55,13 @@ export function removeFieldShape(fieldShapeId: number): REMOVE_fieldShapeAction 
   return {
     type: ActionType.REMOVE_fieldShape,
     fieldShapeId
+  }
+}
+
+
+export function clearAllConnectedLinesFromAllFields(): CLEAR_fieldShape_connectedLinesAction {
+  return {
+    type: ActionType.CLEAR_fieldShape_connectedLines,
   }
 }
 
@@ -93,17 +101,38 @@ export function setPropertyEditor_FieldX(fieldId: number, x: number): MultiActio
   return (dispatch, getState) => {
 
     const fieldBefore = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (fieldBefore === undefined) {
+      Logger.fatal('[internal] could not find the fieldBefore')
+      return
+    }
+
     const beforeFieldSymbol = fieldBefore.createdFromSymbolGuid === null
       ? null
       : getState().fieldSymbolState.present.find(p => p.guid === fieldBefore.createdFromSymbolGuid)
 
+    if (beforeFieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the beforeFieldSymbol')
+      return
+    }
+
     dispatch(_setPropertyEditor_FieldX(fieldId, x))
 
     const fieldAfter = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (fieldAfter === undefined) {
+      Logger.fatal('[internal] could not find the fieldAfter')
+      return
+    }
+
     const afterFieldSymbol = fieldAfter.createdFromSymbolGuid === null
       ? null
       : getState().fieldSymbolState.present.find(p => p.guid === fieldAfter.createdFromSymbolGuid)
 
+    if (afterFieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the afterFieldSymbol')
+      return
+    }
 
     adjustLinesFromAnchorPoints(fieldBefore, fieldAfter, beforeFieldSymbol, afterFieldSymbol)
   }
@@ -121,17 +150,38 @@ export function setPropertyEditor_FieldY(fieldId: number, y: number): MultiActio
   return (dispatch, getState) => {
 
     const fieldBefore = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (fieldBefore === undefined) {
+      Logger.fatal('[internal] could not find the fieldBefore')
+      return
+    }
+
     const beforeFieldSymbol = fieldBefore.createdFromSymbolGuid === null
       ? null
       : getState().fieldSymbolState.present.find(p => p.guid === fieldBefore.createdFromSymbolGuid)
 
+    if (beforeFieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the beforeFieldSymbol')
+      return
+    }
+
     dispatch(_setPropertyEditor_FieldY(fieldId, y))
 
     const fieldAfter = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (fieldAfter === undefined) {
+      Logger.fatal('[internal] could not find the fieldAfter')
+      return
+    }
+
     const afterFieldSymbol = fieldAfter.createdFromSymbolGuid === null
       ? null
       : getState().fieldSymbolState.present.find(p => p.guid === fieldAfter.createdFromSymbolGuid)
 
+    if (afterFieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the afterFieldSymbol')
+      return
+    }
 
     adjustLinesFromAnchorPoints(fieldBefore, fieldAfter, beforeFieldSymbol, afterFieldSymbol)
   }
@@ -149,16 +199,38 @@ export function setPropertyEditor_FieldWidth(fieldId: number, width: number): Mu
   return (dispatch, getState) => {
 
     const fieldBefore = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (fieldBefore === undefined) {
+      Logger.fatal('[internal] could not find the beforeField')
+      return
+    }
+
     const beforeFieldSymbol = fieldBefore.createdFromSymbolGuid === null
       ? null
       : getState().fieldSymbolState.present.find(p => p.guid === fieldBefore.createdFromSymbolGuid)
 
+    if (beforeFieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the beforeFieldSymbol')
+      return
+    }
+
     dispatch(_setPropertyEditor_FieldWidth(fieldId, width))
 
     const fieldAfter = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (fieldAfter === undefined) {
+      Logger.fatal('[internal] could not find the fieldAfter')
+      return
+    }
+
     const afterFieldSymbol = fieldAfter.createdFromSymbolGuid === null
       ? null
       : getState().fieldSymbolState.present.find(p => p.guid === fieldAfter.createdFromSymbolGuid)
+
+    if (afterFieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the afterFieldSymbol')
+      return
+    }
 
     adjustLinesFromAnchorPoints(fieldBefore, fieldAfter, beforeFieldSymbol, afterFieldSymbol)
   }
@@ -176,16 +248,38 @@ export function setPropertyEditor_FieldHeight(fieldId: number, height: number): 
   return (dispatch, getState) => {
 
     const fieldBefore = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (fieldBefore === undefined) {
+      Logger.fatal('[internal] could not find the fieldBefore')
+      return
+    }
+
     const beforeFieldSymbol = fieldBefore.createdFromSymbolGuid === null
       ? null
       : getState().fieldSymbolState.present.find(p => p.guid === fieldBefore.createdFromSymbolGuid)
 
+    if (beforeFieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the beforeFieldSymbol')
+      return
+    }
+
     dispatch(_setPropertyEditor_FieldHeight(fieldId, height))
 
     const fieldAfter = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (fieldAfter === undefined) {
+      Logger.fatal('[internal] could not find the fieldAfter')
+      return
+    }
+
     const afterFieldSymbol = fieldAfter.createdFromSymbolGuid === null
       ? null
       : getState().fieldSymbolState.present.find(p => p.guid === fieldAfter.createdFromSymbolGuid)
+
+    if (afterFieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the afterFieldSymbol')
+      return
+    }
 
     adjustLinesFromAnchorPoints(fieldBefore, fieldAfter, beforeFieldSymbol, afterFieldSymbol)
   }
@@ -203,16 +297,38 @@ export function setPropertyEditor_field_rotationInDegree(fieldId: number, rotati
   return (dispatch, getState) => {
 
     const fieldBefore = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (fieldBefore === undefined) {
+      Logger.fatal('[internal] could not find the fieldBefore')
+      return
+    }
+
     const beforeFieldSymbol = fieldBefore.createdFromSymbolGuid === null
       ? null
       : getState().fieldSymbolState.present.find(p => p.guid === fieldBefore.createdFromSymbolGuid)
 
+    if (beforeFieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the beforeFieldSymbol')
+      return
+    }
+
     dispatch(_setPropertyEditor_field_rotationInDegree(fieldId, rotationInDegree))
 
     const fieldAfter = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (fieldAfter === undefined) {
+      Logger.fatal('[internal] could not find the fieldAfter')
+      return
+    }
+
     const afterFieldSymbol = fieldAfter.createdFromSymbolGuid === null
       ? null
       : getState().fieldSymbolState.present.find(p => p.guid === fieldAfter.createdFromSymbolGuid)
+
+    if (afterFieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the afterFieldSymbol')
+      return
+    }
 
     adjustLinesFromAnchorPoints(fieldBefore, fieldAfter, beforeFieldSymbol, afterFieldSymbol)
 

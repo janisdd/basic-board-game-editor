@@ -1,10 +1,11 @@
-import {FieldShape, GuidAble, ImgShape, LineBase} from "../types/drawing";
+import {FieldShape, GuidAble, ImgShape, LineBase, LineShape} from "../types/drawing";
 import state from '../state/state'
 import {
   setPropertyEditor_FieldAbsoluteZIndex, setPropertyEditor_FieldX, setPropertyEditor_FieldY
 } from "../state/reducers/tileEditor/fieldProperties/actions";
 import {setPropertyEditor_ImageAbsoluteZIndex} from "../state/reducers/tileEditor/imgProperties/actions";
 import {setPropertyEditor_LineAbsoluteZIndex} from "../state/reducers/tileEditor/lineProperties/actions";
+import {Logger} from "./logger";
 
 
 interface ObjWithZIndex {
@@ -12,6 +13,63 @@ interface ObjWithZIndex {
   readonly zIndex: number
 }
 
+
+/**
+ * resets all z indices in the tile and tries to keep the old order
+ * we don't allow some holes in the z index sequence else rendering might break and changing z index functions too
+ */
+export function renewAllZIndicesInTile(): void {
+
+
+  Logger.log('renewing z indices')
+  //copy to not mutate & to sort
+  const fieldShapes = state.getState().tileEditorFieldShapesState.present// as FieldShape[]
+  const imgShapes = state.getState().tileEditorImgShapesState.present// as ImgShape[]
+  const lineShapes = state.getState().tileEditorLineShapeState.present// as LineShape[]
+
+  const allShapes: Array<FieldShape | ImgShape | LineShape> = [].concat(fieldShapes).concat(imgShapes).concat(lineShapes)
+
+  allShapes.sort((a, b) => a.zIndex - b.zIndex)
+
+  for (let i = 0; i < allShapes.length; i++) {
+    const shape = allShapes[i]
+
+    const fieldShape = fieldShapes.find(p => p.id === shape.id)
+    if (fieldShape) {
+      //you should never do this!
+      //we actually would need to use
+      // state.dispatch(setPropertyEditor_FieldAbsoluteZIndex(shape.id, i))
+      //but the performance is bad i think because we need to do this for all shapes
+
+      //also this has a downside that this won't update the ui... because props won't change
+      //because we call this func only if we add/remove/set shapes the property editor tab is not longer displayed
+      //and thus gets never out of sync (hopefully)
+
+      //@ts-ignore
+      fieldShape.zIndex = i
+      continue
+    }
+
+    const imgShape = imgShapes.find(p => p.id === shape.id)
+    if (imgShape) {
+      //you should never do this!
+      //@ts-ignore
+      imgShape.zIndex = i
+      continue
+    }
+
+    const lineShape = lineShapes.find(p => p.id === shape.id)
+    if (lineShape) {
+      //you should never do this!
+      //@ts-ignore
+      lineShape.zIndex = i
+      continue
+    }
+
+    Logger.fatal('could not renew all z indices because some shape is missing')
+  }
+
+}
 
 export function swapZIndexInTile(currObj: ObjWithZIndex,
                                  newZIndex: number,
@@ -132,13 +190,12 @@ export function swapDisplayIndex(currObj: ObjWithDisplayIndex,
                                  toAbsoluteLast: boolean,
                                  maxDisplayIndex: number,
                                  allObjects: ReadonlyArray<ObjWithDisplayIndex>,
-                                 changeDisplayIndex:(objId: number, newDisplayIndex:number)=>any
-                                 ) {
+                                 changeDisplayIndex: (objId: number, newDisplayIndex: number) => any
+) {
 
   if (newDisplayIndex >= maxDisplayIndex) return
   if (newDisplayIndex < 0) return
   if (currObj.displayIndex === newDisplayIndex) return
-
 
 
   const otherObj = allObjects.find(p => p.displayIndex === newDisplayIndex)
@@ -182,18 +239,17 @@ export function swapDisplayIndex(currObj: ObjWithDisplayIndex,
 
 
 export function swapDisplayIndexWithGuid(currObj: ObjWithDisplayIndexAndGuid,
-                                 newDisplayIndex: number,
-                                 toAbsoluteFirst: boolean, //0 is first
-                                 toAbsoluteLast: boolean,
-                                 maxDisplayIndex: number,
-                                 allObjects: ReadonlyArray<ObjWithDisplayIndexAndGuid>,
-                                 changeDisplayIndex:(guid: string, newDisplayIndex:number)=>any
+                                         newDisplayIndex: number,
+                                         toAbsoluteFirst: boolean, //0 is first
+                                         toAbsoluteLast: boolean,
+                                         maxDisplayIndex: number,
+                                         allObjects: ReadonlyArray<ObjWithDisplayIndexAndGuid>,
+                                         changeDisplayIndex: (guid: string, newDisplayIndex: number) => any
 ) {
 
   if (newDisplayIndex >= maxDisplayIndex) return
   if (newDisplayIndex < 0) return
   if (currObj.displayIndex === newDisplayIndex) return
-
 
 
   const otherObj = allObjects.find(p => p.displayIndex === newDisplayIndex)

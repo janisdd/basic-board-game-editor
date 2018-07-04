@@ -186,6 +186,7 @@ export function _reducer(state: State = initial, action: AllActions): State {
     case FieldShapedActionTypes.SET_field_isFontItalic:
     case FieldShapedActionTypes.SET_field_rotationInDegree:
     case FieldShapedActionTypes.SET_field_backgroundImgGuid:
+    case FieldShapedActionTypes.CLEAR_fieldShape_connectedLines:
     case FieldShapedActionTypes.RESET: {
 
       if (state.lastEditedShapeType !== LastEditedShapeType.fieldShape) {

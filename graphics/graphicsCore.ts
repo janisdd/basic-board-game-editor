@@ -8,7 +8,13 @@ import MouseEvent = createjs.MouseEvent
 import {ImgStorage} from "../src/externalStorage/imgStorage";
 import {ZIndexCache} from "../src/types/ui";
 import Bitmap = createjs.Bitmap;
-import {calcAnchorPoints, getAngleInDeg, rotatePointBy} from "../src/helpers/interactionHelper";
+import {
+  calcAnchorPoints,
+  getAngleInDeg,
+  getPointDistance,
+  interpolate2DPoint,
+  rotatePointBy
+} from "../src/helpers/interactionHelper";
 import {WorldSettings} from "../src/state/reducers/world/worldSettings/worldSettingsReducer";
 import {
   isFieldShape,
@@ -112,6 +118,45 @@ export function drawGrid(stage: Stage, width: number, height: number, gridSizeIn
 
       stage.addChild(line)
     }
+  }
+
+
+}
+
+
+const printGuidesDashArray = [3]
+const printGuidesStrokeThicknessInPx = 4
+const printGuidesColor= 'black'
+
+export function drawPrintGuides(stage: Stage, actualWidthInPx: number, actualHeightInPx: number, expectedWidthInPx: number, expectedHeightInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string): void {
+
+
+  for (let x = 1; x * expectedWidthInPx < actualWidthInPx; x++) {
+
+    let topToBottomPrintGuide = new createjs.Shape()
+    topToBottomPrintGuide.graphics
+      .setStrokeStyle(printGuidesStrokeThicknessInPx)
+      .beginStroke(printGuidesColor)
+      .setStrokeDash(printGuidesDashArray)
+      .moveTo(x * expectedWidthInPx, 0)
+      .lineTo(x * expectedWidthInPx, actualHeightInPx)
+
+    topToBottomPrintGuide.mouseEnabled = false
+    stage.addChild(topToBottomPrintGuide)
+  }
+
+  for (let y = 1; y * expectedHeightInPx < actualHeightInPx; y++) {
+    let topToBottomPrintGuide = new createjs.Shape()
+    topToBottomPrintGuide.graphics
+      .setStrokeStyle(printGuidesStrokeThicknessInPx)
+      .beginStroke(printGuidesColor)
+      .setStrokeDash(printGuidesDashArray)
+      .moveTo(0, y * expectedHeightInPx)
+      .lineTo(actualWidthInPx, y * expectedHeightInPx)
+
+    topToBottomPrintGuide.mouseEnabled = false
+    stage.addChild(topToBottomPrintGuide)
+
   }
 
 
@@ -407,10 +452,10 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
       //mostly copied from easeljs source
       //https://createjs.com/docs/easeljs/files/easeljs_display_Bitmap.js.html#l144
       //but we need out own drawImage overload so that the svg matches the size
-      if (this.DisplayObject_draw(ctx, ignoreCache)) {
+      if ((this as any).DisplayObject_draw(ctx, ignoreCache)) {
         return true;
       }
-      let img = this.image, rect = this.sourceRect;
+      let img: any = this.image, rect = this.sourceRect;
       if (img.getImage) {
         img = img.getImage();
       }
@@ -454,7 +499,7 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
   if ((symbolForShape !== null ? symbolForShape.text : field.text) !== null) {
 
     let textShape = new createjs.Text();
-    textShape.text = symbolForShape !== null ? symbolForShape.text : field.text
+    textShape.text = (symbolForShape !== null ? symbolForShape.text : field.text) || ''
 
     if (symbolForShape !== null) {
       textShape.font = `${symbolForShape.isFontBold ? 'bold ' : ''}${symbolForShape.isFontItalic ? 'italic ' : ''}${symbolForShape.fontSizeInPx}px '${symbolForShape.fontName}'`
@@ -787,19 +832,45 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
 
         if (point.curveMode !== CurveMode.linear) return point
 
+        const pStart = index === 0 ? pathLine.startPoint : pathLine.points[index - 1]
+        const pEnd = point
+
+        let beforeStart: PlainPoint
+        let beforeEnd: PlainPoint
+
+        let tStart = 0.0
+        let tEnd = 1.0
+
+        if ((symbolForShape !== null ? symbolForShape.hasStartArrow : pathLine.hasStartArrow)) {
+          tStart = 0.5
+        }
+
+        if (symbolForShape !== null ? symbolForShape.hasEndArrow : pathLine.hasEndArrow) {
+          tEnd = 0.5
+        }
+
+        if (pStart.x <= pEnd.x) {
+          beforeStart = interpolate2DPoint(pStart, pEnd, tStart)
+          beforeEnd = interpolate2DPoint(pStart, pEnd, tEnd)
+        }
+        else {
+          beforeStart = interpolate2DPoint(pEnd, pStart, tStart)
+          beforeEnd = interpolate2DPoint(pEnd, pStart, tEnd)
+        }
+
         //we need to set the cp points to the opposite real point
         //because we need the arrows to point in the right direction
         return {
           ...point,
           cp1: {
             ...point.cp1,
-            x: point.x,
-            y: point.y
+            x: beforeStart.x,
+            y: beforeStart.y
           },
           cp2: {
             ...point.cp2,
-            x: index === 0 ? pathLine.startPoint.x : pathLine.points[index - 1].x,
-            y: index === 0 ? pathLine.startPoint.y : pathLine.points[index - 1].y
+            x: beforeEnd.x,
+            y: beforeEnd.y
           }
         }
 
@@ -867,7 +938,7 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
     const p1 = pathLine.points[pathLine.points.length - 1] //end point control point
     const angleDeg = getAngleInDeg(p1.x, p1.y, p2.x, p2.y) - 90
 
-    let p0: PlainPoint = null
+    let p0: PlainPoint
 
     if (pathLine.points.length === 1) {
       p0 = pathLine.startPoint
@@ -1148,7 +1219,7 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
   let imgHeight = (symbolForShape !== null ? symbolForShape.height : imgShape.height)
 
   //--start
-  let bitmap: Bitmap = null
+  let bitmap: Bitmap
 
   if (img === null) {
 
@@ -1216,10 +1287,10 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
       //mostly copied from easeljs source
       //https://createjs.com/docs/easeljs/files/easeljs_display_Bitmap.js.html#l144
       //but we need out own drawImage overload so that the svg matches the size
-      if (this.DisplayObject_draw(ctx, ignoreCache)) {
+      if ((this as any).DisplayObject_draw(ctx, ignoreCache)) {
         return true;
       }
-      let img = this.image, rect = this.sourceRect;
+      let img: any = this.image, rect = this.sourceRect;
       if (img.getImage) {
         img = img.getImage();
       }
@@ -1266,11 +1337,11 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
   hitTestShape.graphics
     .beginFill('black')
     .drawRect(
-    0,
-    0,
-    (symbolForShape !== null ? symbolForShape.width : imgShape.width),
-    (symbolForShape !== null ? symbolForShape.height : imgShape.height)
-  )
+      0,
+      0,
+      (symbolForShape !== null ? symbolForShape.width : imgShape.width),
+      (symbolForShape !== null ? symbolForShape.height : imgShape.height)
+    )
   container.hitArea = hitTestShape
 
   if (isSelected) {

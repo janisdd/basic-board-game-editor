@@ -24,6 +24,9 @@ ISSUES
 
   - when we change field symbol update connected lines pos
 
+- when a line is connected (through an anchor point) to a field symbol instance and we change the width/height of the symbol
+  - then the line is still connected to the field but is not moved!
+
 - printing vars ... will all vars be found?
   - add tests to check this, they are not part of the simulation so create a new dir
 - check if all vars are defined... will all vars be found?
@@ -58,8 +61,6 @@ IDEAS
     - min & max values then use math.random(min, max)...
 
 harder
-
-
 - i18n for error messages
 - add some missing ask dialogs
 
@@ -91,6 +92,7 @@ harder
 - http://www.unfocus.com/2014/03/03/hidpiretina-for-createjs-flash-pro-html5-canvas/
 
 maybe
+- move tile settings to own reducer... (from tile editor reducer)
 - add an icon
 - how do we know the id of the border points??
   - currently we can only use the select next field mode to get the border point

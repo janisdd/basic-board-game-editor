@@ -43,13 +43,13 @@ Also expressing the rules of simple games e.g. *Mensch ärgere Dich nicht* is pr
 
 some of them
 - you need to make sure every player has its own starting point,
-- if one token stops on another players token
+- if one token stops on another players token (could be more than one)
 - if one token would be set on another token of you than this is an invalid turn (must be checked before the token is moved)
 - you can only walk around the game field one time
 
-All this would be possible but feeds hard to implement in the current editor & the workflow.
+All this would be possible but feeds hard to implement in the current editor & workflow.
 It's also might not add many value for other games than *Mensch ärgere Dich nicht* when we extend
-the language to support the rules for this specific game (you could exchange with any other game and argue with that)
+the language to support the rules for this specific game (you could exchange *Mensch ärgere Dich nicht* with any other game and argue with that)
 
 ## Alternatives
 
@@ -58,7 +58,7 @@ the language to support the rules for this specific game (you could exchange wit
 - https://boardgamegeek.com/thread/1876312/card-editor-free-open-source-gui-tool-creating-boa - for cards
 - https://sourceforge.net/projects/bgmapeditor/ - for board games
 
-## My board game
+## My board game (initial idea)
 
 I originally created the editor for my own board game project which was a programming game
 

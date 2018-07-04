@@ -60,6 +60,11 @@ the tests can be found at `simulation/__tests__`
 
 the dev docs are located at `./devDocs`
 
+## notes
+
+there won't be much movement in this project (at least from me)
+because i have some other things/projects to do and for my *board game* all features are there
+
 ## TODOs & issues
 
 in `./TODO.md` are issues, ideas & todos captured
@@ -68,7 +73,10 @@ some of the notable issues are
 
 
 - when a line is connected to a field anchor point then moving the field/line undo is bugged
-  - this could also mess up the field connected lines list
+	- this could also mess up the field connected lines list
+
+- when a line is connected (through an anchor point) to a field symbol instance and we change the width/height of the symbol
+  - then the line is still connected to the field but is not moved!
 
 - printing (vars) maybe not all vars are found
 

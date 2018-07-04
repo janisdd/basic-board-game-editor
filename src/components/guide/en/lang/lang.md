@@ -300,6 +300,8 @@ move(3)
 
 *note and error is thrown if the player token would move before the game start field*
 
+when moving back then all fields are executed as normal (e.g. always execute forced fields, only execute field code when $leftSteps is 0)
+
 >the move back is done with an array saving all steps taken by the player token >so we can move back and don't need to deal with tile transitions
 
 `rollback()` rolls all state changes back before the turn started and ends the players turn (used for different game end behaviors)

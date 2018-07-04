@@ -105,6 +105,11 @@ describe('game vars should throw', () => {
 
     const res = runForState(prog)
 
+    if (res.gameEndCondition === null) {
+      expect(res.gameEndCondition).not.toEqual(null)
+      return
+    }
+
     const tuple = AbstractMachine.execExpression(res.gameEndCondition, AbstractMachine.createNewMachineState())
 
     expect(tuple.boolVal).toEqual(null)

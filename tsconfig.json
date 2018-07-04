@@ -11,7 +11,9 @@
     "suppressImplicitAnyIndexErrors": true,
     "lib": ["es2015", "dom","es5","scripthost"],
     "allowJs": true,
-    "importHelpers": true
+    "importHelpers": true,
+    "strict": false,
+    "skipLibCheck": true
   },
   "include": [
     "./src/**/*",
@@ -21,8 +23,7 @@
     "./libs/ace-editor/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "node_modules/@types/react/index.d.ts"
+    "node_modules"
   ]
 
 }

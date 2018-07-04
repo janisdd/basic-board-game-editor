@@ -84,6 +84,11 @@ export interface MyProps {
   readonly stageScaleX: number
   readonly stageScaleY: number
 
+  readonly displayPrintGuidesDisplayed: boolean
+
+  readonly printLargeTilePreferredWidthInPx: number
+  readonly printLargeTilePreferredHeightInPx: number
+
   /**
    * true: the next select selects
    */
@@ -327,7 +332,6 @@ class tileRenderer extends React.Component<Props, any> {
       isDraggingField = false
       isDraggingImage = false
       isDraggingStage = false
-      //TODO not working (immediately deselects shape)
       //store.dispatch(setSelectedFieldShapeId(null))
     })
 
@@ -353,6 +357,21 @@ class tileRenderer extends React.Component<Props, any> {
     graphics.drawGrid(this.renderStage, width, height, this.props.gridSizeInPx,
       this.props.worldSettings.gridStrokeThicknessInPx,
       this.props.worldSettings.gridStrokeColor, !this.props.drawGrid, 0, 0)
+
+
+    if (this.props.displayPrintGuidesDisplayed &&
+      (width > this.props.printLargeTilePreferredWidthInPx || height > this.props.printLargeTilePreferredHeightInPx)) {
+
+      console.log('draw')
+      graphics.drawPrintGuides(this.renderStage,
+        width,
+        height,
+        this.props.printLargeTilePreferredWidthInPx,
+        this.props.printLargeTilePreferredHeightInPx,
+        this.props.worldSettings.gridStrokeThicknessInPx,
+        this.props.worldSettings.gridStrokeColor
+      )
+    }
 
     graphics.drawTileBorderPoints(this.renderStage,
       width,

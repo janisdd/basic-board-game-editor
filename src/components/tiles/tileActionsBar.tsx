@@ -3,22 +3,13 @@ import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
-import {FieldShape, HorizontalAlign, VerticalAlign} from "../../types/drawing";
+import {CurveMode, FieldShape} from "../../types/drawing";
 import {
-  defaultAddImgHeight,
-  defaultAddImgWidth,
-  defaultAnchorPoints,
-  defaultArrowHeight,
-  defaultArrowWidth, defaultFieldShape, defaultImgShapeProps, defaultLineShape, defaultPadding, lineShapeDefaultColor,
-  newField_height,
-  newField_width, newField_x,
-  newField_y
+   defaultFieldShape, defaultImgShapeProps, defaultLineShape
 } from "../../constants";
-import {PrintHelper} from "../../helpers/printHelper";
 import {Tile} from "../../types/world";
 import {getNextShapeId} from "../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
-import {autoConnectFieldsWithLinesByCmdText, getNiceBezierCurveBetween} from "../../helpers/interactionHelper";
-import {getGuid} from "../../helpers/guid";
+import { getNiceBezierCurveBetween} from "../../helpers/interactionHelper";
 import {Button, Icon} from "semantic-ui-react";
 import {addFieldShape} from "../../state/reducers/tileEditor/fieldProperties/actions";
 import {addImageShape} from "../../state/reducers/tileEditor/imgProperties/actions";
@@ -36,6 +27,7 @@ import ControlSimulationBar from './controlSimulationBar'
 import {getI18n} from "../../../i18n/i18nRoot";
 import ToolTip from "../helpers/ToolTip";
 import {redo_shapeEditor, undo_shapeEditor} from "../../state/reducers/tileEditor/shapesReducer/actions";
+import {renewAllZIndicesInTile} from "../../helpers/someIndexHelper";
 
 //const css = require('./styles.styl');
 
@@ -129,6 +121,7 @@ class tileActionsBar extends React.Component<Props, any> {
                         }
 
                         this.props.addFieldShape(field)
+                        renewAllZIndicesInTile()
                       }}
               >
                 <Icon name='cube'/>
@@ -147,14 +140,18 @@ class tileActionsBar extends React.Component<Props, any> {
                           startPoint: {
                             id: getNextShapeId(),
                             x: 100,
-                            y: 100
+                            y: 100,
                           },
                           points: [
-                            getNiceBezierCurveBetween({x: 100, y: 100}, {x: 200, y: 200},
-                              MajorLineDirection.topToBottom)
+                            {
+                              ...getNiceBezierCurveBetween({x: 100, y: 100}, {x: 200, y: 200},
+                                MajorLineDirection.topToBottom),
+                              curveMode: CurveMode.linear
+                            }
                           ],
                         })
 
+                        renewAllZIndicesInTile()
                       }}
               >
                 <Icon name='exchange'/>
@@ -182,6 +179,7 @@ class tileActionsBar extends React.Component<Props, any> {
                   imgGuid: imgSurrogate.guid,
                 })
 
+                renewAllZIndicesInTile()
                 this.props.setEditor_IsAddImgShapeLibraryDisplayed(false)
               }}
               isDisplayed={this.props.isAddImgShapeLibraryDisplayed}

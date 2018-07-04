@@ -20,8 +20,8 @@ export const editorInstancesMap: { [id: string]: Editor | undefined } = {}
 export default class EditorWrapper extends React.Component<MyProps, any> {
 
 
-  hostDiv: HTMLDivElement = null
-  editor: Editor = undefined
+  hostDiv!: HTMLDivElement
+  editor!: Editor
   editorHasChanged = false
 
   componentDidMount() {

@@ -10,6 +10,8 @@ import {SimulationStatus} from "../src/types/states";
 import {BorderPoint, FieldShape} from "../src/types/drawing";
 import {ChangingDefinitionsObj, LangHelper} from "../src/helpers/langHelper";
 
+declare function require(s: string): any
+
 const langCompiler = require('../simulation/compiler/langCompiler').parser
 
 
@@ -550,19 +552,21 @@ export class Simulator {
   }
 
 
-  private static getCurrentCmdText(tiles: ReadonlyArray<Tile>, tileGuid: string, fieldId: number): string | null {
+  private static getCurrentCmdText(tiles: ReadonlyArray<Tile>, tileGuid: string | null, fieldId: number | null): string | null {
 
-    const tile = tiles.find(p => p.guid === tileGuid)
+    let tile = tiles.find(p => p.guid === tileGuid)
 
     if (!tile) {
-      Logger.fatal(`current tile ${tileGuid} not found`)
+      tile = Logger.fatal(`current tile ${tileGuid} not found`)
+      //throw new Error()
     }
 
-    const field = tile.fieldShapes.find(p => p.id === fieldId)
+    let field = tile.fieldShapes.find(p => p.id === fieldId)
 
     if (!field) {
-      Logger.fatal(`current field ${fieldId} on tile ${tileGuid} not found`)
+      field = Logger.fatal(`current field ${fieldId} on tile ${tileGuid} not found`)
     }
+
 
     if (field.cmdText !== null) {
       if (field.cmdText.trim() === '') return null
@@ -617,11 +621,19 @@ export class Simulator {
         hasCurrentPlayerWon: false
       }
     }
+    else if (token.tileGuid === null) {
+      Logger.fatal('simulator in invalid sate: token.tileGuid was null')
+      throw new Error() //TOOD ts can Logger.fatal somehow do this??
+    }
+    else if (token.fieldId === null) {
+      Logger.fatal('simulator in invalid sate: token.fieldId was null')
+      throw new Error() //TOOD ts can Logger.fatal somehow do this??
+    }
 
     let cmdText = this.getCurrentCmdText(tiles, token.tileGuid, token.fieldId)
 
     if (!cmdText) {
-      Logger.fatal(`current field ${token.fieldId} on tile ${token.tileGuid} has no command`)
+      cmdText = Logger.fatal(`current field ${token.fieldId} on tile ${token.tileGuid} has no command`)
     }
 
     let game: GameUnit
@@ -633,7 +645,7 @@ export class Simulator {
       let tokens = this.compiler.tokenize(cmdText)
       Logger.log('tokens before error:')
       Logger.log('', tokens)
-      Logger.fatal(`current field ${token.fieldId} on tile ${token.tileGuid} has errors: ${err}`)
+      game = Logger.fatal(`current field ${token.fieldId} on tile ${token.tileGuid} has errors: ${err}`)
     }
 
     const statements = game.statements
@@ -716,14 +728,16 @@ export class Simulator {
 
     const currentTile = tiles.find(p => p.guid === movedToken.tileGuid)
 
-    const currentTileSurrogate = tileSurrogates.find(p => p.tileGuid === currentTile.guid)
-
     if (!currentTile) {
       Logger.fatal(`tile transition from tile ${movedToken.tileGuid}: tile not found?`)
+      throw new Error()
     }
+
+    const currentTileSurrogate = tileSurrogates.find(p => p.tileGuid === currentTile.guid)
 
     if (!currentTileSurrogate) {
       Logger.fatal(`tile transition from tile ${movedToken.tileGuid}: tile position not found?`)
+      throw new Error()
     }
 
     const nowField = currentTile.fieldShapes.find(p => p.id === movedToken.fieldId)
@@ -784,6 +798,16 @@ export class Simulator {
       nextField = _nextField
     }
 
+
+    if (!nextTile) {
+      Logger.fatal(`could not do tile transition because next tile was not found, current field ${movedToken.fieldId}`)
+      throw new Error()
+    }
+    if (!nextField) {
+      Logger.fatal(`could not do tile transition because next field was not found, current field ${movedToken.fieldId}`)
+      throw new Error()
+    }
+
     state = Simulator.doTileTransition(token.tileGuid, token.fieldId, nextTile, nextField, state)
 
     return {
@@ -805,14 +829,16 @@ export class Simulator {
     const nextTileSurrogate = tileSurrogates.find(p => nextTileSurrogateCond(p))
 
     if (!nextTileSurrogate) {
-      Logger.fatal(`tile transition: cannot find next position for current tile ${currentTile.guid}`)
+      Logger.fatal(`tile transition: cannot find next position for current tile ${currentTile.guid} (${currentTile.displayName})`)
+      throw new Error()
     }
 
-    const nextTile: Tile = tiles.find(p => p.guid === nextTileSurrogate.tileGuid)
+    const nextTile = tiles.find(p => p.guid === nextTileSurrogate.tileGuid)
 
     if (!nextTile) {
       Logger.fatal(
-        `tile transition: cannot find next tile from position x: ${nextTileSurrogate.x}, y: ${nextTileSurrogate.y}, current tile: ${currentTile.guid}`)
+        `tile transition: cannot find next tile from position x: ${nextTileSurrogate.x}, y: ${nextTileSurrogate.y}, current tile: ${currentTile.guid} (${currentTile.displayName})`)
+      throw new Error()
     }
 
     //find border points with same coords
@@ -821,17 +847,20 @@ export class Simulator {
 
     if (!nextBorderPoint) {
       Logger.fatal(
-        `tile transition: cannot find transition from tile ${currentTile.guid} to tile ${nextTile.guid} because top border point not found`)
+        `tile transition: cannot find transition from tile ${currentTile.guid} (${currentTile.displayName}) to tile ${nextTile.guid} because top border point not found`)
+      throw new Error()
     }
     if (nextBorderPoint.nextFieldId === null) {
       Logger.fatal(
-        `tile transition: cannot find transition from tile ${currentTile.guid} to tile ${nextTile.guid} because top border point has no next field`)
+        `tile transition: cannot find transition from tile ${currentTile.guid} (${currentTile.displayName}) to tile ${nextTile.guid} because top border point has no next field`)
+      throw new Error()
     }
 
     const nextField = nextTile.fieldShapes.find(p => p.id === nextBorderPoint.nextFieldId)
 
-    if (nextField === null) {
-      Logger.fatal(`tile transition: cannot find next field ${nextBorderPoint.nextFieldId} on tile ${nextTile.guid}`)
+    if (!nextField) {
+      Logger.fatal(`tile transition: cannot find next field ${nextBorderPoint.nextFieldId} on tile ${nextTile.guid} (${nextTile.displayName})`)
+      throw new Error()
     }
 
     return {
@@ -877,6 +906,7 @@ export class Simulator {
 
     if (!cmdText) {
       Logger.fatal(`field ${token.fieldId} on tile ${token.tileGuid} has no commands`)
+      throw new Error()
     }
 
     let game: GameUnit
@@ -889,6 +919,7 @@ export class Simulator {
       Logger.log('tokens before error:')
       Logger.log('', tokens)
       Logger.fatal(`field ${token.fieldId} on tile ${token.tileGuid}: has errors: ${err}`)
+      throw new Error()
     }
 
     const statements = this.getNormalStatements(game.statements)
@@ -903,7 +934,7 @@ export class Simulator {
         Logger.fatal(
           `field ${token.fieldId} on tile ${token.tileGuid}: force statements need to be the first statement`)
       }
-      return
+      throw new Error()
     }
 
     let winnerCount = state.winnersIds.length
@@ -934,6 +965,12 @@ export class Simulator {
 
       if (!tile) {
         Logger.fatal(`current tile ${token.tileGuid} not found`)
+        throw new Error()
+      }
+
+      if (token.fieldId === null) {
+        Logger.fatal(`current player token field was null`)
+        throw new Error()
       }
 
       //the player token is on the simulation end field for a single simulation

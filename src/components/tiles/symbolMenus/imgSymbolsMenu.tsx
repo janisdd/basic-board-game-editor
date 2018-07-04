@@ -5,13 +5,13 @@ import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../../state";
 import SymbolRenderer from '../symbols/symbolRenderer'
 import {set_selectedImgSymbolGuid} from "../../../state/reducers/tileEditor/symbols/actions";
-import {setSelectedImageShapeIds} from "../../../state/reducers/tileEditor/actions";
+import {set_editor_rightTabActiveIndex, setSelectedImageShapeIds} from "../../../state/reducers/tileEditor/actions";
 import {addImageShape} from "../../../state/reducers/tileEditor/imgProperties/actions";
 import {
   remove_imgSymbol,
   set_imgSymbol_displayIndex
 } from "../../../state/reducers/tileEditor/symbols/imgSymbols/actions";
-import {swapDisplayIndex, swapDisplayIndexWithGuid} from "../../../helpers/someIndexHelper";
+import {renewAllZIndicesInTile, swapDisplayIndex, swapDisplayIndexWithGuid} from "../../../helpers/someIndexHelper";
 import {ui_helpPopupDelayInMs} from "../../../constants";
 import {ImgShape, ImgSymbol} from "../../../types/drawing";
 import {Button, Icon, Popup} from "semantic-ui-react";
@@ -19,6 +19,7 @@ import {getNextShapeId} from "../../../state/reducers/tileEditor/fieldProperties
 import ToolTip from '../../helpers/ToolTip'
 import {getI18n} from "../../../../i18n/i18nRoot";
 import IconToolTip from "../../helpers/IconToolTip";
+import {RightTileEditorTabs} from "../../../state/reducers/tileEditor/tileEditorReducer";
 
 //const css = require('./styles.styl');
 
@@ -42,10 +43,11 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   //imported reducer funcs here
 
   set_selectedImgSymbolGuid,
-  setSelectedImageShapeId: setSelectedImageShapeIds,
+  setSelectedImageShapeIds,
   addImageShape,
   set_imgSymbol_displayIndex,
   remove_imgSymbol,
+  set_editor_rightTabActiveIndex,
 
 }, dispatch)
 
@@ -96,6 +98,8 @@ class imgSymbolsMenu extends React.Component<Props, any> {
                                 const shape = createNewImgShapeFromSymbol(symbol, this.props.amountOfShapesInTile,
                                   false)
                                 this.props.addImageShape(shape)
+
+                                renewAllZIndicesInTile()
                               }}
                       >
                         <Icon name="add"/>
@@ -110,6 +114,8 @@ class imgSymbolsMenu extends React.Component<Props, any> {
                               onClick={() => {
                                 const shape = createNewImgShapeFromSymbol(symbol, this.props.amountOfShapesInTile, true)
                                 this.props.addImageShape(shape)
+
+                                renewAllZIndicesInTile()
                               }}
                       >
                         <Icon name="clone"/>
@@ -118,8 +124,9 @@ class imgSymbolsMenu extends React.Component<Props, any> {
 
                     <Button icon
                             onClick={() => {
-                              this.props.setSelectedImageShapeId(null) //hide normal props editor
+                              this.props.setSelectedImageShapeIds([]) //hide normal props editor
                               this.props.set_selectedImgSymbolGuid(symbol.guid)
+                              this.props.set_editor_rightTabActiveIndex(RightTileEditorTabs.propertyEditorTab)
                             }}
                     >
                       <Icon name="write"/>

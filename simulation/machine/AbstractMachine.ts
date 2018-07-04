@@ -325,7 +325,7 @@ export class AbstractMachine {
 
       default:
         notExhaustive(statement)
-
+        throw new Error()
     }
   }
 
@@ -432,6 +432,17 @@ export class AbstractMachine {
 
         if (expRes.boolVal !== null) {
           this.makeError(`player var ${varDecl.ident} is of type int but expression is of type bool`)
+          throw new Error()
+        }
+
+        if (expRes.val === null) {
+          this.makeError(`player var ${varDecl.ident} expression int was null`)
+          throw new Error()
+        }
+
+        if (varDecl.maxVal === null) {
+          this.makeError(`player var ${varDecl.ident} expression int was null`)
+          throw new Error()
         }
 
         //replace the modified player
@@ -2394,7 +2405,7 @@ export class AbstractMachine {
     return Math.floor(val)
   }
 
-  private static makeError(message: string): any {
+  private static makeError(message: string): never {
 
     //console.error(message)
     throw  Error(message)

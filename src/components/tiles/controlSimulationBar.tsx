@@ -88,9 +88,15 @@ class controlSimulationBar extends React.Component<Props, any> {
 
     if (startPos === null) {
       Logger.fatal('could not find start field')
+      throw new Error()
     }
 
     let state = this.props.simulationState.machineState
+
+    if (state === null) {
+      Logger.fatal('state was null')
+      throw new Error()
+    }
 
     if (state.leftDiceValue === 0) {
       //round is finished...
@@ -144,6 +150,12 @@ class controlSimulationBar extends React.Component<Props, any> {
     } catch (err) {
       //in case an evaluation error occurred
       const tile = this.props.tiles.find(p => p.guid === token.tileGuid)
+
+      if (!tile) {
+        Logger.fatal(`tile with guid ${token.tileGuid} was not found`)
+        throw new Error()
+      }
+
       Logger.fatal(`error on field after field with id: '${token.fieldId}', on tile '${token.tileGuid}' (${tile.displayName}), error: ${err.message}`)
     }
 
@@ -165,6 +177,11 @@ class controlSimulationBar extends React.Component<Props, any> {
         } catch (err) {
           //in case an evaluation error occurred
           const tile = this.props.tiles.find(p => p.guid === token.tileGuid)
+
+          if (!tile) {
+            Logger.fatal(`tile with guid ${token.tileGuid} was not found`)
+            throw new Error()
+          }
           Logger.fatal(`error on field after field with id: '${token.fieldId}', on tile '${token.tileGuid}' (${tile.displayName}), error: ${err.message}`)
         }
 
@@ -220,7 +237,13 @@ class controlSimulationBar extends React.Component<Props, any> {
                       return
                     }
 
-                    let initState: MachineState = this.props.simulationState.machineState
+                    let initState = this.props.simulationState.machineState
+
+                    if (!initState) {
+                      Logger.fatal(`initState was falsy`)
+                      throw new Error()
+                    }
+
                     let ignoreFirstStateUpdate: boolean = false
 
                     if (this.props.simulationState.simulationStatus === null || this.props.simulationState.simulationStatus !== SimulationStatus.paused) {
@@ -298,10 +321,23 @@ class controlSimulationBar extends React.Component<Props, any> {
                           }
                         })
                     } catch (err) {
-                      const token = lastKnownState.players[lastKnownState.currentPlayerIndex].tokens[lastKnownState.currentPlayerActiveTokenIndex]
-                      //in case an evaluation error occurred
-                      const tile = this.props.tiles.find(p => p.guid === token.tileGuid)
-                      Logger.fatal(`error on field after field with id: '${token.fieldId}', on tile '${token.tileGuid}' (${tile.displayName}), error: ${err.message}`)
+
+                      if (!lastKnownState) {
+                        Logger.fatal('there was no last known state')
+                      }
+                      else {
+
+                        const token = lastKnownState!.players[lastKnownState!.currentPlayerIndex].tokens[lastKnownState!.currentPlayerActiveTokenIndex]
+                        //in case an evaluation error occurred
+                        const tile = this.props.tiles.find(p => p.guid === token.tileGuid)
+
+                        if (!tile) {
+                          Logger.fatal(`could not find tile near field with id: '${token.fieldId}', tile guid: '${token.tileGuid}'`)
+                          throw new Error()
+                        }
+
+                        Logger.fatal(`error on field after field with id: '${token.fieldId}', on tile '${token.tileGuid}' (${tile.displayName}), error: ${err.message}`)
+                      }
                     }
 
                   }}>

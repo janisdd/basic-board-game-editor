@@ -151,6 +151,7 @@ export const lang_en: LangObj = {
   "Print tile width in px": "Print tile width in px",
   "Print tile height in px": "Print tile height in px",
   "Auto increment field text that contain numbers on duplication": "Auto increment field text that contain numbers on duplication",
+  "Display print guides": "Display print guides",
   "top to bottom": "top to bottom",
   "bottom to top": "bottom to top",
   "left to right": "left to right",

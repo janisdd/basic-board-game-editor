@@ -38,6 +38,8 @@ export enum ActionType {
 
   ADD_fieldShape = 'tileEditorReducer_ADD_fieldShape',
   REMOVE_fieldShape = 'tileEditorReducer_REMOVE_fieldShape',
+  CLEAR_fieldShape_connectedLines = 'tileEditorReducer_CLEAR_fieldShape_connectedLines',
+
 
   SET_fieldText = 'fieldPropertyReducer_SET_fieldText',
   SET_fieldX = 'fieldPropertyReducer_SET_fieldXAction',
@@ -88,6 +90,10 @@ export interface ADD_fieldShapeAction extends ActionBase {
 export interface REMOVE_fieldShapeAction extends ActionBase {
   readonly type: ActionType.REMOVE_fieldShape
   readonly fieldShapeId: number
+}
+
+export interface CLEAR_fieldShape_connectedLinesAction extends ActionBase {
+  readonly type: ActionType.CLEAR_fieldShape_connectedLines
 }
 
 
@@ -278,6 +284,7 @@ export type AllActions =
   | SET_field_isFontItalicAction
   | SET_field_rotationInDegreeAction
   | SET_fieldBackgroundImgGuidAction
+  | CLEAR_fieldShape_connectedLinesAction
 
 
 function _reducer(state: State = initial, action: AllActions): State {
@@ -294,6 +301,15 @@ function _reducer(state: State = initial, action: AllActions): State {
     case ActionType.SET_fieldsArray: {
       return [...action.fields]
     }
+
+    case ActionType.CLEAR_fieldShape_connectedLines:
+      return state.map<FieldShape>(p => {
+        return {
+          ...p,
+          connectedLinesThroughAnchorPoints: {}
+        }
+      })
+
 
     //--- field properties
     case ActionType.SET_fieldText: {

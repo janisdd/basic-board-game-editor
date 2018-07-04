@@ -17,6 +17,7 @@ import {Compiler} from "../../simulation/compiler/compiler";
 import {GameUnit} from "../../simulation/model/executionUnit";
 import {MajorLineDirection} from "../state/reducers/tileEditor/tileEditorReducer";
 import {Logger} from "./logger";
+import {renewAllZIndicesInTile} from "./someIndexHelper";
 
 const langCompiler = require('../../simulation/compiler/langCompiler').parser
 
@@ -630,6 +631,8 @@ function connectPointsWithLine(startFieldX: number, startFieldY: number, startFi
 
   globalState.dispatch(addLineShape(line))
 
+  renewAllZIndicesInTile()
+
 }
 
 /**
@@ -873,3 +876,64 @@ export function getPointDistance(p1: PlainPoint, p2: PlainPoint): number {
   return Math.sqrt(a ** 2 + b ** 2)
 }
 
+
+/**
+ * returns a point between p1 and p2
+ * the distance between the two points is 100%
+ * t is the point we want (0 is p1, 1 is p2) all between 0,1 are interpolated
+ *
+ * assumes p1 is bottom left, p2 is top right??
+ * @param {PlainPoint} p1
+ * @param {PlainPoint} p2
+ * @param {number} t between [0,1]
+ * @returns {PlainPoint}
+ */
+export function interpolate2DPoint(p1: PlainPoint, p2: PlainPoint, t: number): PlainPoint {
+
+  if (t < 0 || t > 1) {
+    Logger.fatal(`interpolate2DPoint, t  must be [0,1] but was: ${t}`)
+  }
+
+
+  console.log('asdasdasd')
+
+  //y = mx + n   where t = x between [0, 1]
+  const deltaX = p2.x - p1.x
+  const deltaY = p2.y - p1.y
+
+
+  if (p1.x === p2.x) {
+
+    const distY = Math.abs(deltaY)
+
+    if (p1.y >= p2.y) {
+      return {
+        x: p1.x,
+        y: p1.y - t * distY
+      }
+    }
+
+    return {
+      x: p1.x,
+      y: p1.y + t * distY
+    }
+  }
+
+  const distX = Math.abs(deltaX)
+
+  // distX      x?
+  // ---     = ---
+  // 100%      t
+  //t is already  / 100 because [0,1]
+  const wantedX = t * distX
+
+  const n = p1.y
+  const m = deltaY / deltaX
+
+  const resY = wantedX * m + n
+
+  return {
+    x: p1.x + wantedX,
+    y: resY
+  }
+}

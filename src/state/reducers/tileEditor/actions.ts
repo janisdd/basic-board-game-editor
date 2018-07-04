@@ -2,7 +2,7 @@ import {
   ActionType,
   LeftTileEditorTabs,
   MajorLineDirection,
-  RightTileEditorTabs,
+  RightTileEditorTabs, SET_editor_arePrintGuidesDisplayedAction,
   SET_editor_autoIncrementFieldTextNumbersOnDuplicateAction,
   SET_editor_botBorderPointsAction,
   SET_editor_gridSizeInPxAction,
@@ -45,6 +45,7 @@ import {set_simulation_simulationStatus} from "../simulation/actions";
 import {__setNextShapeId} from "./fieldProperties/fieldPropertyReducer";
 import {clearHistory_shapeEditor, reset_shapeEditor} from "./shapesReducer/actions";
 import {getDefaultNewTile} from "../../../constants";
+import {renewAllZIndicesInTile} from "../../../helpers/someIndexHelper";
 
 //only used for import currently...
 export function setEditorTile(tile: Tile): SET_tileAction {
@@ -134,6 +135,9 @@ export function set_editor_isCreatingNewTile(isCreatingNewTile: boolean, tile: T
     dispatch(setPropertyEditor_fieldsShapes(tile.fieldShapes))
     dispatch(setPropertyEditor_imgShapes(tile.imgShapes))
     dispatch(setPropertyEditor_lineShapes(tile.lineShapes))
+
+    //this can fix all z indices that are wrong...
+    renewAllZIndicesInTile()
 
     //clear history
     dispatch(reset_shapeEditor()) //this is needed because we changed lines & ... to [] which will set the last edited shape type
@@ -423,5 +427,12 @@ export function set_editor_isLeftTabMenuExpandedAction(isLeftTabMenuExpanded: bo
   return {
     type: ActionType.SET_editor_isLeftTabMenuExpanded,
     isLeftTabMenuExpanded
+  }
+}
+
+export function set_editor_arePrintGuidesDisplayed(arePrintGuidesDisplayed: boolean): SET_editor_arePrintGuidesDisplayedAction {
+  return {
+    type: ActionType.SET_editor_arePrintGuidesDisplayed,
+    arePrintGuidesDisplayed
   }
 }

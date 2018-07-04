@@ -48,7 +48,7 @@ class IconToolTip extends React.Component<Props, any> {
       <Popup
         trigger={
           <div style={{display: 'inline-block'}} className="hoverable mar-left-half"
-               onClick={this.props.onClick ? this.props.onClick : null}
+               onClick={this.props.onClick ? this.props.onClick : undefined}
           >
             {
               this.props.iconGroup &&
@@ -56,7 +56,7 @@ class IconToolTip extends React.Component<Props, any> {
             }
             {
               !this.props.iconGroup &&
-              <Icon size={this.props.iconSize ? this.props.iconSize : null}
+              <Icon size={this.props.iconSize ? this.props.iconSize : undefined}
                     name={this.props.icon ? this.props.icon as SemanticICONS : 'question circle'}/>
             }
           </div>

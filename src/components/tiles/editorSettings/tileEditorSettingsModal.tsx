@@ -5,6 +5,7 @@ import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../../state/index";
 import {Checkbox, Input, Form, Button, Icon, Divider, Modal, Dropdown, DropdownItemProps} from 'semantic-ui-react'
 import {
+  set_editor_arePrintGuidesDisplayed,
   set_editor_autoIncrementFieldTextNumbersOnDuplicate,
   set_editor_botBorderPoints,
   set_editor_isTileEditorSettingsModalDisplayed,
@@ -85,6 +86,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_editor_isTileEditorSettingsModalDisplayed,
   set_editor_autoIncrementFieldTextNumbersOnDuplicate,
   set_editor_majorLineDirectionAction,
+  set_editor_arePrintGuidesDisplayed,
 
 }, dispatch)
 
@@ -286,6 +288,16 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
                   checked={this.props.settings.autoIncrementFieldTextNumbersOnDuplicate}
                   onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
                     this.props.set_editor_autoIncrementFieldTextNumbersOnDuplicate(data.checked)
+                  }}
+                />
+              </Form.Field>
+
+              <Form.Field>
+                <Checkbox
+                  label={getI18n(this.props.langId, "Display print guides")}
+                  checked={this.props.settings.arePrintGuidesDisplayed}
+                  onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
+                    this.props.set_editor_arePrintGuidesDisplayed(data.checked)
                   }}
                 />
               </Form.Field>

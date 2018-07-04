@@ -9,15 +9,15 @@ import {
   set_lineSymbol_displayIndex,
   set_lineSymbols
 } from "../../../state/reducers/tileEditor/symbols/lineSymbols/actions";
-import {setSelectedLineShapeIds} from "../../../state/reducers/tileEditor/actions";
+import {set_editor_rightTabActiveIndex, setSelectedLineShapeIds} from "../../../state/reducers/tileEditor/actions";
 import {addLineShape} from "../../../state/reducers/tileEditor/lineProperties/actions";
 import {LineShape, LineSymbol} from "../../../types/drawing";
 import {ui_helpPopupDelayInMs} from "../../../constants";
 import {getNextShapeId} from "../../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
 import {getNiceBezierCurveBetween} from "../../../helpers/interactionHelper";
 import {Button, Icon, Popup} from "semantic-ui-react";
-import {swapDisplayIndexWithGuid} from "../../../helpers/someIndexHelper";
-import {MajorLineDirection} from "../../../state/reducers/tileEditor/tileEditorReducer";
+import {renewAllZIndicesInTile, swapDisplayIndexWithGuid} from "../../../helpers/someIndexHelper";
+import {MajorLineDirection, RightTileEditorTabs} from "../../../state/reducers/tileEditor/tileEditorReducer";
 import ToolTip from '../../helpers/ToolTip'
 import {getI18n} from "../../../../i18n/i18nRoot";
 import IconToolTip from "../../helpers/IconToolTip";
@@ -44,13 +44,15 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   //imported reducer funcs here
   set_selectedLineSymbolGuid,
 
-  setSelectedLineShapeId: setSelectedLineShapeIds,
+  setSelectedLineShapeIds,
 
   addLineShape,
 
   set_lineSymbol_displayIndex,
 
   set_lineSymbols,
+
+  set_editor_rightTabActiveIndex,
 
 }, dispatch)
 
@@ -100,6 +102,8 @@ class lineSymbolsMenu extends React.Component<Props, any> {
                               const shape = createNewLinShapeFromSymbol(symbol, this.props.amountOfShapesInTile,
                                 false)
                               this.props.addLineShape(shape)
+
+                              renewAllZIndicesInTile()
                             }}
                     >
                       <Icon name="add"/>
@@ -114,6 +118,8 @@ class lineSymbolsMenu extends React.Component<Props, any> {
                             onClick={() => {
                               const shape = createNewLinShapeFromSymbol(symbol, this.props.amountOfShapesInTile, true)
                               this.props.addLineShape(shape)
+
+                              renewAllZIndicesInTile()
                             }}
                     >
                       <Icon name="clone"/>
@@ -122,8 +128,9 @@ class lineSymbolsMenu extends React.Component<Props, any> {
 
                   <Button icon
                           onClick={() => {
-                            this.props.setSelectedLineShapeId(null) //hide normal props editor
+                            this.props.setSelectedLineShapeIds([]) //hide normal props editor
                             this.props.set_selectedLineSymbolGuid(symbol.guid)
+                            this.props.set_editor_rightTabActiveIndex(RightTileEditorTabs.propertyEditorTab)
                           }}
                   >
                     <Icon name="write"/>
