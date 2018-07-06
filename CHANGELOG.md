@@ -4,6 +4,7 @@
 
 already changed but version has not changed
 
+- changed back the hack with bitmap.draw = (own func) to draw the desired size of the bitmap
 - added selection with area (like on a desktop)
   - added shift+drag to additive select with area
 - we now add always borders to tiles when we split one large tile into pieces

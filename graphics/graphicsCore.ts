@@ -126,7 +126,7 @@ export function drawGrid(stage: Stage, width: number, height: number, gridSizeIn
 
 const printGuidesDashArray = [3]
 const printGuidesStrokeThicknessInPx = 4
-const printGuidesColor= 'black'
+const printGuidesColor = 'black'
 
 export function drawPrintGuides(stage: Stage, actualWidthInPx: number, actualHeightInPx: number, expectedWidthInPx: number, expectedHeightInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string): void {
 
@@ -448,31 +448,8 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
     //   (symbolForShape !== null ? symbolForShape.height : field.height)
     // )
 
-    bitmap.draw = function (ctx, ignoreCache) {
-      //mostly copied from easeljs source
-      //https://createjs.com/docs/easeljs/files/easeljs_display_Bitmap.js.html#l144
-      //but we need out own drawImage overload so that the svg matches the size
-      if ((this as any).DisplayObject_draw(ctx, ignoreCache)) {
-        return true;
-      }
-      let img: any = this.image, rect = this.sourceRect;
-      if (img.getImage) {
-        img = img.getImage();
-      }
-      if (!img) {
-        return true;
-      }
-      //ctx.drawImage(img, 0, 0, canvasSize, canvasSize, 0, 0, imgShape.width, imgShape.height,)
-      ctx.drawImage(
-        img,
-        borderSize,
-        borderSize,
-        (symbolForShape !== null ? symbolForShape.width : field.width) - (borderSize * 2),
-        (symbolForShape !== null ? symbolForShape.height : field.height) - (borderSize * 2)
-      )
-
-      return true
-    }
+    bitmap.scaleX = (symbolForShape !== null ? symbolForShape.width : field.width) / bitmap.image.width
+    bitmap.scaleY = (symbolForShape !== null ? symbolForShape.height : field.height) / bitmap.image.height
 
     container.addChild(bitmap)
 
@@ -1271,10 +1248,10 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     bitmap = new createjs.Bitmap(img.base64);
     bitmap.x = 0
     bitmap.y = 0
-    bitmap.scaleX = 1;//imgShape.width / imgWidth
-    bitmap.scaleY = 1;//imgShape.height / imgHeight
-    bitmap.regX = 0//imgShape.width / 2
-    bitmap.regY = 0//imgShape.height / 2
+    bitmap.scaleX = imgWidth / bitmap.image.width
+    bitmap.scaleY = imgHeight / bitmap.image.height
+    bitmap.regX = 0
+    bitmap.regY = 0
 
     bitmap.setBounds(
       imgShape.x + xOffset,
@@ -1283,31 +1260,32 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
       (symbolForShape !== null ? symbolForShape.height : imgShape.height)
     )
 
-    bitmap.draw = function (ctx, ignoreCache) {
-      //mostly copied from easeljs source
-      //https://createjs.com/docs/easeljs/files/easeljs_display_Bitmap.js.html#l144
-      //but we need out own drawImage overload so that the svg matches the size
-      if ((this as any).DisplayObject_draw(ctx, ignoreCache)) {
-        return true;
-      }
-      let img: any = this.image, rect = this.sourceRect;
-      if (img.getImage) {
-        img = img.getImage();
-      }
-      if (!img) {
-        return true;
-      }
-      //ctx.drawImage(img, 0, 0, canvasSize, canvasSize, 0, 0, imgShape.width, imgShape.height,)
-      ctx.drawImage(
-        img,
-        0,
-        0,
-        (symbolForShape !== null ? symbolForShape.width : imgShape.width),
-        (symbolForShape !== null ? symbolForShape.height : imgShape.height)
-      )
-
-      return true
-    }
+    //this was old without setting the scale
+    // bitmap.draw = function (ctx, ignoreCache) {
+    //   //mostly copied from easeljs source
+    //   //https://createjs.com/docs/easeljs/files/easeljs_display_Bitmap.js.html#l144
+    //   //but we need out own drawImage overload so that the svg matches the size
+    //   if ((this as any).DisplayObject_draw(ctx, ignoreCache)) {
+    //     return true;
+    //   }
+    //   let img: any = this.image, rect = this.sourceRect;
+    //   if (img.getImage) {
+    //     img = img.getImage();
+    //   }
+    //   if (!img) {
+    //     return true;
+    //   }
+    //   //ctx.drawImage(img, 0, 0, canvasSize, canvasSize, 0, 0, imgShape.width, imgShape.height,)
+    //   ctx.drawImage(
+    //     img,
+    //     0,
+    //     0,
+    //     (symbolForShape !== null ? symbolForShape.width : imgShape.width),
+    //     (symbolForShape !== null ? symbolForShape.height : imgShape.height)
+    //   )
+    //
+    //   return true
+    // }
 
     // bitmap.regX = imgShape.width
     // bitmap.regY = imgShape.height

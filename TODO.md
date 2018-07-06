@@ -205,17 +205,6 @@ DOCS
 - middle mosue button on canvas --> zoom to normal
 - mouse wheel on canvas -> zoom
 - zoom is mouse position agnostic
-- easeljs bitmap trick (draw stretched svg... use custom draw function)
-  - bitmap.draw = copy from source and use
-  ctx.drawImage(
-          img,
-          0,
-          0,
-          imgShape.width,
-          imgShape.height
-        )
-
-
 
 ----
 
