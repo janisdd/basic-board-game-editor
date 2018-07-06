@@ -4,6 +4,7 @@
 
 already changed but version has not changed
 
+- fixed issue where one could not simulate a single tile with fake simulation start/end
 - fixed issue where dragging a field (and some line was connected?) threw an error because we didn't check if we are
   dragging a line or a field properly
 - changed back the hack with bitmap.draw = (own func) to draw the desired size of the bitmap

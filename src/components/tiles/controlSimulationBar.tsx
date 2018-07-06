@@ -239,11 +239,6 @@ class controlSimulationBar extends React.Component<Props, any> {
 
                     let initState = this.props.simulationState.machineState
 
-                    if (!initState) {
-                      Logger.fatal(`initState was falsy`)
-                      throw new Error()
-                    }
-
                     let ignoreFirstStateUpdate: boolean = false
 
                     if (this.props.simulationState.simulationStatus === null || this.props.simulationState.simulationStatus !== SimulationStatus.paused) {
