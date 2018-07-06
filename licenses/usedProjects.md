@@ -22,7 +22,6 @@
 - https://ace.c9.io/
 - easeljs - svg exporter (changed)
 
-
 - keys css design https://gist.github.com/jeromyanglim/3952143
 
 also have a look at `package.json` for all used projects

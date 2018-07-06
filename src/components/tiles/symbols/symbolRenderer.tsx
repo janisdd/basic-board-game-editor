@@ -75,6 +75,8 @@ class symbolRenderer extends React.Component<Props, any> {
     return (
       <div>
         <TileRenderer
+          selectionRect={null}
+          setSelectionRect={nop}
           printLargeTilePreferredHeightInPx={0}
           printLargeTilePreferredWidthInPx={0}
           displayPrintGuidesDisplayed={false}
@@ -116,7 +118,10 @@ class symbolRenderer extends React.Component<Props, any> {
 
             if (ids.length === 0) {
 
-              this.props.setSelectedFieldShapeIds([]) //this de selects every field/img/line
+              this.props.setSelectedFieldShapeIds([])
+              this.props.setSelectedLineShapeIds([])
+              this.props.setSelectedImageShapeIds([])
+
               this.props.set_selectedFieldSymbolGuid(null) //this will deselect all other symbols
 
               if (wasNoShapeSelectedBeforeClear) {

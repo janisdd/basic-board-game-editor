@@ -60,12 +60,34 @@ type Props = typeof stateProps & typeof dispatchProps;
 class rightEditorTabMenu extends React.Component<Props, any> {
   render(): JSX.Element {
 
-    const isSomPropsEditorDisplayed = this.props.selectedLineShapeIds.length > 0
+    let isSomPropsEditorDisplayed = this.props.selectedLineShapeIds.length > 0
       || this.props.selectedImageShapeIds.length > 0
       || this.props.selectedFieldShapeIds.length > 0
       || this.props.selectedLineSymbolGuid !== null
       || this.props.selectedImgSymbolGuid !== null
       || this.props.selectedFieldSymbolGuid !== null
+
+
+    let selectionsState = 0
+
+    if (this.props.selectedFieldShapeIds.length > 0) {
+      selectionsState++
+    }
+
+    if (this.props.selectedImageShapeIds.length > 0) {
+      selectionsState++
+    }
+    if (this.props.selectedLineShapeIds.length > 0) {
+      selectionsState++
+    }
+
+
+    let hidePropertiesEditorForced = false
+
+    if (selectionsState > 1) {
+      //we select two different shape types --> no assume no common props only allow moving change (x,y)
+      hidePropertiesEditorForced = true
+    }
 
 
     const tile: Tile = {
@@ -195,7 +217,7 @@ class rightEditorTabMenu extends React.Component<Props, any> {
       }
     ]
 
-    if (isSomPropsEditorDisplayed) {
+    if (isSomPropsEditorDisplayed && hidePropertiesEditorForced === false) {
       panes = panes.concat({
         menuItem: getI18n(this.props.langId, "Properties"),
         render: () => {
@@ -211,7 +233,7 @@ class rightEditorTabMenu extends React.Component<Props, any> {
 
         <Tab menu={{secondary: true, pointing: true}}
              activeIndex={this.props.rightTabActiveIndex}
-             //TODO false not working here...??
+          //TODO false not working here...??
              renderActiveOnly
              onTabChange={(event1, data) => {
                this.props.set_editor_rightTabActiveIndex(data.activeIndex as number)

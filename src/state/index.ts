@@ -54,6 +54,11 @@ import {
 import {reducer as  shapesReducer, State as ShapesReducerState} from './reducers/tileEditor/shapesReducer/shapesReducer'
 import {StateWithHistory} from "redux-undo";
 
+import {
+  reducer as tileEditorSelectionReducer,
+  State as TileEditorSelectionState
+} from './reducers/tileEditorSelection/tileEditorSelectionReducer'
+
 
 export interface RootState {
 
@@ -72,6 +77,7 @@ export interface RootState {
   readonly tileLibraryState: TileLibraryState
 
   readonly tileEditorState: TileEditorState
+  readonly tileEditorSelectionState: TileEditorSelectionState
 
 
   readonly shapesReducerState: StateWithHistory<ShapesReducerState>
@@ -106,6 +112,7 @@ export default combineReducers<RootState>({
   tileLibraryState: tileLibraryReducer,
 
   tileEditorState: tileEditorReducer,
+  tileEditorSelectionState: tileEditorSelectionReducer,
 
   shapesReducerState: shapesReducer,
   tileEditorFieldShapesState: fieldPropertyReducer,

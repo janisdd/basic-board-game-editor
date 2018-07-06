@@ -234,7 +234,7 @@ export const initial: State = {
 
   isLeftTabMenuExpanded: false,
 
-  arePrintGuidesDisplayed: true
+  arePrintGuidesDisplayed: false
 
 }
 
@@ -588,22 +588,16 @@ export function reducer(state: State = initial, action: AllActions): State {
       return {
         ...state,
         selectedFieldShapeIds: action.selectedFieldShapeIds,
-        selectedLineShapeIds: [],
-        selectedImageShapeIds: []
       }
 
     case ActionType.SET_selectedLineShapeIds:
       return {
         ...state,
-        selectedFieldShapeIds: [],
         selectedLineShapeIds: action.selectedLineShapeIds,
-        selectedImageShapeIds: [],
       }
     case ActionType.SET_selectedImageShapeIds:
       return {
         ...state,
-        selectedFieldShapeIds: [],
-        selectedLineShapeIds: [],
         selectedImageShapeIds: action.selectedImageShapeIds,
       }
 

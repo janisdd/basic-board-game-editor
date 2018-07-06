@@ -11,11 +11,17 @@ import {
   ImgShape, ImgSymbol,
   LineShape, LineSymbol,
   PlainPoint,
-  Point
+  Point, Rect
 } from "../../types/drawing";
 import MouseEvent = createjs.MouseEvent
 import {ZIndexCache} from "../../types/ui";
-import {globalMinimalZoom, globalZoomStep} from "../../constants";
+import {
+  globalMinimalZoom,
+  globalZoomStep,
+  selectionBgAlpha,
+  selectionRectBgColor,
+  selectionRectBorderColor
+} from "../../constants";
 import {
   isFieldShape,
   isFieldSymbol,
@@ -25,6 +31,8 @@ import {
   isLineSymbol
 } from "../../helpers/typeHelper";
 import {MachineState} from "../../../simulation/machine/machineState";
+import {intersectRect} from "../../helpers/interactionHelper";
+import {Logger} from "../../helpers/logger";
 
 
 //const css = require('./styles.styl');
@@ -88,6 +96,10 @@ export interface MyProps {
 
   readonly printLargeTilePreferredWidthInPx: number
   readonly printLargeTilePreferredHeightInPx: number
+
+  readonly selectionRect: Rect | null
+
+  readonly setSelectionRect: (rect: Rect | null) => void
 
   /**
    * true: the next select selects
@@ -174,11 +186,12 @@ let downXContainerOffset = 0
 let downYContainerOffset = 0
 
 let isDraggingField = false
+let isSelectingMultipleShapes = false
 let isDraggingLinePoint = false
 let isDraggingImage = false
 let isDraggingStage = false
 let draggingObjectId = -1
-let draggingPointId: number | null = 0 //if we drag no point only the line --> null
+let draggingPointId: number | null = null //if we drag no point only the line --> null
 
 class tileRenderer extends React.Component<Props, any> {
 
@@ -269,7 +282,7 @@ class tileRenderer extends React.Component<Props, any> {
     })
 
 
-    this.renderStage.on('stagemousemove', onMouseMove.bind(this))
+    this.renderStage.on('stagemousemove', this.onMouseMove.bind(this))
 
     this.renderStage.on('stagemousedown', eventObj => {
       const e = eventObj as MouseEvent
@@ -281,26 +294,34 @@ class tileRenderer extends React.Component<Props, any> {
         //see https://createjs.com/docs/easeljs/classes/Container.html#method_getObjectsUnderPoint
         const el = this.renderStage.getObjectUnderPoint(mouseX, mouseY, 1)
 
-        if (!el || e.nativeEvent.altKey) { //if the whole tile is coverd by shapes we want to drag with alt + click + drag
+        if (e.nativeEvent.altKey) { //if the whole tile is coverd by shapes we want to drag with alt + click + drag
 
-          if (e.nativeEvent.altKey === false) {
-
-
-            if (this.props.isSelectingNextField) {
-              this.props.setTileEditorSelectingNextField(false, null)
-            }
-            else {
-              this.props.setSelectedFieldShapeIds([]) //will de-select all other shape types too
-            }
-
-
-          }
+          // if (e.nativeEvent.altKey === false) {
+          //
+          //
+          //   if (this.props.isSelectingNextField) {
+          //     this.props.setTileEditorSelectingNextField(false, null)
+          //   }
+          //   else {
+          //     this.props.setSelectedFieldShapeIds([]) //will de-select all other shape types too
+          //   }
+          // }
 
           isDraggingStage = true
           downX = mouseX + this.props.stageOffsetX //absolute pos
           downY = mouseY + this.props.stageOffsetY //absolute pos
           downXContainerOffset = e.stageX - this.props.stageOffsetX
           downYContainerOffset = e.stageY - this.props.stageOffsetY
+
+          return
+        }
+
+        if (!el) {
+          isSelectingMultipleShapes = true
+          downX = mouseX
+          downY = mouseY
+
+          return
         }
       }
 
@@ -323,18 +344,64 @@ class tileRenderer extends React.Component<Props, any> {
         const newY = this.props.stageOffsetY - (referencePoint.y - referencePoint2.y)
 
         this.props.setEditor_stageOffset(newX, newY)
-      }
 
+        return
+      }
     })
 
     this.renderStage.on('stagemouseup', eventObj => {
+      const e = eventObj as MouseEvent
+
       isDraggingLinePoint = false
       isDraggingField = false
       isDraggingImage = false
       isDraggingStage = false
+      isSelectingMultipleShapes = false
+
       //store.dispatch(setSelectedFieldShapeId(null))
+
+      const {x: mouseX, y: mouseY} = this.renderStage.globalToLocal(e.stageX, e.stageY)
+
+
+      const el = this.renderStage.getObjectUnderPoint(mouseX, mouseY, 1)
+
+      if (!el) {
+        if (mouseX === downX && mouseY === downY) {
+          //deselect
+          if (this.props.isSelectingNextField) {
+            this.props.setTileEditorSelectingNextField(false, null)
+          }
+          else {
+            //deselect all
+            this.props.setSelectedFieldShapeIds([])
+            this.props.setSelectedLineShapeIds([])
+            this.props.setSelectedImageShapeIds([])
+          }
+        }
+      }
+
+
+      if (this.props.selectionRect !== null) {
+        this.props.setSelectionRect(null)
+      }
+
+
     })
 
+  }
+
+  getSelectedShapeTypesCount(): number {
+    let selectedShapeTypesCount = 0
+    if (this.props.selectedFieldShapeIds.length > 0) {
+      selectedShapeTypesCount++
+    }
+    if (this.props.selectedImageShapeIds.length > 0) {
+      selectedShapeTypesCount++
+    }
+    if (this.props.selectedLineShapeIds.length > 0) {
+      selectedShapeTypesCount++
+    }
+    return selectedShapeTypesCount
   }
 
   updateCanvasModel() {
@@ -362,7 +429,6 @@ class tileRenderer extends React.Component<Props, any> {
     if (this.props.displayPrintGuidesDisplayed &&
       (width > this.props.printLargeTilePreferredWidthInPx || height > this.props.printLargeTilePreferredHeightInPx)) {
 
-      console.log('draw')
       graphics.drawPrintGuides(this.renderStage,
         width,
         height,
@@ -449,6 +515,10 @@ class tileRenderer extends React.Component<Props, any> {
             this.props.setTileEditorSelectingNextField(false, null)
             //select the target field because we probably want to move to the next
             this.props.setSelectedFieldShapeIds([field.id])
+            this.props.setSelectedImageShapeIds([])
+            this.props.setSelectedLineShapeIds([])
+
+
             return
           }
 
@@ -471,6 +541,13 @@ class tileRenderer extends React.Component<Props, any> {
             if (this.props.selectedFieldShapeIds.indexOf(field.id) === -1) {
               //not selected --> select only this field
               this.props.setSelectedFieldShapeIds([field.id])
+
+              //deselect if needed
+              if (this.getSelectedShapeTypesCount() > 1) {
+                this.props.setSelectedImageShapeIds([])
+                this.props.setSelectedLineShapeIds([])
+              }
+
             } else {
 
               //we have the shape already selected (or multiple)
@@ -572,6 +649,13 @@ class tileRenderer extends React.Component<Props, any> {
             if (this.props.selectedLineShapeIds.indexOf(lineShape.id) === -1) {
               //not selected --> select only this field
               this.props.setSelectedLineShapeIds([lineShape.id])
+
+              //deselect if needed
+              if (this.getSelectedShapeTypesCount() > 1) {
+                this.props.setSelectedImageShapeIds([])
+                this.props.setSelectedFieldShapeIds([])
+              }
+
             } else {
               //we have the shape already selected (or multiple)
               //when we now do mouse down we might want to move the shape and not select...
@@ -665,6 +749,13 @@ class tileRenderer extends React.Component<Props, any> {
             if (this.props.selectedImageShapeIds.indexOf(imgShape.id) === -1) {
               //not selected --> select only this field
               this.props.setSelectedImageShapeIds([imgShape.id])
+
+              //deselect if needed
+              if (this.getSelectedShapeTypesCount() > 1) {
+                this.props.setSelectedFieldShapeIds([])
+                this.props.setSelectedLineShapeIds([])
+              }
+
             } else {
               //we have the shape already selected (or multiple)
               //when we now do mouse down we might want to move the shape and not select...
@@ -756,6 +847,34 @@ class tileRenderer extends React.Component<Props, any> {
     }
 
 
+    //draw selection
+    if (this.props.selectionRect !== null) {
+
+      let selectionRect = new createjs.Shape()
+
+      selectionRect.graphics
+        .beginStroke(selectionRectBorderColor)
+        .drawRect(
+          this.props.selectionRect.x,
+          this.props.selectionRect.y,
+          this.props.selectionRect.width,
+          this.props.selectionRect.height
+        )
+        .endStroke()
+        .beginFill(selectionRectBgColor)
+        .drawRect(
+          this.props.selectionRect.x + 1,
+          this.props.selectionRect.y + 1,
+          this.props.selectionRect.width - 1,
+          this.props.selectionRect.height - 1
+        )
+        .endFill()
+
+      selectionRect.alpha = selectionBgAlpha
+
+      this.renderStage.addChild(selectionRect)
+    }
+
     this.renderStage.update()
   }
 
@@ -781,113 +900,230 @@ class tileRenderer extends React.Component<Props, any> {
       </div>
     )
   }
-}
+
+  onMouseMove(this: tileRenderer, eventObj: MouseEvent): void {
 
 
-function onMouseMove(eventObj: MouseEvent): void {
+    const e = eventObj as MouseEvent
+    //transform in case we translate/scaled
+    const {x: mouseX, y: mouseY} = this.renderStage.globalToLocal(e.stageX, e.stageY)
+
+    if (isDraggingField || isDraggingImage || isDraggingLinePoint) {
 
 
-  const e = eventObj as MouseEvent
-  //transform in case we translate/scaled
-  const {x: mouseX, y: mouseY} = this.renderStage.globalToLocal(e.stageX, e.stageY)
+      const x = this.props.snapToGrid
+        ? Math.floor((mouseX - downXContainerOffset) / this.props.gridSizeInPx) * this.props.gridSizeInPx
+        : mouseX - downXContainerOffset
 
-  if (isDraggingField || isDraggingImage) {
+      const y = this.props.snapToGrid
+        ? Math.floor((mouseY - downYContainerOffset) / this.props.gridSizeInPx) * this.props.gridSizeInPx
+        : mouseY - downYContainerOffset
 
 
-    const x = this.props.snapToGrid
-      ? Math.floor((mouseX - downXContainerOffset) / this.props.gridSizeInPx) * this.props.gridSizeInPx
-      : mouseX - downXContainerOffset
+      if (draggingPointId !== null) {
 
-    const y = this.props.snapToGrid
-      ? Math.floor((mouseY - downYContainerOffset) / this.props.gridSizeInPx) * this.props.gridSizeInPx
-      : mouseY - downYContainerOffset
+        //move only the selected/clicked point
+        //0,0 is only a dummy because currently not used and would be a performance hit to search through all
+        //line point + anchor points + too lazy
+        this.props.setLinePointNewPos(draggingObjectId, draggingPointId, {x: 0, y: 0}, {x: x, y: y}, true)
 
-    if (isDraggingField) {
-      //same as this.props.setPropertyEditor_FieldX()
-      const draggedField = (this.props.fieldShapes as ReadonlyArray<FieldShape>).find(
-        p => p.id === draggingObjectId)
-      const deltaX = x - draggedField.x
-      const deltaY = y - draggedField.y
-      for (const id of this.props.selectedFieldShapeIds) {
-        const field = (this.props.fieldShapes as ReadonlyArray<FieldShape>).find(p => p.id === id)
-        this.props.setPropertyEditor_FieldX(field, field.x, field.x + deltaX)
-        this.props.setPropertyEditor_FieldY(field, field.y, field.y + deltaY)
       }
-    }
+      else {
 
-    if (isDraggingImage) {
-      const draggedImage = (this.props.imgShapes as ReadonlyArray<ImgShape>).find(p => p.id === draggingObjectId)
-      const deltaX = x - draggedImage.x
-      const deltaY = y - draggedImage.y
-      for (const id of this.props.selectedImageShapeIds) {
-        const imgShape = (this.props.imgShapes as ReadonlyArray<ImgShape>).find(p => p.id === id)
-        this.props.setPropertyEditor_ImageX(imgShape, imgShape.x, imgShape.x + deltaX)
-        this.props.setPropertyEditor_ImageY(imgShape, imgShape.y, imgShape.y + deltaY)
-      }
-    }
 
-  }
+        //same as this.props.setPropertyEditor_FieldX()
+        let draggedShape: FieldShape | ImgShape | LineShape = (this.props.fieldShapes as ReadonlyArray<FieldShape>).find(
+          p => p.id === draggingObjectId)
 
-  if (isDraggingLinePoint) {
+        let deltaX = 0
+        let deltaY = 0
 
-    const x = this.props.snapToGrid
-      ? Math.floor((mouseX - downXContainerOffset) / this.props.gridSizeInPx) * this.props.gridSizeInPx
-      : mouseX + downXContainerOffset
+        if (draggedShape !== undefined) {
+          deltaX = x - draggedShape.x
+          deltaY = y - draggedShape.y
+        }
+        else {
 
-    const y = this.props.snapToGrid
-      ? Math.floor((mouseY - downYContainerOffset) / this.props.gridSizeInPx) * this.props.gridSizeInPx
-      : mouseY + downYContainerOffset
+          draggedShape = (this.props.imgShapes as ReadonlyArray<ImgShape>).find(
+            p => p.id === draggingObjectId)
 
-    if (draggingPointId === null) {
-      //move all points of all selected lines
+          if (draggedShape !== undefined) {
+            deltaX = x - draggedShape.x
+            deltaY = y - draggedShape.y
+          }
+          else {
 
-      const draggedLine = (this.props.lineShapes as ReadonlyArray<LineShape>).find(
-        p => p.id === draggingObjectId)
+            draggedShape = (this.props.lineShapes as ReadonlyArray<LineShape>).find(
+              p => p.id === draggingObjectId)
 
-      const deltaX = x - draggedLine.startPoint.x
-      const deltaY = y - draggedLine.startPoint.y
+            if (draggedShape !== null) {
+              //move all points of all selected lines
+              const draggedLine = (this.props.lineShapes as ReadonlyArray<LineShape>).find(
+                p => p.id === draggingObjectId)
 
-      for (const id of this.props.selectedLineShapeIds) {
-        const lineShape = (this.props.lineShapes as ReadonlyArray<LineShape>).find(p => p.id === id)
+              deltaX = x - draggedLine.startPoint.x
+              deltaY = y - draggedLine.startPoint.y
 
-        this.props.setLinePointNewPos(lineShape.id, lineShape.startPoint.id,
-          lineShape.startPoint,
-          {
-            x: lineShape.startPoint.x + deltaX,
-            y: lineShape.startPoint.y + deltaY
-          }, true)
+            }
+          }
+        }
 
-        for (const linePoint of lineShape.points) {
-          this.props.setLinePointNewPos(lineShape.id, linePoint.id,
-            linePoint,
+
+        for (const id of this.props.selectedFieldShapeIds) {
+          const field = (this.props.fieldShapes as ReadonlyArray<FieldShape>).find(p => p.id === id)
+          this.props.setPropertyEditor_FieldX(field, field.x, field.x + deltaX)
+          this.props.setPropertyEditor_FieldY(field, field.y, field.y + deltaY)
+        }
+
+        for (const id of this.props.selectedImageShapeIds) {
+          const imgShape = (this.props.imgShapes as ReadonlyArray<ImgShape>).find(p => p.id === id)
+          this.props.setPropertyEditor_ImageX(imgShape, imgShape.x, imgShape.x + deltaX)
+          this.props.setPropertyEditor_ImageY(imgShape, imgShape.y, imgShape.y + deltaY)
+        }
+
+        //move all points of all selected lines
+
+        for (const id of this.props.selectedLineShapeIds) {
+          const lineShape = (this.props.lineShapes as ReadonlyArray<LineShape>).find(p => p.id === id)
+
+          this.props.setLinePointNewPos(lineShape.id, lineShape.startPoint.id,
+            lineShape.startPoint,
             {
-              x: linePoint.x + deltaX,
-              y: linePoint.y + deltaY
+              x: lineShape.startPoint.x + deltaX,
+              y: lineShape.startPoint.y + deltaY
             }, true)
+
+          for (const linePoint of lineShape.points) {
+            this.props.setLinePointNewPos(lineShape.id, linePoint.id,
+              linePoint,
+              {
+                x: linePoint.x + deltaX,
+                y: linePoint.y + deltaY
+              }, true)
+          }
         }
       }
 
+      return
+    }
 
-    } else {
-      //move only the selected/clicked point
-      //0,0 is only a dummy because currently not used and would be a performance hit to search through all
-      //line point + anchor points + too lazy
-      this.props.setLinePointNewPos(draggingObjectId, draggingPointId, {x: 0, y: 0}, {x: x, y: y}, true)
+    if (isDraggingStage) {
+
+      //downXContainerOffset is relative to the stage (the click point)
+      //e.g. 0,0 can be at 100,100 when the offset x,y is 100
+
+      //mouseX is relative to the offset so we need to add the offset
+      const x = e.stageX - downXContainerOffset //mouseX + this.props.stageOffsetX - downXContainerOffset
+      const y = e.stageY - downYContainerOffset //mouseY + this.props.stageOffsetY - downYContainerOffset
+      this.props.setEditor_stageOffset(Math.floor(x), Math.floor(y))
+      return
+    }
+
+    if (isSelectingMultipleShapes) {
+
+      const rect: Rect = {
+        x: downX,
+        y: downY,
+        width: mouseX - downX,
+        height: mouseY - downY
+      }
+      this.props.setSelectionRect(rect)
+
+      //select all intersecting shapes... use bounding box
+      this.selectAllIntersectingShapes(rect)
+
+    }
+  }
+
+  selectAllIntersectingShapes(rect: Rect): void {
+
+    //respect symbols!!
+    let fieldsToSelect = []
+
+    for (const fieldShape of this.props.fieldShapes) {
+
+      if (fieldShape.createdFromSymbolGuid === null) {
+        if (intersectRect(rect, fieldShape)) {
+          fieldsToSelect.push((fieldShape as FieldShape).id)
+        }
+      }
+      else {
+        const fieldSymbol = this.props.fieldSymbols.find(p => p.guid === fieldShape.createdFromSymbolGuid)
+
+        if (!fieldSymbol) {
+          //TODO
+          Logger.fatal(`could not find field symbol for field with id: ${(fieldShape as FieldShape).id}`)
+          throw new Error()
+        }
+
+        if (intersectRect(rect, {
+          x: fieldShape.x,
+          y: fieldShape.y,
+          width: fieldSymbol.width,
+          height: fieldSymbol.height
+        })) {
+          fieldsToSelect.push((fieldShape as FieldShape).id)
+        }
+      }
+    }
+
+    let imgsToSelect = []
+
+    for (const imgShape of this.props.imgShapes) {
+
+      if (imgShape.createdFromSymbolGuid === null) {
+        if (intersectRect(rect, imgShape)) {
+          imgsToSelect.push((imgShape as ImgShape).id)
+        }
+      }
+      else {
+        const imgSymbol = this.props.imgSymbols.find(p => p.guid === imgShape.createdFromSymbolGuid)
+
+        if (!imgSymbol) {
+          //TODO
+          Logger.fatal(`could not find img symbol for img with id: ${(imgShape as ImgShape).id}`)
+          throw new Error()
+        }
+
+        if (intersectRect(rect, {
+          x: imgShape.x,
+          y: imgShape.y,
+          width: imgSymbol.width,
+          height: imgSymbol.height
+        })) {
+          imgsToSelect.push((imgShape as ImgShape).id)
+        }
+      }
     }
 
 
+    let linesToSelect = []
+
+    for (const linesShape of this.props.lineShapes) {
+
+      if (linesShape.createdFromSymbolGuid === null) {
+        if (intersectRect(rect, {
+          x: linesShape.startPoint.x, //TODO
+          y: linesShape.startPoint.y,  //TODO
+          width: 100,  //TODO
+          height: 100asd  //TODO
+        })) {
+          linesToSelect.push((linesShape as LineShape).id)
+        }
+      }
+    }
+
+
+    //this can also deselect
+
+    this.props.setSelectedFieldShapeIds(fieldsToSelect)
+
+    this.props.setSelectedImageShapeIds(imgsToSelect)
+
+    this.props.setSelectedLineShapeIds(linesToSelect)
+
   }
 
-  if (isDraggingStage) {
-
-    //downXContainerOffset is relative to the stage (the click point)
-    //e.g. 0,0 can be at 100,100 when the offset x,y is 100
-
-    //mouseX is relative to the offset so we need to add the offset
-    const x = e.stageX - downXContainerOffset //mouseX + this.props.stageOffsetX - downXContainerOffset
-    const y = e.stageY - downYContainerOffset //mouseY + this.props.stageOffsetY - downYContainerOffset
-    this.props.setEditor_stageOffset(Math.floor(x), Math.floor(y))
-  }
 
 }
 

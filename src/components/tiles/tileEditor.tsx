@@ -63,6 +63,7 @@ import {CSSProperties} from "react";
 import {PrintHelper} from "../../helpers/printHelper";
 import {AvailableAppTabs} from "../../state/reducers/appReducer";
 import {renewAllZIndicesInTile} from "../../helpers/someIndexHelper";
+import {set_editorSelection_rect} from "../../state/reducers/tileEditorSelection/tileEditorSelectionReducer";
 
 
 export interface MyProps {
@@ -117,10 +118,14 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
 
     shapeReducerState: rootState.shapesReducerState,
 
+    selectionRect: rootState.tileEditorSelectionState.rect,
+
     langId: rootState.i18nState.langId
 
   }
 }
+
+const test = set_editorSelection_rect
 
 const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   //imported reducer funcs here
@@ -168,7 +173,9 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_editor_isTileEditorSettingsModalDisplayed,
 
   undo_shapeEditor,
-  redo_shapeEditor
+  redo_shapeEditor,
+
+  set_editorSelection_rect,
 
 }, dispatch)
 
@@ -309,7 +316,11 @@ class tileEditor extends React.Component<Props, any> {
     }
 
     //if not deselect all shapes + symbols
+    this.props.setSelectedLineShapeIds([])
+    this.props.setSelectedImageShapeIds([])
+    //this should display the last selected right menu tab
     this.onSelectFieldShapes([])
+
   }
 
   onUndoPressed(e: KeyboardEvent): void {
@@ -328,7 +339,7 @@ class tileEditor extends React.Component<Props, any> {
 
   onSelectFieldShapes(ids: ReadonlyArray<number>) {
 
-    //if we unselect all this will be called so handle special cases here
+    //if we deselect all this will be called so handle special cases here
 
     //we could also had selected a symbol in another stage
     const wasNoShapeSelectedBeforeClear = this.props.selectedFieldShapeIds.length === 0
@@ -341,18 +352,28 @@ class tileEditor extends React.Component<Props, any> {
     this.props.set_selectedFieldSymbolGuid(null) //hide the symbol props editor
     this.props.setSelectedFieldShapeIds(ids)
 
-    if (ids.length === 0) {
-      if (wasNoShapeSelectedBeforeClear) {
-        //then we don't need to reset
-        //this can happen if we switch right tabs and no shape is selected
-        //if we then click on the tile the index should not switch back
-        return
-      }
-
+    if (this.getAreMultipleShapeTypesSelected()) {
       this.props.set_editor_restoreRightTabActiveIndex()
-
       return
     }
+
+    //fields are not selected and not multiple...
+    //we want to restore tab only if we deselect the only selected fields
+    if (ids.length === 0 && this.getSelectedShapeTypesCount() === 0) {
+      this.props.set_editor_restoreRightTabActiveIndex()
+      return
+    }
+
+    // if (ids.length === 0) {
+    //   if (wasNoShapeSelectedBeforeClear) {
+    //     //then we don't need to reset
+    //     //this can happen if we switch right tabs and no shape is selected
+    //     //if we then click on the tile the index should not switch back
+    //     return
+    //   }
+    //   this.props.set_editor_restoreRightTabActiveIndex()
+    //   return
+    // }
 
 
     this.props.set_editor_rightTabActiveIndex(RightTileEditorTabs.propertyEditorTab)
@@ -361,7 +382,27 @@ class tileEditor extends React.Component<Props, any> {
   }
 
 
+  getSelectedShapeTypesCount(): number {
+    let selectedShapeTypesCount = 0
+    if (this.props.selectedFieldShapeIds.length > 0) {
+      selectedShapeTypesCount++
+    }
+    if (this.props.selectedImageShapeIds.length > 0) {
+      selectedShapeTypesCount++
+    }
+    if (this.props.selectedLineShapeIds.length > 0) {
+      selectedShapeTypesCount++
+    }
+    return selectedShapeTypesCount
+  }
+
+  getAreMultipleShapeTypesSelected(): boolean {
+    return this.getSelectedShapeTypesCount() > 1
+  }
+
   render(): JSX.Element {
+
+
     return (
       <div>
 
@@ -692,6 +733,11 @@ class tileEditor extends React.Component<Props, any> {
 
             <TileRenderer
 
+              selectionRect={this.props.selectionRect}
+              setSelectionRect={rect => {
+                this.props.set_editorSelection_rect(rect)
+              }}
+
               printLargeTilePreferredWidthInPx={this.props.settings.printLargeTilePreferredWidthInPx}
               printLargeTilePreferredHeightInPx={this.props.settings.printLargeTilePreferredHeightInPx}
               displayPrintGuidesDisplayed={this.props.settings.arePrintGuidesDisplayed}
@@ -746,7 +792,14 @@ class tileEditor extends React.Component<Props, any> {
                 this.props.set_selectedImgSymbolGuid(null) //hide the symbol props editor
                 this.props.setSelectedImageShapeIds(ids)
 
-                if (ids.length === 0) {
+                if (this.getAreMultipleShapeTypesSelected()) {
+                  this.props.set_editor_restoreRightTabActiveIndex()
+                  return
+                }
+
+                //imgs are not selected and not multiple...
+                //we want to restore tab only if we deselect the only selected imgs
+                if (ids.length === 0 && this.getSelectedShapeTypesCount() === 0) {
                   this.props.set_editor_restoreRightTabActiveIndex()
                   return
                 }
@@ -757,7 +810,14 @@ class tileEditor extends React.Component<Props, any> {
                 this.props.set_selectedLineSymbolGuid(null) //hide the symbol props editor
                 this.props.setSelectedLineShapeIds(ids)
 
-                if (ids.length === 0) {
+                if (this.getAreMultipleShapeTypesSelected()) {
+                  this.props.set_editor_restoreRightTabActiveIndex()
+                  return
+                }
+
+                //lines are not selected and not multiple...
+                //we want to restore tab only if we deselect the only selected lines
+                if (ids.length === 0 && this.getSelectedShapeTypesCount() === 0) {
                   this.props.set_editor_restoreRightTabActiveIndex()
                   return
                 }

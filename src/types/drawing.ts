@@ -6,6 +6,14 @@ export interface GuidAble {
   readonly guid: string
 }
 
+
+export interface Rect {
+   x: number
+   y: number
+   width: number
+   height: number
+}
+
 export interface ShapeBase {
   readonly x: number
   readonly y: number

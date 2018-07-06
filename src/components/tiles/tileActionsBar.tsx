@@ -146,7 +146,6 @@ class tileActionsBar extends React.Component<Props, any> {
                             {
                               ...getNiceBezierCurveBetween({x: 100, y: 100}, {x: 200, y: 200},
                                 MajorLineDirection.topToBottom),
-                              curveMode: CurveMode.linear
                             }
                           ],
                         })

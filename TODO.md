@@ -4,7 +4,8 @@
 
 - add more dev docs
 
-
+- calc line bounding box
+- maybe shift area = additiv select area
 
 ISSUES
 

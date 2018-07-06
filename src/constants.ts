@@ -27,6 +27,10 @@ export let imgNotFoundColor = '#dddddd'
 export let imgNotFoundStrokeThickness = 2
 
 
+export const selectionRectBgColor = '#50a2f0'
+export const selectionRectBorderColor = 'black'
+export const selectionBgAlpha = 0.3
+
 export const popupDelay = 1000
 
 export const lineShapeDefaultColor = '#d4d4d4'
@@ -247,10 +251,10 @@ export const defaultLineShape: LineShape = {
   id: -1, //will be set when added
   zIndex: -1, //will be set when added
   color: lineShapeDefaultColor,
-  hasEndArrow: true,
+  hasEndArrow: false,
   hasStartArrow: false,
   lineThicknessInPx: 3,
-  dashArray: [],
+  dashArray: [15],
   startPoint: { //will be set when added
     id: -1,
     x: -1,

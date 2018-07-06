@@ -6,7 +6,7 @@ import {
   FieldSymbol, IdAble,
   LineShape,
   PlainPoint,
-  Point
+  Point, Rect
 } from "../types/drawing";
 import globalState from '../state/state'
 import {getNextShapeId} from "../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
@@ -49,6 +49,24 @@ const langCompiler = require('../../simulation/compiler/langCompiler').parser
 
 const compiler = new Compiler(langCompiler)
 
+
+//from https://stackoverflow.com/questions/2752349/fast-rectangle-to-rectangle-intersection
+export function intersectRect(r1: Rect, r2: Rect): boolean {
+
+  if (r1.width < 0) {
+    r1.x = r1.x + r1.width
+    r1.width = -r1.width
+  }
+  if (r1.height < 0) {
+    r1.y = r1.y + r1.height
+    r1.height = -r1.height
+  }
+
+  return !(r2.x > r1.x + r1.width ||
+    r2.x + r2.width < r1.x ||
+    r2.y > r1.y + r1.height ||
+    r2.y + r2.height < r1.y);
+}
 
 //too lazy https://stackoverflow.com/questions/17410809/how-to-calculate-rotation-in-2d-in-javascript
 /**
