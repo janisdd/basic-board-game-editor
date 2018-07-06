@@ -4,6 +4,8 @@
 
 already changed but version has not changed
 
+- fixed issue where dragging a field (and some line was connected?) threw an error because we didn't check if we are
+  dragging a line or a field properly
 - changed back the hack with bitmap.draw = (own func) to draw the desired size of the bitmap
 - added selection with area (like on a desktop)
   - added shift+drag to additive select with area

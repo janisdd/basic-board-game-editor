@@ -921,7 +921,7 @@ class tileRenderer extends React.Component<Props, any> {
         : mouseY - downYContainerOffset
 
 
-      if (draggingPointId !== null) {
+      if (isDraggingLinePoint && draggingPointId !== null) {
 
         //move only the selected/clicked point
         //0,0 is only a dummy because currently not used and would be a performance hit to search through all
