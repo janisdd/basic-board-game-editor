@@ -4,6 +4,8 @@
 
 already changed but version has not changed
 
+- added selection with area (like on a desktop)
+  - added shift+drag to additive select with area
 - we now add always borders to tiles when we split one large tile into pieces
 - fixed issue with z index
   was always the amount of shapes on the tile but when some shape was deleted that the new z index was invalid

@@ -31,8 +31,9 @@ import {
   isLineSymbol
 } from "../../helpers/typeHelper";
 import {MachineState} from "../../../simulation/machine/machineState";
-import {intersectRect} from "../../helpers/interactionHelper";
+import {calcLineBoundingBox, intersectRect} from "../../helpers/interactionHelper";
 import {Logger} from "../../helpers/logger";
+import _ = require("lodash");
 
 
 //const css = require('./styles.styl');
@@ -287,7 +288,7 @@ class tileRenderer extends React.Component<Props, any> {
     this.renderStage.on('stagemousedown', eventObj => {
       const e = eventObj as MouseEvent
 
-      if (e.nativeEvent.button === 0 && e.nativeEvent.shiftKey === false) {
+      if (e.nativeEvent.button === 0) {
         const {x: mouseX, y: mouseY} = this.renderStage.globalToLocal(e.stageX, e.stageY)
         e.preventDefault()
 
@@ -1029,13 +1030,13 @@ class tileRenderer extends React.Component<Props, any> {
       }
       this.props.setSelectionRect(rect)
 
-      //select all intersecting shapes... use bounding box
-      this.selectAllIntersectingShapes(rect)
+      //select all intersecting shapes... use bounding boxes
+      this.selectAllIntersectingShapes(rect, e.nativeEvent.shiftKey)
 
     }
   }
 
-  selectAllIntersectingShapes(rect: Rect): void {
+  selectAllIntersectingShapes(rect: Rect, additiveSelect: boolean): void {
 
     //respect symbols!!
     let fieldsToSelect = []
@@ -1051,7 +1052,6 @@ class tileRenderer extends React.Component<Props, any> {
         const fieldSymbol = this.props.fieldSymbols.find(p => p.guid === fieldShape.createdFromSymbolGuid)
 
         if (!fieldSymbol) {
-          //TODO
           Logger.fatal(`could not find field symbol for field with id: ${(fieldShape as FieldShape).id}`)
           throw new Error()
         }
@@ -1080,7 +1080,6 @@ class tileRenderer extends React.Component<Props, any> {
         const imgSymbol = this.props.imgSymbols.find(p => p.guid === imgShape.createdFromSymbolGuid)
 
         if (!imgSymbol) {
-          //TODO
           Logger.fatal(`could not find img symbol for img with id: ${(imgShape as ImgShape).id}`)
           throw new Error()
         }
@@ -1102,25 +1101,43 @@ class tileRenderer extends React.Component<Props, any> {
     for (const linesShape of this.props.lineShapes) {
 
       if (linesShape.createdFromSymbolGuid === null) {
-        if (intersectRect(rect, {
-          x: linesShape.startPoint.x, //TODO
-          y: linesShape.startPoint.y,  //TODO
-          width: 100,  //TODO
-          height: 100asd  //TODO
-        })) {
+        if (intersectRect(rect, calcLineBoundingBox(linesShape as LineShape))) {
           linesToSelect.push((linesShape as LineShape).id)
         }
       }
     }
 
 
-    //this can also deselect
+    if (additiveSelect) {
 
-    this.props.setSelectedFieldShapeIds(fieldsToSelect)
+      //here it's ok that we cannot deselect because we want to additively select... also better for performance
+      if (fieldsToSelect.length > 0)
+        this.props.setSelectedFieldShapeIds(_.unionWith(this.props.selectedFieldShapeIds, fieldsToSelect, (a, b) => a === b))
 
-    this.props.setSelectedImageShapeIds(imgsToSelect)
 
-    this.props.setSelectedLineShapeIds(linesToSelect)
+      if (imgsToSelect.length > 0)
+        this.props.setSelectedImageShapeIds(_.unionWith(this.props.selectedImageShapeIds, imgsToSelect, (a, b) => a === b))
+
+
+      if (linesToSelect.length > 0)
+        this.props.setSelectedLineShapeIds(_.unionWith(this.props.selectedLineShapeIds, linesToSelect, (a, b) => a === b))
+
+    }
+    else {
+
+      //this can also deselect
+
+      //better for performance but we want to deselect fields when we move the selection area away from the field
+      // if (fieldsToSelect.length > 0) {
+      this.props.setSelectedFieldShapeIds(fieldsToSelect)
+      // }
+      // if (imgsToSelect.length > 0) {
+      this.props.setSelectedImageShapeIds(imgsToSelect)
+      // }
+      // if (linesToSelect.length > 0) {
+      this.props.setSelectedLineShapeIds(linesToSelect)
+      // }
+    }
 
   }
 

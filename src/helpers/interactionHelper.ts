@@ -50,6 +50,44 @@ const langCompiler = require('../../simulation/compiler/langCompiler').parser
 const compiler = new Compiler(langCompiler)
 
 
+/**
+ * calcs the bounding box of a line (uses only the points not the lines segments itself)
+ * we could also use the control points which would give us probably better results
+ * but then we need to check much more points... (performance)
+ * @param {LineShape} line
+ * @returns {Rect}
+ */
+export function calcLineBoundingBox(line: LineShape): Rect {
+
+  let minX = line.startPoint.x
+  let minY = line.startPoint.y
+  let maxX = line.startPoint.x
+  let maxY = line.startPoint.y
+
+  for (const point of line.points) {
+    if (point.x < minX) {
+      minX = point.x
+    }
+    if (point.x > maxX) {
+      maxX = point.x
+    }
+    if (point.y < minY) {
+      minY = point.y
+    }
+    if (point.y > maxY) {
+      maxY = point.y
+    }
+  }
+
+  return {
+    x: minX,
+    y: minY,
+    width: maxX - minX,
+    height: maxY - minY
+  }
+
+}
+
 //from https://stackoverflow.com/questions/2752349/fast-rectangle-to-rectangle-intersection
 export function intersectRect(r1: Rect, r2: Rect): boolean {
 

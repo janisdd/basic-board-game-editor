@@ -4,9 +4,6 @@
 
 - add more dev docs
 
-- calc line bounding box
-- maybe shift area = additiv select area
-
 ISSUES
 
 - could all be resolved by creating a new reducer & new actions that do multiple actions at once e.g.
@@ -94,6 +91,7 @@ harder
 - http://www.unfocus.com/2014/03/03/hidpiretina-for-createjs-flash-pro-html5-canvas/
 
 maybe
+- select with area performance is bad if we select many shapes) because we calculate array (selected shapes) completely new on every mousemove
 - move tile settings to own reducer... (from tile editor reducer)
 - add an icon
 - how do we know the id of the border points??
