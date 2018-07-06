@@ -162,12 +162,6 @@
   p.embedImages = false;
 
   /**
-   *
-   * @type {boolean}
-   */
-  p.stretchImages = false;
-
-  /**
    * If true, all colors will be converted into an RGB hex (ex #FF99CC) color and opacity value. This can improve
    * compatibility with tools that don't support HLS, RGBA, or named colors.
    * @property embedImages
@@ -310,16 +304,8 @@
   };
 
   p.exportBitmap = function(o) {
-
-    /* CHANGED use real size */
-    var bounds = o.getBounds()
-    o.image.width = bounds.width
-    o.image.height = bounds.height
-    /* CHANGED END */
-
     var img = this._getImage(o.image);
     if (!img) { return; }
-
     return this.exportCommon(img, o, "bitmap");
   };
 
@@ -655,7 +641,7 @@
       ctx.drawImage(image, 0, 0);
       name = image instanceof HTMLVideoElement ? "video" : "embeddedImage"
     } else if (image instanceof HTMLImageElement) {
-      var bmp = this.createNode("image", {width: w, height: h, preserveAspectRatio: this.stretchImages ? 'none' : undefined }); //CHANGED: added preserveAspectRatio: 'none' - let the img stretch
+      var bmp = this.createNode("image", {width: w, height: h});
       bmp.setAttributeNS(SVGExporter.XLINK_NS, "xlink:href", this._getImageURL(image));
       return bmp;
     } else if (image instanceof HTMLCanvasElement) {
