@@ -4,6 +4,8 @@
 
 already changed but version has not changed
 
+- improved automatic check if all variables are defined (we now go deeper into the tree)
+- fixed issue where sleep method caused automatic simulation to hang/end
 - fixed issue where one could not simulate a single tile with fake simulation start/end
 - fixed issue where dragging a field (and some line was connected?) threw an error because we didn't check if we are
   dragging a line or a field properly

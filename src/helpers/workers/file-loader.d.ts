@@ -3,7 +3,7 @@ declare module "file-loader?name=[name].js!*" {
   export = value;
 }
 
-declare module 'worker-loader!*' {
+declare module "worker-loader!*" {
   class WebpackWorker extends Worker {
     constructor();
   }

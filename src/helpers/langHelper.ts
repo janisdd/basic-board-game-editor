@@ -1,11 +1,12 @@
 import {Tile} from "../types/world";
 import {
-  ExpressionUnit,
+  ComparisonUnit, ConjunctionUnit, DisjunctionUnit,
+  ExpressionUnit, FactorUnit,
   GameUnit,
   PrimaryIdentUnit,
-  PrimaryPlayerVarIdentUnit,
+  PrimaryPlayerVarIdentUnit, PrimaryUnit, RelationUnit,
   SomeExprUnits,
-  StatementUnit,
+  StatementUnit, SumUnit, TermUnit,
   TernaryExpressionUnit,
   VarDeclUnit
 } from "../../simulation/model/executionUnit";
@@ -358,7 +359,7 @@ export class LangHelper {
   }
 
   private static isGlobalOrLocalVarDefined(
-    changingDefs: ChangingDefinitionsObj, ident: string, fieldPosition: WorldSimulationPosition): void {
+    changingDefs: ChangingDefinitionsObj, ident: string, fieldPosition: WorldSimulationPosition): boolean {
 
 
     let currentScopeIndex = changingDefs.currentScopeIndex
@@ -373,7 +374,7 @@ export class LangHelper {
 
         if (isDefined) {
           //found all ok
-          return
+          return true
         }
 
         //if not found search outer scope
@@ -390,6 +391,7 @@ export class LangHelper {
         Logger.fatal(
           `local var ${ident} was not defined, scope was limited, on field with id '${fieldPosition.fieldId}', on tile '${fieldPosition.tileGuid}'`)
       }
+      return true
     }
 
 
@@ -400,6 +402,7 @@ export class LangHelper {
         `var ${ident} was not defined, checked all scopes, on field with id '${fieldPosition.fieldId}', on tile '${fieldPosition.tileGuid}'`)
     }
 
+    return true
   }
 
 
@@ -429,47 +432,103 @@ export class LangHelper {
         if (expr.disjunction === null) break
 
         const disjunction = expr.disjunction
-        nodeAction(disjunction)
-        if (disjunction.left !== null) break
-
-
-        const conjunction = disjunction.right
-        nodeAction(conjunction)
-        if (conjunction.left !== null) break
-
-
-        const comparison = conjunction.right
-        nodeAction(comparison)
-        if (comparison.left !== null) break
-
-
-        const relation = comparison.right
-        nodeAction(relation)
-        if (relation.left !== null) break
-
-        const sum = relation.right
-        nodeAction(sum)
-        if (sum.left !== null) break
-
-        const term = sum.right
-        nodeAction(term)
-        if (term.left !== null) break
-
-        const factor = term.right
-        nodeAction(factor)
-        if (factor.left !== null) break
-
-        const primary = factor.right
-        nodeAction(primary.primary)
+        this.traverseDisjunction(disjunction, nodeAction)
 
         break
-
       }
 
       default:
         notExhaustive(expr)
     }
 
+  }
+
+  public static traverseDisjunction(disjunctionUnit: DisjunctionUnit, nodeAction: (treeNode: SomeExprUnits) => void) {
+
+    if (disjunctionUnit.left === null) {
+      //pass through
+      this.traverseConjunction(disjunctionUnit.right, nodeAction)
+      return
+    }
+
+    this.traverseConjunction(disjunctionUnit.right, nodeAction)
+    this.traverseDisjunction(disjunctionUnit.left, nodeAction)
+  }
+
+  public static traverseConjunction(conjunctionUnit: ConjunctionUnit, nodeAction: (treeNode: SomeExprUnits) => void) {
+
+    if (conjunctionUnit.left === null) {
+      //pass through
+      this.traverseComparison(conjunctionUnit.right, nodeAction)
+      return
+    }
+
+    this.traverseComparison(conjunctionUnit.right, nodeAction)
+    this.traverseConjunction(conjunctionUnit.left, nodeAction)
+  }
+
+  public static traverseComparison(comparisonUnit: ComparisonUnit, nodeAction: (treeNode: SomeExprUnits) => void) {
+
+    if (comparisonUnit.left === null) {
+      //pass through
+      this.traverseRelation(comparisonUnit.right, nodeAction)
+      return
+    }
+
+    this.traverseRelation(comparisonUnit.right, nodeAction)
+    this.traverseRelation(comparisonUnit.left, nodeAction)
+  }
+
+  public static traverseRelation(relationUnit: RelationUnit, nodeAction: (treeNode: SomeExprUnits) => void) {
+
+    if (relationUnit.left === null) {
+      //pass through
+      this.traverseSum(relationUnit.right, nodeAction)
+      return
+    }
+
+    this.traverseSum(relationUnit.right, nodeAction)
+    this.traverseSum(relationUnit.left, nodeAction)
+  }
+
+  public static traverseSum(sumUnit: SumUnit, nodeAction: (treeNode: SomeExprUnits) => void) {
+
+    if (sumUnit.left === null) {
+      //pass through
+      this.traverseTerm(sumUnit.right, nodeAction)
+      return
+    }
+
+    this.traverseTerm(sumUnit.right, nodeAction)
+    this.traverseSum(sumUnit.left, nodeAction)
+  }
+
+  public static traverseTerm(termUnit: TermUnit, nodeAction: (treeNode: SomeExprUnits) => void) {
+
+    if (termUnit.left === null) {
+      //pass through
+      this.traverseFactor(termUnit.right, nodeAction)
+      return
+    }
+
+    this.traverseFactor(termUnit.right, nodeAction)
+    this.traverseTerm(termUnit.left, nodeAction)
+  }
+
+  public static traverseFactor(factorUnit: FactorUnit, nodeAction: (treeNode: SomeExprUnits) => void) {
+
+    if (factorUnit.left === null) {
+      //pass through
+      this.traversePrimary(factorUnit.right, nodeAction)
+      return
+    }
+
+    this.traversePrimary(factorUnit.right, nodeAction)
+    this.traverseFactor(factorUnit.left, nodeAction)
+  }
+
+  public static traversePrimary(primaryUnit: PrimaryUnit, nodeAction: (treeNode: SomeExprUnits) => void) {
+    nodeAction(primaryUnit.primary)
   }
 
 }

@@ -5,7 +5,7 @@ import {AbstractMachine} from "../../../simulation/machine/AbstractMachine";
 //from https://github.com/zlepper/typescript-webworker
 //and https://github.com/webpack-contrib/worker-loader/issues/94
 
-//every dependency is instanciated separately so use as few as possible
+//every dependency is instantiate separately so use as few as possible
 
 addEventListener('message', (ev) => {
   //start off worker

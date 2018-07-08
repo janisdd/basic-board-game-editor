@@ -19,8 +19,7 @@ module.exports = {
       {
         test: /\.(png|svg)$/,
         loader: "url-loader",
-        options: {
-        }
+        options: {}
       },
       // {test: /\.(jpe?g|gif|png|svg|woff|ttf|wav|mp3)$/, loader: "file-loader"}, //|css
       {test: /\.tsx?$/, loader: "awesome-typescript-loader", exclude: /node_modules/},

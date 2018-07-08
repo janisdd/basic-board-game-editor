@@ -3,13 +3,13 @@ import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
-import {Button, Divider, Form, Icon, Input, Progress, Table} from "semantic-ui-react";
+import {Button, Divider, Form, Icon, Input, Table} from "semantic-ui-react";
 import {
   DefinitionTable,
   DefinitionTableBoolEntry,
   DefinitionTableIntEntry,
   isBoolVar,
-  isIntVar, MachineState, WorldSimulationPosition, WorldTileSurrogate
+  isIntVar, MachineState, WorldTileSurrogate
 } from "../../../simulation/machine/machineState";
 import {StringHelper} from "../../helpers/stringHelper";
 import {Simulator} from "../../../simulation/simulator";
@@ -18,7 +18,7 @@ import {Logger} from "../../helpers/logger";
 import {SimulationResult} from "../../state/reducers/tileEditor/tileEditorReducer";
 
 
-import Worker = require('worker-loader!../../helpers/workers/simulationWorker')
+import Worker = require("worker-loader!../../helpers/workers/simulation.worker")
 import {SimulationStatus, WorkerInputData, WorkerOutData} from "../../types/states";
 import {
   set_simulation_maxTotalStepsPerSimulation,
@@ -337,6 +337,8 @@ class simulationOverview extends React.Component<Props, any> {
                             worker.terminate()
                           }
 
+                          //also clear results? yes for now to have the same behavior as the normal simulation end button
+                          this.props.set_simulation_simulationResults([])
                           this.props.set_simulation_simulationStatus(null, null)
                         }}
                 >
@@ -579,8 +581,11 @@ class simulationOverview extends React.Component<Props, any> {
 
                           {
                             player.suspendCounter !== 0 &&
-                            <span>(({getI18n(this.props.langId, "suspends for next")}: {player.suspendCounter} {getI18n(
-                              this.props.langId, "Round(s)")})
+                            <span>
+                              {'('}
+                              {getI18n(this.props.langId, "suspends for next")}: {player.suspendCounter} {getI18n(
+                              this.props.langId, "Round(s)")}
+                              {')'}
                             </span>
                           }
                         </div>

@@ -8,7 +8,6 @@
     "buildCompiler": "node node_modules/.bin/jison simulation/compiler/langCompiler.jison -o simulation/compiler/cliLangCompiler.js && sed -e :a -e '$d;N;2,12ba' -e 'P;D' simulation/compiler/cliLangCompiler.js > simulation/compiler/langCompiler.js && echo '}' >> simulation/compiler/langCompiler.js && node node_modules/.bin/tsc -p simulation/tsconfig.json",
     "buildCompilerDist": "node node_modules/.bin/webpack --config webpack.interpreter.config.dist.js",
     "test": "node_modules/.bin/jest"
-
   },
   "author": "janis daehne",
   "license": "MIT",
@@ -26,8 +25,6 @@
     "@types/react-color": "2.13.5",
     "@types/react-dom": "15.5.0",
     "@types/react-redux": "4.4.40",
-    "@types/react-router": "4.0.15",
-    "@types/react-router-dom": "4.0.7",
     "@types/redux-actions": "1.2.7",
     "@types/redux-logger": "3.0.0",
     "@types/redux-promise-middleware": "0.0.8",
@@ -36,6 +33,7 @@
     "ace-builds": "1.3.3",
     "awesome-typescript-loader": "3.1.3",
     "bezier-js": "2.2.5",
+    "clean-webpack-plugin": "^0.1.19",
     "copy-webpack-plugin": "4.5.1",
     "createjs-easeljs": "0.8.2",
     "css-loader": "0.28.7",

@@ -1166,7 +1166,22 @@ export class Simulator {
 
               //end round
               state = Simulator.endRound(state)
-              return
+              //we know state.leftDiceValue === 0 here
+
+              stepsCounter++
+              callbackTuple = updateStateCallbackAndContinue(state, SimulationStatus.running)
+
+              if (!callbackTuple.shouldContinue) {
+                //pause the simulation
+                resolve(state)
+                return
+              }
+
+              if (callbackTuple.simulationSpeedInDelayInMsBetweenSteps > 0) {
+                await this.delay(callbackTuple.simulationSpeedInDelayInMsBetweenSteps)
+              }
+
+              continue
             }
 
             //Logger.log('dice: ', state.rolledDiceValue)

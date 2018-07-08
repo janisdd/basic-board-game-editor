@@ -7,6 +7,16 @@ const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin')
+
+let pathsToClean = [
+  'dist'
+]
+
+let cleanOptions = {
+  exclude:  ['ace-builds', 'themes'],
+  verbose: true
+}
 
 module.exports = {
   entry: './src/index.tsx',
@@ -64,21 +74,14 @@ module.exports = {
   },
 
   plugins: [
+    new CleanWebpackPlugin(pathsToClean, cleanOptions),
     new ExtractTextPlugin("styles.css"),
     new HtmlWebpackPlugin({
       hash: true,
       filename: 'index.html',
       template: 'htmlTemplates/index_deploy.ejs',
       inject: true,
-      cache: false,
-      //this is only for the template file
-      minify: {
-        caseSensitive: true,
-        minifyCSS: true,
-        collapseWhitespace: true,
-        removeAttributeQuotes: true,
-        removeComments: true
-      }
+      cache: false
     }),
     new webpack.optimize.UglifyJsPlugin({
       compress: {warnings: false},
