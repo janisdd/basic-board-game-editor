@@ -1,11 +1,13 @@
 import {Simulator} from "../../../simulation/simulator";
 import {SimulationStatus, WorkerInputData, WorkerOutData} from "../../types/states";
-import {AbstractMachine} from "../../../simulation/machine/AbstractMachine";
+import {AbstractMachine, SimulationTimes} from "../../../simulation/machine/AbstractMachine";
 
 //from https://github.com/zlepper/typescript-webworker
 //and https://github.com/webpack-contrib/worker-loader/issues/94
 
 //every dependency is instantiate separately so use as few as possible
+
+//because all instances are new (e.g. SimulationTimes) we need to set them new
 
 addEventListener('message', (ev) => {
   //start off worker
@@ -26,6 +28,7 @@ async function runMultipleSimulations(data: WorkerInputData): Promise<void> {
 
   //maybe increase the random seed by +1 for every run so the user can actually reproduce all results?
   AbstractMachine.setSeed(data.randomSeed)
+  SimulationTimes.setTimes(data.simulationTimes)
 
   while (runs < data.numOfSimulationsToRun) {
 

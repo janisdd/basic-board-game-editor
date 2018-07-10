@@ -9,6 +9,7 @@ import {Logger} from "../src/helpers/logger";
 import {SimulationStatus} from "../src/types/states";
 import {BorderPoint, FieldShape} from "../src/types/drawing";
 import {ChangingDefinitionsObj, LangHelper} from "../src/helpers/langHelper";
+import {maxTileBorderPointToBorderPointTransitionWithoutFields} from "../src/constants";
 
 declare function require(s: string): any
 
@@ -759,7 +760,8 @@ export class Simulator {
       //do transition to bottom
       let {_nextTile, _nextField} = this.getNextTileAndField(botBorderPoint, currentTile, tiles, tileSurrogates,
         surrogate => surrogate.x === currentTileSurrogate.x && surrogate.y === currentTileSurrogate.y + 1,
-        tile => tile.topBorderPoints
+        nextTile => nextTile.topBorderPoints,
+        0
       )
       nextTile = _nextTile
       nextField = _nextField
@@ -770,7 +772,8 @@ export class Simulator {
       //do transition to top
       let {_nextTile, _nextField} = this.getNextTileAndField(topBorderPoint, currentTile, tiles, tileSurrogates,
         surrogate => surrogate.x === currentTileSurrogate.x && surrogate.y === currentTileSurrogate.y - 1,
-        tile => tile.botBorderPoints
+        nextTile => nextTile.botBorderPoints,
+        0
       )
       nextTile = _nextTile
       nextField = _nextField
@@ -781,7 +784,8 @@ export class Simulator {
       //do transition to left
       let {_nextTile, _nextField} = this.getNextTileAndField(leftBorderPoint, currentTile, tiles, tileSurrogates,
         surrogate => surrogate.x === currentTileSurrogate.x - 1 && surrogate.y === currentTileSurrogate.y,
-        tile => tile.rightBorderPoint
+        nextTile => nextTile.rightBorderPoint,
+        0
       )
       nextTile = _nextTile
       nextField = _nextField
@@ -792,7 +796,8 @@ export class Simulator {
       //do transition to right
       let {_nextTile, _nextField} = this.getNextTileAndField(rightBorderPoint, currentTile, tiles, tileSurrogates,
         surrogate => surrogate.x === currentTileSurrogate.x + 1 && surrogate.y === currentTileSurrogate.y,
-        tile => tile.leftBorderPoints
+        nextTile => nextTile.leftBorderPoints,
+        0
       )
       nextTile = _nextTile
       nextField = _nextField
@@ -820,10 +825,16 @@ export class Simulator {
   private static getNextTileAndField(borderPoint: BorderPoint, currentTile: Tile, tiles: ReadonlyArray<Tile>,
                                      tileSurrogates: ReadonlyArray<WorldTileSurrogate>,
                                      nextTileSurrogateCond: (surrogate: WorldTileSurrogate) => boolean,
-                                     nextTileBorderPointsFunc: (tile: Tile) => ReadonlyArray<BorderPoint>
+                                     nextTileBorderPointsFunc: (tile: Tile) => ReadonlyArray<BorderPoint>,
+                                     depthCounter: number //used if we have transitions without fields... we could get into a loop
   ): {
     _nextTile: Tile, _nextField: FieldShape
   } {
+
+    if (depthCounter > maxTileBorderPointToBorderPointTransitionWithoutFields) {
+      Logger.fatal(`tile transition error: done ~${depthCounter} transitions without a field, maybe an infinite loop?`)
+      throw new Error()
+    }
 
     //find tile below
     const nextTileSurrogate = tileSurrogates.find(p => nextTileSurrogateCond(p))
@@ -833,7 +844,7 @@ export class Simulator {
       throw new Error()
     }
 
-    const nextTile = tiles.find(p => p.guid === nextTileSurrogate.tileGuid)
+    const nextTile: Tile = tiles.find(p => p.guid === nextTileSurrogate.tileGuid)
 
     if (!nextTile) {
       Logger.fatal(
@@ -841,7 +852,7 @@ export class Simulator {
       throw new Error()
     }
 
-    //find border points with same coords
+    //find border points with same coords (on the next tile)
 
     const nextBorderPoint = nextTileBorderPointsFunc(nextTile).find(p => p.val === borderPoint.val)
 
@@ -856,11 +867,81 @@ export class Simulator {
       throw new Error()
     }
 
+
     const nextField = nextTile.fieldShapes.find(p => p.id === nextBorderPoint.nextFieldId)
 
     if (!nextField) {
-      Logger.fatal(`tile transition: cannot find next field ${nextBorderPoint.nextFieldId} on tile ${nextTile.guid} (${nextTile.displayName})`)
-      throw new Error()
+
+      //we could do a transition without a field just border point to border point
+      const nextBotBorderPoint = nextTile.botBorderPoints.find(p => p.id === nextBorderPoint.nextFieldId)
+
+
+      if (nextBotBorderPoint) {
+        //transition to bot
+
+        const nextCoords = this.getNextTileAndField(nextBotBorderPoint, nextTile, tiles, tileSurrogates,
+          nextNextSurrogate => nextNextSurrogate.x === nextTileSurrogate.x && nextNextSurrogate.y === nextTileSurrogate.y+1,
+          nextNextTile => nextNextTile.topBorderPoints,
+          depthCounter+1
+        )
+
+        return nextCoords
+      }
+      else {
+
+        const nextTopBorderPoint = nextTile.topBorderPoints.find(p => p.id === nextBorderPoint.nextFieldId)
+
+        if (nextTopBorderPoint) {
+          //transition to top
+
+          const nextCoords = this.getNextTileAndField(nextTopBorderPoint, nextTile, tiles, tileSurrogates,
+            nextNextSurrogate => nextNextSurrogate.x === nextTileSurrogate.x && nextNextSurrogate.y === nextTileSurrogate.y - 1,
+            nextNextTile => nextNextTile.botBorderPoints,
+            depthCounter+1
+          )
+
+          return nextCoords
+
+        }
+        else {
+
+          const nextLeftBorderPoint = nextTile.leftBorderPoints.find(p => p.id === nextBorderPoint.nextFieldId)
+
+          if (nextLeftBorderPoint) {
+            //transition to left
+
+            const nextCoords = this.getNextTileAndField(nextLeftBorderPoint, nextTile, tiles, tileSurrogates,
+              nextNextSurrogate => nextNextSurrogate.x === nextTileSurrogate.x - 1 && nextNextSurrogate.y === nextTileSurrogate.y,
+              nextNextTile => nextNextTile.rightBorderPoint,
+              depthCounter+1
+            )
+
+            return nextCoords
+          }
+          else {
+
+            const nexRightBorderPoint = nextTile.rightBorderPoint.find(p => p.id === nextBorderPoint.nextFieldId)
+
+            if (nexRightBorderPoint) {
+              //transition to right
+
+              const nextCoords = this.getNextTileAndField(nexRightBorderPoint, nextTile, tiles, tileSurrogates,
+                nextNextSurrogate => nextNextSurrogate.x === nextTileSurrogate.x + 1 && nextNextSurrogate.y === nextTileSurrogate.y,
+                nextNextTile => nextNextTile.leftBorderPoints,
+                depthCounter+1
+              )
+
+              return nextCoords
+
+            }
+            else {
+              Logger.fatal(`tile transition: cannot find next field ${nextBorderPoint.nextFieldId} on tile ${nextTile.guid} (${nextTile.displayName})`)
+              throw new Error()
+            }
+          }
+        }
+      }
+
     }
 
     return {
@@ -1134,6 +1215,8 @@ export class Simulator {
   ): Promise<MachineState> {
 
     //simulation is already inited
+
+    console.log(SimulationTimes._timeInS_rollDice)
 
     let promise = new Promise<MachineState>(async (resolve, reject) => {
 

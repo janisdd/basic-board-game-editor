@@ -173,8 +173,8 @@ export interface LangObj {
   "Left border points": string
   "Right border points": string
   "Absolute pos in px": string
-  "Next field id or empty": string
-  "The next field id is used for simulation to know where we need to go next if we step on this border point": string
+  "Next (field) id or empty": string
+  "The next field/border point id is used for simulation to know where we need to go next if we step on this border point": string
   //--- properties
   //--- properties field
   "Properties": string

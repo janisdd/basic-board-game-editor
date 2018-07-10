@@ -3,8 +3,6 @@ import {notExhaustive} from "../../_notExhausiveHelper";
 import {defaultGameInitCode} from "../../../../constants";
 import {SimulationTimes} from "../../../../../simulation/machine/AbstractMachine";
 
-
-
 export interface WorldSettings {
   readonly selectedFieldBorderColor: string
   readonly selectedFieldBorderThicknessInPx: number
@@ -471,6 +469,7 @@ export interface ResetAction extends ActionBase {
   readonly type: ActionType.RESET
 }
 
+
 export type AllActions =
   ResetAction
   | SET_selectedFieldBorderColorAction
@@ -698,10 +697,17 @@ export function reducer(state: State = initial, action: AllActions): State {
 
 
     case ActionType.SET_world_timeInS_rollDice:
-      return {
+
+      //if we run multiple simulations we set the simulation times again because
+      //SimulationTimes is a new instance in the worker
+      //for normal simulation (debug) we want the right times too
+
+      const copy = {
         ...state,
         timeInS_rollDice: SimulationTimes._timeInS_rollDice = action.timeInS_rollDice
       }
+
+      return copy
     case ActionType.SET_world_timeInS_choose_bool_func:
       return {
         ...state,
@@ -735,13 +741,13 @@ export function reducer(state: State = initial, action: AllActions): State {
     case ActionType.SET_world_timeInS_var_decl:
       return {
         ...state,
-        timeInS_var_decl:SimulationTimes._timeInS_var_decl =  action.timeInS_var_decl
+        timeInS_var_decl: SimulationTimes._timeInS_var_decl = action.timeInS_var_decl
       }
 
     case ActionType.SET_world_timeInS_expr_primary_leftSteps:
       return {
         ...state,
-        timeInS_expr_primary_leftSteps:SimulationTimes._timeInS_expr_primary_leftSteps =  action.timeInS_expr_primary_leftSteps
+        timeInS_expr_primary_leftSteps: SimulationTimes._timeInS_expr_primary_leftSteps = action.timeInS_expr_primary_leftSteps
       }
 
     case ActionType.SET_world_timeInS_expr_primary_constant:
@@ -753,55 +759,55 @@ export function reducer(state: State = initial, action: AllActions): State {
     case ActionType.SET_world_timeInS_expr_primary_ident:
       return {
         ...state,
-        timeInS_expr_primary_ident:SimulationTimes._timeInS_expr_primary_ident =  action.timeInS_expr_primary_ident
+        timeInS_expr_primary_ident: SimulationTimes._timeInS_expr_primary_ident = action.timeInS_expr_primary_ident
       }
 
     case ActionType.SET_world_timeInS_expr_primary_incrementOrDecrement:
       return {
         ...state,
-        timeInS_expr_primary_incrementOrDecrement:SimulationTimes._timeInS_expr_primary_incrementOrDecrement =  action.timeInS_expr_primary_incrementOrDecrement
+        timeInS_expr_primary_incrementOrDecrement: SimulationTimes._timeInS_expr_primary_incrementOrDecrement = action.timeInS_expr_primary_incrementOrDecrement
       }
 
     case ActionType.SET_world_timeInS_expr_disjunction:
       return {
         ...state,
-        timeInS_expr_disjunction:SimulationTimes._timeInS_expr_disjunction =  action.timeInS_expr_disjunction
+        timeInS_expr_disjunction: SimulationTimes._timeInS_expr_disjunction = action.timeInS_expr_disjunction
       }
 
     case ActionType.SET_world_timeInS_expr_conjunction:
       return {
         ...state,
-        timeInS_expr_conjunction:SimulationTimes._timeInS_expr_conjunction =  action.timeInS_expr_conjunction
+        timeInS_expr_conjunction: SimulationTimes._timeInS_expr_conjunction = action.timeInS_expr_conjunction
       }
 
     case ActionType.SET_world_timeInS_expr_comparison:
       return {
         ...state,
-        timeInS_expr_comparison:SimulationTimes._timeInS_expr_comparison =  action.timeInS_expr_comparison
+        timeInS_expr_comparison: SimulationTimes._timeInS_expr_comparison = action.timeInS_expr_comparison
       }
 
     case ActionType.SET_world_timeInS_expr_relation:
       return {
         ...state,
-        timeInS_expr_relation:SimulationTimes._timeInS_expr_relation =  action.timeInS_expr_relation
+        timeInS_expr_relation: SimulationTimes._timeInS_expr_relation = action.timeInS_expr_relation
       }
 
     case ActionType.SET_world_timeInS_expr_sum:
       return {
         ...state,
-        timeInS_expr_sum:SimulationTimes._timeInS_expr_sum =  action.timeInS_expr_sum
+        timeInS_expr_sum: SimulationTimes._timeInS_expr_sum = action.timeInS_expr_sum
       }
 
     case ActionType.SET_world_timeInS_expr_term:
       return {
         ...state,
-        timeInS_expr_term:SimulationTimes._timeInS_expr_term =  action.timeInS_expr_term
+        timeInS_expr_term: SimulationTimes._timeInS_expr_term = action.timeInS_expr_term
       }
 
     case ActionType.SET_world_timeInS_expr_factor:
       return {
         ...state,
-        timeInS_expr_factor:SimulationTimes._timeInS_expr_factor =  action.timeInS_expr_factor
+        timeInS_expr_factor: SimulationTimes._timeInS_expr_factor = action.timeInS_expr_factor
       }
 
     case ActionType.RESET:

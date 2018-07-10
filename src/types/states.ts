@@ -1,5 +1,6 @@
 import {MachineState, WorldSimulationPosition, WorldTileSurrogate} from "../../simulation/machine/machineState";
 import {Tile} from "./world";
+import {SimulationTimesObj} from "../../simulation/machine/AbstractMachine";
 
 export enum SimulationStatus {
   init = 0,
@@ -37,6 +38,12 @@ export interface WorkerInputData {
    * the seed for the random values
    */
   readonly randomSeed: number |null
+
+  /**
+   * because the worker create new instances (e.g. window is not defined)
+   * SimulationTimes is also another instance... set times again
+   */
+  readonly simulationTimes: SimulationTimesObj
 }
 
 export interface WorkerOutData {

@@ -57,6 +57,7 @@ const mapStateToProps = (rootState: RootState, props: MyProps) => {
     //test: props.test
     ...props,
 
+    settings: rootState.worldSettingsState,
     simulationState: rootState.simulationState,
     langId: rootState.i18nState.langId,
   }
@@ -152,7 +153,7 @@ class simulationOverview extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Random seed number")}
               <IconToolTip message={getI18n(this.props.langId,
                 "You can specify a random seed (a number). Every simulations initializes a random generator. If you specify the same number every simulation run will generate the same sequence of random numbers. For multiple simulations the random generator is only initialized at once. E.g. if you set the seed to 100 and then start the simulation your dice values will be e.g. 5, 3, 2, 6. If you start the simulation again and the seed is still set to 100 then the dice values will be the same (in the same order). If you don't specify a seed you will get different dice values every run.")}
-                          wide="very"
+                           wide="very"
               />
             </label>
             <Input
@@ -295,7 +296,27 @@ class simulationOverview extends React.Component<Props, any> {
                             maxMovesPerSimulation: this.props.simulationState.maxTotalStepsPerSimulation,
                             numOfResultsToSendAtOnce: this.props.simulationState.numOfSimulationResultsToWaitForBeforeSending,
                             isSingleTileSimulation: this.props.isSingleSimulation,
-                            randomSeed: this.props.simulationState.randomSeed
+                            randomSeed: this.props.simulationState.randomSeed,
+                            simulationTimes: {
+                              _timeInS_rollDice: this.props.settings.timeInS_rollDice,
+                              _timeInS_choose_bool_func: this.props.settings.timeInS_choose_bool_func,
+                              _timeInS_goto: this.props.settings.timeInS_goto,
+                              _timeInS_set_var: this.props.settings.timeInS_set_var,
+                              _timeInS_advancePlayer: this.props.settings.timeInS_advancePlayer,
+                              _timeInS_rollback: this.props.settings.timeInS_rollback,
+                              _timeInS_var_decl: this.props.settings.timeInS_var_decl,
+                              _timeInS_expr_primary_leftSteps: this.props.settings.timeInS_expr_primary_leftSteps,
+                              _timeInS_expr_primary_constant: this.props.settings.timeInS_expr_primary_constant,
+                              _timeInS_expr_primary_ident: this.props.settings.timeInS_expr_primary_ident,
+                              _timeInS_expr_primary_incrementOrDecrement: this.props.settings.timeInS_expr_primary_incrementOrDecrement,
+                              _timeInS_expr_disjunction: this.props.settings.timeInS_expr_disjunction,
+                              _timeInS_expr_conjunction: this.props.settings.timeInS_expr_conjunction,
+                              _timeInS_expr_comparison: this.props.settings.timeInS_expr_comparison,
+                              _timeInS_expr_relation: this.props.settings.timeInS_expr_relation,
+                              _timeInS_expr_sum: this.props.settings.timeInS_expr_sum,
+                              _timeInS_expr_term: this.props.settings.timeInS_expr_term,
+                              _timeInS_expr_factor: this.props.settings.timeInS_expr_factor,
+                            }
                           }
 
                           worker = new Worker();

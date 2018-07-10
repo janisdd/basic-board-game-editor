@@ -19,7 +19,7 @@ import {
 } from "../../state/reducers/simulation/actions";
 import ToolTip from '../helpers/ToolTip'
 import {getI18n} from "../../../i18n/i18nRoot";
-import {AbstractMachine} from "../../../simulation/machine/AbstractMachine";
+import {AbstractMachine, SimulationTimes} from "../../../simulation/machine/AbstractMachine";
 import * as mousetrap from "mousetrap";
 
 
@@ -259,6 +259,9 @@ class controlSimulationBar extends React.Component<Props, any> {
                     try {
 
                       //then run the simulation till end
+
+                      console.log(SimulationTimes._timeInS_rollDice)
+
                       await Simulator.runSimulationTillEnd(this.props.tiles,
                         this.props.tileSurrogates,
                         initState,

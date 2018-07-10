@@ -49,6 +49,7 @@ import {notExhaustive} from "../../src/state/reducers/_notExhausiveHelper";
 import {GameDefUnits, GameVarsUnit, PlayersDefUnit} from "../model/gameDefUnits";
 
 declare function require(s: string): any
+
 const seedrandom = require("seedrandom");
 
 
@@ -58,6 +59,26 @@ const errorVal = 42
 
 const logTimes = false
 
+export interface SimulationTimesObj {
+  readonly _timeInS_rollDice: number
+  readonly _timeInS_choose_bool_func: number
+  readonly _timeInS_goto: number
+  readonly _timeInS_set_var: number
+  readonly _timeInS_advancePlayer: number
+  readonly _timeInS_rollback: number
+  readonly _timeInS_var_decl: number
+  readonly _timeInS_expr_primary_leftSteps: number
+  readonly _timeInS_expr_primary_constant: number
+  readonly _timeInS_expr_primary_ident: number
+  readonly _timeInS_expr_primary_incrementOrDecrement: number
+  readonly _timeInS_expr_disjunction: number
+  readonly _timeInS_expr_conjunction: number
+  readonly _timeInS_expr_comparison: number
+  readonly _timeInS_expr_relation: number
+  readonly _timeInS_expr_sum: number
+  readonly _timeInS_expr_term: number
+  readonly _timeInS_expr_factor: number
+}
 
 export class SimulationTimes {
   private constructor() {
@@ -67,8 +88,8 @@ export class SimulationTimes {
   //with webpack worker loader
 
   public static readonly timeInS_rollDice_default = 2
-  public static readonly timeInS_choose_bool_func_default = 0.3
-  public static readonly timeInS_goto_default = 0.5
+  public static readonly timeInS_choose_bool_func_default = 2
+  public static readonly timeInS_goto_default = 1.5
   public static readonly timeInS_set_var_default = 3
   public static readonly timeInS_advancePlayer_default = 1
   public static readonly timeInS_rollback_default = 2
@@ -104,9 +125,31 @@ export class SimulationTimes {
   public static _timeInS_expr_term = SimulationTimes.timeInS_expr_term_default
   public static _timeInS_expr_factor = SimulationTimes.timeInS_expr_factor_default
 
+  public static setTimes(obj: SimulationTimesObj) {
+    this._timeInS_rollDice = obj._timeInS_rollDice
+    this._timeInS_choose_bool_func = obj._timeInS_choose_bool_func
+    this._timeInS_goto = obj._timeInS_goto
+    this._timeInS_set_var = obj._timeInS_set_var
+    this._timeInS_advancePlayer = obj._timeInS_advancePlayer
+    this._timeInS_rollback = obj._timeInS_rollback
+    this._timeInS_var_decl = obj._timeInS_var_decl
+    this._timeInS_expr_primary_leftSteps = obj._timeInS_expr_primary_leftSteps
+    this._timeInS_expr_primary_constant = obj._timeInS_expr_primary_constant
+    this._timeInS_expr_primary_ident = obj._timeInS_expr_primary_ident
+    this._timeInS_expr_primary_incrementOrDecrement = obj._timeInS_expr_primary_incrementOrDecrement
+    this._timeInS_expr_disjunction = obj._timeInS_expr_disjunction
+    this._timeInS_expr_conjunction = obj._timeInS_expr_conjunction
+    this._timeInS_expr_comparison = obj._timeInS_expr_comparison
+    this._timeInS_expr_relation = obj._timeInS_expr_relation
+    this._timeInS_expr_sum = obj._timeInS_expr_sum
+    this._timeInS_expr_term = obj._timeInS_expr_term
+    this._timeInS_expr_factor = obj._timeInS_expr_factor
+  }
+
   //time to roll the dice
   public static timeInS_rollDice(): number {
-    if (logTimes) console.log(`roll took ${2}s`)
+    // if (logTimes)
+    console.log(`roll took ${this._timeInS_rollDice}s`)
     return this._timeInS_rollDice
   }
 
@@ -260,8 +303,8 @@ export class AbstractMachine {
 
   public static setSeed(seed: number | null) {
     random = seedrandom(seed === null
-                        ? null
-                        : seed.toString())
+      ? null
+      : seed.toString())
   }
 
   //game functions e.g. next round, roll dice...
@@ -286,8 +329,8 @@ export class AbstractMachine {
       currentPlayerIndex: newCurrentPlayerIndex,
       nextPlayerIndex: (newCurrentPlayerIndex + 1) % state.players.length,
       previousPlayerIndex: (newCurrentPlayerIndex - 1) < 0
-                           ? state.players.length - 1
-                           : (newCurrentPlayerIndex - 1),
+        ? state.players.length - 1
+        : (newCurrentPlayerIndex - 1),
 
       elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_advancePlayer()
     }
@@ -393,8 +436,8 @@ export class AbstractMachine {
       currentPlayerIndex: newCurrentPlayerIndex,
       nextPlayerIndex: (newCurrentPlayerIndex + 1) % lastState.players.length,
       previousPlayerIndex: (newCurrentPlayerIndex - 1) < 0
-                           ? lastState.players.length - 1
-                           : (newCurrentPlayerIndex - 1),
+        ? lastState.players.length - 1
+        : (newCurrentPlayerIndex - 1),
     }
 
     return lastState
@@ -449,8 +492,8 @@ export class AbstractMachine {
         lastState = {
           ...lastState,
           players: lastState.players.map((p, index) => playerIndex !== index
-                                                       ? p
-                                                       : {
+            ? p
+            : {
               ...p,
               defTable: {
                 ...p.defTable,
@@ -473,8 +516,8 @@ export class AbstractMachine {
         lastState = {
           ...lastState,
           players: lastState.players.map((p, index) => playerIndex !== index
-                                                       ? p
-                                                       : {
+            ? p
+            : {
               ...p,
               defTable: {
                 ...p.defTable,
@@ -519,7 +562,7 @@ export class AbstractMachine {
    * @private
    */
   private static _execPlayerVarAssign(entry: DefinitionTableIntEntry | DefinitionTableBoolEntry, playerIndex: number,
-    exprRes: ExprTuple, state: MachineState
+                                      exprRes: ExprTuple, state: MachineState
   ): ExprTuple {
 
     if (exprRes.val !== null) {
@@ -534,18 +577,18 @@ export class AbstractMachine {
         const copyState: MachineState = {
           ...exprRes.state,
           players: state.players.map((p, index) => index !== playerIndex
-                                                   ? p
-                                                   : {
-                                                     ...p,
-                                                     defTable: {
-                                                       ...p.defTable,
-                                                       [entry.ident]: {
-                                                         val: exprRes.val,
-                                                         maxVal: entry.maxVal,
-                                                         ident: entry.ident
-                                                       } as DefinitionTableIntEntry
-                                                     }
-                                                   } as PlayerObj),
+            ? p
+            : {
+              ...p,
+              defTable: {
+                ...p.defTable,
+                [entry.ident]: {
+                  val: exprRes.val,
+                  maxVal: entry.maxVal,
+                  ident: entry.ident
+                } as DefinitionTableIntEntry
+              }
+            } as PlayerObj),
           elapsedTimeInS: exprRes.state.elapsedTimeInS + SimulationTimes.timeInS_set_var()
         }
 
@@ -567,17 +610,17 @@ export class AbstractMachine {
         const copyState: MachineState = {
           ...exprRes.state,
           players: state.players.map((p, index) => index !== playerIndex
-                                                   ? p
-                                                   : {
-                                                     ...p,
-                                                     defTable: {
-                                                       ...p.defTable,
-                                                       [entry.ident]: {
-                                                         boolVal: exprRes.boolVal,
-                                                         ident: entry.ident
-                                                       } as DefinitionTableBoolEntry
-                                                     }
-                                                   } as PlayerObj),
+            ? p
+            : {
+              ...p,
+              defTable: {
+                ...p.defTable,
+                [entry.ident]: {
+                  boolVal: exprRes.boolVal,
+                  ident: entry.ident
+                } as DefinitionTableBoolEntry
+              }
+            } as PlayerObj),
           elapsedTimeInS: exprRes.state.elapsedTimeInS + SimulationTimes.timeInS_set_var()
         }
 
@@ -802,24 +845,24 @@ export class AbstractMachine {
     return {
       ...state,
       players: state.players.map((p, index) => index !== state.currentPlayerIndex
-                                               ? p
-                                               : {
-                                                 ...p,
-                                                 tokens: p.tokens.map(
-                                                   (t, index1) => index1 !== state.currentPlayerActiveTokenIndex
-                                                                  ? t
-                                                                  : {
-                                                                    ...t,
-                                                                    fieldId: conditionRes.boolVal === true
-                                                                             ? controlIfElse.trueTargetId
-                                                                             : controlIfElse.falseTargetId,
-                                                                    previousPositions: playerToken.previousPositions.concat(
-                                                                      {
-                                                                        tileGuid: playerToken.tileGuid,
-                                                                        fieldId: playerToken.fieldId
-                                                                      } as WorldSimulationPosition)
-                                                                  } as PlayerToken)
-                                               } as PlayerObj),
+        ? p
+        : {
+          ...p,
+          tokens: p.tokens.map(
+            (t, index1) => index1 !== state.currentPlayerActiveTokenIndex
+              ? t
+              : {
+                ...t,
+                fieldId: conditionRes.boolVal === true
+                  ? controlIfElse.trueTargetId
+                  : controlIfElse.falseTargetId,
+                previousPositions: playerToken.previousPositions.concat(
+                  {
+                    tileGuid: playerToken.tileGuid,
+                    fieldId: playerToken.fieldId
+                  } as WorldSimulationPosition)
+              } as PlayerToken)
+        } as PlayerObj),
       leftDiceValue: state.leftDiceValue - 1,
 
       //use the elapsed time from the expr evaluation
@@ -835,22 +878,22 @@ export class AbstractMachine {
     return {
       ...state,
       players: state.players.map((p, index) => index !== state.currentPlayerIndex
-                                               ? p
-                                               : {
-                                                 ...p,
-                                                 tokens: p.tokens.map(
-                                                   (t, index1) => index1 !== state.currentPlayerActiveTokenIndex
-                                                                  ? t
-                                                                  : {
-                                                                    ...t,
-                                                                    fieldId: controlGoto.targetId,
-                                                                    previousPositions: playerToken.previousPositions.concat(
-                                                                      {
-                                                                        tileGuid: playerToken.tileGuid,
-                                                                        fieldId: playerToken.fieldId
-                                                                      } as WorldSimulationPosition)
-                                                                  } as PlayerToken)
-                                               } as PlayerObj),
+        ? p
+        : {
+          ...p,
+          tokens: p.tokens.map(
+            (t, index1) => index1 !== state.currentPlayerActiveTokenIndex
+              ? t
+              : {
+                ...t,
+                fieldId: controlGoto.targetId,
+                previousPositions: playerToken.previousPositions.concat(
+                  {
+                    tileGuid: playerToken.tileGuid,
+                    fieldId: playerToken.fieldId
+                  } as WorldSimulationPosition)
+              } as PlayerToken)
+        } as PlayerObj),
       leftDiceValue: state.leftDiceValue - 1,
 
       elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_goto()
@@ -866,8 +909,8 @@ export class AbstractMachine {
     return {
       ...state,
       players: state.players.map((value, playerIndex) => playerIndex !== state.currentPlayerIndex
-                                                         ? value
-                                                         : {
+        ? value
+        : {
           ...value,
           localDefTables: value.localDefTables.concat({
             isScopeLimited: false,
@@ -887,8 +930,8 @@ export class AbstractMachine {
     return {
       ...state,
       players: state.players.map((value, playerIndex) => playerIndex !== state.currentPlayerIndex
-                                                         ? value
-                                                         : {
+        ? value
+        : {
           ...value,
           localDefTables: value.localDefTables.filter((p, index) => index < value.localDefTables.length - 1) //pop last scope
         })
@@ -900,12 +943,12 @@ export class AbstractMachine {
     return {
       ...state,
       players: state.players.map((value, playerIndex) => playerIndex !== state.currentPlayerIndex
-                                                         ? value
-                                                         : {
+        ? value
+        : {
           ...value,
           localDefTables: value.localDefTables.map((p, index) => index !== value.localDefTables.length - 1
-                                                                 ? p
-                                                                 : {
+            ? p
+            : {
               ...p,
               isScopeLimited: true
             })
@@ -925,12 +968,12 @@ export class AbstractMachine {
     return {
       ...state,
       players: state.players.map((value, playerIndex) => playerIndex !== state.currentPlayerIndex
-                                                         ? value
-                                                         : {
+        ? value
+        : {
           ...value,
           lastReturnedValue: exprRes.val !== null
-                             ? exprRes.val
-                             : exprRes.boolVal
+            ? exprRes.val
+            : exprRes.boolVal
         }),
       elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_set_var()
     }
@@ -951,14 +994,14 @@ export class AbstractMachine {
     return {
       ...state,
       players: state.players.map((p, index) => index !== targetPlayerIndex
-                                               ? p
-                                               : {
-                                                 ...p,
-                                                 suspendCounter: Math.max(p.suspendCounter + exprRes.val, 0) //we should not get -x sleep
-                                               } as PlayerObj), //player cannot move any further if he should sleep
+        ? p
+        : {
+          ...p,
+          suspendCounter: Math.max(p.suspendCounter + exprRes.val, 0) //we should not get -x sleep
+        } as PlayerObj), //player cannot move any further if he should sleep
       leftDiceValue: sleepFunc.player === SomePlayer.currentPlayer
-                     ? 0
-                     : state.leftDiceValue,
+        ? 0
+        : state.leftDiceValue,
 
       //itself doesn't consume time
       //this sets the elapsed time
@@ -1029,17 +1072,17 @@ export class AbstractMachine {
     return {
       ...state,
       players: state.players.map((p, index) => index !== state.currentPlayerIndex
-                                               ? p
-                                               : {
-                                                 ...p,
-                                                 tokens: p.tokens.map(
-                                                   (t, index1) => index1 !== state.currentPlayerActiveTokenIndex
-                                                                  ? t
-                                                                  : {
-                                                                    ...t,
-                                                                    fieldId: goto.targetId
-                                                                  } as PlayerToken)
-                                               } as PlayerObj),
+        ? p
+        : {
+          ...p,
+          tokens: p.tokens.map(
+            (t, index1) => index1 !== state.currentPlayerActiveTokenIndex
+              ? t
+              : {
+                ...t,
+                fieldId: goto.targetId
+              } as PlayerToken)
+        } as PlayerObj),
       elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_goto()
     }
   }
@@ -1133,12 +1176,12 @@ export class AbstractMachine {
       copy = {
         ...state,
         players: state.players.map((p, playerIdex) => playerIdex !== state.currentPlayerIndex
-                                                      ? p
-                                                      : {
+          ? p
+          : {
             ...p,
             localDefTables: p.localDefTables.map((value, index) => index !== scopeIndex
-                                                                   ? value
-                                                                   : {
+              ? value
+              : {
                 ...value,
                 defTable: {
                   ...value.defTable,
@@ -1165,12 +1208,12 @@ export class AbstractMachine {
       copy = {
         ...state,
         players: state.players.map((p, playerIdex) => playerIdex !== state.currentPlayerIndex
-                                                      ? p
-                                                      : {
+          ? p
+          : {
             ...p,
             localDefTables: p.localDefTables.map((value, index) => index !== scopeIndex
-                                                                   ? value
-                                                                   : {
+              ? value
+              : {
                 ...value,
                 defTable: {
                   ...value.defTable,
@@ -1330,23 +1373,23 @@ export class AbstractMachine {
             state: {
               ...state,
               players: state.players.map((p, playerIndex) => playerIndex !== state.currentPlayerIndex
-                                                             ? p
-                                                             : {
-                                                               ...p,
-                                                               localDefTables: p.localDefTables.map(
-                                                                 (value, index) => index !== scopeIndex
-                                                                                   ? value
-                                                                                   : {
-                                                                                     ...value,
-                                                                                     defTable: {
-                                                                                       ...value.defTable,
-                                                                                       [assign.ident]: {
-                                                                                         ident: assign.ident,
-                                                                                         boolVal: expRes.boolVal
-                                                                                       } as DefinitionTableBoolEntry
-                                                                                     }
-                                                                                   }  as DefinitionTableWrapper)
-                                                             } as PlayerObj),
+                ? p
+                : {
+                  ...p,
+                  localDefTables: p.localDefTables.map(
+                    (value, index) => index !== scopeIndex
+                      ? value
+                      : {
+                        ...value,
+                        defTable: {
+                          ...value.defTable,
+                          [assign.ident]: {
+                            ident: assign.ident,
+                            boolVal: expRes.boolVal
+                          } as DefinitionTableBoolEntry
+                        }
+                      }  as DefinitionTableWrapper)
+                } as PlayerObj),
               elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_set_var()
             }
           }
@@ -1364,28 +1407,28 @@ export class AbstractMachine {
             state: {
               ...state,
               players: state.players.map((p, playerIndex) => playerIndex !== state.currentPlayerIndex
-                                                             ? p
-                                                             : {
-                                                               ...p,
-                                                               localDefTables: p.localDefTables.map(
-                                                                 (value, index) => index !== scopeIndex
-                                                                                   ? value
-                                                                                   : {
-                                                                                     ...value,
-                                                                                     defTable: {
-                                                                                       ...value.defTable,
-                                                                                       [assign.ident]: {
-                                                                                         ident: assign.ident,
-                                                                                         maxVal: entry.maxVal,
-                                                                                         val: this.circularArithmeticVal(
-                                                                                           expRes.val, entry.maxVal + 1,
-                                                                                           entry.maxVal
-                                                                                         )
-                                                                                       } as DefinitionTableIntEntry
-                                                                                     }
-                                                                                   } as DefinitionTableWrapper)
+                ? p
+                : {
+                  ...p,
+                  localDefTables: p.localDefTables.map(
+                    (value, index) => index !== scopeIndex
+                      ? value
+                      : {
+                        ...value,
+                        defTable: {
+                          ...value.defTable,
+                          [assign.ident]: {
+                            ident: assign.ident,
+                            maxVal: entry.maxVal,
+                            val: this.circularArithmeticVal(
+                              expRes.val, entry.maxVal + 1,
+                              entry.maxVal
+                            )
+                          } as DefinitionTableIntEntry
+                        }
+                      } as DefinitionTableWrapper)
 
-                                                             } as PlayerObj),
+                } as PlayerObj),
               elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_set_var()
             }
           }
@@ -1608,10 +1651,10 @@ export class AbstractMachine {
         },
         val: null,
         boolVal: comparison.op === "=="
-                 ? leftRes.val === rightRes.val
-                 : comparison.op === '!='
-                   ? leftRes.val !== rightRes.val
-                   : this.makeError('unknown comarison op, must be one of ==, !==')
+          ? leftRes.val === rightRes.val
+          : comparison.op === '!='
+            ? leftRes.val !== rightRes.val
+            : this.makeError('unknown comarison op, must be one of ==, !==')
       }
     }
 
@@ -1625,10 +1668,10 @@ export class AbstractMachine {
         },
         val: null,
         boolVal: comparison.op === "=="
-                 ? leftRes.boolVal === rightRes.boolVal
-                 : comparison.op === '!='
-                   ? leftRes.boolVal !== rightRes.boolVal
-                   : this.makeError('unknown comarison op, must be one of ==, !==')
+          ? leftRes.boolVal === rightRes.boolVal
+          : comparison.op === '!='
+            ? leftRes.boolVal !== rightRes.boolVal
+            : this.makeError('unknown comarison op, must be one of ==, !==')
       }
     }
 
@@ -1685,14 +1728,14 @@ export class AbstractMachine {
         },
         val: null,
         boolVal: relation.op === '<'
-                 ? sumRes.val < rightSumRes.val
-                 : relation.op === '>'
-                   ? sumRes.val > rightSumRes.val
-                   : relation.op === '>='
-                     ? sumRes.val >= rightSumRes.val
-                     : relation.op === '<='
-                       ? sumRes.val <= rightSumRes.val
-                       : this.makeError('unknown sum op')
+          ? sumRes.val < rightSumRes.val
+          : relation.op === '>'
+            ? sumRes.val > rightSumRes.val
+            : relation.op === '>='
+              ? sumRes.val >= rightSumRes.val
+              : relation.op === '<='
+                ? sumRes.val <= rightSumRes.val
+                : this.makeError('unknown sum op')
       }
     }
 
@@ -1751,10 +1794,10 @@ export class AbstractMachine {
       },
       boolVal: null,
       val: sum.op === '+'
-           ? sumRes.val + termRes.val
-           : sum.op === '-'
-             ? sumRes.val - termRes.val
-             : this.makeError('unknown sum op')
+        ? sumRes.val + termRes.val
+        : sum.op === '-'
+          ? sumRes.val - termRes.val
+          : this.makeError('unknown sum op')
     }
   }
 
@@ -1804,12 +1847,12 @@ export class AbstractMachine {
       },
       boolVal: null,
       val: term.op === '*'
-           ? this.forceIntVal(termRes.val * factorRes.val)
-           : term.op === '/'
-             ? this.forceIntVal(termRes.val / factorRes.val)
-             : term.op === '%'
-               ? this.forceIntVal(termRes.val % factorRes.val)
-               : this.makeError('unknown op for term')
+        ? this.forceIntVal(termRes.val * factorRes.val)
+        : term.op === '/'
+          ? this.forceIntVal(termRes.val / factorRes.val)
+          : term.op === '%'
+            ? this.forceIntVal(termRes.val % factorRes.val)
+            : this.makeError('unknown op for term')
     }
   }
 
@@ -1832,8 +1875,8 @@ export class AbstractMachine {
         },
         val: null,
         boolVal: factor.unOp === "not"
-                 ? !factorRes.boolVal
-                 : factorRes.boolVal
+          ? !factorRes.boolVal
+          : factorRes.boolVal
       }
     }
 
@@ -1844,8 +1887,8 @@ export class AbstractMachine {
       },
       boolVal: null,
       val: factor.unOp === '+'
-           ? factorRes.val
-           : -factorRes.val
+        ? factorRes.val
+        : -factorRes.val
     }
   }
 
@@ -1971,11 +2014,11 @@ export class AbstractMachine {
 
         return {
           boolVal: (typeof lastVal === "boolean")
-                   ? lastVal
-                   : null,
+            ? lastVal
+            : null,
           val: (typeof lastVal === "number")
-               ? lastVal
-               : null,
+            ? lastVal
+            : null,
           state: {
             ...state,
             elapsedTimeInS: state.elapsedTimeInS + SimulationTimes._timeInS_expr_primary_ident //time like accessing a var
@@ -2020,33 +2063,33 @@ export class AbstractMachine {
       }
 
       const newVal = playerDefTabEntry.val + (increment
-                                              ? 1
-                                              : -1)
+        ? 1
+        : -1)
 
 
       const copy: ExprTuple = {
         val: primary.isPost
-             ? playerDefTabEntry.val   //   [some player].x++
-             : newVal,                 //++[some player].x
+          ? playerDefTabEntry.val   //   [some player].x++
+          : newVal,                 //++[some player].x
         boolVal: null,
         state: {
           ...state,
           players: state.players.map((p, index) => index !== playerIndex
-                                                   ? p
-                                                   : {
-                                                     ...p,
-                                                     defTable: {
-                                                       ...p.defTable,
-                                                       [primary.ident]: {
-                                                         val: this.circularArithmeticVal(
-                                                           newVal, playerDefTabEntry.maxVal + 1,
-                                                           playerDefTabEntry.maxVal
-                                                         ),
-                                                         maxVal: playerDefTabEntry.maxVal,
-                                                         ident: primary.ident
-                                                       } as DefinitionTableIntEntry
-                                                     }
-                                                   } as PlayerObj),
+            ? p
+            : {
+              ...p,
+              defTable: {
+                ...p.defTable,
+                [primary.ident]: {
+                  val: this.circularArithmeticVal(
+                    newVal, playerDefTabEntry.maxVal + 1,
+                    playerDefTabEntry.maxVal
+                  ),
+                  maxVal: playerDefTabEntry.maxVal,
+                  ident: primary.ident
+                } as DefinitionTableIntEntry
+              }
+            } as PlayerObj),
           elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_expr_primary_incrementOrDecrement()
         }
       }
@@ -2086,36 +2129,36 @@ export class AbstractMachine {
         }
 
         const newVal = entry.val + (increment
-                                    ? 1
-                                    : -1)
+          ? 1
+          : -1)
 
         const copy: ExprTuple = {
           val: primary.isPost
-               ? entry.val               //   x++
-               : newVal,                 // ++x
+            ? entry.val               //   x++
+            : newVal,                 // ++x
           boolVal: null,
           state: {
             ...state,
             players: state.players.map((p, index) => index !== state.currentPlayerIndex
-                                                     ? p
-                                                     : {
-                                                       ...p, //only change the def table in the scope where we found the var
-                                                       localDefTables: p.localDefTables.map(
-                                                         (value, defTableIndex) => defTableIndex !== scopeIndex
-                                                                                   ? value
-                                                                                   : {
-                                                             ...value,
-                                                             defTable: {
-                                                               ...value.defTable,
-                                                               [primary.ident]: {
-                                                                 val: this.circularArithmeticVal(
-                                                                   newVal, entry.maxVal + 1, entry.maxVal),
-                                                                 maxVal: entry.maxVal,
-                                                                 ident: primary.ident
-                                                               } as DefinitionTableIntEntry
-                                                             }
-                                                           }),
-                                                     } as PlayerObj),
+              ? p
+              : {
+                ...p, //only change the def table in the scope where we found the var
+                localDefTables: p.localDefTables.map(
+                  (value, defTableIndex) => defTableIndex !== scopeIndex
+                    ? value
+                    : {
+                      ...value,
+                      defTable: {
+                        ...value.defTable,
+                        [primary.ident]: {
+                          val: this.circularArithmeticVal(
+                            newVal, entry.maxVal + 1, entry.maxVal),
+                          maxVal: entry.maxVal,
+                          ident: primary.ident
+                        } as DefinitionTableIntEntry
+                      }
+                    }),
+              } as PlayerObj),
             elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_expr_primary_incrementOrDecrement()
           }
         }
@@ -2141,32 +2184,32 @@ export class AbstractMachine {
       }
 
       const newVal = playerDefTabEntry.val + (increment
-                                              ? 1
-                                              : -1)
+        ? 1
+        : -1)
 
       const copy: ExprTuple = {
         val: primary.isPost
-             ? playerDefTabEntry.val   //   [some player].x++
-             : newVal,                 //++[some player].x
+          ? playerDefTabEntry.val   //   [some player].x++
+          : newVal,                 //++[some player].x
         boolVal: null,
         state: {
           ...state,
           players: state.players.map((p, index) => index !== state.currentPlayerIndex
-                                                   ? p
-                                                   : {
-                                                     ...p,
-                                                     defTable: {
-                                                       ...p.defTable,
-                                                       [primary.ident]: {
-                                                         val: this.circularArithmeticVal(
-                                                           newVal, playerDefTabEntry.maxVal + 1,
-                                                           playerDefTabEntry.maxVal
-                                                         ),
-                                                         maxVal: playerDefTabEntry.maxVal,
-                                                         ident: primary.ident
-                                                       } as DefinitionTableIntEntry
-                                                     }
-                                                   } as PlayerObj),
+            ? p
+            : {
+              ...p,
+              defTable: {
+                ...p.defTable,
+                [primary.ident]: {
+                  val: this.circularArithmeticVal(
+                    newVal, playerDefTabEntry.maxVal + 1,
+                    playerDefTabEntry.maxVal
+                  ),
+                  maxVal: playerDefTabEntry.maxVal,
+                  ident: primary.ident
+                } as DefinitionTableIntEntry
+              }
+            } as PlayerObj),
           elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_expr_primary_incrementOrDecrement()
         }
       }
@@ -2197,13 +2240,13 @@ export class AbstractMachine {
     }
 
     const newVal = defTabEntry.val + (increment
-                                      ? 1
-                                      : -1)
+      ? 1
+      : -1)
 
     const copy: ExprTuple = {
       val: primary.isPost
-           ? defTabEntry.val             //   x++
-           : newVal,                     // ++x
+        ? defTabEntry.val             //   x++
+        : newVal,                     // ++x
       boolVal: null,
       state: {
         ...state,
@@ -2306,7 +2349,7 @@ export class AbstractMachine {
   }
 
   private static getDefTableVariable(defTabEntry: DefinitionTableBoolEntry | DefinitionTableIntEntry,
-    state: MachineState, errorMessage: string
+                                     state: MachineState, errorMessage: string
   ): ExprTuple {
     if (isIntVar(defTabEntry)) {
       const varVal = defTabEntry.val
@@ -2346,12 +2389,12 @@ export class AbstractMachine {
    */
   private static getSomePlayerIndex(somePlayer: SomePlayer, state: MachineState, errorMessage: string): number {
     return somePlayer === SomePlayer.currentPlayer
-           ? state.currentPlayerIndex
-           : somePlayer === SomePlayer.nextPlayer
-             ? state.nextPlayerIndex
-             : somePlayer === SomePlayer.previousPlayer
-               ? state.previousPlayerIndex
-               : this.makeError(errorMessage)
+      ? state.currentPlayerIndex
+      : somePlayer === SomePlayer.nextPlayer
+        ? state.nextPlayerIndex
+        : somePlayer === SomePlayer.previousPlayer
+          ? state.previousPlayerIndex
+          : this.makeError(errorMessage)
   }
 
   /**

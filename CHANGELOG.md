@@ -4,6 +4,12 @@
 
 already changed but version has not changed
 
+- fixed issue where many simulations did not respect the simulation times
+  - this was because the worker is executed as a separate unit and all classes/code inside is a new instance
+    so the app.js > SimulationTimes was !== worker > SimulationTimes and thus the times were not equal
+- one can now do tile transitions without intermediate fields (useful e.g. if one player needs to go back to the start or something)
+  - note that the max number of transitions without fields is limited (see constants (maxTileBorderPointToBorderPointTransitionWithoutFields)
+    because we could get into an infinite loop
 - improved automatic check if all variables are defined (we now go deeper into the tree)
 - fixed issue where sleep method caused automatic simulation to hang/end
 - fixed issue where one could not simulate a single tile with fake simulation start/end

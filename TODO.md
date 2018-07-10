@@ -7,14 +7,8 @@
 - global setting auto bg/fg color force fields --> like symbol just overwrite style
   - useful e.g. for end field (always forced)
 
-- web: worker not found
-- [x] dist: worker hangs? because of sleep?
-
 - frontend settings
-- tile to tile transition without field?
 
-- actual time 18:40 could be 14-15
-- auf forced if halten??
 
 - MAYBE migrate to mobx? performance should be better... but a lot of work
 

@@ -18,6 +18,8 @@ export const appProperties = {
   exportFileNamePrefix: 'bbge'
 }
 
+export const maxTileBorderPointToBorderPointTransitionWithoutFields = 1000
+
 export let isLinkedToSymbolIndicatorSizeInPx = 10
 export let isLinkedToSymbolIndicatorCornerRadius = 2
 export let isLinkedToSymbolIndicatorColor = '#000000'
