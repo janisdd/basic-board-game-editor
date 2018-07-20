@@ -40,7 +40,7 @@ import {
   set_selectedImgSymbolGuid,
   set_selectedLineSymbolGuid
 } from "../../state/reducers/tileEditor/symbols/actions";
-import {Tile} from "../../types/world";
+import {MajorLineDirection, Tile} from "../../types/world";
 import {getGuid} from "../../helpers/guid";
 import {set_world_isTileEditorDisplayed} from "../../state/reducers/world/actions";
 import {set_app_activeTabIndex} from "../../state/reducers/actions";
@@ -105,7 +105,7 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
 
     allTiles: rootState.tileLibraryState.possibleTiles,
     isCreatingNewTile: rootState.tileEditorState.isCreatingNewTile,
-    editingTileGuide: rootState.tileEditorState.tileGuid,
+    editingTileGuide: rootState.tileEditorState.tileProps.guid,
 
     amountOfShapesInTile: rootState.tileEditorLineShapeState.present.length + rootState.tileEditorImgShapesState.present.length + rootState.tileEditorFieldShapesState.present.length,
 
@@ -257,7 +257,7 @@ class tileEditor extends React.Component<Props, any> {
       }
 
       const copies = DuplicateHelper.duplicateFieldShapes(selectedFieldShapes, this.props.amountOfShapesInTile,
-        this.props.settings.autoIncrementFieldTextNumbersOnDuplicate, e.shiftKey)
+        this.props.settings.tileProps.tileSettings.autoIncrementFieldTextNumbersOnDuplicate, e.shiftKey)
       this.props.setPropertyEditor_fieldsShapes(this.props.fieldShapes.concat(copies))
       this.props.setSelectedFieldShapeIds(copies.map(p => p.id))
 
@@ -424,6 +424,7 @@ class tileEditor extends React.Component<Props, any> {
                         //add the new tile to the tile library
 
                         const tile: Tile = {
+                          guid: getGuid(),
                           lineShapes: this.props.lineShapes,
                           fieldShapes: this.props.fieldShapes,
                           imgShapes: this.props.imgShapes,
@@ -431,12 +432,24 @@ class tileEditor extends React.Component<Props, any> {
                           botBorderPoints: this.props.tileProps.botBorderPoints,
                           leftBorderPoints: this.props.tileProps.leftBorderPoints,
                           topBorderPoints: this.props.tileProps.topBorderPoints,
-                          height: this.props.tileProps.height,
-                          width: this.props.tileProps.width,
-                          displayName: this.props.tileProps.displayName,
-                          guid: getGuid(),
                           simulationStartFieldIds: this.props.tileProps.simulationStartFieldIds,
-                          simulationEndFieldIds: this.props.tileProps.simulationEndFieldIds
+                          simulationEndFieldIds: this.props.tileProps.simulationEndFieldIds,
+                          tileSettings: {
+                            displayName: this.props.tileProps.tileSettings.displayName,
+                            width: this.props.tileProps.tileSettings.width,
+                            height: this.props.tileProps.tileSettings.height,
+                            majorLineDirection: this.props.tileProps.tileSettings.majorLineDirection,
+                            gridSizeInPx: this.props.tileProps.tileSettings.gridSizeInPx,
+                            showGrid: this.props.tileProps.tileSettings.showGrid,
+                            snapToGrid: this.props.tileProps.tileSettings.snapToGrid,
+                            showSequenceIds: this.props.tileProps.tileSettings.showSequenceIds,
+                            moveBezierControlPointsWhenLineIsMoved: this.props.tileProps.tileSettings.moveBezierControlPointsWhenLineIsMoved,
+                            arePrintGuidesDisplayed: this.props.tileProps.tileSettings.arePrintGuidesDisplayed,
+                            autoIncrementFieldTextNumbersOnDuplicate: this.props.tileProps.tileSettings.autoIncrementFieldTextNumbersOnDuplicate,
+                            printLargeTilePreferredWidthInPx: this.props.tileProps.tileSettings.printLargeTilePreferredWidthInPx,
+                            printLargeTilePreferredHeightInPx: this.props.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
+                            splitLargeTileForPrint: this.props.tileProps.tileSettings.splitLargeTileForPrint,
+                          }
                         }
 
                         this.props.set_tileLibrary_possibleTiles(this.props.allTiles.concat(tile))
@@ -465,12 +478,25 @@ class tileEditor extends React.Component<Props, any> {
                           botBorderPoints: this.props.tileProps.botBorderPoints,
                           leftBorderPoints: this.props.tileProps.leftBorderPoints,
                           topBorderPoints: this.props.tileProps.topBorderPoints,
-                          height: this.props.tileProps.height,
-                          width: this.props.tileProps.width,
-                          displayName: this.props.tileProps.displayName,
                           guid: this.props.editingTileGuide,
                           simulationStartFieldIds: this.props.tileProps.simulationStartFieldIds,
-                          simulationEndFieldIds: this.props.tileProps.simulationEndFieldIds
+                          simulationEndFieldIds: this.props.tileProps.simulationEndFieldIds,
+                          tileSettings: {
+                            displayName: this.props.tileProps.tileSettings.displayName,
+                            width: this.props.tileProps.tileSettings.width,
+                            height: this.props.tileProps.tileSettings.height,
+                            majorLineDirection: this.props.tileProps.tileSettings.majorLineDirection,
+                            gridSizeInPx: this.props.tileProps.tileSettings.gridSizeInPx,
+                            showGrid: this.props.tileProps.tileSettings.showGrid,
+                            snapToGrid: this.props.tileProps.tileSettings.snapToGrid,
+                            showSequenceIds: this.props.tileProps.tileSettings.showSequenceIds,
+                            moveBezierControlPointsWhenLineIsMoved: this.props.tileProps.tileSettings.moveBezierControlPointsWhenLineIsMoved,
+                            arePrintGuidesDisplayed: this.props.tileProps.tileSettings.arePrintGuidesDisplayed,
+                            autoIncrementFieldTextNumbersOnDuplicate: this.props.tileProps.tileSettings.autoIncrementFieldTextNumbersOnDuplicate,
+                            printLargeTilePreferredWidthInPx: this.props.tileProps.tileSettings.printLargeTilePreferredWidthInPx,
+                            printLargeTilePreferredHeightInPx: this.props.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
+                            splitLargeTileForPrint: this.props.tileProps.tileSettings.splitLargeTileForPrint,
+                          }
                         }
 
 
@@ -671,18 +697,31 @@ class tileEditor extends React.Component<Props, any> {
 
                   const tile: Tile = {
                     guid: getGuid(),
-                    width: this.props.tileProps.width,
-                    height: this.props.tileProps.height,
                     imgShapes: this.props.imgShapes,
                     fieldShapes: this.props.fieldShapes,
                     lineShapes: this.props.lineShapes,
-                    displayName: this.props.tileProps.displayName,
                     topBorderPoints: this.props.tileProps.topBorderPoints,
                     botBorderPoints: this.props.tileProps.botBorderPoints,
                     leftBorderPoints: this.props.tileProps.leftBorderPoints,
                     rightBorderPoint: this.props.tileProps.rightBorderPoint,
                     simulationStartFieldIds: [],
-                    simulationEndFieldIds: []
+                    simulationEndFieldIds: [],
+                    tileSettings: {
+                      displayName: this.props.tileProps.tileSettings.displayName,
+                      width: this.props.tileProps.tileSettings.width,
+                      height: this.props.tileProps.tileSettings.height,
+                      majorLineDirection: this.props.tileProps.tileSettings.majorLineDirection,
+                      gridSizeInPx: this.props.tileProps.tileSettings.gridSizeInPx,
+                      showGrid: this.props.tileProps.tileSettings.showGrid,
+                      snapToGrid: this.props.tileProps.tileSettings.snapToGrid,
+                      showSequenceIds: this.props.tileProps.tileSettings.showSequenceIds,
+                      moveBezierControlPointsWhenLineIsMoved: this.props.tileProps.tileSettings.moveBezierControlPointsWhenLineIsMoved,
+                      arePrintGuidesDisplayed: this.props.tileProps.tileSettings.arePrintGuidesDisplayed,
+                      autoIncrementFieldTextNumbersOnDuplicate: this.props.tileProps.tileSettings.autoIncrementFieldTextNumbersOnDuplicate,
+                      printLargeTilePreferredWidthInPx: this.props.tileProps.tileSettings.printLargeTilePreferredWidthInPx,
+                      printLargeTilePreferredHeightInPx: this.props.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
+                      splitLargeTileForPrint: this.props.tileProps.tileSettings.splitLargeTileForPrint,
+                    }
                   }
 
                   PrintHelper.exportTileAsLargeSvg(
@@ -691,7 +730,7 @@ class tileEditor extends React.Component<Props, any> {
                     this.props.imgSymbols,
                     this.props.lineSymbols,
                     false,
-                    this.props.settings.gridSizeInPx,
+                    this.props.settings.tileProps.tileSettings.gridSizeInPx,
                     this.props.worldSettings.gridStrokeThicknessInPx,
                     this.props.worldSettings.gridStrokeColor,
                     this.props.worldSettings,
@@ -738,9 +777,9 @@ class tileEditor extends React.Component<Props, any> {
                 this.props.set_editorSelection_rect(rect)
               }}
 
-              printLargeTilePreferredWidthInPx={this.props.settings.printLargeTilePreferredWidthInPx}
-              printLargeTilePreferredHeightInPx={this.props.settings.printLargeTilePreferredHeightInPx}
-              displayPrintGuidesDisplayed={this.props.settings.arePrintGuidesDisplayed}
+              printLargeTilePreferredWidthInPx={this.props.settings.tileProps.tileSettings.printLargeTilePreferredWidthInPx}
+              printLargeTilePreferredHeightInPx={this.props.settings.tileProps.tileSettings.printLargeTilePreferredHeightInPx}
+              displayPrintGuidesDisplayed={this.props.settings.tileProps.tileSettings.arePrintGuidesDisplayed}
               isSelectingNextField={this.props.isSelectingNextField}
               sourceForSelectingNextField={this.props.sourceForSelectingNextField}
               setPropertyEditor_FieldCmdText={(fieldId, cmdText) => {
@@ -756,16 +795,16 @@ class tileEditor extends React.Component<Props, any> {
               botBorderPoints={this.props.tileProps.botBorderPoints}
               leftBorderPoints={this.props.tileProps.leftBorderPoints}
               rightBorderPoint={this.props.tileProps.rightBorderPoint}
-              drawGrid={this.props.settings.showGrid}
-              gridSizeInPx={this.props.settings.gridSizeInPx}
-              snapToGrid={this.props.settings.snapToGrid}
-              drawFieldIds={this.props.settings.showSequenceIds}
+              drawGrid={this.props.settings.tileProps.tileSettings.showGrid}
+              gridSizeInPx={this.props.settings.tileProps.tileSettings.gridSizeInPx}
+              snapToGrid={this.props.settings.tileProps.tileSettings.snapToGrid}
+              drawFieldIds={this.props.settings.tileProps.tileSettings.showSequenceIds}
 
               fieldShapes={this.props.fieldShapes}
               imgShapes={this.props.imgShapes}
               lineShapes={this.props.lineShapes}
-              canvasHeight={this.props.tileProps.height}
-              canvasWidth={this.props.tileProps.width}
+              canvasHeight={this.props.tileProps.tileSettings.height}
+              canvasWidth={this.props.tileProps.tileSettings.width}
 
 
               setPropertyEditor_FieldX={(fieldShape, oldX, newX) => {

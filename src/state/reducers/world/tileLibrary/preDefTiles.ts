@@ -5525,12 +5525,25 @@ export const predefTiles: ReadonlyArray<Tile> = [
 				"nextFieldId": null
 			}
 		],
-		"height": 1000,
-		"width": 1000,
-		"displayName": "ladder game",
 		"guid": "a28d750900ffc60db2c415b2e9cf41eb",
 		"simulationStartFieldIds": [],
-		"simulationEndFieldIds": []
+		"simulationEndFieldIds": [],
+		"tileSettings": {
+			"displayName": "ladder game",
+			"width": 1000,
+      "height": 1000,
+      "majorLineDirection": 0,
+      "gridSizeInPx": 10,
+      "showGrid": true,
+      "snapToGrid": true,
+      "showSequenceIds": false,
+      "moveBezierControlPointsWhenLineIsMoved": true,
+      "arePrintGuidesDisplayed": false,
+      "autoIncrementFieldTextNumbersOnDuplicate": true,
+      "printLargeTilePreferredWidthInPx": 500,
+      "printLargeTilePreferredHeightInPx": 500,
+      "splitLargeTileForPrint": true
+		}
 	}
     `
   )

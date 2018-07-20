@@ -3,6 +3,12 @@ import {notExhaustive} from "../../_notExhausiveHelper";
 import {defaultGameInitCode} from "../../../../constants";
 import {SimulationTimes} from "../../../../../simulation/machine/AbstractMachine";
 
+
+/**
+ * the world settings
+ * NOTE: if you add a property here then you also need to change the function
+ * @link overwriteWorldSettings to overwrite the setting value when importing a world
+ */
 export interface WorldSettings {
   readonly selectedFieldBorderColor: string
   readonly selectedFieldBorderThicknessInPx: number
@@ -163,6 +169,8 @@ export interface ActionBase extends Action {
 
 export enum ActionType {
 
+  replace_worldSettings = 'worldSettingsReducer_replace_worldSettings',
+
   SET_selectedFieldBorderColor = 'worldSettingsReducer_SET_selectedFieldBorderColor',
   SET_selectedFieldBorderThicknessInPx = 'worldSettingsReducer_SET_selectedFieldBorderThicknessInPx',
   SET_gridStrokeThicknessInPx = 'worldSettingsReducer_SET_gridStrokeThicknessInPx',
@@ -222,6 +230,12 @@ export enum ActionType {
 
 
 //--- some static ui settings
+
+
+export interface replace_worldSettingsAction extends ActionBase {
+  readonly type: ActionType.replace_worldSettings
+  readonly newWorldSettings: WorldSettings
+}
 
 export interface SET_selectedFieldBorderColorAction extends ActionBase {
   readonly type: ActionType.SET_selectedFieldBorderColor
@@ -472,6 +486,7 @@ export interface ResetAction extends ActionBase {
 
 export type AllActions =
   ResetAction
+  | replace_worldSettingsAction
   | SET_selectedFieldBorderColorAction
   | SET_selectedFieldBorderThicknessInPxAction
   | SET_gridStrokeThicknessInPxAction
@@ -808,6 +823,11 @@ export function reducer(state: State = initial, action: AllActions): State {
       return {
         ...state,
         timeInS_expr_factor: SimulationTimes._timeInS_expr_factor = action.timeInS_expr_factor
+      }
+
+    case ActionType.replace_worldSettings:
+      return {
+        ...action.newWorldSettings
       }
 
     case ActionType.RESET:

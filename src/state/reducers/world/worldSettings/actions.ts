@@ -46,7 +46,7 @@ import {
   SET_world_timeInS_expr_relationAction,
   SET_world_timeInS_expr_sumAction,
   SET_world_timeInS_expr_termAction,
-  SET_world_timeInS_expr_factorAction
+  SET_world_timeInS_expr_factorAction, WorldSettings, replace_worldSettingsAction
 } from "./worldSettingsReducer";
 
 
@@ -378,5 +378,12 @@ export function set_world_timeInS_expr_factorAction(timeInS_expr_factor: number)
   return {
     type: ActionType.SET_world_timeInS_expr_factor,
     timeInS_expr_factor
+  }
+}
+
+export function replace_worldSettings(newWorldSettings: WorldSettings): replace_worldSettingsAction {
+  return {
+    type: ActionType.replace_worldSettings,
+    newWorldSettings
   }
 }

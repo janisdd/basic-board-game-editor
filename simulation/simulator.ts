@@ -840,7 +840,7 @@ export class Simulator {
     const nextTileSurrogate = tileSurrogates.find(p => nextTileSurrogateCond(p))
 
     if (!nextTileSurrogate) {
-      Logger.fatal(`tile transition: cannot find next position for current tile ${currentTile.guid} (${currentTile.displayName})`)
+      Logger.fatal(`tile transition: cannot find next position for current tile ${currentTile.guid} (${currentTile.tileSettings.displayName})`)
       throw new Error()
     }
 
@@ -848,7 +848,7 @@ export class Simulator {
 
     if (!nextTile) {
       Logger.fatal(
-        `tile transition: cannot find next tile from position x: ${nextTileSurrogate.x}, y: ${nextTileSurrogate.y}, current tile: ${currentTile.guid} (${currentTile.displayName})`)
+        `tile transition: cannot find next tile from position x: ${nextTileSurrogate.x}, y: ${nextTileSurrogate.y}, current tile: ${currentTile.guid} (${currentTile.tileSettings.displayName})`)
       throw new Error()
     }
 
@@ -858,12 +858,12 @@ export class Simulator {
 
     if (!nextBorderPoint) {
       Logger.fatal(
-        `tile transition: cannot find transition from tile ${currentTile.guid} (${currentTile.displayName}) to tile ${nextTile.guid} because top border point not found`)
+        `tile transition: cannot find transition from tile ${currentTile.guid} (${currentTile.tileSettings.displayName}) to tile ${nextTile.guid} because top border point not found`)
       throw new Error()
     }
     if (nextBorderPoint.nextFieldId === null) {
       Logger.fatal(
-        `tile transition: cannot find transition from tile ${currentTile.guid} (${currentTile.displayName}) to tile ${nextTile.guid} because top border point has no next field`)
+        `tile transition: cannot find transition from tile ${currentTile.guid} (${currentTile.tileSettings.displayName}) to tile ${nextTile.guid} because top border point has no next field`)
       throw new Error()
     }
 
@@ -935,7 +935,7 @@ export class Simulator {
 
             }
             else {
-              Logger.fatal(`tile transition: cannot find next field ${nextBorderPoint.nextFieldId} on tile ${nextTile.guid} (${nextTile.displayName})`)
+              Logger.fatal(`tile transition: cannot find next field ${nextBorderPoint.nextFieldId} on tile ${nextTile.guid} (${nextTile.tileSettings.displayName})`)
               throw new Error()
             }
           }

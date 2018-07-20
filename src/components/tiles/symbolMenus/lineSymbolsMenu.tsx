@@ -17,10 +17,11 @@ import {getNextShapeId} from "../../../state/reducers/tileEditor/fieldProperties
 import {getNiceBezierCurveBetween} from "../../../helpers/interactionHelper";
 import {Button, Icon, Popup} from "semantic-ui-react";
 import {renewAllZIndicesInTile, swapDisplayIndexWithGuid} from "../../../helpers/someIndexHelper";
-import {MajorLineDirection, RightTileEditorTabs} from "../../../state/reducers/tileEditor/tileEditorReducer";
+import { RightTileEditorTabs} from "../../../state/reducers/tileEditor/tileEditorReducer";
 import ToolTip from '../../helpers/ToolTip'
 import {getI18n} from "../../../../i18n/i18nRoot";
 import IconToolTip from "../../helpers/IconToolTip";
+import {MajorLineDirection} from "../../../types/world";
 
 //const css = require('./styles.styl');
 

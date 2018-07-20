@@ -1,14 +1,9 @@
-import {ExportTile, ExportWorld, ImageAsset, ImageAssetSurrogate, Tile} from "../types/world";
+import {ExportTile, ExportWorld, ImageAsset, Tile} from "../types/world";
 import globalState from "../state/state";
 import fileSaver = require("file-saver");
 import {ImgStorage} from "../externalStorage/imgStorage";
 import {appProperties, tileFileExtensionWithoutDot, worldFileExtensionWithoutDot} from "../constants";
 import {set_tileLibrary_possibleTiles} from "../state/reducers/world/tileLibrary/actions";
-import {
-  set_world_expectedTileHeight, set_world_expectedTileWidth,
-  set_world_worldHeightInTiles,
-  set_world_worldWidthInTiles
-} from "../state/reducers/world/worldSettings/actions";
 import {set_fieldSymbols} from "../state/reducers/tileEditor/symbols/fieldSymbols/actions";
 import {set_imgSymbols} from "../state/reducers/tileEditor/symbols/imgSymbols/actions";
 import {set_lineSymbols} from "../state/reducers/tileEditor/symbols/lineSymbols/actions";
@@ -17,6 +12,28 @@ import {imgLibrary_addImg} from "../state/reducers/imgLibrary/actions";
 import {set_world_tiles} from "../state/reducers/world/tileSurrogates/actions";
 import {MigrationHelper} from "./MigrationHelpers";
 import {Logger} from "./logger";
+import {
+  replace_worldSettings,
+  set_world_expectedTileHeight,
+  set_world_expectedTileWidth, set_world_printGameAsOneImageAction, set_world_timeInS_advancePlayerAction,
+  set_world_timeInS_choose_bool_funcAction,
+  set_world_timeInS_expr_comparisonAction,
+  set_world_timeInS_expr_conjunctionAction,
+  set_world_timeInS_expr_disjunctionAction,
+  set_world_timeInS_expr_factorAction, set_world_timeInS_expr_primary_constantAction,
+  set_world_timeInS_expr_primary_identAction,
+  set_world_timeInS_expr_primary_incrementOrDecrementAction,
+  set_world_timeInS_expr_primary_leftStepsAction,
+  set_world_timeInS_expr_relationAction,
+  set_world_timeInS_expr_sumAction,
+  set_world_timeInS_expr_termAction,
+  set_world_timeInS_gotoAction,
+  set_world_timeInS_rollbackAction, set_world_timeInS_rollDiceAction,
+  set_world_timeInS_set_varAction,
+  set_world_timeInS_var_declAction,
+  set_world_worldCmdTextAction, set_world_worldHeightInTiles, set_world_worldWidthInTiles
+} from "../state/reducers/world/worldSettings/actions";
+import {WorldSettings} from "../state/reducers/world/worldSettings/worldSettingsReducer";
 
 
 export class IoHelper {
@@ -75,7 +92,7 @@ export class IoHelper {
         //only add once
         continue
       }
-      
+
       usedRealImages.push(imgAsset)
     }
 
@@ -90,7 +107,7 @@ export class IoHelper {
 
       if (usedRealImages.some(p => p.guid === imgAsset.guid)) {
         //only add once
-          continue
+        continue
       }
 
       usedRealImages.push(imgAsset)
@@ -132,9 +149,6 @@ export class IoHelper {
     //the fields are stored in separate reducers...
     const tile: Tile = {
       guid: exportedTile.tile.guid,
-      displayName: exportedTile.tile.displayName,
-      width: exportedTile.tile.width,
-      height: exportedTile.tile.height,
       topBorderPoints: exportedTile.tile.topBorderPoints,
       botBorderPoints: exportedTile.tile.botBorderPoints,
       leftBorderPoints: exportedTile.tile.leftBorderPoints,
@@ -143,7 +157,23 @@ export class IoHelper {
       imgShapes: exportedTile.tile.imgShapes,
       lineShapes: exportedTile.tile.lineShapes,
       simulationStartFieldIds: exportedTile.tile.simulationStartFieldIds,
-      simulationEndFieldIds: exportedTile.tile.simulationEndFieldIds
+      simulationEndFieldIds: exportedTile.tile.simulationEndFieldIds,
+      tileSettings: {
+        displayName: exportedTile.tile.tileSettings.displayName,
+        width: exportedTile.tile.tileSettings.width,
+        height: exportedTile.tile.tileSettings.height,
+        majorLineDirection: exportedTile.tile.tileSettings.majorLineDirection,
+        gridSizeInPx: exportedTile.tile.tileSettings.gridSizeInPx,
+        showGrid: exportedTile.tile.tileSettings.showGrid,
+        snapToGrid: exportedTile.tile.tileSettings.snapToGrid,
+        showSequenceIds: exportedTile.tile.tileSettings.showSequenceIds,
+        moveBezierControlPointsWhenLineIsMoved: exportedTile.tile.tileSettings.moveBezierControlPointsWhenLineIsMoved,
+        arePrintGuidesDisplayed: exportedTile.tile.tileSettings.arePrintGuidesDisplayed,
+        autoIncrementFieldTextNumbersOnDuplicate: exportedTile.tile.tileSettings.autoIncrementFieldTextNumbersOnDuplicate,
+        printLargeTilePreferredWidthInPx: exportedTile.tile.tileSettings.printLargeTilePreferredWidthInPx,
+        printLargeTilePreferredHeightInPx: exportedTile.tile.tileSettings.printLargeTilePreferredHeightInPx,
+        splitLargeTileForPrint: exportedTile.tile.tileSettings.splitLargeTileForPrint,
+      }
     }
 
     const allTiles = globalState.getState().tileLibraryState.possibleTiles
@@ -235,10 +265,7 @@ export class IoHelper {
       imgSymbols: globalState.getState().imgSymbolState.present,
       lineSymbols: globalState.getState().lineSymbolState.present,
 
-      worldHeightInTiles: globalState.getState().worldSettingsState.worldHeightInTiles,
-      worldWidthInTiles: globalState.getState().worldSettingsState.worldWidthInTiles,
-      expectedTileWidth: globalState.getState().worldSettingsState.expectedTileWidth,
-      expectedTileHeight: globalState.getState().worldSettingsState.expectedTileHeight,
+      worldSettings: globalState.getState().worldSettingsState,
 
       worldTiles: globalState.getState().tileSurrogateState.present,
 
@@ -279,15 +306,40 @@ export class IoHelper {
 
     globalState.dispatch(set_tileLibrary_possibleTiles(exportedWorld.allTiles))
 
-    globalState.dispatch(set_world_worldWidthInTiles(exportedWorld.worldWidthInTiles))
-    globalState.dispatch(set_world_worldHeightInTiles(exportedWorld.worldHeightInTiles))
 
-    globalState.dispatch(set_world_expectedTileWidth(exportedWorld.expectedTileWidth))
-    globalState.dispatch(set_world_expectedTileHeight(exportedWorld.expectedTileHeight))
+    const newWorldSettings = overwriteWorldSettings(globalState.getState().worldSettingsState, exportedWorld.worldSettings)
+
+    globalState.dispatch(replace_worldSettings(newWorldSettings))
 
     globalState.dispatch(set_world_tiles(exportedWorld.worldTiles))
 
 
   }
 
+}
+
+/**
+ * dispatches events to set all options in the state from the given world settings
+ * only take settings we know so we can drop unknown ones
+ * @param {WorldSettings} currentWorldSettings
+ * @param {WorldSettings} loadedWorldSettings these might have more/less props
+ * @returns {WorldSettings}
+ */
+export function overwriteWorldSettings(currentWorldSettings: WorldSettings, loadedWorldSettings: WorldSettings): WorldSettings {
+
+  const keys = Object.keys(currentWorldSettings)
+  const copy = {...currentWorldSettings} //remember this does only a shallow copy
+
+  for(const key of keys) {
+
+    if (loadedWorldSettings[key] === undefined) {
+      continue
+    }
+    //let's hope for equal types
+    copy[key] = loadedWorldSettings[key]
+  }
+
+
+  Logger.log('overwrote world settings')
+  return copy
 }

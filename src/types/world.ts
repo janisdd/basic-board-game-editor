@@ -8,6 +8,7 @@ import {
   LineShape
 } from "./drawing";
 import {WorldTileSurrogate} from "../../simulation/machine/machineState";
+import {WorldSettings} from "../state/reducers/world/worldSettings/worldSettingsReducer";
 
 /**
  * a surrogate for a real img
@@ -55,7 +56,17 @@ export interface ImageAsset extends ImageAssetSurrogate {
   readonly base64: string
 }
 
-export interface TileProps {
+
+export enum MajorLineDirection {
+  topToBottom = 0,
+  bottomToTop = 1,
+  leftToRight = 2,
+  rightToLeft = 3
+}
+
+
+export interface TileSettings {
+
 
   readonly width: number
 
@@ -65,6 +76,58 @@ export interface TileProps {
    * the tile name e.g. when there is no preview
    */
   readonly displayName: string
+
+  /**
+   * if one duplicates a field (or multiple) and the field text contains any number
+   * the number is incremented this should also work for multiple
+   * e.g. field 1, field2 selected --> duplicate --> field 3, field4
+   */
+  readonly autoIncrementFieldTextNumbersOnDuplicate: boolean
+
+  readonly gridSizeInPx: number
+  readonly showGrid: boolean
+  readonly snapToGrid: boolean
+  readonly showSequenceIds: boolean
+  /**
+   * true: when the point is moved the bezier control point is moved too
+   * false: not
+   */
+  readonly moveBezierControlPointsWhenLineIsMoved: boolean
+
+  /**
+   * the preferred width to split the large tile into pieces
+   * @see maxPrintTileWidth for max value
+   */
+  readonly printLargeTilePreferredWidthInPx: number
+  /**
+   * the preferred height to split the large tile into pieces
+   * @see maxPrintTileHeight for max value
+   */
+  readonly printLargeTilePreferredHeightInPx: number
+
+  /**
+   * true: split the large tile
+   * false: not (maybe when we want to just save the img?)
+   *  this will display the image in the print tab as one image
+   */
+  readonly splitLargeTileForPrint: boolean
+
+
+  /**
+   * the start direction for generated lines (to know where start and end is of the line)
+   */
+  readonly majorLineDirection: MajorLineDirection
+
+  /**
+   * the lines where we would split the tile
+   */
+  readonly arePrintGuidesDisplayed: boolean
+
+}
+
+export interface TileProps {
+
+  readonly guid: string
 
   readonly topBorderPoints: ReadonlyArray<BorderPoint>
   readonly botBorderPoints: ReadonlyArray<BorderPoint>
@@ -82,11 +145,12 @@ export interface TileProps {
    * this is evaluated as a forced game_end field
    */
   readonly simulationEndFieldIds: ReadonlyArray<number>
+
+  readonly tileSettings: TileSettings
 }
 
 export interface Tile extends TileProps {
 
-  readonly guid: string
 
   /**
    * only for design
@@ -133,17 +197,7 @@ export interface ExportTile extends SomeExport {
 
 export interface ExportWorld extends SomeExport {
 
-  readonly worldWidthInTiles: number
-  readonly worldHeightInTiles: number
-
-  /**
-   * used to draw the empty tiles grid
-   */
-  readonly expectedTileWidth: number
-  /**
-   * used to draw the empty tiles grid
-   */
-  readonly expectedTileHeight: number
+  readonly worldSettings: WorldSettings
 
   /**
    * all tiles in the tiles library

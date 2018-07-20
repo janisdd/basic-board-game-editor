@@ -221,7 +221,7 @@ function _reducer(state: State = initial, action: AllActions): State {
       if (!targetLine) return state
 
       const newLine = replacePointInLineCanBeBezierPoint(targetLine, action.oldPointId, action.newPointPos,
-        globalState.getState().tileEditorState.moveControlPointWhenPointIsMoved)
+        globalState.getState().tileEditorState.tileProps.tileSettings.moveBezierControlPointsWhenLineIsMoved)
 
       return state.map(p =>
         p.id !== action.lineId

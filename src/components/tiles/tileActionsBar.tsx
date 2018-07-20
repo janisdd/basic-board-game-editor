@@ -7,7 +7,7 @@ import {CurveMode, FieldShape} from "../../types/drawing";
 import {
    defaultFieldShape, defaultImgShapeProps, defaultLineShape
 } from "../../constants";
-import {Tile} from "../../types/world";
+import {MajorLineDirection, Tile} from "../../types/world";
 import {getNextShapeId} from "../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
 import { getNiceBezierCurveBetween} from "../../helpers/interactionHelper";
 import {Button, Icon} from "semantic-ui-react";
@@ -18,7 +18,6 @@ import ImageLibrary from './imageLibrary/imageLibrary'
 import {
   setEditor_IsAddImgShapeLibraryDisplayed
 } from "../../state/reducers/tileEditor/actions";
-import {MajorLineDirection} from "../../state/reducers/tileEditor/tileEditorReducer";
 import {
   set_simulation_simulationResults,
   set_simulation_simulationStatus

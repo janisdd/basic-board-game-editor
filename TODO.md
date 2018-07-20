@@ -7,10 +7,9 @@
 - global setting auto bg/fg color force fields --> like symbol just overwrite style
   - useful e.g. for end field (always forced)
 
-- frontend settings
-
-
 - MAYBE migrate to mobx? performance should be better... but a lot of work
+
+- change the worker deploy... the hash is bad for git because it's changed every build
 
 ISSUES
 
@@ -145,6 +144,21 @@ maybe
 
 
 DOCS
+
+- we export the world settings now with the world
+  - on import we only use the known properties to overwrite the settings
+
+- we now export the tile settings with the tile
+  - on import we only use the known properties to overwrite the settings
+
+- for coverage add to package.json
+  ```
+      "collectCoverage": true,
+      "collectCoverageFrom": [
+        "simulation/machine/AbstractMachine.ts"
+      ],
+      "coverageDirectory": "reports",
+  ```
 - publish to github pages `git subtree push --prefix dist origin gh-pages`
   - from http://stephenplusplus.github.io/yeoman.io/deployment.html
 - img transparent pixels are now clickable because a bug with svg width="100%" height="100%" viewBox="0 0 41 103"

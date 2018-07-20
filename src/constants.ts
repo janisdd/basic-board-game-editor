@@ -7,13 +7,13 @@ import {
   LineShape,
   VerticalAlign
 } from "./types/drawing";
-import {Tile} from "./types/world";
+import {MajorLineDirection, Tile} from "./types/world";
 import {getNextShapeId} from "./state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
 import {getGuid} from "./helpers/guid";
 import {ActionTypes} from "redux-undo";
 
 export const appProperties = {
-  version: '1.0.3',
+  version: '1.1.0',
   appName: 'Basic board game editor',
   exportFileNamePrefix: 'bbge'
 }
@@ -63,6 +63,9 @@ export const defaultAddImgWidth = 100
 export const globalZoomStep = 0.25
 export const globalMinimalZoom = 0.25
 
+/**
+ * larger than 500 and we cannot get 2 tiles on one din a4
+ */
 export const maxPrintTileWidth = 500
 export const maxPrintTileHeight = 500
 
@@ -184,9 +187,6 @@ export const newTileFields: () => FieldShape[] = () => [
 
 export function getDefaultNewTile(): Tile {
   return {
-    width: defaultTileWidth,
-    height: defaultTileHeight,
-    displayName: 'tile 1',
     topBorderPoints: [{
       id: getNextShapeId(),
       val: defaultTileWidth / 2,
@@ -212,7 +212,24 @@ export function getDefaultNewTile(): Tile {
     lineShapes: [],
     imgShapes: [],
     simulationEndFieldIds: [],
-    simulationStartFieldIds: []
+    simulationStartFieldIds: [],
+
+    tileSettings: {
+      displayName: 'tile 1',
+      width: defaultTileWidth,
+      height: defaultTileHeight,
+      majorLineDirection: MajorLineDirection.topToBottom,
+      gridSizeInPx: 10,
+      showGrid: true,
+      snapToGrid: true,
+      showSequenceIds: false,
+      moveBezierControlPointsWhenLineIsMoved: true,
+      arePrintGuidesDisplayed: false,
+      autoIncrementFieldTextNumbersOnDuplicate: true,
+      printLargeTilePreferredWidthInPx: 500,
+      printLargeTilePreferredHeightInPx: 500,
+      splitLargeTileForPrint: true,
+    }
   }
 }
 

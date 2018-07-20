@@ -1,7 +1,6 @@
 import {
   ActionType,
   LeftTileEditorTabs,
-  MajorLineDirection,
   RightTileEditorTabs, SET_editor_arePrintGuidesDisplayedAction,
   SET_editor_autoIncrementFieldTextNumbersOnDuplicateAction,
   SET_editor_botBorderPointsAction,
@@ -35,7 +34,7 @@ import {
   SET_selectedLineShapeIdsAction,
   SET_tileAction
 } from "./tileEditorReducer";
-import {Tile} from "../../../types/world";
+import {MajorLineDirection, Tile} from "../../../types/world";
 import {BorderPoint, FieldShape, LineShape, LineSymbol} from "../../../types/drawing";
 import {MultiActions} from "../../../types/ui";
 import {setPropertyEditor_imgShapes} from "./imgProperties/actions";
@@ -203,8 +202,8 @@ export function set_editor_isSelectingNextField(isSelectingNextField: boolean, s
 
 export function setEditor_moveControlPointWhenPointIsMoved(moveControlPointWhenPointIsMoved: boolean): SET_moveControlPointWhenPointIsMovedAction {
   return {
-    type: ActionType.SET_moveControlPointWhenPointIsMoved,
-    moveControlPointWhenPointIsMoved
+    type: ActionType.SET_moveBezierControlPointsWhenLineIsMoved,
+    moveBezierControlPointsWhenLineIsMoved: moveControlPointWhenPointIsMoved
   }
 }
 

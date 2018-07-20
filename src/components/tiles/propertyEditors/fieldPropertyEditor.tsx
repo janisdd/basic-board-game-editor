@@ -14,7 +14,6 @@ import {ChromePicker} from 'react-color';
 import ImageLibrary from '../imageLibrary/imageLibrary'
 import EditorWrapper, {editorInstancesMap} from "../../helpers/editorWrapper";
 import {Simulator} from "../../../../simulation/simulator";
-import {AbstractMachine} from "../../../../simulation/machine/AbstractMachine";
 import {GameUnit} from "../../../../simulation/model/executionUnit";
 import {Logger} from "../../../helpers/logger";
 
@@ -91,7 +90,7 @@ const mapStateToProps = (rootState: RootState, props: MyProps) => {
     //test0: rootState...
     //test: props.test
     ...props,
-    autoIncrementFieldTextNumbersOnDuplicate: rootState.tileEditorState.autoIncrementFieldTextNumbersOnDuplicate,
+    autoIncrementFieldTextNumbersOnDuplicate: rootState.tileEditorState.tileProps.tileSettings.autoIncrementFieldTextNumbersOnDuplicate,
     fieldShapes: rootState.tileEditorFieldShapesState.present,
     amountOfShapesInTile: rootState.tileEditorLineShapeState.present.length + rootState.tileEditorImgShapesState.present.length + rootState.tileEditorFieldShapesState.present.length,
     lineShapes: rootState.tileEditorLineShapeState.present,

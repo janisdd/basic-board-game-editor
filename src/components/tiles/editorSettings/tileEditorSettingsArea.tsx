@@ -55,9 +55,9 @@ class tileEditorSettingsArea extends React.Component<Props, any> {
           message={getI18n(this.props.langId, "Show grid")}
         >
           <div
-            className={[this.props.editorState.showGrid ? 'toggled-colored clickable' : 'clickable', 'vertical-centered'].join(' ')}
+            className={[this.props.editorState.tileProps.tileSettings.showGrid ? 'toggled-colored clickable' : 'clickable', 'vertical-centered'].join(' ')}
             onClick={() => {
-              this.props.setEditor_showGrid(!this.props.editorState.showGrid)
+              this.props.setEditor_showGrid(!this.props.editorState.tileProps.tileSettings.showGrid)
             }}
           >
             <Icon style={{fontSize: '1.5em'}}  name="th" />
@@ -71,7 +71,7 @@ class tileEditorSettingsArea extends React.Component<Props, any> {
           <input style={{width: '80px'}}
                  type="number"
                  value={this.props.editorState.stageOffsetX + this.props.editorState.stageOffsetXScaleCorrection}
-                 step={this.props.editorState.snapToGrid ? this.props.editorState.gridSizeInPx : 1}
+                 step={this.props.editorState.tileProps.tileSettings.snapToGrid ? this.props.editorState.tileProps.tileSettings.gridSizeInPx : 1}
                  onChange={(e: SyntheticEvent<HTMLInputElement>) => {
 
                    const val = parseInt(e.currentTarget.value)
@@ -91,7 +91,7 @@ class tileEditorSettingsArea extends React.Component<Props, any> {
 
         <Input labelPosition='right' placeholder='0' size="small">
           <input style={{width: '80px', borderLeft: '0', borderTopLeftRadius: '0', borderBottomLeftRadius: '0'}}
-                 step={this.props.editorState.snapToGrid ? this.props.editorState.gridSizeInPx : 1}
+                 step={this.props.editorState.tileProps.tileSettings.snapToGrid ? this.props.editorState.tileProps.tileSettings.gridSizeInPx : 1}
                  type="number"
                  value={this.props.editorState.stageOffsetY + this.props.editorState.stageOffsetYScaleCorrection}
                  onChange={(e: SyntheticEvent<HTMLInputElement>) => {

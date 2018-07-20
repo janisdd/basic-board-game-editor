@@ -33,16 +33,12 @@ import {CheckboxData} from "../../../types/ui";
 import {
   defaultTileHeight,
   defaultTileWidth,
-  globalMinimalZoom,
-  globalZoomStep,
   maxPrintTileHeight,
   maxPrintTileWidth
 } from "../../../constants";
-import {BorderPoint} from "../../../types/drawing";
-import {getNextShapeId} from "../../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
-import {MajorLineDirection} from "../../../state/reducers/tileEditor/tileEditorReducer";
 import {getI18n} from "../../../../i18n/i18nRoot";
 import IconToolTip from "../../helpers/IconToolTip";
+import {MajorLineDirection} from "../../../types/world";
 
 //const css = require('./styles.styl');
 
@@ -134,7 +130,7 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
 
               <Form.Field>
                 <label>{getI18n(this.props.langId, "Tile name")}</label>
-                <Input type="text" placeholder='tile basic' value={this.props.tileProps.displayName}
+                <Input type="text" placeholder='tile basic' value={this.props.tileProps.tileSettings.displayName}
                        style={{width: '150px'}}
                        onChange={(e: SyntheticEvent<HTMLInputElement>) => {
                          this.props.setEditor_tileDisplayName(e.currentTarget.value)
@@ -148,7 +144,7 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
                     "When automatic inserting lines from the commands how the main flow is (where to connect the ingoing & outgoing lines to the shapes)")}/>
                 </label>
                 <Dropdown placeholder='Select Friend' fluid selection options={majorLineDirectionOptions}
-                          value={this.props.settings.majorLineDirection}
+                          value={this.props.settings.tileProps.tileSettings.majorLineDirection}
                           onChange={(event: SyntheticEvent<HTMLSelectElement>, data: { value: MajorLineDirection }) => {
                             this.props.set_editor_majorLineDirectionAction(data.value)
                           }}
@@ -156,7 +152,7 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
               </Form.Field>
 
               <Form.Field>
-                <Checkbox label={getI18n(this.props.langId, "Show grid")} checked={this.props.settings.showGrid}
+                <Checkbox label={getI18n(this.props.langId, "Show grid")} checked={this.props.settings.tileProps.tileSettings.showGrid}
                           onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
                             this.props.setEditor_showGrid(data.checked)
                           }}
@@ -164,7 +160,7 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
               </Form.Field>
               <Form.Field>
                 <label>{getI18n(this.props.langId, "Grid size in px")}</label>
-                <Input type="number" placeholder='10' value={this.props.settings.gridSizeInPx}
+                <Input type="number" placeholder='10' value={this.props.settings.tileProps.tileSettings.gridSizeInPx}
                        style={{width: '100px'}}
                        onChange={(e: SyntheticEvent<HTMLInputElement>) => {
                          this.props.setEditor_gridSizeInPx(parseInt(e.currentTarget.value))
@@ -173,7 +169,7 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
               </Form.Field>
 
               <Form.Field>
-                <Checkbox label={getI18n(this.props.langId, "Snap to Grid")} checked={this.props.settings.snapToGrid}
+                <Checkbox label={getI18n(this.props.langId, "Snap to Grid")} checked={this.props.settings.tileProps.tileSettings.snapToGrid}
                           onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
                             this.props.setEditor_snapToGrid(data.checked)
                           }}
@@ -182,7 +178,7 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
 
               <Form.Field>
                 <Checkbox label={getI18n(this.props.langId, "Show field ids")}
-                          checked={this.props.settings.showSequenceIds}
+                          checked={this.props.settings.tileProps.tileSettings.showSequenceIds}
                           onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
                             this.props.setEditor_showSequenceIds(data.checked)
                           }}
@@ -191,7 +187,7 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
 
               <Form.Field>
                 <Checkbox label={getI18n(this.props.langId, "Move control points when line is moved")}
-                          checked={this.props.settings.moveControlPointWhenPointIsMoved}
+                          checked={this.props.settings.tileProps.tileSettings.moveBezierControlPointsWhenLineIsMoved}
                           onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
                             this.props.setEditor_moveControlPointWhenPointIsMoved(data.checked)
                           }}
@@ -200,7 +196,7 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
 
               <Form.Field>
                 <Checkbox label={getI18n(this.props.langId, "Split tile into smaller pieces")}
-                          checked={this.props.settings.splitLargeTileForPrint}
+                          checked={this.props.settings.tileProps.tileSettings.splitLargeTileForPrint}
                           onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
                             this.props.setEditor_splitLargeTileForPrint(data.checked)
                           }}
@@ -214,8 +210,8 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
               <Form.Group widths='equal'>
                 <Form.Field>
                   <label>{getI18n(this.props.langId, "Tile width")}</label>
-                  <Input type="number" placeholder={defaultTileWidth} value={this.props.tileProps.width}
-                         step="20" min="20"
+                  <Input type="number" placeholder={defaultTileWidth} value={this.props.tileProps.tileSettings.width}
+                         step="10" min="10"
                          style={{width: '100px'}}
                          onChange={(e: SyntheticEvent<HTMLInputElement>) => {
                            const val = parseInt(e.currentTarget.value)
@@ -225,8 +221,8 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
                 </Form.Field>
                 <Form.Field>
                   <label>{getI18n(this.props.langId, "Tile height")}</label>
-                  <Input type="number" placeholder={defaultTileHeight} value={this.props.tileProps.height}
-                         step="20" min="20"
+                  <Input type="number" placeholder={defaultTileHeight} value={this.props.tileProps.tileSettings.height}
+                         step="10" min="10"
                          style={{width: '100px'}}
                          onChange={(e: SyntheticEvent<HTMLInputElement>) => {
                            const val = parseInt(e.currentTarget.value)
@@ -249,8 +245,8 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
                 <Form.Field>
                   <label>{getI18n(this.props.langId, "Print tile width in px")} ({'<'} {maxPrintTileWidth})</label>
                   <Input type="number" placeholder={maxPrintTileWidth}
-                         value={this.props.settings.printLargeTilePreferredWidthInPx}
-                         step="20" min="20"
+                         value={this.props.settings.tileProps.tileSettings.printLargeTilePreferredWidthInPx}
+                         step="10" min="10"
                          style={{width: '100px'}}
                          onChange={(e: SyntheticEvent<HTMLInputElement>) => {
                            const val = parseInt(e.currentTarget.value)
@@ -261,8 +257,8 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
                 <Form.Field>
                   <label>{getI18n(this.props.langId, "Print tile height in px")} ({'<'} {maxPrintTileHeight})</label>
                   <Input type="number" placeholder={maxPrintTileHeight}
-                         value={this.props.settings.printLargeTilePreferredHeightInPx}
-                         step="50" min="10"
+                         value={this.props.settings.tileProps.tileSettings.printLargeTilePreferredHeightInPx}
+                         step="10" min="10"
                          style={{width: '100px'}}
                          onChange={(e: SyntheticEvent<HTMLInputElement>) => {
                            const val = parseInt(e.currentTarget.value)
@@ -285,7 +281,7 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
               <Form.Field>
                 <Checkbox
                   label={getI18n(this.props.langId, "Auto increment field text that contain numbers on duplication")}
-                  checked={this.props.settings.autoIncrementFieldTextNumbersOnDuplicate}
+                  checked={this.props.settings.tileProps.tileSettings.autoIncrementFieldTextNumbersOnDuplicate}
                   onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
                     this.props.set_editor_autoIncrementFieldTextNumbersOnDuplicate(data.checked)
                   }}
@@ -295,7 +291,7 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
               <Form.Field>
                 <Checkbox
                   label={getI18n(this.props.langId, "Display print guides")}
-                  checked={this.props.settings.arePrintGuidesDisplayed}
+                  checked={this.props.settings.tileProps.tileSettings.arePrintGuidesDisplayed}
                   onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
                     this.props.set_editor_arePrintGuidesDisplayed(data.checked)
                   }}

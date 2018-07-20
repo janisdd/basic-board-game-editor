@@ -13,11 +13,11 @@ import {
   PlainPoint
 } from "../../../types/drawing";
 import {DuplicateHelper} from "../../../helpers/duplicateHelper";
-import {MajorLineDirection} from "../../../state/reducers/tileEditor/tileEditorReducer";
 import {getI18n} from "../../../../i18n/i18nRoot";
 import ToolTip from '../../helpers/ToolTip'
 import IconToolTip, {horizontalIconPopupOffsetInPx} from "../../helpers/IconToolTip";
 import {ChromePicker} from "react-color";
+import {MajorLineDirection} from "../../../types/world";
 
 //const css = require('./styles.styl');
 

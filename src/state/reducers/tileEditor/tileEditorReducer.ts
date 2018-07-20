@@ -1,41 +1,10 @@
 import {Action} from "redux";
 import {notExhaustive} from "../_notExhausiveHelper";
-import {Tile, TileProps} from "../../../types/world";
-import {defaultTileHeight, defaultTileWidth} from "../../../constants";
-import {getNextShapeId} from "./fieldProperties/fieldPropertyReducer";
+import {MajorLineDirection, Tile, TileProps} from "../../../types/world";
+import {getDefaultNewTile} from "../../../constants";
 import {BorderPoint, FieldShape} from "../../../types/drawing";
-import {MachineState} from "../../../../simulation/machine/machineState";
-import {Logger} from "../../../helpers/logger";
-import {SimulationStatus} from "../../../types/states";
 
-export const exampleTile: TileProps = {
-  width: defaultTileWidth,
-  height: defaultTileHeight,
-  simulationEndFieldIds: [],
-  simulationStartFieldIds: [],
-  displayName: 'tile 1',
-  topBorderPoints: [{
-    id: getNextShapeId(),
-    val: defaultTileWidth / 2,
-    nextFieldId: null
-  }],
-  botBorderPoints: [{
-    id: getNextShapeId(),
-    val: defaultTileWidth / 2,
-    nextFieldId: null
-  }],
-  leftBorderPoints: [{
-    id: getNextShapeId(),
-    val: defaultTileHeight / 2,
-    nextFieldId: null
-  }],
-  rightBorderPoint: [{
-    id: getNextShapeId(),
-    val: defaultTileHeight / 2,
-    nextFieldId: null
-  }],
-
-}
+export const exampleTile: TileProps = getDefaultNewTile()
 
 
 export enum LeftTileEditorTabs {
@@ -59,30 +28,12 @@ export type State = {
    */
   readonly isCreatingNewTile: boolean
 
-  /**
-   * when editing a tile this is the guid
-   */
-  readonly tileGuid: string | null
-
   readonly tileProps: TileProps
 
   readonly selectedFieldShapeIds: ReadonlyArray<number>
   readonly selectedLineShapeIds: ReadonlyArray<number>
   readonly selectedImageShapeIds: ReadonlyArray<number>
-  /**
-   * when a point is moved from a line if the corresponding control point is also moved
-   */
-  readonly moveControlPointWhenPointIsMoved: boolean
 
-  readonly gridSizeInPx: number
-  readonly showGrid: boolean
-  readonly snapToGrid: boolean
-  readonly showSequenceIds: boolean
-  /**
-   * true: when the point is moved the bezier control point is moved too
-   * false: not
-   */
-  readonly linkBezierControlPointsToPoints: boolean
 
   readonly stageOffsetX: number
   readonly stageOffsetY: number
@@ -100,6 +51,9 @@ export type State = {
 
   readonly isAddImgShapeLibraryDisplayed: boolean
 
+
+  readonly isTileEditorSettingsModalDisplayed: boolean
+
   /**
    * in the img properties
    */
@@ -109,26 +63,6 @@ export type State = {
    * for the field shape/symbol background img prop
    */
   readonly isChooseFieldShapeBackgroundImageLibraryDisplayed: boolean
-
-  /**
-   * the preferred width to split the large tile into pieces
-   * @see maxPrintTileWidth for max value
-   */
-  readonly printLargeTilePreferredWidthInPx: number
-  /**
-   * the preferred height to split the large tile into pieces
-   * @see maxPrintTileHeight for max value
-   */
-  readonly printLargeTilePreferredHeightInPx: number
-
-  /**
-   * true: split the large tile
-   * false: not (maybe when we want to just save the img?)
-   *  this will display the image in the print tab as one image
-   */
-  readonly splitLargeTileForPrint: boolean
-
-  readonly isTileEditorSettingsModalDisplayed: boolean
 
   /**
    * 0: border points
@@ -144,13 +78,6 @@ export type State = {
 
   readonly leftTabActiveIndex: LeftTileEditorTabs
 
-  /**
-   * if one duplicates a field (or multiple) and the field text contains any number
-   * the number is incremented this should also work for multiple
-   * e.g. field 1, field2 selected --> duplicate --> field 3, field4
-   */
-  readonly autoIncrementFieldTextNumbersOnDuplicate: boolean
-
 
   /**
    * select the next field for simulation (to know where go next)
@@ -158,17 +85,8 @@ export type State = {
   readonly isSelectingNextField: boolean
   readonly sourceForSelectingNextField: FieldShape | null
 
-  /**
-   * the start direction for generated lines (to know where start and end is of the line)
-   */
-  readonly majorLineDirection: MajorLineDirection
 
   readonly isLeftTabMenuExpanded: boolean
-
-  /**
-   * the lines where we would split the tile
-   */
-  readonly arePrintGuidesDisplayed: boolean
 
 }
 
@@ -180,29 +98,12 @@ export interface SimulationResult {
   readonly error: string | null
 }
 
-export enum MajorLineDirection {
-  topToBottom = 0,
-  bottomToTop = 1,
-  leftToRight = 2,
-  rightToLeft = 3
-}
-
-
 export const initial: State = {
   isCreatingNewTile: true,
-  tileGuid: null,
   tileProps: exampleTile,
   selectedFieldShapeIds: [],
   selectedLineShapeIds: [],
   selectedImageShapeIds: [],
-
-  moveControlPointWhenPointIsMoved: true,
-
-  gridSizeInPx: 10,
-  showGrid: true,
-  snapToGrid: true,
-  showSequenceIds: false,
-  linkBezierControlPointsToPoints: true,
 
   stageOffsetX: 0,
   stageOffsetY: 0,
@@ -212,29 +113,22 @@ export const initial: State = {
   stageScaleY: 1,
 
   isAddImgShapeLibraryDisplayed: false,
-  isChooseImgShapeImageLibraryDisplayed: false,
+
   isChooseFieldShapeBackgroundImageLibraryDisplayed: false,
 
-  printLargeTilePreferredWidthInPx: 500,
-  printLargeTilePreferredHeightInPx: 500,
-
-  splitLargeTileForPrint: true,
   isTileEditorSettingsModalDisplayed: false,
 
   rightTabActiveIndex: RightTileEditorTabs.simulationTab,
   lastRightTabActiveIndex: RightTileEditorTabs.simulationTab,
   leftTabActiveIndex: LeftTileEditorTabs.fieldSymbolsTab,
 
-  autoIncrementFieldTextNumbersOnDuplicate: true,
 
   isSelectingNextField: false,
   sourceForSelectingNextField: null,
 
-  majorLineDirection: MajorLineDirection.topToBottom,
-
   isLeftTabMenuExpanded: false,
 
-  arePrintGuidesDisplayed: false
+  isChooseImgShapeImageLibraryDisplayed: false
 
 }
 
@@ -251,7 +145,7 @@ export enum ActionType {
   SET_selectedLineShapeIds = 'tileEditorReducer_SET_selectedLineShapeIds',
   SET_selectedImageShapeIds = 'tileEditorReducer_SET_selectedImageShapeIds',
 
-  SET_moveControlPointWhenPointIsMoved = 'tileEditorReducer_SET_moveControlPointWhenPointIsMoved',
+  SET_moveBezierControlPointsWhenLineIsMoved = 'tileEditorReducer_SET_moveBezierControlPointsWhenLineIsMoved',
 
 
   SET_editor_gridSizeInPx = 'tileEditorReducer_SET_editor_gridSizeInPx',
@@ -393,8 +287,8 @@ export interface SET_editor_isLeftTabMenuExpandedAction extends ActionBase {
 //--- editor settings
 
 export interface SET_moveControlPointWhenPointIsMovedAction extends ActionBase {
-  readonly type: ActionType.SET_moveControlPointWhenPointIsMoved
-  readonly moveControlPointWhenPointIsMoved: boolean
+  readonly type: ActionType.SET_moveBezierControlPointsWhenLineIsMoved
+  readonly moveBezierControlPointsWhenLineIsMoved: boolean
 }
 
 
@@ -580,8 +474,7 @@ export function reducer(state: State = initial, action: AllActions): State {
       return {
         ...initial, //full reset
         isCreatingNewTile: action.isCreatingNewTile,
-        tileProps: action.tile,
-        tileGuid: action.tile.guid
+        tileProps: action.tile
       }
 
     case ActionType.SET_selectedFieldShapeIds:
@@ -601,42 +494,74 @@ export function reducer(state: State = initial, action: AllActions): State {
         selectedImageShapeIds: action.selectedImageShapeIds,
       }
 
-    case ActionType.SET_moveControlPointWhenPointIsMoved:
+    case ActionType.SET_moveBezierControlPointsWhenLineIsMoved:
       return {
         ...state,
-        moveControlPointWhenPointIsMoved: action.moveControlPointWhenPointIsMoved,
+        tileProps: {
+          ...state.tileProps,
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            moveBezierControlPointsWhenLineIsMoved: action.moveBezierControlPointsWhenLineIsMoved
+          }
+        },
       }
 
 
     case ActionType.SET_editor_gridSizeInPx:
       return {
         ...state,
-        gridSizeInPx: action.gridSizeInPx,
+        tileProps: {
+          ...state.tileProps,
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            gridSizeInPx: action.gridSizeInPx,
+          }
+        },
       }
 
     case ActionType.SET_editor_showGrid:
       return {
         ...state,
-        showGrid: action.showGrid,
+        tileProps: {
+          ...state.tileProps,
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            showGrid: action.showGrid,
+          }
+        },
       }
 
     case ActionType.SET_editor_snapToGrid:
       return {
         ...state,
-        snapToGrid: action.snapToGrid,
+        tileProps: {
+          ...state.tileProps,
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            snapToGrid: action.snapToGrid,
+          }
+        },
       }
+
     case ActionType.SET_editor_showSequenceIds:
       return {
         ...state,
-        showSequenceIds: action.showSequenceIds,
+        tileProps: {
+          ...state.tileProps,
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            showSequenceIds: action.showSequenceIds,
+          }
+        },
       }
+
     case ActionType.SET_editor_stageOffset: {
       let offsetX = action.stageOffsetX
       let offsetY = action.stageOffsetY
 
-      if (state.snapToGrid) {
-        offsetX = Math.round(action.stageOffsetX / state.gridSizeInPx) * state.gridSizeInPx
-        offsetY = Math.round(action.stageOffsetY / state.gridSizeInPx) * state.gridSizeInPx
+      if (state.tileProps.tileSettings.snapToGrid) {
+        offsetX = Math.round(action.stageOffsetX / state.tileProps.tileSettings.gridSizeInPx) * state.tileProps.tileSettings.gridSizeInPx
+        offsetY = Math.round(action.stageOffsetY / state.tileProps.tileSettings.gridSizeInPx) * state.tileProps.tileSettings.gridSizeInPx
       }
       return {
         ...state,
@@ -648,9 +573,9 @@ export function reducer(state: State = initial, action: AllActions): State {
       let offsetX = action.stageOffsetXScaleCorrection
       let offsetY = action.stageOffsetYScaleCorrection
 
-      if (state.snapToGrid) {
-        offsetX = Math.round(action.stageOffsetXScaleCorrection / state.gridSizeInPx) * state.gridSizeInPx
-        offsetY = Math.round(action.stageOffsetYScaleCorrection / state.gridSizeInPx) * state.gridSizeInPx
+      if (state.tileProps.tileSettings.snapToGrid) {
+        offsetX = Math.round(action.stageOffsetXScaleCorrection / state.tileProps.tileSettings.gridSizeInPx) * state.tileProps.tileSettings.gridSizeInPx
+        offsetY = Math.round(action.stageOffsetYScaleCorrection / state.tileProps.tileSettings.gridSizeInPx) * state.tileProps.tileSettings.gridSizeInPx
       }
       return {
         ...state,
@@ -674,15 +599,22 @@ export function reducer(state: State = initial, action: AllActions): State {
         ...state,
         tileProps: {
           ...state.tileProps,
-          width: action.tileWidth
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            width: action.tileWidth
+          }
         },
       }
+
     case ActionType.SET_editor_tileHeight:
       return {
         ...state,
         tileProps: {
           ...state.tileProps,
-          height: action.tileHeight
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            height: action.tileHeight
+          }
         },
       }
 
@@ -691,7 +623,10 @@ export function reducer(state: State = initial, action: AllActions): State {
         ...state,
         tileProps: {
           ...state.tileProps,
-          displayName: action.tileDisplayName
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            displayName: action.tileDisplayName
+          }
         },
       }
 
@@ -766,17 +701,37 @@ export function reducer(state: State = initial, action: AllActions): State {
     case ActionType.SET_editor_printLargeTilePreferredWidthInPx:
       return {
         ...state,
-        printLargeTilePreferredWidthInPx: action.printLargeTilePreferredWidthInPx
+        tileProps: {
+          ...state.tileProps,
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            printLargeTilePreferredWidthInPx: action.printLargeTilePreferredWidthInPx
+          }
+        },
       }
+
     case ActionType.SET_editor_printLargeTilePreferredHeightInPx:
       return {
         ...state,
-        printLargeTilePreferredHeightInPx: action.printLargeTilePreferredHeightInPx
+        tileProps: {
+          ...state.tileProps,
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            printLargeTilePreferredHeightInPx: action.printLargeTilePreferredHeightInPx
+          }
+        },
       }
+
     case ActionType.SET_editor_splitLargeTileForPrint:
       return {
         ...state,
-        splitLargeTileForPrint: action.splitLargeTileForPrint
+        tileProps: {
+          ...state.tileProps,
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            splitLargeTileForPrint: action.splitLargeTileForPrint
+          }
+        },
       }
     case ActionType.SET_editor_isTileEditorSettingsModalDisplayed:
       return {
@@ -801,7 +756,13 @@ export function reducer(state: State = initial, action: AllActions): State {
     case ActionType.SET_editor_autoIncrementFieldTextNumbersOnDuplicate:
       return {
         ...state,
-        autoIncrementFieldTextNumbersOnDuplicate: action.autoIncrementFieldTextNumbersOnDuplicate
+        tileProps: {
+          ...state.tileProps,
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            autoIncrementFieldTextNumbersOnDuplicate: action.autoIncrementFieldTextNumbersOnDuplicate
+          }
+        },
       }
 
     case ActionType.SET_editor_isSelectingNextField:
@@ -814,7 +775,13 @@ export function reducer(state: State = initial, action: AllActions): State {
     case ActionType.SET_editor_majorLineDirection:
       return {
         ...state,
-        majorLineDirection: action.majorLineDirection,
+        tileProps: {
+          ...state.tileProps,
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            majorLineDirection: action.majorLineDirection,
+          }
+        },
       }
 
     case ActionType.SET_editor_isLeftTabMenuExpanded:
@@ -825,7 +792,13 @@ export function reducer(state: State = initial, action: AllActions): State {
     case ActionType.SET_editor_arePrintGuidesDisplayed:
       return {
         ...state,
-        arePrintGuidesDisplayed: action.arePrintGuidesDisplayed,
+        tileProps: {
+          ...state.tileProps,
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            arePrintGuidesDisplayed: action.arePrintGuidesDisplayed,
+          }
+        },
       }
 
 

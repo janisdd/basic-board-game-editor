@@ -4,6 +4,16 @@
 
 already changed but version has not changed
 
+
+
+## 1.1.0
+
+- [feature/break-soft] we export the world settings now with the world
+  - on import we only use the known properties to overwrite the settings
+
+- [feature/break-soft] we now export the tile settings with the tile
+  - on import we only use the known properties to overwrite the settings
+
 - fixed issue where many simulations did not respect the simulation times
   - this was because the worker is executed as a separate unit and all classes/code inside is a new instance
     so the app.js > SimulationTimes was !== worker > SimulationTimes and thus the times were not equal

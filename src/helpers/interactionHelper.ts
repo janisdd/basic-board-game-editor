@@ -12,10 +12,9 @@ import globalState from '../state/state'
 import {getNextShapeId} from "../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
 import {addLineShape, set_selectedLinePointNewPosAction} from "../state/reducers/tileEditor/lineProperties/actions";
 import {defaultArrowHeight, defaultArrowWidth, lineShapeDefaultColor} from "../constants";
-import {TileProps} from "../types/world";
+import {MajorLineDirection, TileProps} from "../types/world";
 import {Compiler} from "../../simulation/compiler/compiler";
 import {GameUnit} from "../../simulation/model/executionUnit";
-import {MajorLineDirection} from "../state/reducers/tileEditor/tileEditorReducer";
 import {Logger} from "./logger";
 import {renewAllZIndicesInTile} from "./someIndexHelper";
 
@@ -895,13 +894,13 @@ export function checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap(tile: Ti
     return {x: p.val, y: 0}
   })
     .concat(tile.botBorderPoints.map<PlainPoint>(p => {
-      return {x: p.val, y: tile.height}
+      return {x: p.val, y: tile.tileSettings.height}
     }))
     .concat(tile.leftBorderPoints.map<PlainPoint>(p => {
       return {x: 0, y: p.val}
     }))
     .concat(tile.rightBorderPoint.map<PlainPoint>(p => {
-      return {x: tile.width, y: p.val}
+      return {x: tile.tileSettings.width, y: p.val}
     }))
 
   for (const anchorPoint of allBorderPoints) {

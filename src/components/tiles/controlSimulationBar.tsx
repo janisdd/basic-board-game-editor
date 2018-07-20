@@ -156,7 +156,7 @@ class controlSimulationBar extends React.Component<Props, any> {
         throw new Error()
       }
 
-      Logger.fatal(`error on field after field with id: '${token.fieldId}', on tile '${token.tileGuid}' (${tile.displayName}), error: ${err.message}`)
+      Logger.fatal(`error on field after field with id: '${token.fieldId}', on tile '${token.tileGuid}' (${tile.tileSettings.displayName}), error: ${err.message}`)
     }
 
 
@@ -182,7 +182,7 @@ class controlSimulationBar extends React.Component<Props, any> {
             Logger.fatal(`tile with guid ${token.tileGuid} was not found`)
             throw new Error()
           }
-          Logger.fatal(`error on field after field with id: '${token.fieldId}', on tile '${token.tileGuid}' (${tile.displayName}), error: ${err.message}`)
+          Logger.fatal(`error on field after field with id: '${token.fieldId}', on tile '${token.tileGuid}' (${tile.tileSettings.displayName}), error: ${err.message}`)
         }
 
 
@@ -334,7 +334,7 @@ class controlSimulationBar extends React.Component<Props, any> {
                           throw new Error()
                         }
 
-                        Logger.fatal(`error on field after field with id: '${token.fieldId}', on tile '${token.tileGuid}' (${tile.displayName}), error: ${err.message}`)
+                        Logger.fatal(`error on field after field with id: '${token.fieldId}', on tile '${token.tileGuid}' (${tile.tileSettings.displayName}), error: ${err.message}`)
                       }
                     }
 

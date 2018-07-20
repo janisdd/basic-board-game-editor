@@ -93,7 +93,8 @@ import {
   set_fieldSymbols
 } from "../../state/reducers/tileEditor/symbols/fieldSymbols/actions";
 import {getGuid} from "../../helpers/guid";
-import {LeftTileEditorTabs, MajorLineDirection} from "../../state/reducers/tileEditor/tileEditorReducer";
+import {LeftTileEditorTabs} from "../../state/reducers/tileEditor/tileEditorReducer";
+import {MajorLineDirection} from "../../types/world";
 
 //const css = require('./styles.styl');
 

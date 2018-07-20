@@ -1,7 +1,8 @@
-import {ExportTile, ExportWorld, Tile} from "../types/world";
+import {ExportTile, ExportWorld, MajorLineDirection, Tile} from "../types/world";
 import {Logger} from "./logger";
 import {FieldSymbol} from "../types/drawing";
-import {appProperties} from "../constants";
+import {appProperties, defaultGameInitCode, defaultTileHeight, defaultTileWidth} from "../constants";
+import {SimulationTimes} from "../../simulation/machine/AbstractMachine";
 
 
 interface MigrationClass {
@@ -164,6 +165,122 @@ class Migration_1_0_1__to__1_0_2 implements MigrationClass {
 }
 
 
+//--- shallow migration: createVersionShallowMigration('1.0.2', '1.0.3')
+
+/**
+ * migration for version 1.0.3 to 1.1.0
+ *
+ * we changed to tile to have a field tileSettings where we save the tile settings so they can be exported
+ *   also we moved some tile props into the tileSettings
+ *
+ * when exporting the world we now also export the world settings (all world settings!)
+ */
+class Migration_1_0_3__to__1_1_0 implements MigrationClass {
+
+  oldVersion = '1.0.3'
+  newVersion = '1.1.0'
+
+  public migrateTile(exportTile: ExportTile): ExportTile {
+
+    const copy: ExportTile = {
+      ...exportTile,
+      editorVersion: this.newVersion,
+      tile: {
+        ...exportTile.tile,
+        tileSettings: { //this was added, use the default values at that time
+          displayName: exportTile.tile['displayName'], //moved into settings
+          width: exportTile.tile['width'], //moved into settings
+          height: exportTile.tile['height'], //moved into settings
+          majorLineDirection: MajorLineDirection.topToBottom,
+          gridSizeInPx: 10,
+          showGrid: true,
+          snapToGrid: true,
+          showSequenceIds: false,
+          moveBezierControlPointsWhenLineIsMoved: true,
+          arePrintGuidesDisplayed: false,
+          autoIncrementFieldTextNumbersOnDuplicate: true,
+          printLargeTilePreferredWidthInPx: 500,
+          printLargeTilePreferredHeightInPx: 500,
+          splitLargeTileForPrint: true,
+        }
+      }
+    }
+    //we moved them so remove in the upper level
+    delete copy.tile['displayName']
+    delete copy.tile['width']
+    delete copy.tile['height']
+
+    return copy
+  }
+
+  public migrateWorld(exportWorld: ExportWorld): ExportWorld {
+
+    //use the settings that were default at that time (so all get the same migration regardless of the current values (from the latest version)
+    const copy: ExportWorld = {
+      ...exportWorld,
+      editorVersion: this.newVersion,
+      worldSettings: {
+        selectedFieldBorderColor: 'blue',
+        selectedFieldBorderThicknessInPx: 1,
+        gridStrokeThicknessInPx: 0.2,
+        gridStrokeColor: 'gray',
+        linePointsUiDiameter: 3,
+        linePointsUiColor: 'black',
+        tileMidPointsUiColor: '#f1b213',
+        tileMidPointsDiameter: 3,
+        lineBezierControlPoint1UiDiameter: 3,
+        lineBezierControlPoint1UiColor: 'green',
+        lineBezierControlPoint2UiDiameter: 3,
+        lineBezierControlPoint2UiColor: 'blue',
+        fieldSequenceBoxColor: 'black',
+        fieldSequenceFont: 'Arial',
+        fieldSequenceFontColor: 'black',
+        fieldSequenceFontSizeInPx: 12,
+        anchorPointColor: '#f1b213',
+        anchorPointDiameter: 3,
+        anchorPointSnapToleranceRadiusInPx: 7,
+
+        stageOffsetX: 0,
+        stageOffsetY: 0,
+        stageScaleX: 1,
+        stageScaleY: 1,
+        stageOffsetXScaleCorrection: 0,
+        stageOffsetYScaleCorrection: 0,
+
+        worldWidthInTiles: exportWorld['worldWidthInTiles'], //this was saved
+        worldHeightInTiles: exportWorld['worldHeightInTiles'], //this was saved
+        expectedTileWidth: exportWorld['expectedTileWidth'], //this was saved
+        expectedTileHeight: exportWorld['expectedTileHeight'], //this was saved
+
+        worldCmdText: defaultGameInitCode,
+        printGameAsOneImage: false,
+
+        timeInS_rollDice: 2,
+        timeInS_choose_bool_func: 2,
+        timeInS_goto: 1.5,
+        timeInS_set_var: 3,
+        timeInS_advancePlayer: 1,
+        timeInS_rollback: 2,
+        timeInS_var_decl: 3,
+        timeInS_expr_primary_leftSteps: 2,
+        timeInS_expr_primary_constant: 0.5,
+        timeInS_expr_primary_ident: 1,
+        timeInS_expr_primary_incrementOrDecrement: 1,
+        timeInS_expr_disjunction: 1,
+        timeInS_expr_conjunction: 1,
+        timeInS_expr_comparison: 1,
+        timeInS_expr_relation: 1,
+        timeInS_expr_sum: 1,
+        timeInS_expr_term: 1,
+        timeInS_expr_factor: 1,
+      }
+    }
+
+    return copy
+  }
+
+}
+
 /**
  * a helper to create a shallow migration (no field/img/line props are changed, model) only ui stuff
  * @param {string} oldVersion
@@ -203,7 +320,8 @@ export class MigrationHelper {
   public static readonly allMigrations: ReadonlyArray<MigrationClass> = [
     new Migration_1_0_0__to__1_0_1(),
     new Migration_1_0_1__to__1_0_2(),
-    createVersionShallowMigration('1.0.2', '1.0.3')
+    createVersionShallowMigration('1.0.2', '1.0.3'),
+    new Migration_1_0_3__to__1_1_0(),
   ]
 
   /**

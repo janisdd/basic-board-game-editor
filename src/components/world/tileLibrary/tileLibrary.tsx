@@ -295,7 +295,7 @@ class tileLibrary extends React.Component<Props, any> {
                         />
 
                         <div>
-                          <span>{getI18n(this.props.langId, "Name")}: {tile.displayName}</span>
+                          <span>{getI18n(this.props.langId, "Name")}: {tile.tileSettings.displayName}</span>
                         </div>
 
                         <div className="flex-left-right">
@@ -379,7 +379,10 @@ class tileLibrary extends React.Component<Props, any> {
                               const copy: Tile = {
                                 ...tile,
                                 guid: getGuid(),
-                                displayName: tile.displayName + ' copy'
+                                tileSettings: {
+                                  ...tile.tileSettings,
+                                  displayName: tile.tileSettings.displayName + ' copy'
+                                }
                               }
 
                               this.props.set_tileLibrary_possibleTiles(this.props.possibleTiles.concat(copy))

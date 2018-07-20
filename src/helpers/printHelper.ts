@@ -54,8 +54,8 @@ export class PrintHelper {
 
     let canvas = document.createElement('canvas')
 
-    canvas.width = tile.width
-    canvas.height = tile.height
+    canvas.width = tile.tileSettings.width
+    canvas.height = tile.tileSettings.height
 
     const stage = this.printFullTile(
       tile,
@@ -68,7 +68,7 @@ export class PrintHelper {
       worldSettings
     )
 
-    const exporter = new (window as any).SVGExporter(stage, tile.width, tile.height, false);
+    const exporter = new (window as any).SVGExporter(stage, tile.tileSettings.width, tile.tileSettings.height, false);
     exporter.stretchImages = true;
     exporter.run()
     const serializer = new XMLSerializer();
@@ -106,8 +106,8 @@ export class PrintHelper {
     worldSettings: WorldSettings,
   ) {
 
-    const tilesWidth = tilesToPrint[0].width
-    const tilesHeight = tilesToPrint[0].height
+    const tilesWidth = tilesToPrint[0].tileSettings.width
+    const tilesHeight = tilesToPrint[0].tileSettings.height
 
     const boundingBox = WorldTilesHelper.getWorldBoundingBox(tileSurrogates)
     const widthInTiles = boundingBox.maxX - boundingBox.minX + 1 //+1 max = min = 1 --> 0 but this is 1 tile
@@ -411,7 +411,7 @@ export class PrintHelper {
 
 
     //canvas size is larger for printing (scaled) so use the tile size
-    graphics.drawGrid(stage, tile.width, tile.height, gridSizeInPx, gridStrokeThicknessInPx, gridStrokeColor, !drawGrid,
+    graphics.drawGrid(stage, tile.tileSettings.width, tile.tileSettings.height, gridSizeInPx, gridStrokeThicknessInPx, gridStrokeColor, !drawGrid,
       0, 0)
 
     graphics.drawFieldsOnTile(stage, tile.fieldShapes, [], [], null, null, null, zIndexCache, false, false,
@@ -650,8 +650,8 @@ export class PrintHelper {
 
       //only print the world as one image
 
-      const tilesWidth = tilesToPrint[0].width
-      const tilesHeight = tilesToPrint[0].height
+      const tilesWidth = tilesToPrint[0].tileSettings.width
+      const tilesHeight = tilesToPrint[0].tileSettings.height
 
       const boundingBox = WorldTilesHelper.getWorldBoundingBox(tileSurrogates)
       const widthInTiles = boundingBox.maxX - boundingBox.minX + 1 //+1 max = min = 1 --> 0 but this is 1 tile
@@ -794,8 +794,8 @@ export class PrintHelper {
 
         const canvas = printWindow.document.createElement('canvas') as HTMLCanvasElement
 
-        const fullTileWidth = printTile.width
-        const fillTileHeight = printTile.height
+        const fullTileWidth = printTile.tileSettings.width
+        const fillTileHeight = printTile.tileSettings.height
 
         canvas.style.width = `${fullTileWidth}px`
         canvas.style.height = `${fillTileHeight}px`
