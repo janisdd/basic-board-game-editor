@@ -880,9 +880,9 @@ export class Simulator {
         //transition to bot
 
         const nextCoords = this.getNextTileAndField(nextBotBorderPoint, nextTile, tiles, tileSurrogates,
-          nextNextSurrogate => nextNextSurrogate.x === nextTileSurrogate.x && nextNextSurrogate.y === nextTileSurrogate.y+1,
+          nextNextSurrogate => nextNextSurrogate.x === nextTileSurrogate.x && nextNextSurrogate.y === nextTileSurrogate.y + 1,
           nextNextTile => nextNextTile.topBorderPoints,
-          depthCounter+1
+          depthCounter + 1
         )
 
         return nextCoords
@@ -897,7 +897,7 @@ export class Simulator {
           const nextCoords = this.getNextTileAndField(nextTopBorderPoint, nextTile, tiles, tileSurrogates,
             nextNextSurrogate => nextNextSurrogate.x === nextTileSurrogate.x && nextNextSurrogate.y === nextTileSurrogate.y - 1,
             nextNextTile => nextNextTile.botBorderPoints,
-            depthCounter+1
+            depthCounter + 1
           )
 
           return nextCoords
@@ -913,7 +913,7 @@ export class Simulator {
             const nextCoords = this.getNextTileAndField(nextLeftBorderPoint, nextTile, tiles, tileSurrogates,
               nextNextSurrogate => nextNextSurrogate.x === nextTileSurrogate.x - 1 && nextNextSurrogate.y === nextTileSurrogate.y,
               nextNextTile => nextNextTile.rightBorderPoint,
-              depthCounter+1
+              depthCounter + 1
             )
 
             return nextCoords
@@ -928,7 +928,7 @@ export class Simulator {
               const nextCoords = this.getNextTileAndField(nexRightBorderPoint, nextTile, tiles, tileSurrogates,
                 nextNextSurrogate => nextNextSurrogate.x === nextTileSurrogate.x + 1 && nextNextSurrogate.y === nextTileSurrogate.y,
                 nextNextTile => nextNextTile.leftBorderPoints,
-                depthCounter+1
+                depthCounter + 1
               )
 
               return nextCoords
@@ -980,10 +980,13 @@ export class Simulator {
    */
   public static executeForceStatements(tiles: ReadonlyArray<Tile>, state: MachineState,
                                        checkTilePropsEndField: boolean
-  ): { state: MachineState, hasCurrentPlayerWon: boolean } {
+  ): { state: MachineState, hasCurrentPlayerWon: boolean, wasForcedField: boolean } {
+
     const token = state.players[state.currentPlayerIndex].tokens[state.currentPlayerActiveTokenIndex]
 
     let cmdText = this.getCurrentCmdText(tiles, token.tileGuid, token.fieldId)
+
+    let wasForcedField = false
 
     if (!cmdText) {
       Logger.fatal(`field ${token.fieldId} on tile ${token.tileGuid} has no commands`)
@@ -1029,6 +1032,8 @@ export class Simulator {
     const hasSomeImplicitForcedStatement = this.getImplicitForcedStatements(game.statements).length > 0
 
     if (isFirstStatementAForceStatement || hasSomeImplicitForcedStatement) {
+
+      wasForcedField = true
       for (const statement of statements) {
         state = AbstractMachine.executeStatement(statement, state)
 
@@ -1059,7 +1064,8 @@ export class Simulator {
       if (tile.simulationEndFieldIds.indexOf(token.fieldId) !== -1) {
         return {
           state,
-          hasCurrentPlayerWon: true
+          hasCurrentPlayerWon: true,
+          wasForcedField
         }
       }
 
@@ -1067,7 +1073,8 @@ export class Simulator {
 
     return {
       state,
-      hasCurrentPlayerWon
+      hasCurrentPlayerWon,
+      wasForcedField
     }
   }
 
@@ -1144,9 +1151,8 @@ export class Simulator {
   }
 
   /**
-   * execute the code but ignore all goto statements
+   * execute the code (all normal statements) but ignore all goto statements
    *
-   * if the first statement is a force statement do nothing here because we already executed this earlier
    * @param {ReadonlyArray<Tile>} tiles
    * @param {MachineState} state
    * @returns {MachineState}
@@ -1175,10 +1181,10 @@ export class Simulator {
 
     const normalStatements = this.getNormalStatements(game.statements)
 
-    const isFirstStatementAForceStatement = normalStatements.length > 0 && normalStatements[0].type === "force"
-
-    //if this is a force field we already executed it
-    if (isFirstStatementAForceStatement) return state
+    // const isFirstStatementAForceStatement = normalStatements.length > 0 && normalStatements[0].type === "force"
+    //
+    // //if this is a force field we already executed it
+    // if (isFirstStatementAForceStatement) return state
 
 
     for (let i = 0; i < normalStatements.length; i++) {
@@ -1193,6 +1199,9 @@ export class Simulator {
 
 
   /**
+   *
+   * keep this in sync with
+   * @link controlSimulationBar.do1SimulationStep
    *
    * @param {ReadonlyArray<Tile>} tiles
    * @param tileSurrogates surrogates for tile transitions or null
@@ -1215,8 +1224,6 @@ export class Simulator {
   ): Promise<MachineState> {
 
     //simulation is already inited
-
-    console.log(SimulationTimes._timeInS_rollDice)
 
     let promise = new Promise<MachineState>(async (resolve, reject) => {
 
@@ -1284,9 +1291,21 @@ export class Simulator {
             return
           }
 
+          const afterMovePos: WorldSimulationPosition = {
+            tileGuid: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].tileGuid,
+            fieldId: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].fieldId
+          }
+
           //execute force statements on the new field
           const forceExecuteResult = Simulator.executeForceStatements(tiles, state, checkTilePropsEndField)
           state = forceExecuteResult.state
+
+          const wasForcedField = forceExecuteResult.wasForcedField
+
+          const afterForcePos: WorldSimulationPosition = {
+            tileGuid: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].tileGuid,
+            fieldId: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].fieldId
+          }
 
           if (forceExecuteResult.hasCurrentPlayerWon || Simulator.currentPlayerHasWon(state)) {
             if (showPlayerHasWon) {
@@ -1306,9 +1325,21 @@ export class Simulator {
 
               state = Simulator.endRound(state)
             } else {
-              //execute the code on the current field (normal/not control statements) BUT
-              //IF we already executed the code because of force DON'T execute any statement
-              state = Simulator.executeCodeOnCurrentField(tiles, state)
+
+
+              //we are still on the same field & we already executed the statements because of force
+              if (wasForcedField && afterMovePos.fieldId === afterForcePos.fieldId && afterMovePos.tileGuid === afterForcePos.tileGuid) {
+                //do nothing
+              }
+              else {
+
+                //the current field was not forced OR we are on another field now
+                //so we are sure we don't execute anything twice
+
+                //the player stopped and we need to execute the fields command we landed on
+                state = Simulator.executeCodeOnCurrentField(tiles, state)
+              }
+
 
               if (Simulator.currentPlayerHasWon(state)) {
                 if (showPlayerHasWon) {

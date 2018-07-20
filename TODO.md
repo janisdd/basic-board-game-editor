@@ -43,9 +43,6 @@ ISSUES
 
 - error messages are not i18n ready
 
-- web worker cannot be loaded locally (open the index file in the browser)
-  - you cannot run *many simulations*
-
 
 
 QUESTIONS

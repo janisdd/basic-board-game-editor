@@ -8,6 +8,11 @@ already changed but version has not changed
 
 ## 1.1.0
 
+- [fixed] issue where a field was not executed when we stop on a forced field which will force us to step to the next field
+  which is also a forced field
+  - because we only checked if we are still on a forced field (in this case we didn't execute the statements of the 2nd field
+  - now we check if we moved to another field before
+  - so: ignore the statements if we are on the same field (where we already executed the force statements) & we are still on a forced field
 - [feature/break-soft] we export the world settings now with the world
   - on import we only use the known properties to overwrite the settings
 

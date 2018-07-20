@@ -6,7 +6,7 @@ import {SimulationStatus} from "../../types/states";
 import {Logger} from "../../helpers/logger";
 import {Tile} from "../../types/world";
 import {Simulator} from "../../../simulation/simulator";
-import {MachineState, WorldTileSurrogate} from "../../../simulation/machine/machineState";
+import {MachineState, WorldSimulationPosition, WorldTileSurrogate} from "../../../simulation/machine/machineState";
 import {RootState} from "../../state";
 import {Button, Icon} from "semantic-ui-react";
 import {
@@ -78,6 +78,10 @@ class controlSimulationBar extends React.Component<Props, any> {
   }
 
   //in own method for shortcut
+  /**
+   * keep this in sync with
+   * @link Simulator.runSimulationTillEnd
+   */
   do1SimulationStep() {
 
     if (this.props.simulationState.simulationStatus === null || this.props.simulationState.simulationStatus === SimulationStatus.running || this.props.simulationState.simulationStatus === SimulationStatus.finished || this.props.simulationState.simulationStatus === SimulationStatus.running_many_paused || this.props.simulationState.simulationStatus === SimulationStatus.running_many) {
@@ -135,12 +139,29 @@ class controlSimulationBar extends React.Component<Props, any> {
       return
     }
 
+    const afterMovePos: WorldSimulationPosition = {
+      tileGuid: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].tileGuid,
+      fieldId: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].fieldId
+    }
+
+    let afterForcePos: WorldSimulationPosition
+    let wasForcedField = false
+
     try {
+
       //when we get on the field execute the force statement immediately
       //here we also check if the current player is on an END field (and has won)
       const forceExecuteResult = Simulator.executeForceStatements(this.props.tiles, state,
         this.props.isSingleSimulation)
+
       state = forceExecuteResult.state
+
+      wasForcedField = forceExecuteResult.wasForcedField
+
+      afterForcePos = {
+        tileGuid: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].tileGuid,
+        fieldId: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].fieldId
+      }
 
       if (forceExecuteResult.hasCurrentPlayerWon || Simulator.currentPlayerHasWon(state)) {
         Logger.message(`player ${state.currentPlayerIndex} has won!`, 'Game over')
@@ -172,8 +193,21 @@ class controlSimulationBar extends React.Component<Props, any> {
       else {
 
         try {
-          //the player stopped and we need to execute the fields command we landed on
-          state = Simulator.executeCodeOnCurrentField(this.props.tiles, state)
+
+          //we are still on the same field & we already executed the statements because of force
+          if (wasForcedField && afterMovePos.fieldId === afterForcePos.fieldId && afterMovePos.tileGuid === afterForcePos.tileGuid) {
+            //do nothing
+          }
+          else {
+
+            //the current field was not forced OR we are on another field now
+            //so we are sure we don't execute anything twice
+
+            //the player stopped and we need to execute the fields command we landed on
+            state = Simulator.executeCodeOnCurrentField(this.props.tiles, state)
+          }
+
+
         } catch (err) {
           //in case an evaluation error occurred
           const tile = this.props.tiles.find(p => p.guid === token.tileGuid)
@@ -254,13 +288,11 @@ class controlSimulationBar extends React.Component<Props, any> {
                       ignoreFirstStateUpdate = true
                     }
 
-                    let lastKnownState: MachineState |null = null
+                    let lastKnownState: MachineState | null = null
 
                     try {
 
                       //then run the simulation till end
-
-                      console.log(SimulationTimes._timeInS_rollDice)
 
                       await Simulator.runSimulationTillEnd(this.props.tiles,
                         this.props.tileSurrogates,
