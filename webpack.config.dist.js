@@ -58,7 +58,7 @@ module.exports = {
       {
         test: /\.md$/,
         loader: 'raw-loader'
-      }
+      },
       /*
        {
        test: /\.js$/,

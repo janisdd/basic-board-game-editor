@@ -4,7 +4,10 @@
 
 already changed but version has not changed
 
+## 1.1.1
 
+- [fixed] hopefully importing version 1.1.0 version world files (the tile settings were not migrated properly)
+  - we now use the default values from the default tiles
 
 ## 1.1.0
 

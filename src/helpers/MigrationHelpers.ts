@@ -1,7 +1,7 @@
 import {ExportTile, ExportWorld, MajorLineDirection, Tile} from "../types/world";
 import {Logger} from "./logger";
 import {FieldSymbol} from "../types/drawing";
-import {appProperties, defaultGameInitCode, defaultTileHeight, defaultTileWidth} from "../constants";
+import {appProperties, defaultGameInitCode, defaultTileHeight, defaultTileWidth, getDefaultNewTile} from "../constants";
 import {SimulationTimes} from "../../simulation/machine/AbstractMachine";
 
 
@@ -216,6 +216,9 @@ class Migration_1_0_3__to__1_1_0 implements MigrationClass {
   public migrateWorld(exportWorld: ExportWorld): ExportWorld {
 
     //use the settings that were default at that time (so all get the same migration regardless of the current values (from the latest version)
+
+    const defaultTileSettings = getDefaultNewTile().tileSettings
+
     const copy: ExportWorld = {
       ...exportWorld,
       editorVersion: this.newVersion,
@@ -273,7 +276,80 @@ class Migration_1_0_3__to__1_1_0 implements MigrationClass {
         timeInS_expr_sum: 1,
         timeInS_expr_term: 1,
         timeInS_expr_factor: 1,
-      }
+      },
+      allTiles: exportWorld.allTiles.map(exportTile => {
+        return {
+          ...exportTile,
+          tileSettings: {
+            ...exportTile.tileSettings,
+            printLargeTilePreferredWidthInPx: defaultTileSettings.printLargeTilePreferredWidthInPx,
+            printLargeTilePreferredHeightInPx: defaultTileSettings.printLargeTilePreferredHeightInPx,
+            width: exportTile['width'],
+            height: exportTile['height'],
+            displayName: exportTile['displayName'],
+            arePrintGuidesDisplayed: defaultTileSettings.arePrintGuidesDisplayed,
+            autoIncrementFieldTextNumbersOnDuplicate: defaultTileSettings.autoIncrementFieldTextNumbersOnDuplicate,
+            gridSizeInPx: defaultTileSettings.gridSizeInPx,
+            majorLineDirection: defaultTileSettings.majorLineDirection,
+            moveBezierControlPointsWhenLineIsMoved: defaultTileSettings.moveBezierControlPointsWhenLineIsMoved,
+            showGrid: defaultTileSettings.showGrid,
+            showSequenceIds: defaultTileSettings.showSequenceIds,
+            snapToGrid: defaultTileSettings.snapToGrid,
+            splitLargeTileForPrint: defaultTileSettings.splitLargeTileForPrint,
+          }
+        }
+      })
+    }
+
+    return copy
+  }
+
+}
+
+class Migration_1_1_0__to__1_1_1 implements MigrationClass {
+
+  oldVersion = '1.1.0'
+  newVersion = '1.1.1'
+
+  public migrateTile(exportTile: ExportTile): ExportTile {
+
+    const copy: ExportTile = {
+      ...exportTile,
+      editorVersion: this.newVersion
+    }
+
+    return copy
+  }
+
+  public migrateWorld(exportWorld: ExportWorld): ExportWorld {
+
+    const defaultTileSettings = getDefaultNewTile().tileSettings
+
+    const copy: ExportWorld = {
+      ...exportWorld,
+      editorVersion: this.newVersion,
+      allTiles: exportWorld.allTiles.map(exportTile => {
+        return {
+          ...exportTile,
+          tileSettings: {
+            ...exportTile.tileSettings,
+            printLargeTilePreferredWidthInPx: defaultTileSettings.printLargeTilePreferredWidthInPx,
+            printLargeTilePreferredHeightInPx: defaultTileSettings.printLargeTilePreferredHeightInPx,
+            width: exportTile['width'] === undefined ? exportTile.tileSettings.width : exportTile['width'],
+            height: exportTile['height'] === undefined ? exportTile.tileSettings.width : exportTile['height'],
+            displayName: (exportTile['displayName'] === undefined || exportTile['displayName'] === '') ? exportTile.tileSettings.width : exportTile['displayName'],
+            arePrintGuidesDisplayed: defaultTileSettings.arePrintGuidesDisplayed,
+            autoIncrementFieldTextNumbersOnDuplicate: defaultTileSettings.autoIncrementFieldTextNumbersOnDuplicate,
+            gridSizeInPx: defaultTileSettings.gridSizeInPx,
+            majorLineDirection: defaultTileSettings.majorLineDirection,
+            moveBezierControlPointsWhenLineIsMoved: defaultTileSettings.moveBezierControlPointsWhenLineIsMoved,
+            showGrid: defaultTileSettings.showGrid,
+            showSequenceIds: defaultTileSettings.showSequenceIds,
+            snapToGrid: defaultTileSettings.snapToGrid,
+            splitLargeTileForPrint: defaultTileSettings.splitLargeTileForPrint,
+          }
+        }
+      })
     }
 
     return copy
@@ -322,6 +398,7 @@ export class MigrationHelper {
     new Migration_1_0_1__to__1_0_2(),
     createVersionShallowMigration('1.0.2', '1.0.3'),
     new Migration_1_0_3__to__1_1_0(),
+    new Migration_1_1_0__to__1_1_1()
   ]
 
   /**
