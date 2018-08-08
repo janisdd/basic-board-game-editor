@@ -137,10 +137,30 @@ var logTimes = false;
 var SimulationTimes = /** @class */ (function () {
     function SimulationTimes() {
     }
+    SimulationTimes.setTimes = function (obj) {
+        this._timeInS_rollDice = obj._timeInS_rollDice;
+        this._timeInS_choose_bool_func = obj._timeInS_choose_bool_func;
+        this._timeInS_goto = obj._timeInS_goto;
+        this._timeInS_set_var = obj._timeInS_set_var;
+        this._timeInS_advancePlayer = obj._timeInS_advancePlayer;
+        this._timeInS_rollback = obj._timeInS_rollback;
+        this._timeInS_var_decl = obj._timeInS_var_decl;
+        this._timeInS_expr_primary_leftSteps = obj._timeInS_expr_primary_leftSteps;
+        this._timeInS_expr_primary_constant = obj._timeInS_expr_primary_constant;
+        this._timeInS_expr_primary_ident = obj._timeInS_expr_primary_ident;
+        this._timeInS_expr_primary_incrementOrDecrement = obj._timeInS_expr_primary_incrementOrDecrement;
+        this._timeInS_expr_disjunction = obj._timeInS_expr_disjunction;
+        this._timeInS_expr_conjunction = obj._timeInS_expr_conjunction;
+        this._timeInS_expr_comparison = obj._timeInS_expr_comparison;
+        this._timeInS_expr_relation = obj._timeInS_expr_relation;
+        this._timeInS_expr_sum = obj._timeInS_expr_sum;
+        this._timeInS_expr_term = obj._timeInS_expr_term;
+        this._timeInS_expr_factor = obj._timeInS_expr_factor;
+    };
     //time to roll the dice
     SimulationTimes.timeInS_rollDice = function () {
-        if (logTimes)
-            console.log("roll took " + 2 + "s");
+        // if (logTimes)
+        // console.log(`roll took ${this._timeInS_rollDice}s`)
         return this._timeInS_rollDice;
     };
     SimulationTimes.timeInS_choose_bool_func = function () {
@@ -242,8 +262,8 @@ var SimulationTimes = /** @class */ (function () {
     //DON'T move this to constants else the simulation worker would include everything that constants reference to...
     //with webpack worker loader
     SimulationTimes.timeInS_rollDice_default = 2;
-    SimulationTimes.timeInS_choose_bool_func_default = 0.3;
-    SimulationTimes.timeInS_goto_default = 0.5;
+    SimulationTimes.timeInS_choose_bool_func_default = 2;
+    SimulationTimes.timeInS_goto_default = 1.5;
     SimulationTimes.timeInS_set_var_default = 3;
     SimulationTimes.timeInS_advancePlayer_default = 1;
     SimulationTimes.timeInS_rollback_default = 2;
@@ -363,6 +383,7 @@ var AbstractMachine = /** @class */ (function () {
             }
             default:
                 _notExhausiveHelper_1.notExhaustive(statement);
+                throw new Error();
         }
     };
     AbstractMachine.execPlayerDef = function (defs, state) {
@@ -435,6 +456,15 @@ var AbstractMachine = /** @class */ (function () {
             if (varDecl.var_type === executionUnit_1.VarType.int) {
                 if (expRes.boolVal !== null) {
                     this_1.makeError("player var " + varDecl.ident + " is of type int but expression is of type bool");
+                    throw new Error();
+                }
+                if (expRes.val === null) {
+                    this_1.makeError("player var " + varDecl.ident + " expression int was null");
+                    throw new Error();
+                }
+                if (varDecl.maxVal === null) {
+                    this_1.makeError("player var " + varDecl.ident + " expression int was null");
+                    throw new Error();
                 }
                 //replace the modified player
                 lastState = tslib_1.__assign({}, lastState, { players: lastState.players.map(function (p, index) {
