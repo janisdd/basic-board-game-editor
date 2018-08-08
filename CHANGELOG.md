@@ -6,6 +6,8 @@ already changed but version has not changed
 
 ## 1.1.1
 
+- [improved] the world view will now resize to the window size
+- [improved internal]the worker is now always named simulation.worker.js (no longer a hash) which is good for git
 - [fixed] hopefully importing version 1.1.0 version world files (the tile settings were not migrated properly)
   - we now use the default values from the default tiles
 

@@ -140,8 +140,8 @@ class controlSimulationBar extends React.Component<Props, any> {
     }
 
     const afterMovePos: WorldSimulationPosition = {
-      tileGuid: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].tileGuid,
-      fieldId: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].fieldId
+      tileGuid: state.players[state.currentPlayerIndex].tokens[state.currentPlayerActiveTokenIndex].tileGuid,
+      fieldId: state.players[state.currentPlayerIndex].tokens[state.currentPlayerActiveTokenIndex].fieldId
     }
 
     let afterForcePos: WorldSimulationPosition
@@ -159,8 +159,8 @@ class controlSimulationBar extends React.Component<Props, any> {
       wasForcedField = forceExecuteResult.wasForcedField
 
       afterForcePos = {
-        tileGuid: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].tileGuid,
-        fieldId: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].fieldId
+        tileGuid: state.players[state.currentPlayerIndex].tokens[state.currentPlayerActiveTokenIndex].tileGuid,
+        fieldId: state.players[state.currentPlayerIndex].tokens[state.currentPlayerActiveTokenIndex].fieldId
       }
 
       if (forceExecuteResult.hasCurrentPlayerWon || Simulator.currentPlayerHasWon(state)) {

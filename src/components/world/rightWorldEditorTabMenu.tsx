@@ -54,20 +54,19 @@ class rightWorldEditorTabMenu extends React.Component<Props, any> {
       gameInitCmdText={this.props.worldCmdText}
       tiles={tiles}
       tileSurrogates={this.props.tileSurrogates}
-      className="property-editor-right"
+      className="property-editor-right-full-sized"
       isSingleSimulation={false}
       />
     )
 
     return (
-      <div className="right-tab-menu">
+      <div className="right-tab-menu-full-sized">
         <Tab menu={{secondary: true, pointing: true}}
              //activeIndex={this.props.rightTabActiveIndex}
              onTabChange={(event1, data) => {
                //this.props.set_editor_rightTabActiveIndex(data.activeIndex as number)
              }}
              panes={
-
                [
                  {
                    menuItem: getI18n(this.props.langId, "Simulation"),

@@ -39,13 +39,36 @@ body {
   border-bottom 1px solid #dddddd
 
   height 657px //TODO make this stretch to bottom but without site scrollbar
+  //height calc(100% - 1em)
   overflow visible
+
+}
+
+.right-tab-menu-full-sized {
+  border-left 1px solid #dddddd
+  border-top 1px solid #dddddd
+  border-bottom 1px solid #dddddd
+
+  height calc(100% - 1em)
+  overflow visible
+
+  >div { //this is the tab wrapper div
+    overflow hidden
+    height 100%
+  }
 }
 
 .property-editor-right {
   width 350px
-  //max-height 600px //TODO make this stretch to bottom but without site scrollbar
+  max-height 600px //TODO make this stretch to bottom but without site scrollbar
   height 600px
+  overflow auto
+  padding 0.5em
+}
+
+.property-editor-right-full-sized {
+  width 350px
+  height 100%
   overflow auto
   padding 0.5em
 }

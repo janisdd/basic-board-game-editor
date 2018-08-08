@@ -149,7 +149,7 @@ export class SimulationTimes {
   //time to roll the dice
   public static timeInS_rollDice(): number {
     // if (logTimes)
-    console.log(`roll took ${this._timeInS_rollDice}s`)
+    // console.log(`roll took ${this._timeInS_rollDice}s`)
     return this._timeInS_rollDice
   }
 

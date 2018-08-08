@@ -8,6 +8,7 @@
   - useful e.g. for end field (always forced)
 
 - MAYBE migrate to mobx? performance should be better... but a lot of work
+  - but we would lose easy undo/redo...
 
 - change the worker deploy... the hash is bad for git because it's changed every build
 

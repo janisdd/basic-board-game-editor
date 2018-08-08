@@ -1292,8 +1292,8 @@ export class Simulator {
           }
 
           const afterMovePos: WorldSimulationPosition = {
-            tileGuid: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].tileGuid,
-            fieldId: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].fieldId
+            tileGuid: state.players[state.currentPlayerIndex].tokens[state.currentPlayerActiveTokenIndex].tileGuid,
+            fieldId: state.players[state.currentPlayerIndex].tokens[state.currentPlayerActiveTokenIndex].fieldId
           }
 
           //execute force statements on the new field
@@ -1303,8 +1303,8 @@ export class Simulator {
           const wasForcedField = forceExecuteResult.wasForcedField
 
           const afterForcePos: WorldSimulationPosition = {
-            tileGuid: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].tileGuid,
-            fieldId: state.players[state.currentPlayerIndex].tokens[state.currentPlayerIndex].fieldId
+            tileGuid: state.players[state.currentPlayerIndex].tokens[state.currentPlayerActiveTokenIndex].tileGuid,
+            fieldId: state.players[state.currentPlayerIndex].tokens[state.currentPlayerActiveTokenIndex].fieldId
           }
 
           if (forceExecuteResult.hasCurrentPlayerWon || Simulator.currentPlayerHasWon(state)) {

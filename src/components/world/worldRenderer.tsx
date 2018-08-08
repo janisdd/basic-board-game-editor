@@ -58,9 +58,13 @@ const dispatchProps = returntypeof(mapDispatchToProps);
 type Props = typeof stateProps & typeof dispatchProps;
 
 
+const canvasContainerId = 'canvasContainerId'
+
 class worldRenderer extends React.Component<Props, any> {
 
   canvas: HTMLCanvasElement = null
+
+  canvasContainer: HTMLDivElement = null
 
   renderStage: createjs.Stage = null
 
@@ -85,10 +89,24 @@ class worldRenderer extends React.Component<Props, any> {
 
   isDraggingStage: boolean = false
 
+  resizeHandler: EventListener
+
   componentDidMount() {
     this.renderStage = new createjs.Stage(this.canvas)
     this.zIndexCache = {}
     this.updateCanvasModel()
+
+
+    let self = this
+    window.addEventListener('resize', this.resizeHandler = debounce(() => {
+      self.resizeRenderer()
+    }, 200, false))
+    self.resizeRenderer()
+  }
+
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.resizeHandler)
   }
 
   componentDidUpdate() {
@@ -402,13 +420,25 @@ class worldRenderer extends React.Component<Props, any> {
     }
 
     this.renderStage.update()
+  }
 
+  resizeRenderer() {
+
+
+    if (!this.canvas || !this.canvasContainer) return
+
+
+    this.canvas.height = this.canvasContainer.offsetHeight
+    this.canvas.width = this.canvasContainer.offsetWidth
+
+    //force redraw
+    this.updateCanvasModel()
 
   }
 
   render(): JSX.Element {
     return (
-      <div className="fh fw">
+      <div id={canvasContainerId} className="fh fw" ref={p => this.canvasContainer = p}>
 
         <canvas id="world-renderer-canvas" className="tile-canvas" ref={p => this.canvas = p}
                 width={1200}
@@ -421,3 +451,18 @@ class worldRenderer extends React.Component<Props, any> {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(worldRenderer)
+
+const debounce = (func: any, wait: any, immediate: any) => {
+  var timeout: any;
+  return () => {
+    const context = this
+    const later = function () {
+      timeout = null;
+      if (!immediate) func.apply(context);
+    };
+    const callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context);
+  };
+};

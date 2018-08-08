@@ -18,7 +18,7 @@ import {Logger} from "../../helpers/logger";
 import {SimulationResult} from "../../state/reducers/tileEditor/tileEditorReducer";
 
 
-import Worker = require("worker-loader!../../helpers/workers/simulation.worker")
+import Worker = require("worker-loader?name=simulation.worker.js!../../helpers/workers/simulation.worker")
 import {SimulationStatus, WorkerInputData, WorkerOutData} from "../../types/states";
 import {
   set_simulation_maxTotalStepsPerSimulation,
