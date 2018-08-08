@@ -2,7 +2,8 @@
   display: grid;
   grid-column-gap: 0.5em;
   grid-row-gap: 0.5em;
-  overflow: auto;
+  overflow-y: hidden;
+  overflow-x: auto;
 }
 .tile-editor-content .left-tab-menu {
   grid-column-start: 1;
@@ -97,6 +98,7 @@
 .world-editor {
   display: flex;
   flex-direction: column;
+  height: calc(100% - 55px);
 }
 .world-editor-settings-bar {
   margin-bottom: 0.5em;
@@ -114,24 +116,14 @@
   margin-right: 1em;
 }
 .world-editor-main-area {
-  display: grid;
-  grid-column-gap: 0.5em;
-  grid-row-gap: 0.5em;
+  display: flex;
   overflow: auto;
+  height: 100%;
 }
 .world-editor-main-area .left-area {
-  grid-column-start: 1;
-  grid-column-end: 1;
-  grid-row-start: 1;
-  grid-row-end: 1;
-  justify-self: center;
-}
-.world-editor-main-area .right-area {
-  grid-column-start: 2;
-  grid-column-end: 2;
-  grid-row-start: 1;
-  grid-row-end: 1;
-  justify-self: right;
+  overflow: hidden;
+  padding: 1em;
+  flex: 1;
 }
 .white-colored {
   color: #fff;
@@ -700,9 +692,27 @@ body {
   height: 657px;
   overflow: visible;
 }
+.right-tab-menu-full-sized {
+  border-left: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  height: calc(100% - 1em);
+  overflow: visible;
+}
+.right-tab-menu-full-sized >div {
+  overflow: hidden;
+  height: 100%;
+}
 .property-editor-right {
   width: 350px;
+  max-height: 600px;
   height: 600px;
+  overflow: auto;
+  padding: 0.5em;
+}
+.property-editor-right-full-sized {
+  width: 350px;
+  height: 100%;
   overflow: auto;
   padding: 0.5em;
 }
