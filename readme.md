@@ -1,6 +1,6 @@
 # basic board game editor
 
-is a basic board game editor with some simulation capabilities
+is a basic board game editor with some simulation capabilities (and printing)
 
 [Demo](https://janisdd.github.io/basic-board-game-editor/)
 
