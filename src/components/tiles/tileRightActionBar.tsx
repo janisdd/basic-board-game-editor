@@ -115,20 +115,29 @@ class tileRightActionBar extends React.Component<Props, any> {
         >
           <Button icon
                   onClick={() => {
-                    autoConnectFieldsWithLinesByCmdText(
-                      this.props.fieldShapes,
-                      this.props.fieldSymbols,
-                      this.props.amountOfShapesInTile,
-                      this.props.tileProps.topBorderPoints,
-                      this.props.tileProps.botBorderPoints,
-                      this.props.tileProps.leftBorderPoints,
-                      this.props.tileProps.rightBorderPoint,
-                      this.props.tileProps.tileSettings.width,
-                      this.props.tileProps.tileSettings.height,
-                      this.props.worldSettings.tileMidPointsDiameter,
-                      this.props.settings.tileProps.tileSettings.majorLineDirection,
-                      this.props.lineShapes
-                    )
+
+                    try {
+                      autoConnectFieldsWithLinesByCmdText(
+                        this.props.fieldShapes,
+                        this.props.fieldSymbols,
+                        this.props.amountOfShapesInTile,
+                        this.props.tileProps.topBorderPoints,
+                        this.props.tileProps.botBorderPoints,
+                        this.props.tileProps.leftBorderPoints,
+                        this.props.tileProps.rightBorderPoint,
+                        this.props.tileProps.tileSettings.width,
+                        this.props.tileProps.tileSettings.height,
+                        this.props.worldSettings.tileMidPointsDiameter,
+                        this.props.settings.tileProps.tileSettings.majorLineDirection,
+                        this.props.lineShapes
+                      )
+                    } catch (err) {
+                      //probably a syntax error
+                      console.error(err)
+                      Logger.fatal('error connecting fields: ' + err)
+                    }
+
+
                   }}
           >
             <Icon name="wizard"/>

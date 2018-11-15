@@ -353,7 +353,8 @@ function connectFieldsFromRootFieldByCmdText(
   try {
     game = compiler.parse(rootField.cmdText)
   } catch (err) {
-    throw err
+    const msg = err as string
+    throw new Error(`parsing error on field with id '${rootField.id}': ${msg}`)
   }
 
   let lastZIndex = newZIndex
