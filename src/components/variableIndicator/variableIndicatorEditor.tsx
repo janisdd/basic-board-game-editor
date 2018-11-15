@@ -1,28 +1,29 @@
 import * as React from "react";
+import {SyntheticEvent} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
 import {Button, Checkbox, Form, Icon} from "semantic-ui-react";
 import {
-  set_varIndicator_outerCircleDiameterInPxAction,
-  set_varIndicator_innerCircleDiameterInPxAction,
-  set_varIndicator_numOfFieldsAction,
-  set_varIndicator_innerText,
-  varIndicator_reset,
-  set_varIndicator_fontSizeInPxAction,
+  set_varIndicator_drawQrCode,
   set_varIndicator_fontNameAction,
+  set_varIndicator_fontSizeInPxAction,
+  set_varIndicator_innerCircleDiameterInPxAction,
+  set_varIndicator_innerText,
   set_varIndicator_isBoolVarAction,
-  set_varIndicator_innerTextFontSizeInPxAction
+  set_varIndicator_numOfFieldsAction,
+  set_varIndicator_outerCircleDiameterInPxAction,
+  varIndicator_reset
 } from "../../state/reducers/variableIndicator/actions";
-import {SyntheticEvent} from "react";
 import {CheckboxData, ZIndexCache} from "../../types/ui";
 import {VariableIndicatorDrawer} from "../../../graphics/variableIndicatorDrawer";
 import * as graphics from '../../../graphics/graphicsCore'
 import {PrintHelper} from "../../helpers/printHelper";
-import {printVariableIndicatorBorderColor} from "../../constants";
+import {printVariableIndicatorBorderColor, printVariableIndicatorStrokeThickness} from "../../constants";
 import {getI18n} from "../../../i18n/i18nRoot";
 import ToolTip from '../helpers/ToolTip'
+import IconToolTip from '../helpers/IconToolTip';
 
 //const css = require('./styles.styl');
 
@@ -51,7 +52,8 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_varIndicator_isBoolVarAction,
   set_varIndicator_fontSizeInPxAction,
   set_varIndicator_fontNameAction,
-  set_varIndicator_innerTextFontSizeInPxAction,
+
+  set_varIndicator_drawQrCode,
 
 }, dispatch)
 
@@ -66,17 +68,17 @@ class variableIndicatorEditor extends React.Component<Props, any> {
   zIndexCache: ZIndexCache = {}
   renderStage: createjs.Stage = null
 
-  componentDidMount() {
+  async componentDidMount() {
     this.renderStage = new createjs.Stage(this.canvas)
     this.zIndexCache = {}
-    this.updateCanvasModel()
+    await this.updateCanvasModel()
   }
 
-  componentDidUpdate() {
-    this.updateCanvasModel()
+  async componentDidUpdate() {
+    await this.updateCanvasModel()
   }
 
-  updateCanvasModel() {
+  async updateCanvasModel() {
     //clear all old
     this.renderStage.removeAllEventListeners()
     for (const item of this.renderStage.children) {
@@ -98,7 +100,7 @@ class variableIndicatorEditor extends React.Component<Props, any> {
       1,
       '#dddddd', false, 0, 0)
 
-    VariableIndicatorDrawer.drawVariableIndicator(this.renderStage,
+    await VariableIndicatorDrawer.drawVariableIndicator(this.renderStage,
       width,
       height,
       this.props.state.outerCircleDiameterInPx,
@@ -108,7 +110,8 @@ class variableIndicatorEditor extends React.Component<Props, any> {
       this.props.state.isBoolVar,
       this.props.state.fontSizeInPx,
       this.props.state.fontName,
-      this.props.state.innerTextFontSizeInPx
+      printVariableIndicatorStrokeThickness,
+      this.props.state.drawQrCode
     )
 
     this.renderStage.update()
@@ -116,13 +119,13 @@ class variableIndicatorEditor extends React.Component<Props, any> {
 
   render(): JSX.Element {
     return (
-      <div>
+      <div style={{padding: '0 1em'}}>
 
-        <div className="flexed">
+        <div className="flexed" style={{marginBottom: '1em'}}>
 
           <Button icon className="mar-right"
-                  onClick={() => {
-                    PrintHelper.printVariableIndicator(
+                  onClick={async () => {
+                    await PrintHelper.printVariableIndicator(
                       this.props.state.outerCircleDiameterInPx,
                       this.props.state.outerCircleDiameterInPx,
                       this.props.state.outerCircleDiameterInPx,
@@ -133,7 +136,8 @@ class variableIndicatorEditor extends React.Component<Props, any> {
                       this.props.state.isBoolVar,
                       this.props.state.fontSizeInPx,
                       this.props.state.fontName,
-                      this.props.state.innerTextFontSizeInPx
+                      printVariableIndicatorStrokeThickness,
+                      this.props.state.drawQrCode
                     )
                   }}
           >
@@ -158,12 +162,22 @@ class variableIndicatorEditor extends React.Component<Props, any> {
 
             <Form.Field>
               <Form.Field>
+
+                <Form.Field>
+                  <Checkbox label={getI18n(this.props.langId, "Draw Qr code")} checked={this.props.state.drawQrCode}
+                            onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
+                              this.props.set_varIndicator_drawQrCode(data.checked)
+                            }}
+                  />
+                </Form.Field>
+
                 <Checkbox label={getI18n(this.props.langId, "Is bool variable")} checked={this.props.state.isBoolVar}
                           onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
                             this.props.set_varIndicator_isBoolVarAction(data.checked)
                           }}
                 />
               </Form.Field>
+
             </Form.Field>
 
             <Form.Field>
@@ -187,7 +201,10 @@ class variableIndicatorEditor extends React.Component<Props, any> {
             </Form.Field>
 
             <Form.Field>
-              <label>{getI18n(this.props.langId, "Amount of fields")}</label>
+              <label>{getI18n(this.props.langId, "Amount of fields")}
+              <IconToolTip message={getI18n(this.props.langId, "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 10, -1 to -10, 0 and -12")}
+              />
+              </label>
               <input type="number" placeholder='32' value={this.props.state.numOfFields}
                      onChange={(e: SyntheticEvent<HTMLInputElement>) => {
                        const val = parseInt(e.currentTarget.value)
@@ -236,27 +253,12 @@ class variableIndicatorEditor extends React.Component<Props, any> {
               />
             </Form.Field>
 
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Inner text font size in px")}</label>
-              <input type="number"
-                     value={this.props.state.innerTextFontSizeInPx}
-
-                     onChange={(e) => {
-                       const val = parseInt(e.currentTarget.value)
-
-                       if (isNaN(val)) return
-
-                       this.props.set_varIndicator_innerTextFontSizeInPxAction(val)
-                     }}
-              />
-            </Form.Field>
-
           </Form>
 
           <div>
             <canvas className="tile-canvas" ref={p => this.canvas = p} width={this.props.state.outerCircleDiameterInPx}
                     height={this.props.state.outerCircleDiameterInPx}
-                    style={{maxHeight: 500, maxWidth: 500}}
+                    style={{maxHeight: 1000, maxWidth: 1000}}
             ></canvas>
           </div>
 

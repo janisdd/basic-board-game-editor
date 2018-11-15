@@ -117,6 +117,7 @@ class rightEditorTabMenu extends React.Component<Props, any> {
 
                        if (isNaN(val)) {
                          this.props.set_editor_simulationStartFieldIds([])
+                         return
                        }
 
                        this.props.set_editor_simulationStartFieldIds([val])

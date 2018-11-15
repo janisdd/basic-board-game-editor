@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
-import {worldFileExtensionWithoutDot} from "../../constants";
+import {printVariableIndicatorStrokeThickness, worldFileExtensionWithoutDot} from "../../constants";
 import {Button, Icon} from "semantic-ui-react";
 import {
   set_world_isTileEditorDisplayed, set_world_isTileLibraryModalDisplayed
@@ -228,10 +228,10 @@ class worldActionsBar extends React.Component<Props, any> {
 
 
         <ToolTip
-          message={getI18n(this.props.langId, "Print world & all found variables")}>
-          <Button disabled={tiles.length === 0} icon onClick={() => {
+          message={getI18n(this.props.langId, "Print world & all found variables. For the variables the settings in the variable indicator tab are used")}>
+          <Button disabled={tiles.length === 0} icon onClick={async () => {
 
-            PrintHelper.printWorld(this.props.tileSurrogatesState.present,
+            await PrintHelper.printWorld(this.props.tileSurrogatesState.present,
               tiles,
               this.props.fieldSymbols,
               this.props.imgSymbols,
@@ -250,7 +250,8 @@ class worldActionsBar extends React.Component<Props, any> {
               this.props.worldSettings.expectedTileHeight,
               this.props.variableIndicatorState.fontSizeInPx,
               this.props.variableIndicatorState.fontName,
-              this.props.variableIndicatorState.innerTextFontSizeInPx,
+              printVariableIndicatorStrokeThickness,
+              this.props.variableIndicatorState.drawQrCode
             )
           }}>
             <Icon name="print"/>

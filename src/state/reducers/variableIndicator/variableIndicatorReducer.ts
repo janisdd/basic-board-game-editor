@@ -14,7 +14,7 @@ export type State = {
   readonly fontSizeInPx: number
   readonly fontName: string
 
-  readonly innerTextFontSizeInPx: number
+  readonly drawQrCode: boolean
 }
 
 
@@ -24,9 +24,9 @@ export const initial: State = {
   numOfFields: 12,
   innerText: 'text',
   isBoolVar: false,
-  fontSizeInPx: 12,
-  innerTextFontSizeInPx: 12,
-  fontName: 'Arial'
+  fontSizeInPx: 18,
+  fontName: 'Arial',
+  drawQrCode: true
 }
 
 export interface ActionBase extends Action {
@@ -42,7 +42,8 @@ export enum ActionType {
   SET_varIndicator_isBoolVar = 'variableIndicatorReducer_SET_varIndicator_isBoolVar',
   SET_varIndicator_fontSizeInPx = 'variableIndicatorReducer_SET_varIndicator_fontSizeInPx',
   SET_varIndicator_fontName = 'variableIndicatorReducer_SET_varIndicator_fontName',
-  SET_varIndicator_innerTextFontSizeInPx = 'variableIndicatorReducer_SET_varIndicator_innerTextFontSizeInPx',
+
+  SET_drawQrCode = 'variableIndicatorReducer_SET_drawQrCode',
 
 
   RESET = 'variableIndicatorReducer_RESET',
@@ -84,9 +85,10 @@ export interface SET_varIndicator_fontNameAction extends ActionBase {
   readonly fontName: string
 }
 
-export interface SET_varIndicator_innerTextFontSizeInPxAction extends ActionBase {
-  readonly type: ActionType.SET_varIndicator_innerTextFontSizeInPx
-  readonly innerTextFontSizeInPx: number
+
+export interface SET_drawQrCodeAction extends ActionBase {
+  readonly type: ActionType.SET_drawQrCode
+  readonly drawQrCode: boolean
 }
 
 
@@ -103,7 +105,7 @@ export type AllActions =
   | SET_varIndicator_isBoolVarAction
   | SET_varIndicator_fontSizeInPxAction
   | SET_varIndicator_fontNameAction
-  | SET_varIndicator_innerTextFontSizeInPxAction
+  | SET_drawQrCodeAction
 
 
 export function reducer(state: State = initial, action: AllActions): State {
@@ -151,10 +153,10 @@ export function reducer(state: State = initial, action: AllActions): State {
         fontName: action.fontName
       }
 
-    case ActionType.SET_varIndicator_innerTextFontSizeInPx:
+    case ActionType.SET_drawQrCode:
       return {
         ...state,
-        innerTextFontSizeInPx: action.innerTextFontSizeInPx
+        drawQrCode: action.drawQrCode
       }
 
     case ActionType.RESET:

@@ -220,7 +220,34 @@ export interface ExportWorld extends SomeExport {
 
 
 
-
+export interface VariableIndicatorQrCodeData {
+  readonly version: number
+  readonly qrType: 'varInd'
+  /**
+   * outer circle diameter
+   */
+  readonly oDiam: number,
+  /**
+   * inner circle diameter
+   */
+  readonly iDiam: number,
+  /**
+   * numOfFields
+   */
+  readonly fields: number,
+  /**
+   * inner text
+   */
+  readonly text: string,
+  /**
+   * fontSizeInPx
+   */
+  readonly fSize: number,
+  /**
+   * fontName
+   */
+  readonly fName: string,
+}
 
 
 

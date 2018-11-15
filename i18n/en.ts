@@ -8,12 +8,14 @@ export const lang_en: LangObj = {
   //--- variable indicator editor
   "Variable indicator editor": "Variable indicator editor",
   "Is bool variable": "Is bool variable",
+  "Draw Qr code" : "Draw Qr code",
   "Outer circle diameter in px": "Outer circle diameter in px",
   "Inner circle diameter in px": "Inner circle diameter in px",
   "Amount of fields": "Amount of fields",
   "Inner text": "Inner text",
   "Inner text font size in px": "Inner text font size in px",
   "Reset to defaults": "Reset to defaults",
+  "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 10, -1 to -10, 0 and -12" : "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 10, -1 to -10, 0 and -12",
   "Guide": "Guide",
   //--- world
   "World editor": "World editor",
@@ -28,7 +30,7 @@ export const lang_en: LangObj = {
   "Start automatic simulation till end. This parses all fields before starting the simulation. We expect 1 start field and at least 1 end field": "Start automatic simulation till end. This parses all fields before starting the simulation. We expect 1 start field and at least 1 end field",
   "Import world": "Import world",
   "Export world. This will also export all images in the library": "Export world. This will also export all images in the library",
-  "Print world & all found variables": "Print world & all found variables",
+  "Print world & all found variables. For the variables the settings in the variable indicator tab are used": "Print world & all found variables. For the variables the settings in the variable indicator tab are used",
   "World settings": "World settings",
   "Set tile into the selected area": "Set tile into the selected area",
   "Edit tile in the selected area": "Edit tile in the selected area",

@@ -18,6 +18,11 @@ export const appProperties = {
   exportFileNamePrefix: 'bbge'
 }
 
+
+export const qrCodeSizeInPx = 300
+export const qrCodeDataVersion = 1
+export const qrCodeCorrectionLevel: "low" | "medium" | "quartile" | "high" = "low"
+
 export const maxTileBorderPointToBorderPointTransitionWithoutFields = 1000
 
 export let isLinkedToSymbolIndicatorSizeInPx = 10
@@ -53,6 +58,7 @@ export const worldSelectedTileBorderColor = 'blue'
 export const worldTileBorderColor = '#dddddd'
 
 export const printVariableIndicatorBorderColor = '#dddddd'
+export const printVariableIndicatorStrokeThickness = 3
 
 export const copyPastDiffXInPx = 20
 export const copyPastDiffYInPx = 20
@@ -78,8 +84,8 @@ export const defaultArrowHeight = 10
 export const symbolPreviewStageXOffset = 10
 export const symbolPreviewStageYOffset = 10
 
-export const defaultVariableIndicatorOuterCircleDiameterInPx = 500
-export const defaultVariableIndicatorInnerCircleDiameterInPx = 300
+export const defaultVariableIndicatorOuterCircleDiameterInPx = 700
+export const defaultVariableIndicatorInnerCircleDiameterInPx = 430
 
 
 export const undoShapeLimit = 50

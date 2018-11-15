@@ -10,12 +10,14 @@ export interface LangObj {
   //--- variable indicator editor
   "Variable indicator editor": string
   "Is bool variable": string
+  "Draw Qr code": string
   "Outer circle diameter in px": string
   "Inner circle diameter in px": string
   "Amount of fields": string
   "Inner text": string
   "Inner text font size in px": string
   "Reset to defaults": string
+  "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 10, -1 to -10, 0 and -12": string
   //--- guide
   "Guide": string
   //--- world editor
@@ -31,7 +33,7 @@ export interface LangObj {
   "Start automatic simulation till end. This parses all fields before starting the simulation. We expect 1 start field and at least 1 end field": string
   "Import world": string
   "Export world. This will also export all images in the library": string
-  "Print world & all found variables": string
+  "Print world & all found variables. For the variables the settings in the variable indicator tab are used": string
   "World settings": string
   "Set tile into the selected area": string
   "Edit tile in the selected area": string

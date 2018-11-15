@@ -1,9 +1,9 @@
 import {
   ActionBase,
   ActionType,
-  ResetAction, SET_varIndicator_fontNameAction, SET_varIndicator_fontSizeInPxAction,
+  ResetAction, SET_drawQrCodeAction, SET_varIndicator_fontNameAction, SET_varIndicator_fontSizeInPxAction,
   SET_varIndicator_innerCircleDiameterInPxAction,
-  SET_varIndicator_innerTextAction, SET_varIndicator_innerTextFontSizeInPxAction,
+  SET_varIndicator_innerTextAction,
   SET_varIndicator_isBoolVarAction,
   SET_varIndicator_numOfFieldsAction,
   SET_varIndicator_outerCircleDiameterInPxAction
@@ -58,12 +58,14 @@ export function set_varIndicator_fontNameAction(fontName: string): SET_varIndica
   }
 }
 
-export function set_varIndicator_innerTextFontSizeInPxAction(innerTextFontSizeInPx: number): SET_varIndicator_innerTextFontSizeInPxAction {
+
+export function set_varIndicator_drawQrCode(drawQrCode: boolean): SET_drawQrCodeAction {
   return {
-    type: ActionType.SET_varIndicator_innerTextFontSizeInPx,
-    innerTextFontSizeInPx
+    type: ActionType.SET_drawQrCode,
+    drawQrCode
   }
 }
+
 
 export function varIndicator_reset(): ResetAction {
   return {

@@ -2,6 +2,9 @@
 
 >keep this in sync with /simulation/simulator.ts > runSimulationTillEnd
 
+the game starts on the field with the command `game_start()` (or with some additional parameters), see *Language > built-in functions*
+the game end can be different from game to game, see *Gmae end behaviors*
+
 
 one turn/round in the simulator/game goes through the following steps
 

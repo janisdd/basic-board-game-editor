@@ -1,5 +1,9 @@
 import {PlainPoint} from "../src/types/drawing";
 import {rotatePointBy} from "../src/helpers/interactionHelper";
+import * as QRCode from "qrcode";
+import {VariableIndicatorQrCodeData} from "../src/types/world";
+import {qrCodeCorrectionLevel, qrCodeDataVersion, qrCodeSizeInPx} from "../src/constants";
+import Bitmap = createjs.Bitmap;
 
 
 export class VariableIndicatorDrawer {
@@ -19,8 +23,10 @@ export class VariableIndicatorDrawer {
    * @param fontSizeInPx
    * @param fontName
    * @param innerTextFontSizeInPx
+   * @param strokeThickness
+   * @param drawQrCode
    */
-  public static drawVariableIndicator(stage: createjs.Stage,
+  public static async drawVariableIndicator(stage: createjs.Stage,
                                       stageWidth: number,
                                       stageHeight: number,
                                       outerCircleDiameterInPx: number,
@@ -30,8 +36,9 @@ export class VariableIndicatorDrawer {
                                       isBoolVar: boolean,
                                       fontSizeInPx: number,
                                       fontName: string,
-                                      innerTextFontSizeInPx: number
-  ) {
+                                      strokeThickness: number,
+                                      drawQrCode: boolean
+  ): Promise<void> {
 
     const color = 'black'
 
@@ -45,7 +52,8 @@ export class VariableIndicatorDrawer {
     let outerCircle = new createjs.Shape()
     outerCircle.graphics
       .beginStroke(color)
-      .drawCircle(centerPoint.x, centerPoint.y, outerCircleDiameterInPx / 2)
+      .setStrokeStyle(strokeThickness)
+      .drawCircle(centerPoint.x, centerPoint.y, outerCircleDiameterInPx / 2 - (strokeThickness/2))
 
 
     if (isBoolVar) {
@@ -70,6 +78,7 @@ export class VariableIndicatorDrawer {
 
       line.graphics
         .beginStroke(color)
+        .setStrokeStyle(strokeThickness)
         .moveTo(lineStartPoint.x, lineStartPoint.y)
         .lineTo(lineEndPoint.x, lineEndPoint.y)
 
@@ -115,24 +124,85 @@ export class VariableIndicatorDrawer {
     innerCircle.graphics
       .beginFill('transparent')
       .beginStroke(color)
-      .drawCircle(centerPoint.x, centerPoint.y, innerCircleRadius)
+      .setStrokeStyle(strokeThickness)
+      .drawCircle(centerPoint.x, centerPoint.y, innerCircleRadius - (strokeThickness/2))
+
+
+    let qrCodeData: VariableIndicatorQrCodeData = {
+      version: qrCodeDataVersion,
+      qrType: "varInd",
+      oDiam: outerCircleDiameterInPx,
+      iDiam: innerCircleDiameterInPx,
+      fields: numOfFields,
+      text: innerText,
+      fSize: fontSizeInPx,
+      fName: fontName,
+    }
 
 
     let innerTextShape = new createjs.Text()
 
-    innerTextShape.font = `${innerTextFontSizeInPx}px ${fontName}`
+    innerTextShape.font = `${fontSizeInPx}px ${fontName}`
 
     innerTextShape.text = innerText
     const innerTextShapeHeight = innerTextShape.getMeasuredHeight()
 
+
+
+
+    const innerCircleContentSize = innerTextShapeHeight + (drawQrCode ? qrCodeSizeInPx : 0)
+    const centerYTop = stageHeight / 2 - (innerCircleContentSize / 2)
+
+    if (drawQrCode) {
+
+
+
+      try {
+        const qrResult = await QRCode.toString(JSON.stringify(qrCodeData), {
+          errorCorrectionLevel: qrCodeCorrectionLevel,
+          type: 'svg',
+          width: qrCodeSizeInPx
+        });
+
+        let container = new createjs.Container()
+        let bitmap: Bitmap
+        bitmap = new createjs.Bitmap("data:image/svg+xml;base64," + window.btoa(qrResult));//window.btoa(qrResult)
+
+        // bitmap = new createjs.Bitmap(qrResult);
+        bitmap.x = 0
+        bitmap.y = 0
+        // bitmap.scaleX = qrCodeSizeInPx / bitmap.image.width
+        // bitmap.scaleY = qrCodeSizeInPx / bitmap.image.height
+        bitmap.regX = 0
+        bitmap.regY = 0
+
+        container.addChild(bitmap)
+
+        container.x = stageWidth / 2 - (qrCodeSizeInPx / 2)
+        container.y = centerYTop
+
+        // container.regX =  (qrCodeSizeInPx / 2)
+        // container.regY =  (qrCodeSizeInPx / 2)
+
+        stage.addChild(container)
+
+      } catch(err) {
+        throw err
+      }
+    }
+
     innerTextShape.x = stageWidth / 2
-    innerTextShape.y = stageHeight / 2 - innerTextShapeHeight / 2
+    // innerTextShape.y = stageHeight / 2 - innerTextShapeHeight / 2
+    innerTextShape.y = centerYTop + + (drawQrCode ? qrCodeSizeInPx : 0)
     innerTextShape.textAlign = 'center'
+
+
 
     stage.addChild(innerTextShape)
     stage.addChild(innerCircle)
 
     stage.addChild(outerCircle)
+
 
   }
 

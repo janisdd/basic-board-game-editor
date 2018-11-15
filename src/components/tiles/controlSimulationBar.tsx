@@ -173,7 +173,8 @@ class controlSimulationBar extends React.Component<Props, any> {
       const tile = this.props.tiles.find(p => p.guid === token.tileGuid)
 
       if (!tile) {
-        Logger.fatal(`tile with guid ${token.tileGuid} was not found`)
+        // Logger.fatal(`tile with guid ${token.tileGuid} was not found`)
+        Logger.fatal(`error on field after field with id: '${token.fieldId}', on tile '${token.tileGuid}' (tile not found), error: ${err.message}`)
         throw new Error()
       }
 
@@ -213,9 +214,12 @@ class controlSimulationBar extends React.Component<Props, any> {
           const tile = this.props.tiles.find(p => p.guid === token.tileGuid)
 
           if (!tile) {
-            Logger.fatal(`tile with guid ${token.tileGuid} was not found`)
+            // Logger.fatal(`tile with guid ${token.tileGuid} was not found`)
+            Logger.fatal(`error on field after field with id: '${token.fieldId}', on tile '${token.tileGuid}' (tile not found), error: ${err.message}`)
             throw new Error()
           }
+
+
           Logger.fatal(`error on field after field with id: '${token.fieldId}', on tile '${token.tileGuid}' (${tile.tileSettings.displayName}), error: ${err.message}`)
         }
 
@@ -405,7 +409,19 @@ class controlSimulationBar extends React.Component<Props, any> {
                   disabled={this.props.simulationState.simulationStatus === SimulationStatus.running || this.props.simulationState.simulationStatus === SimulationStatus.paused || this.props.simulationState.simulationStatus === SimulationStatus.running_many_paused || this.props.simulationState.simulationStatus === SimulationStatus.running_many}
                   onClick={() => {
 
-                    const startPos = Simulator.getStartFieldPosition(this.props.tiles, this.props.isSingleSimulation)
+                    let startPos: WorldSimulationPosition
+                    try {
+                      startPos = Simulator.getStartFieldPosition(this.props.tiles, this.props.isSingleSimulation)
+                    } catch (err) {
+
+                      if (err.message) {
+                        Logger.fatal('error on starting simulation: ' + err.message)
+                        return
+                      }
+
+                      Logger.fatal('error on starting simulation: ' + err)
+                      return
+                    }
 
                     if (!startPos) {
                       Logger.fatal('no start field found')

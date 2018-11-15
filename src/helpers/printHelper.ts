@@ -512,7 +512,7 @@ export class PrintHelper {
   }
 
 
-  public static printVariableIndicator(
+  public static async printVariableIndicator(
     stageWidth: number,
     stageHeight: number,
     outerCircleDiameterInPx: number,
@@ -523,14 +523,15 @@ export class PrintHelper {
     isBoolVar: boolean,
     fontSizeInPx: number,
     fontName: string,
-    innerTextFontSizeInPx: number
-  ) {
+    variableIndicatorStrokeThickness: number,
+    drawQrCode: boolean
+  ): Promise<void> {
 
     const boilerplateHtml1 =
       `
 <html>
   <head>
-  <title>Test</title>
+  <title>Printing</title>
     <style>
       canvas {
         /*border: 1px solid black;*/
@@ -570,13 +571,14 @@ export class PrintHelper {
 
     graphics.drawGrid(stage, stageWidth, stageHeight, 0, 1, borderStrokeColor, true, 0, 0)
 
-    VariableIndicatorDrawer.drawVariableIndicator(stage,
+    await VariableIndicatorDrawer.drawVariableIndicator(stage,
       stageWidth, stageHeight, outerCircleDiameterInPx, innerCircleDiameterInPx, numOfFields,
       innerText,
       isBoolVar,
       fontSizeInPx,
       fontName,
-      innerTextFontSizeInPx
+      variableIndicatorStrokeThickness,
+      drawQrCode
     )
 
     stage.scaleX = stage.scaleY = scaleFactor
@@ -609,8 +611,10 @@ export class PrintHelper {
    * @param variableFontSizeInPx
    * @param variableFontName
    * @param variableInnerTextFontSizeInPx
+   * @param variableIndicatorStrokeThickness
+   * @param drawQrCode
    */
-  public static printWorld(
+  public static async printWorld(
     tileSurrogates: ReadonlyArray<WorldTileSurrogate>,
     tilesToPrint: ReadonlyArray<Tile>,
     fieldSymbols: ReadonlyArray<FieldSymbol>,
@@ -628,8 +632,9 @@ export class PrintHelper {
     expectedTileHeight: number,
     variableFontSizeInPx: number,
     variableFontName: string,
-    variableInnerTextFontSizeInPx: number
-  ) {
+    variableIndicatorStrokeThickness: number,
+    drawQrCode: boolean
+  ): Promise<void> {
 
 
     //a tile could be used multiple times...
@@ -839,9 +844,6 @@ export class PrintHelper {
         }
       }
 
-
-      console.log('PRINT VARS')
-
       const allVarDefs = LangHelper.getAllVarDefiningStatements(worldSettings.worldCmdText, uniqueTiles)
 
       const variableIndicatorWidth = expectTileWidth
@@ -849,7 +851,7 @@ export class PrintHelper {
 
       for (const globalVar of allVarDefs.globalVars) {
 
-        const wrapperDiv = this.getVariablePrintTile(printWindow,
+        const wrapperDiv = await this.getVariablePrintTile(printWindow,
           idDataAttributeKey,
           idCheckboxDataSetKey,
           printTileCount++,
@@ -860,7 +862,6 @@ export class PrintHelper {
           innerCircleDiameterInPx,
           variableFontSizeInPx,
           variableFontName,
-          variableInnerTextFontSizeInPx,
           (globalVar.var_type === VarType.bool
             ? {
               ident: globalVar.ident,
@@ -870,14 +871,16 @@ export class PrintHelper {
               ident: globalVar.ident,
               val: 0, //actual value doesn't matter
               maxVal: globalVar.maxVal
-            } as DefinitionTableIntEntry)
+            } as DefinitionTableIntEntry),
+          variableIndicatorStrokeThickness,
+          drawQrCode
         )
 
         printWindow.document.body.appendChild(wrapperDiv)
       }
 
       for (const playerVar of allVarDefs.playerVars) {
-        const wrapperDiv = this.getVariablePrintTile(printWindow,
+        const wrapperDiv = await this.getVariablePrintTile(printWindow,
           idDataAttributeKey,
           idCheckboxDataSetKey,
           printTileCount++,
@@ -888,7 +891,6 @@ export class PrintHelper {
           innerCircleDiameterInPx,
           variableFontSizeInPx,
           variableFontName,
-          variableInnerTextFontSizeInPx,
           (playerVar.var_type === VarType.bool
             ? {
               ident: playerVar.ident,
@@ -898,7 +900,9 @@ export class PrintHelper {
               ident: playerVar.ident,
               val: 0, //actual value doesn't matter
               maxVal: playerVar.maxVal
-            } as DefinitionTableIntEntry)
+            } as DefinitionTableIntEntry),
+          variableIndicatorStrokeThickness,
+          drawQrCode
         )
 
         printWindow.document.body.appendChild(wrapperDiv)
@@ -909,7 +913,7 @@ export class PrintHelper {
 
         for (const localVarDef of localVarObj.localVars) {
 
-          const wrapperDiv = this.getVariablePrintTile(printWindow,
+          const wrapperDiv = await this.getVariablePrintTile(printWindow,
             idDataAttributeKey,
             idCheckboxDataSetKey,
             printTileCount++,
@@ -920,7 +924,6 @@ export class PrintHelper {
             innerCircleDiameterInPx,
             variableFontSizeInPx,
             variableFontName,
-            variableInnerTextFontSizeInPx,
             (localVarDef.var_type === VarType.bool
               ? {
                 ident: localVarDef.ident,
@@ -930,7 +933,9 @@ export class PrintHelper {
                 ident: localVarDef.ident,
                 val: 0, //actual value doesn't matter
                 maxVal: localVarDef.maxVal
-              } as DefinitionTableIntEntry)
+              } as DefinitionTableIntEntry),
+            variableIndicatorStrokeThickness,
+            drawQrCode
           )
 
           printWindow.document.body.appendChild(wrapperDiv)
@@ -941,7 +946,7 @@ export class PrintHelper {
 
   }
 
-  private static getVariablePrintTile(printWindow: Window, idDataAttributeKey: string,
+  private static async getVariablePrintTile(printWindow: Window, idDataAttributeKey: string,
                                       idCheckboxDataSetKey: string,
                                       uniqueIndex: number,
                                       scaleFactor: number,
@@ -951,9 +956,10 @@ export class PrintHelper {
                                       innerCircleDiameterInPx: number,
                                       fontSizeInPx: number,
                                       fontName: string,
-                                      innerTextFontSizeInPx: number,
-                                      entry: DefinitionTableBoolEntry | DefinitionTableIntEntry
-  ): HTMLDivElement {
+                                      entry: DefinitionTableBoolEntry | DefinitionTableIntEntry,
+                                      strokeThickness: number,
+                                      drawQrCode: boolean
+  ): Promise<HTMLDivElement> {
 
     const wrapperDiv = printWindow.document.createElement('div') as HTMLDivElement
     wrapperDiv.classList.add('wrapper-div')
@@ -985,7 +991,7 @@ export class PrintHelper {
     const stage = new createjs.Stage(canvas)
 
     if (isIntVar(entry)) {
-      VariableIndicatorDrawer.drawVariableIndicator(stage,
+      await VariableIndicatorDrawer.drawVariableIndicator(stage,
         width, height,
         outerCircleDiameterInPx,
         innerCircleDiameterInPx,
@@ -994,12 +1000,13 @@ export class PrintHelper {
         false,
         fontSizeInPx,
         fontName,
-        innerTextFontSizeInPx
+        strokeThickness,
+        drawQrCode
       )
     }
 
     else if (isBoolVar(entry)) {
-      VariableIndicatorDrawer.drawVariableIndicator(stage,
+      await  VariableIndicatorDrawer.drawVariableIndicator(stage,
         width, height,
         outerCircleDiameterInPx,
         innerCircleDiameterInPx,
@@ -1008,7 +1015,8 @@ export class PrintHelper {
         true,
         fontSizeInPx,
         fontName,
-        innerTextFontSizeInPx
+        strokeThickness,
+        drawQrCode
       )
     }
 
