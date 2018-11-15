@@ -33,3 +33,7 @@ ReactDOM.render(
   ,
   document.getElementById("root")
 )
+
+window.onbeforeunload = function (): string {
+    return 'Are you sure you want to exit?'
+}
