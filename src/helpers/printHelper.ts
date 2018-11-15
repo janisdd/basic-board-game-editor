@@ -846,8 +846,8 @@ export class PrintHelper {
 
       const allVarDefs = LangHelper.getAllVarDefiningStatements(worldSettings.worldCmdText, uniqueTiles)
 
-      const variableIndicatorWidth = expectTileWidth
-      const variableIndicatorHeight = expectedTileHeight
+      const variableIndicatorWidth = outerCircleDiameterInPx //expectTileWidth
+      const variableIndicatorHeight = outerCircleDiameterInPx //expectedTileHeight
 
       for (const globalVar of allVarDefs.globalVars) {
 
