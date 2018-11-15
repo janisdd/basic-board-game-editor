@@ -152,7 +152,7 @@ class variableIndicatorEditor extends React.Component<Props, any> {
                       this.props.varIndicator_reset();
                     }}
             >
-              <Icon name="refresh"/>
+              <Icon name="undo"/>
             </Button>
           </ToolTip>
         </div>

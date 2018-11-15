@@ -30,6 +30,31 @@ describe('if else', () => {
     expect(res).toEqual(4)
   })
 
+  test('if else formatted', () => {
+    const prog = `
+       int x {15} = 5
+       
+       if true
+       then x = 3
+       else x = 4 end
+    `
+    const res = runForLocalVar(prog)
+    expect(res).toEqual(3)
+  })
+
+  test('if else formatted 2', () => {
+    const prog = `
+       int x {15} = 5
+       
+       if true
+       then x = 3
+       else x = 4
+       end
+    `
+    const res = runForLocalVar(prog)
+    expect(res).toEqual(3)
+  })
+
 })
 
 

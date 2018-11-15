@@ -12,6 +12,8 @@
 
 - change the worker deploy... the hash is bad for git because it's changed every build
 
+- multi line text is not properly centered...
+
 ISSUES
 
 - could all be resolved by creating a new reducer & new actions that do multiple actions at once e.g.

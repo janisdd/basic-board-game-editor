@@ -48,6 +48,31 @@ describe('if tests', () => {
     expect(res).toEqual(10)
   })
 
+  test('if different formatted 4', () => {
+    const prog = `
+       int x {15} = 5
+       
+       if true 
+       then x = 10 end
+       
+    `
+    const res = runForLocalVar(prog)
+    expect(res).toEqual(10)
+  })
+
+  test('if different formatted 5', () => {
+    const prog = `
+       int x {15} = 5
+       
+       if true 
+       then x = 10
+       end
+       
+    `
+    const res = runForLocalVar(prog)
+    expect(res).toEqual(10)
+  })
+
   test('if else', () => {
     const prog = `
        int x {15} = 5

@@ -53,6 +53,26 @@ describe('control statements', () => {
     expect((res.statements[0] as ControlIfElseUnit).falseTargetId).toEqual(3)
   })
 
+  test('control if else formatted 2', () => {
+    const prog = `
+      control if true 
+      then goto 2
+      else goto 3
+      end
+    `
+    const res = justParse(prog)
+
+    expect(res.statements.length === 1).toEqual(true)
+    expect(res.statements[0].type === 'control_ifElse').toEqual(true)
+
+    let state = AbstractMachine.createNewMachineState()
+    const exprResult = AbstractMachine.execExpression((res.statements[0] as ControlIfElseUnit).conditionExpr, state)
+
+    expect(exprResult.boolVal).toEqual(true)
+    expect((res.statements[0] as ControlIfElseUnit).trueTargetId).toEqual(2)
+    expect((res.statements[0] as ControlIfElseUnit).falseTargetId).toEqual(3)
+  })
+
   test('force', () => {
     const prog = `
       force

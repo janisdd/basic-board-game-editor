@@ -10,3 +10,7 @@
 export function notExhaustive(x: never): any {
   // throw new Error("Didn't expect to get here");
 }
+
+export function notExhaustiveThrow(x: never): any {
+  throw new Error("Didn't expect to get here... some case not matched");
+}

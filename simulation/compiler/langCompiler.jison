@@ -362,12 +362,12 @@ dec_post_expr
 
 /* the possible new lines are inside the pre_statements */
 clause
-  : 'if' expression 'then' pre_statements 'end' { $$ = yy.ExecutionUnitBuilder.ifUnit($2, $4) }
-  | 'if' expression 'then' pre_statements 'else' pre_statements 'end' { $$ = yy.ExecutionUnitBuilder.ifElseUnit($2, $4, $6) }
+  : 'if' expression maybe_nls 'then' pre_statements 'end' { $$ = yy.ExecutionUnitBuilder.ifUnit($2, $5) }
+  | 'if' expression maybe_nls 'then' pre_statements 'else' pre_statements 'end' { $$ = yy.ExecutionUnitBuilder.ifElseUnit($2, $5, $7) }
   ;
 
 control_clause
-  : 'if' expression 'then' maybe_nls 'goto' NUMBER maybe_nls 'else' maybe_nls 'goto' NUMBER maybe_nls 'end' { $$ = yy.ExecutionUnitBuilder.controlIfElseUnit($2, yy.convertNumber($6), yy.convertNumber($11)) }
+  : 'if' expression maybe_nls 'then' maybe_nls 'goto' NUMBER maybe_nls 'else' maybe_nls 'goto' NUMBER maybe_nls 'end' { $$ = yy.ExecutionUnitBuilder.controlIfElseUnit($2, yy.convertNumber($7), yy.convertNumber($12)) }
   ;
 
 

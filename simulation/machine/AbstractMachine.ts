@@ -45,7 +45,7 @@ import {
   PlayerToken,
   WorldSimulationPosition
 } from "./machineState";
-import {notExhaustive} from "../../src/state/reducers/_notExhausiveHelper";
+import {notExhaustiveThrow} from "../../src/state/reducers/_notExhausiveHelper";
 import {GameDefUnits, GameVarsUnit, PlayersDefUnit} from "../model/gameDefUnits";
 
 declare function require(s: string): any
@@ -367,7 +367,7 @@ export class AbstractMachine {
       }
 
       default:
-        notExhaustive(statement)
+        notExhaustiveThrow(statement)
         throw new Error()
     }
   }
@@ -823,7 +823,7 @@ export class AbstractMachine {
       }
 
       default:
-        notExhaustive(statement)
+        notExhaustiveThrow(statement)
     }
   }
 
@@ -1321,7 +1321,7 @@ export class AbstractMachine {
       }
 
       default:
-        notExhaustive(expr.right)
+        notExhaustiveThrow(expr.right)
     }
   }
 
@@ -2028,7 +2028,7 @@ export class AbstractMachine {
       }
 
       default:
-        notExhaustive(primary.primary)
+        notExhaustiveThrow(primary.primary)
     }
 
   }
