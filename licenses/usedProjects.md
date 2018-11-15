@@ -21,6 +21,7 @@
 - https://www.npmjs.com/package/highlightjs
 - https://ace.c9.io/
 - easeljs - svg exporter (changed)
+- https://github.com/soldair/node-qrcode
 
 - keys css design https://gist.github.com/jeromyanglim/3952143
 
