@@ -700,7 +700,7 @@ body {
   overflow: visible;
 }
 .right-tab-menu-full-sized >div {
-  overflow: hidden;
+  overflow: auto;
   height: 100%;
 }
 .property-editor-right {
@@ -713,7 +713,7 @@ body {
 .property-editor-right-full-sized {
   width: 350px;
   height: 100%;
-  overflow: auto;
+  overflow: visible;
   padding: 0.5em;
 }
 .property-editor-left {
