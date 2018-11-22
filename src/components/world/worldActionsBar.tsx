@@ -3,7 +3,11 @@ import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
-import {printVariableIndicatorStrokeThickness, worldFileExtensionWithoutDot} from "../../constants";
+import {
+  exportPngImagesBgColor,
+  printVariableIndicatorStrokeThickness,
+  worldFileExtensionWithoutDot
+} from "../../constants";
 import {Button, Icon} from "semantic-ui-react";
 import {
   set_world_isTileEditorDisplayed, set_world_isTileLibraryModalDisplayed
@@ -229,43 +233,65 @@ class worldActionsBar extends React.Component<Props, any> {
 
         <ToolTip
           message={getI18n(this.props.langId, "Print world & all found variables. For the variables the settings in the variable indicator tab are used")}>
-          <Button disabled={tiles.length === 0} icon onClick={async () => {
+          <Button disabled={tiles.length === 0} icon
+                  className="mar-right"
+                  onClick={async () => {
 
-            await PrintHelper.printWorld(this.props.tileSurrogatesState.present,
-              tiles,
-              this.props.fieldSymbols,
-              this.props.imgSymbols,
-              this.props.lineSymbols,
-              this.props.allTiles,
-              false, //TODO maybe set to hardcoded to false ??
-              10,
-              this.props.worldSettings.gridStrokeThicknessInPx,
-              this.props.worldSettings.gridStrokeColor,
-              this.props.worldSettings,
-              this.props.langId,
-              this.props.worldSettings.printGameAsOneImage,
-              this.props.variableIndicatorState.outerCircleDiameterInPx,
-              this.props.variableIndicatorState.innerCircleDiameterInPx,
-              this.props.worldSettings.expectedTileWidth,
-              this.props.worldSettings.expectedTileHeight,
-              this.props.variableIndicatorState.fontSizeInPx,
-              this.props.variableIndicatorState.fontName,
-              printVariableIndicatorStrokeThickness,
-              this.props.variableIndicatorState.drawQrCode
-            )
-          }}>
+                    await PrintHelper.printWorld(this.props.tileSurrogatesState.present,
+                      tiles,
+                      this.props.fieldSymbols,
+                      this.props.imgSymbols,
+                      this.props.lineSymbols,
+                      this.props.allTiles,
+                      false, //TODO maybe set to hardcoded to false ??
+                      10,
+                      this.props.worldSettings.gridStrokeThicknessInPx,
+                      this.props.worldSettings.gridStrokeColor,
+                      this.props.worldSettings,
+                      this.props.langId,
+                      this.props.worldSettings.printGameAsOneImage,
+                      this.props.variableIndicatorState.outerCircleDiameterInPx,
+                      this.props.variableIndicatorState.innerCircleDiameterInPx,
+                      this.props.worldSettings.expectedTileWidth,
+                      this.props.worldSettings.expectedTileHeight,
+                      this.props.variableIndicatorState.fontSizeInPx,
+                      this.props.variableIndicatorState.fontName,
+                      printVariableIndicatorStrokeThickness,
+                      this.props.variableIndicatorState.drawQrCode,
+                      null,
+                    )
+                  }}>
             <Icon name="print"/>
           </Button>
         </ToolTip>
 
         <ToolTip
+
           message={getI18n(this.props.langId, "Export as svg (experimental)")}>
           <Button disabled={tiles.length === 0} icon onClick={() => {
 
-            PrintHelper.exportWorldAsLargeSvg(this.props.tileSurrogatesState.present, tiles, this.props.fieldSymbols,
+            PrintHelper.exportWorldAsLargeImage(this.props.tileSurrogatesState.present, tiles, this.props.fieldSymbols,
               this.props.imgSymbols, this.props.lineSymbols, this.props.allTiles, false, //TODO maybe set to hardcoded to false ??
               10, this.props.worldSettings.gridStrokeThicknessInPx, this.props.worldSettings.gridStrokeColor,
-              this.props.worldSettings
+              this.props.worldSettings, exportPngImagesBgColor, 'svg'
+            )
+
+          }}>
+            <Icon.Group>
+              <Icon name='upload'/>
+              <Icon corner name='code'/>
+            </Icon.Group>
+          </Button>
+        </ToolTip>
+
+        <ToolTip
+          message={getI18n(this.props.langId, "Export as png (experimental)")}>
+          <Button disabled={tiles.length === 0} icon onClick={() => {
+
+            PrintHelper.exportWorldAsLargeImage(this.props.tileSurrogatesState.present, tiles, this.props.fieldSymbols,
+              this.props.imgSymbols, this.props.lineSymbols, this.props.allTiles, false, //TODO maybe set to hardcoded to false ??
+              10, this.props.worldSettings.gridStrokeThicknessInPx, this.props.worldSettings.gridStrokeColor,
+              this.props.worldSettings, exportPngImagesBgColor, 'png'
             )
 
           }}>

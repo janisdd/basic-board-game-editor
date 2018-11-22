@@ -64,6 +64,7 @@ import {PrintHelper} from "../../helpers/printHelper";
 import {AvailableAppTabs} from "../../state/reducers/appReducer";
 import {renewAllZIndicesInTile} from "../../helpers/someIndexHelper";
 import {set_editorSelection_rect} from "../../state/reducers/tileEditorSelection/tileEditorSelectionReducer";
+import {exportPngImagesBgColor} from "../../constants";
 
 
 export interface MyProps {
@@ -400,6 +401,53 @@ class tileEditor extends React.Component<Props, any> {
     return this.getSelectedShapeTypesCount() > 1
   }
 
+  exportTileAs(format: 'svg' | 'png') {
+
+    const tile: Tile = {
+      guid: getGuid(),
+      imgShapes: this.props.imgShapes,
+      fieldShapes: this.props.fieldShapes,
+      lineShapes: this.props.lineShapes,
+      topBorderPoints: this.props.tileProps.topBorderPoints,
+      botBorderPoints: this.props.tileProps.botBorderPoints,
+      leftBorderPoints: this.props.tileProps.leftBorderPoints,
+      rightBorderPoint: this.props.tileProps.rightBorderPoint,
+      simulationStartFieldIds: [],
+      simulationEndFieldIds: [],
+      tileSettings: {
+        displayName: this.props.tileProps.tileSettings.displayName,
+        width: this.props.tileProps.tileSettings.width,
+        height: this.props.tileProps.tileSettings.height,
+        majorLineDirection: this.props.tileProps.tileSettings.majorLineDirection,
+        gridSizeInPx: this.props.tileProps.tileSettings.gridSizeInPx,
+        showGrid: this.props.tileProps.tileSettings.showGrid,
+        snapToGrid: this.props.tileProps.tileSettings.snapToGrid,
+        showSequenceIds: this.props.tileProps.tileSettings.showSequenceIds,
+        moveBezierControlPointsWhenLineIsMoved: this.props.tileProps.tileSettings.moveBezierControlPointsWhenLineIsMoved,
+        arePrintGuidesDisplayed: this.props.tileProps.tileSettings.arePrintGuidesDisplayed,
+        autoIncrementFieldTextNumbersOnDuplicate: this.props.tileProps.tileSettings.autoIncrementFieldTextNumbersOnDuplicate,
+        printLargeTilePreferredWidthInPx: this.props.tileProps.tileSettings.printLargeTilePreferredWidthInPx,
+        printLargeTilePreferredHeightInPx: this.props.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
+        splitLargeTileForPrint: this.props.tileProps.tileSettings.splitLargeTileForPrint,
+      }
+    }
+
+    PrintHelper.exportTileAsLargeSvg(
+      tile,
+      this.props.fieldSymbols,
+      this.props.imgSymbols,
+      this.props.lineSymbols,
+      false,
+      this.props.settings.tileProps.tileSettings.gridSizeInPx,
+      this.props.worldSettings.gridStrokeThicknessInPx,
+      this.props.worldSettings.gridStrokeColor,
+      this.props.worldSettings,
+      exportPngImagesBgColor,
+      format,
+    )
+
+  }
+
   render(): JSX.Element {
 
 
@@ -695,46 +743,21 @@ class tileEditor extends React.Component<Props, any> {
                 message={getI18n(this.props.langId, "Export as svg (experimental)")}>
                 <Button icon onClick={() => {
 
-                  const tile: Tile = {
-                    guid: getGuid(),
-                    imgShapes: this.props.imgShapes,
-                    fieldShapes: this.props.fieldShapes,
-                    lineShapes: this.props.lineShapes,
-                    topBorderPoints: this.props.tileProps.topBorderPoints,
-                    botBorderPoints: this.props.tileProps.botBorderPoints,
-                    leftBorderPoints: this.props.tileProps.leftBorderPoints,
-                    rightBorderPoint: this.props.tileProps.rightBorderPoint,
-                    simulationStartFieldIds: [],
-                    simulationEndFieldIds: [],
-                    tileSettings: {
-                      displayName: this.props.tileProps.tileSettings.displayName,
-                      width: this.props.tileProps.tileSettings.width,
-                      height: this.props.tileProps.tileSettings.height,
-                      majorLineDirection: this.props.tileProps.tileSettings.majorLineDirection,
-                      gridSizeInPx: this.props.tileProps.tileSettings.gridSizeInPx,
-                      showGrid: this.props.tileProps.tileSettings.showGrid,
-                      snapToGrid: this.props.tileProps.tileSettings.snapToGrid,
-                      showSequenceIds: this.props.tileProps.tileSettings.showSequenceIds,
-                      moveBezierControlPointsWhenLineIsMoved: this.props.tileProps.tileSettings.moveBezierControlPointsWhenLineIsMoved,
-                      arePrintGuidesDisplayed: this.props.tileProps.tileSettings.arePrintGuidesDisplayed,
-                      autoIncrementFieldTextNumbersOnDuplicate: this.props.tileProps.tileSettings.autoIncrementFieldTextNumbersOnDuplicate,
-                      printLargeTilePreferredWidthInPx: this.props.tileProps.tileSettings.printLargeTilePreferredWidthInPx,
-                      printLargeTilePreferredHeightInPx: this.props.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
-                      splitLargeTileForPrint: this.props.tileProps.tileSettings.splitLargeTileForPrint,
-                    }
-                  }
+                  this.exportTileAs('svg')
 
-                  PrintHelper.exportTileAsLargeSvg(
-                    tile,
-                    this.props.fieldSymbols,
-                    this.props.imgSymbols,
-                    this.props.lineSymbols,
-                    false,
-                    this.props.settings.tileProps.tileSettings.gridSizeInPx,
-                    this.props.worldSettings.gridStrokeThicknessInPx,
-                    this.props.worldSettings.gridStrokeColor,
-                    this.props.worldSettings,
-                  )
+                }}>
+                  <Icon.Group>
+                    <Icon name='upload'/>
+                    <Icon corner name='code'/>
+                  </Icon.Group>
+                </Button>
+              </ToolTip>
+
+              <ToolTip
+                message={getI18n(this.props.langId, "Export as svg (experimental)")}>
+                <Button icon onClick={() => {
+
+                  this.exportTileAs('png')
 
                 }}>
                   <Icon.Group>

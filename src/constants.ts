@@ -18,6 +18,7 @@ export const appProperties = {
   exportFileNamePrefix: 'bbge'
 }
 
+export  const exportPngImagesBgColor: string | null = 'white'
 
 export const qrCodeSizeInPx = 300
 export const qrCodeDataVersion = 1

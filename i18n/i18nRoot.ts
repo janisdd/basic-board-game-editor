@@ -44,6 +44,7 @@ export interface LangObj {
   "Edit tile. This will also change all instances of this the in the map. If you want to change only 1 instance then create a clone first and exchange the tile with the clone": string
   "Export single tile. This will export the tile, only the symbols & only the used images": string
   "Export as svg (experimental)": string
+  "Export as png (experimental)": string
   "Clone tile": string
   "Delete tile. This will also delete all instances of this tile in the world": string
   "Drop tile files(s) or <br/> click to select tile files(s)": string

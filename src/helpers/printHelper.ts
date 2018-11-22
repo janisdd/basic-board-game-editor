@@ -22,6 +22,7 @@ import fileSaver = require("file-saver");
 import {LangHelper} from "./langHelper";
 import {VarType} from "../../simulation/model/executionUnit";
 import Stage = createjs.Stage;
+import Shape = createjs.Shape;
 
 
 declare var SVGExporter: any
@@ -42,6 +43,8 @@ export class PrintHelper {
    * @param {number} gridStrokeThicknessInPx
    * @param {string} gridStrokeColor
    * @param {WorldSettings} worldSettings
+   * @param fillBackgroundColor null for transparent or the color for the background
+   * @param format
    */
   public static exportTileAsLargeSvg(
     tile: Tile,
@@ -50,6 +53,8 @@ export class PrintHelper {
     lineSymbols: ReadonlyArray<LineSymbol>,
     drawGrid: boolean, gridSizeInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string,
     worldSettings: WorldSettings,
+    fillBackgroundColor: string | null,
+    format: 'svg' | 'png'
   ) {
 
     let canvas = document.createElement('canvas')
@@ -65,20 +70,36 @@ export class PrintHelper {
       drawGrid, gridSizeInPx,
       gridStrokeThicknessInPx,
       gridStrokeColor,
-      worldSettings
+      worldSettings,
+      fillBackgroundColor
     )
 
-    const exporter = new (window as any).SVGExporter(stage, tile.tileSettings.width, tile.tileSettings.height, false);
-    exporter.stretchImages = true;
-    exporter.run()
-    const serializer = new XMLSerializer();
-    const svgStr = serializer.serializeToString(exporter.svg);
+    if (format === 'svg') {
 
-    const date = new Date(Date.now())
-    let fileName = `export_${appProperties.exportFileNamePrefix}_${date.getFullYear()}_${date.getMonth()}_${date.getDay()}__${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}.svg`
+      const exporter = new (window as any).SVGExporter(stage, tile.tileSettings.width, tile.tileSettings.height, false);
+      exporter.stretchImages = true;
+      exporter.run()
+      const serializer = new XMLSerializer();
+      const svgStr = serializer.serializeToString(exporter.svg);
 
-    const blob = new Blob([svgStr], {type: "image/svg+xml;charset=utf-8"});
-    fileSaver.saveAs(blob, fileName)
+      const date = new Date(Date.now())
+      let fileName = `export_${appProperties.exportFileNamePrefix}_${date.getFullYear()}_${date.getMonth()}_${date.getDay()}__${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}.svg`
+
+      const blob = new Blob([svgStr], {type: "image/svg+xml;charset=utf-8"});
+      fileSaver.saveAs(blob, fileName)
+
+    } else if (format === 'png') {
+
+      const date = new Date(Date.now())
+      let fileName = `export_${appProperties.exportFileNamePrefix}_${date.getFullYear()}_${date.getMonth()}_${date.getDay()}__${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}.png`;
+
+      (stage.canvas as HTMLCanvasElement).toBlob((blob: Blob) => {
+        fileSaver.saveAs(blob, fileName)
+      })
+
+    }
+
+
   }
 
   /**
@@ -94,8 +115,10 @@ export class PrintHelper {
    * @param {number} gridStrokeThicknessInPx
    * @param {string} gridStrokeColor
    * @param {WorldSettings} worldSettings
+   * @param fillBackgroundColor null for transparent or the color for the background
+   * @param format
    */
-  public static exportWorldAsLargeSvg(
+  public static exportWorldAsLargeImage(
     tileSurrogates: ReadonlyArray<WorldTileSurrogate>,
     tilesToPrint: ReadonlyArray<Tile>,
     fieldSymbols: ReadonlyArray<FieldSymbol>,
@@ -104,6 +127,8 @@ export class PrintHelper {
     allTiles: ReadonlyArray<Tile>,
     drawGrid: boolean, gridSizeInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string,
     worldSettings: WorldSettings,
+    fillBackgroundColor: string | null,
+    format: 'svg' | 'png'
   ) {
 
     const tilesWidth = tilesToPrint[0].tileSettings.width
@@ -132,6 +157,8 @@ export class PrintHelper {
     stage.x = 0
     stage.y = 0
 
+    const bgRects: Shape[] = []
+
     for (let i = 0; i < widthInTiles; i++) {
       for (let j = 0; j < heightInTiles; j++) {
 
@@ -154,6 +181,15 @@ export class PrintHelper {
         const tile = allTiles.find(p => p.guid === tileSurrogate.tileGuid)
 
         if (!tile) continue
+
+        if (fillBackgroundColor) {
+          let bgShape = new createjs.Shape()
+          bgShape.graphics.beginFill(fillBackgroundColor)
+            .drawRect(i * tilesWidth, j * tilesHeight, tilesWidth, tilesHeight)
+
+          stage.addChild(bgShape)
+          bgRects.push(bgShape)
+        }
 
         graphics.drawFieldsOnTile(
           stage,
@@ -217,20 +253,36 @@ export class PrintHelper {
       }
     }
 
+    for(const bgRect of bgRects) {
+      stage.setChildIndex(bgRect, 0)
+    }
+
     stage.update()
 
+    if (format === "svg") {
+      const exporter = new (window as any).SVGExporter(stage, fullGameWidth, fullGameHeight, false);
+      exporter.stretchImages = true;
+      exporter.run()
+      const serializer = new XMLSerializer();
+      const svgStr = serializer.serializeToString(exporter.svg);
 
-    const exporter = new (window as any).SVGExporter(stage, fullGameWidth, fullGameHeight, false);
-    exporter.stretchImages = true;
-    exporter.run()
-    const serializer = new XMLSerializer();
-    const svgStr = serializer.serializeToString(exporter.svg);
+      const date = new Date(Date.now())
+      let fileName = `export_${appProperties.exportFileNamePrefix}_${date.getFullYear()}_${date.getMonth()}_${date.getDay()}__${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}.svg`
 
-    const date = new Date(Date.now())
-    let fileName = `export_${appProperties.exportFileNamePrefix}_${date.getFullYear()}_${date.getMonth()}_${date.getDay()}__${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}.svg`
+      const blob = new Blob([svgStr], {type: "image/svg+xml;charset=utf-8"});
+      fileSaver.saveAs(blob, fileName)
 
-    const blob = new Blob([svgStr], {type: "image/svg+xml;charset=utf-8"});
-    fileSaver.saveAs(blob, fileName)
+    } else if (format === "png") {
+
+      const date = new Date(Date.now())
+      let fileName = `export_${appProperties.exportFileNamePrefix}_${date.getFullYear()}_${date.getMonth()}_${date.getDay()}__${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}.png`;
+
+      (stage.canvas as HTMLCanvasElement).toBlob((blob: Blob) => {
+        fileSaver.saveAs(blob, fileName)
+      })
+    }
+
+
   }
 
   /**
@@ -253,6 +305,7 @@ export class PrintHelper {
    * @param splitLargeTileForPrint
    * @param langId
    *
+   * @param fillBackgroundColor null for transparent or the color for the background
    */
   public static printLargeTile(tile: Tile,
                                fieldSymbols: ReadonlyArray<FieldSymbol>,
@@ -265,7 +318,8 @@ export class PrintHelper {
                                preferredSubTileWidth: number,
                                preferredSubTileHeight: number,
                                splitLargeTileForPrint: boolean,
-                               langId: KnownLangs
+                               langId: KnownLangs,
+                               fillBackgroundColor: string | null
   ) {
 
     preferredSubTileWidth = Math.min(maxPrintTileWidth, preferredSubTileWidth)
@@ -301,7 +355,7 @@ export class PrintHelper {
     }
 
     const stage = this.printFullTile(tile, fieldSymbols, imgSymbols, lineSymbols, canvas, drawGrid, gridSizeInPx,
-      gridStrokeThicknessInPx, gridStrokeColor, worldSettings)
+      gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor)
 
     stage.scaleX = stage.scaleY = scaleFactor
     stage.update()
@@ -393,6 +447,7 @@ export class PrintHelper {
                                imgSymbols: ReadonlyArray<ImgSymbol>,
                                lineSymbols: ReadonlyArray<LineSymbol>,
                                canvas: HTMLCanvasElement, drawGrid: boolean, gridSizeInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string, worldSettings: WorldSettings,
+                               fillBackgroundColor: string | null
   ): createjs.Stage {
 
     const zIndexCache: ZIndexCache = {}
@@ -433,6 +488,15 @@ export class PrintHelper {
       for (const child of list) {
         stage.setChildIndex(child, parseInt(zIndex))
       }
+    }
+
+    if (fillBackgroundColor) {
+      let bgShape = new createjs.Shape()
+      bgShape.graphics.beginFill(fillBackgroundColor)
+        .drawRect(0, 0, canvas.width, canvas.height)
+
+      stage.addChild(bgShape)
+      stage.setChildIndex(bgShape, 0)
     }
 
     stage.update()
@@ -610,9 +674,9 @@ export class PrintHelper {
    * @param expectedTileHeight
    * @param variableFontSizeInPx
    * @param variableFontName
-   * @param variableInnerTextFontSizeInPx
    * @param variableIndicatorStrokeThickness
    * @param drawQrCode
+   * @param fillBackgroundColor null for transparent or the color for the background
    */
   public static async printWorld(
     tileSurrogates: ReadonlyArray<WorldTileSurrogate>,
@@ -633,7 +697,8 @@ export class PrintHelper {
     variableFontSizeInPx: number,
     variableFontName: string,
     variableIndicatorStrokeThickness: number,
-    drawQrCode: boolean
+    drawQrCode: boolean,
+    fillBackgroundColor: string | null,
   ): Promise<void> {
 
 
@@ -683,6 +748,8 @@ export class PrintHelper {
       stage.x = 0
       stage.y = 0
 
+      const bgRects: Shape[] = []
+
       for (let i = 0; i < widthInTiles; i++) {
         for (let j = 0; j < heightInTiles; j++) {
 
@@ -705,6 +772,15 @@ export class PrintHelper {
           const tile = allTiles.find(p => p.guid === tileSurrogate.tileGuid)
 
           if (!tile) continue
+
+          if (fillBackgroundColor) {
+            let bgShape = new createjs.Shape()
+            bgShape.graphics.beginFill(fillBackgroundColor)
+              .drawRect(i * tilesWidth, j * tilesHeight, tilesWidth, tilesHeight)
+
+            stage.addChild(bgShape)
+            bgRects.push(bgShape)
+          }
 
           graphics.drawFieldsOnTile(
             stage,
@@ -768,6 +844,10 @@ export class PrintHelper {
         }
       }
 
+     for(const bgRect of bgRects) {
+       stage.setChildIndex(bgRect, 0)
+     }
+
       stage.scaleX = stage.scaleY = scaleFactor
       stage.update()
 
@@ -815,7 +895,7 @@ export class PrintHelper {
 
         const stage = this.printFullTile(printTile, fieldSymbols, imgSymbols, lineSymbols, canvas, drawGrid,
           gridSizeInPx,
-          gridStrokeThicknessInPx, gridStrokeColor, worldSettings)
+          gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor)
 
         stage.scaleX = stage.scaleY = scaleFactor
         stage.update()
@@ -947,18 +1027,18 @@ export class PrintHelper {
   }
 
   private static async getVariablePrintTile(printWindow: Window, idDataAttributeKey: string,
-                                      idCheckboxDataSetKey: string,
-                                      uniqueIndex: number,
-                                      scaleFactor: number,
-                                      width: number,
-                                      height: number,
-                                      outerCircleDiameterInPx: number,
-                                      innerCircleDiameterInPx: number,
-                                      fontSizeInPx: number,
-                                      fontName: string,
-                                      entry: DefinitionTableBoolEntry | DefinitionTableIntEntry,
-                                      strokeThickness: number,
-                                      drawQrCode: boolean
+                                            idCheckboxDataSetKey: string,
+                                            uniqueIndex: number,
+                                            scaleFactor: number,
+                                            width: number,
+                                            height: number,
+                                            outerCircleDiameterInPx: number,
+                                            innerCircleDiameterInPx: number,
+                                            fontSizeInPx: number,
+                                            fontName: string,
+                                            entry: DefinitionTableBoolEntry | DefinitionTableIntEntry,
+                                            strokeThickness: number,
+                                            drawQrCode: boolean
   ): Promise<HTMLDivElement> {
 
     const wrapperDiv = printWindow.document.createElement('div') as HTMLDivElement
@@ -1006,7 +1086,7 @@ export class PrintHelper {
     }
 
     else if (isBoolVar(entry)) {
-      await  VariableIndicatorDrawer.drawVariableIndicator(stage,
+      await VariableIndicatorDrawer.drawVariableIndicator(stage,
         width, height,
         outerCircleDiameterInPx,
         innerCircleDiameterInPx,

@@ -14,6 +14,7 @@ import {Simulator} from "../../../simulation/simulator";
 import {Logger} from "../../helpers/logger";
 import {getI18n} from "../../../i18n/i18nRoot";
 import ToolTip from '../helpers/ToolTip'
+import {exportPngImagesBgColor} from "../../constants";
 
 //const css = require('./styles.styl');
 
@@ -190,7 +191,8 @@ class tileRightActionBar extends React.Component<Props, any> {
             this.props.settings.tileProps.tileSettings.printLargeTilePreferredWidthInPx,
             this.props.settings.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
             this.props.settings.tileProps.tileSettings.splitLargeTileForPrint,
-            this.props.langId
+            this.props.langId,
+            null
           )
         }}>
           <Icon name="print"/>
