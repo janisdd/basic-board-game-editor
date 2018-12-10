@@ -22,8 +22,8 @@ export class VariableIndicatorDrawer {
    * @param {string} innerText
    * @param fontSizeInPx
    * @param fontName
-   * @param innerTextFontSizeInPx
    * @param strokeThickness
+   * @param fillBackgroundColor
    * @param drawQrCode
    */
   public static async drawVariableIndicator(stage: createjs.Stage,
@@ -37,6 +37,7 @@ export class VariableIndicatorDrawer {
                                       fontSizeInPx: number,
                                       fontName: string,
                                       strokeThickness: number,
+                                      fillBackgroundColor: string | null,
                                       drawQrCode: boolean
   ): Promise<void> {
 
@@ -48,6 +49,15 @@ export class VariableIndicatorDrawer {
     }
 
     const innerCircleRadius = innerCircleDiameterInPx / 2
+
+    if (fillBackgroundColor) {
+      let bgShape = new createjs.Shape()
+      bgShape.graphics.beginFill(fillBackgroundColor)
+        .drawCircle(centerPoint.x, centerPoint.y, outerCircleDiameterInPx / 2 - (strokeThickness/2))
+        .endFill()
+
+      stage.addChild(bgShape)
+    }
 
     let outerCircle = new createjs.Shape()
     outerCircle.graphics
@@ -122,7 +132,7 @@ export class VariableIndicatorDrawer {
 
     let innerCircle = new createjs.Shape()
     innerCircle.graphics
-      .beginFill('transparent')
+      //.beginFill('transparent')
       .beginStroke(color)
       .setStrokeStyle(strokeThickness)
       .drawCircle(centerPoint.x, centerPoint.y, innerCircleRadius - (strokeThickness/2))

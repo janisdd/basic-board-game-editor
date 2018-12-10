@@ -13,11 +13,11 @@ export interface LangObj {
   "Draw Qr code": string
   "Outer circle diameter in px": string
   "Inner circle diameter in px": string
-  "Amount of fields": string
+  "Number of fields": string
   "Inner text": string
   "Inner text font size in px": string
   "Reset to defaults": string
-  "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 10, -1 to -10, 0 and -12": string
+  "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 11, -1 to -11, 0 and -12": string
   //--- guide
   "Guide": string
   //--- world editor
@@ -45,6 +45,7 @@ export interface LangObj {
   "Export single tile. This will export the tile, only the symbols & only the used images": string
   "Export as svg (experimental)": string
   "Export as png (experimental)": string
+  "Export as png (experimental), the world tile size is used": string
   "Clone tile": string
   "Delete tile. This will also delete all instances of this tile in the world": string
   "Drop tile files(s) or <br/> click to select tile files(s)": string

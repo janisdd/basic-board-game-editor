@@ -754,7 +754,7 @@ class tileEditor extends React.Component<Props, any> {
               </ToolTip>
 
               <ToolTip
-                message={getI18n(this.props.langId, "Export as svg (experimental)")}>
+                message={getI18n(this.props.langId, "Export as png (experimental)")}>
                 <Button icon onClick={() => {
 
                   this.exportTileAs('png')

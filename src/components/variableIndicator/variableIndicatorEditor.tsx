@@ -20,7 +20,11 @@ import {CheckboxData, ZIndexCache} from "../../types/ui";
 import {VariableIndicatorDrawer} from "../../../graphics/variableIndicatorDrawer";
 import * as graphics from '../../../graphics/graphicsCore'
 import {PrintHelper} from "../../helpers/printHelper";
-import {printVariableIndicatorBorderColor, printVariableIndicatorStrokeThickness} from "../../constants";
+import {
+  exportPngImagesBgColor,
+  printVariableIndicatorBorderColor,
+  printVariableIndicatorStrokeThickness
+} from "../../constants";
 import {getI18n} from "../../../i18n/i18nRoot";
 import ToolTip from '../helpers/ToolTip'
 import IconToolTip from '../helpers/IconToolTip';
@@ -36,6 +40,7 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     //test0: rootState...
     //test: props.test
     state: rootState.variableIndicatorState,
+    worldSettings: rootState.worldSettingsState,
     langId: rootState.i18nState.langId
   }
 }
@@ -111,10 +116,32 @@ class variableIndicatorEditor extends React.Component<Props, any> {
       this.props.state.fontSizeInPx,
       this.props.state.fontName,
       printVariableIndicatorStrokeThickness,
+      exportPngImagesBgColor,
       this.props.state.drawQrCode
     )
 
     this.renderStage.update()
+  }
+
+  async exportVarIndicatorAs(format: 'svg' | 'png') {
+
+    await PrintHelper.exportVariableIndicator(
+      this.props.worldSettings.expectedTileWidth,
+      this.props.worldSettings.expectedTileHeight,
+      this.props.state.outerCircleDiameterInPx,
+      this.props.state.innerCircleDiameterInPx,
+      this.props.state.numOfFields,
+      this.props.state.innerText,
+      printVariableIndicatorBorderColor,
+      this.props.state.isBoolVar,
+      this.props.state.fontSizeInPx,
+      this.props.state.fontName,
+      printVariableIndicatorStrokeThickness,
+      exportPngImagesBgColor,
+      this.props.state.drawQrCode,
+      format
+    )
+
   }
 
   render(): JSX.Element {
@@ -137,12 +164,43 @@ class variableIndicatorEditor extends React.Component<Props, any> {
                       this.props.state.fontSizeInPx,
                       this.props.state.fontName,
                       printVariableIndicatorStrokeThickness,
+                      exportPngImagesBgColor,
                       this.props.state.drawQrCode
                     )
                   }}
           >
             <Icon name="print"/>
           </Button>
+
+
+          <ToolTip
+            message={getI18n(this.props.langId, "Export as svg (experimental)")}>
+            <Button icon onClick={() => {
+
+              this.exportVarIndicatorAs('svg')
+
+            }}>
+              <Icon.Group>
+                <Icon name='upload'/>
+                <Icon corner name='code'/>
+              </Icon.Group>
+            </Button>
+          </ToolTip>
+
+          <ToolTip
+            message={getI18n(this.props.langId, "Export as png (experimental), the world tile size is used")}>
+            <Button icon className="mar-right" onClick={() => {
+
+              this.exportVarIndicatorAs('png')
+
+            }}>
+              <Icon.Group>
+                <Icon name='upload'/>
+                <Icon corner name='image'/>
+              </Icon.Group>
+            </Button>
+          </ToolTip>
+
 
           <ToolTip
             message={getI18n(this.props.langId, "Reset to defaults")}
@@ -201,9 +259,10 @@ class variableIndicatorEditor extends React.Component<Props, any> {
             </Form.Field>
 
             <Form.Field>
-              <label>{getI18n(this.props.langId, "Amount of fields")}
-              <IconToolTip message={getI18n(this.props.langId, "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 10, -1 to -10, 0 and -12")}
-              />
+              <label>{getI18n(this.props.langId, "Number of fields")}
+                <IconToolTip
+                  message={getI18n(this.props.langId, "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 11, -1 to -11, 0 and -12")}
+                />
               </label>
               <input type="number" placeholder='32' value={this.props.state.numOfFields}
                      onChange={(e: SyntheticEvent<HTMLInputElement>) => {

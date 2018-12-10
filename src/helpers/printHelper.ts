@@ -31,6 +31,86 @@ export class PrintHelper {
   private constructor() {
   }
 
+  public static async exportVariableIndicator(
+    stageWidth: number,
+    stageHeight: number,
+    outerCircleDiameterInPx: number,
+    innerCircleDiameterInPx: number,
+    numOfFields: number,
+    innerText: string,
+    borderStrokeColor: string,
+    isBoolVar: boolean,
+    fontSizeInPx: number,
+    fontName: string,
+    variableIndicatorStrokeThickness: number,
+    fillBackgroundColor: string | null,
+    drawQrCode: boolean,
+    format: 'svg' | 'png'
+  )
+  {
+
+    let canvas = document.createElement('canvas')
+
+    canvas.width = stageWidth
+    canvas.height = stageHeight
+
+    const scale = stageWidth / outerCircleDiameterInPx
+
+    // canvas.style.width = stageWidth + 'px'
+    // canvas.style.height = stageHeight + 'px'
+
+    const stage = new createjs.Stage(canvas)
+
+    stage.clear()
+
+    stage.scaleX = stageWidth / outerCircleDiameterInPx
+    stage.scaleY = stageHeight / outerCircleDiameterInPx
+
+    console.log(stage.scaleX)
+    console.log(stage.scaleY)
+    console.log(fillBackgroundColor)
+
+    //stage width??
+    await VariableIndicatorDrawer.drawVariableIndicator(stage,
+      outerCircleDiameterInPx, outerCircleDiameterInPx, outerCircleDiameterInPx, innerCircleDiameterInPx, numOfFields,
+      innerText,
+      isBoolVar,
+      fontSizeInPx,
+      fontName,
+      variableIndicatorStrokeThickness,
+      fillBackgroundColor,
+      drawQrCode
+    )
+
+    stage.update()
+
+    if (format === 'svg') {
+
+      const exporter = new (window as any).SVGExporter(stage, stageWidth, stageHeight, false);
+      exporter.stretchImages = true;
+      exporter.run()
+      const serializer = new XMLSerializer();
+      const svgStr = serializer.serializeToString(exporter.svg);
+
+      const date = new Date(Date.now())
+      let fileName = `export_${appProperties.exportFileNamePrefix}_${date.getFullYear()}_${date.getMonth()}_${date.getDay()}__${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}.svg`
+
+      const blob = new Blob([svgStr], {type: "image/svg+xml;charset=utf-8"});
+      fileSaver.saveAs(blob, fileName)
+
+    } else if (format === 'png') {
+
+      const date = new Date(Date.now())
+      let fileName = `export_${appProperties.exportFileNamePrefix}_${date.getFullYear()}_${date.getMonth()}_${date.getDay()}__${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}.png`;
+
+      (stage.canvas as HTMLCanvasElement).toBlob((blob: Blob) => {
+        fileSaver.saveAs(blob, fileName)
+      })
+
+    }
+
+
+  }
   /**
    * TODO maybe move this to IO helper?? but this needs many settings
    * exports the tile as svg
@@ -588,6 +668,7 @@ export class PrintHelper {
     fontSizeInPx: number,
     fontName: string,
     variableIndicatorStrokeThickness: number,
+    fillBackgroundColor: string | null,
     drawQrCode: boolean
   ): Promise<void> {
 
@@ -642,6 +723,7 @@ export class PrintHelper {
       fontSizeInPx,
       fontName,
       variableIndicatorStrokeThickness,
+      fillBackgroundColor,
       drawQrCode
     )
 
@@ -953,6 +1035,7 @@ export class PrintHelper {
               maxVal: globalVar.maxVal
             } as DefinitionTableIntEntry),
           variableIndicatorStrokeThickness,
+          fillBackgroundColor,
           drawQrCode
         )
 
@@ -982,6 +1065,7 @@ export class PrintHelper {
               maxVal: playerVar.maxVal
             } as DefinitionTableIntEntry),
           variableIndicatorStrokeThickness,
+          fillBackgroundColor,
           drawQrCode
         )
 
@@ -1015,6 +1099,7 @@ export class PrintHelper {
                 maxVal: localVarDef.maxVal
               } as DefinitionTableIntEntry),
             variableIndicatorStrokeThickness,
+            fillBackgroundColor,
             drawQrCode
           )
 
@@ -1038,6 +1123,7 @@ export class PrintHelper {
                                             fontName: string,
                                             entry: DefinitionTableBoolEntry | DefinitionTableIntEntry,
                                             strokeThickness: number,
+                                            fillBackgroundColor: string | null,
                                             drawQrCode: boolean
   ): Promise<HTMLDivElement> {
 
@@ -1081,6 +1167,7 @@ export class PrintHelper {
         fontSizeInPx,
         fontName,
         strokeThickness,
+        fillBackgroundColor,
         drawQrCode
       )
     }
@@ -1096,6 +1183,7 @@ export class PrintHelper {
         fontSizeInPx,
         fontName,
         strokeThickness,
+        fillBackgroundColor,
         drawQrCode
       )
     }
@@ -1124,7 +1212,8 @@ export class PrintHelper {
       idCheckboxDataAttributeKey: string
       idCheckboxDataSetKey: string,
       fullCanvasClass: string
-    } {
+    }
+    {
 
     const checkAllCheckboxesString = getI18n(langId, "Check all")
     const uncheckAllCheckboxesString = getI18n(langId, "Uncheck all")
