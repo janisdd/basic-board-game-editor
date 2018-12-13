@@ -13,7 +13,7 @@ import {getGuid} from "./helpers/guid";
 import {ActionTypes} from "redux-undo";
 
 export const appProperties = {
-  version: '1.1.1',
+  version: '1.2.0',
   appName: 'Basic board game editor',
   exportFileNamePrefix: 'bbge'
 }
@@ -47,7 +47,7 @@ export const lineShapeDefaultColor = '#d4d4d4'
 export const newField_x = 100
 export const newField_y = 100
 export const newField_width = 100
-export const newField_height = 30
+export const newField_height = 45
 
 
 export const ui_helpPopupDelayInMs = 1500
@@ -120,8 +120,8 @@ export const defaultAnchorPoints: ReadonlyArray<AnchorPoint> = [
 
 export const defaultPadding: AbsolutePosition = {
   bottom: 10,
-  left: 30,
-  right: 30,
+  left: 50, //see newField_height
+  right: 50, //see newField_height
   top: 10
 }
 
