@@ -41,6 +41,8 @@ import {
   set_lineSymbol_hasStartArrow, set_lineSymbol_thicknessInPx
 } from "../../../state/reducers/tileEditor/symbols/lineSymbols/actions";
 import {
+  adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight, adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation,
+  adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth,
   setPropertyEditor_FieldX
 } from "../../../state/reducers/tileEditor/fieldProperties/actions";
 import {
@@ -125,7 +127,9 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_lineSymbol_arrowHeight,
   set_lineSymbol_displayName,
 
-  setPropertyEditor_FieldX, //used to update the field anchor points
+  adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth,
+  adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight,
+  adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation,
 
 }, dispatch)
 
@@ -165,7 +169,7 @@ class symbolPropertyEditorWrapper extends React.Component<Props, any> {
                                  isChooseFieldShapeBackgroundImageLibraryDisplayed={this.props.isChooseFieldShapeBackgroundImageLibraryDisplayed}
 
                                  setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed={isDisplayed => {
-                                 this.props.setEditor_isChooseFieldShapeBackgroundImageLibraryDisplayed(isDisplayed)
+                                   this.props.setEditor_isChooseFieldShapeBackgroundImageLibraryDisplayed(isDisplayed)
                                  }}
 
                                  setPropertyEditor_field_backgroundImgGuid={(oldBackgroundImgGuid, newBackgroundImgGuid) => {
@@ -176,6 +180,19 @@ class symbolPropertyEditorWrapper extends React.Component<Props, any> {
                                  setPropertyEditor_FieldRotationInDegree={(oldRotationInDegree, newRotationInDegree) => {
                                    this.props.set_fieldSymbol_rotationInDegree(selectedFieldSymbol.guid,
                                      newRotationInDegree)
+
+                                   //update the connected lines of all dependent fields
+                                   for (const field of this.props.fieldShapes) {
+                                     if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
+                                       this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation(
+                                         field.id,
+                                         oldRotationInDegree,
+                                         newRotationInDegree
+                                       )
+                                     }
+                                   }
+
+
                                  }}
                                  setPropertyEditor_FieldIsBasedOnSymbol={nop}
 
@@ -220,14 +237,17 @@ class symbolPropertyEditorWrapper extends React.Component<Props, any> {
                                  setPropertyEditor_FieldWidth={(oldWidth, newWidth) => {
                                    this.props.set_fieldSymbol_width(selectedFieldSymbol.guid, newWidth)
 
-                                   //update anchor points of all dependent fields
+                                   //update the connected lines of all dependent fields
                                    for (const field of this.props.fieldShapes) {
                                      if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
-                                       //this will update the connected lines (via anchor points)
-                                       // this.props.setPropertyEditor_FieldX(field.id, field.x)
-                                       //TODO update anchor points!!
+                                       this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth(
+                                         field.id,
+                                         oldWidth,
+                                         newWidth,
+                                       )
                                      }
                                    }
+
                                  }}
                                  setPropertyEditor_FieldVerticalAlign={verticalAlign => {
                                    this.props.set_fieldSymbol_verticalAlign(selectedFieldSymbol.guid, verticalAlign)
@@ -241,16 +261,17 @@ class symbolPropertyEditorWrapper extends React.Component<Props, any> {
                                  setPropertyEditor_FieldHeight={(oldHeight, newHeight) => {
                                    this.props.set_fieldSymbol_height(selectedFieldSymbol.guid, newHeight)
 
-                                   //update anchor points of all dependent fields
+                                   //update the connected lines of all dependent fields
                                    for (const field of this.props.fieldShapes) {
 
                                      if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
-                                       //this will update the connected lines (via anchor points)
-                                       // this.props.setPropertyEditor_FieldX(field.id, field.x)
-                                       //TODO update anchor points!!
+                                       this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight(
+                                         field.id,
+                                         oldHeight,
+                                         newHeight,
+                                       )
                                      }
                                    }
-
                                  }}
                                  setPropertyEditor_FieldCornerRadiusInPx={(oldCornerRadiusInPx, newCornerRadiusInPx) => {
                                    this.props.set_fieldSymbol_cornerRadiusInPx(selectedFieldSymbol.guid,

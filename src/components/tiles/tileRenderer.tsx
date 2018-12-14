@@ -962,8 +962,10 @@ class tileRenderer extends React.Component<Props, any> {
               const draggedLine = (this.props.lineShapes as ReadonlyArray<LineShape>).find(
                 p => p.id === draggingObjectId)
 
-              deltaX = x - draggedLine.startPoint.x
-              deltaY = y - draggedLine.startPoint.y
+              if (draggedLine) {
+                deltaX = x - draggedLine.startPoint.x
+                deltaY = y - draggedLine.startPoint.y
+              }
 
             }
           }

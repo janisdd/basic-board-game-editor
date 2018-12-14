@@ -1,4 +1,4 @@
-import {AnchorPoint, FieldShape, HorizontalAlign, VerticalAlign} from "../../../../types/drawing";
+import {AnchorPoint, FieldShape, FieldSymbol, HorizontalAlign, VerticalAlign} from "../../../../types/drawing";
 import {
   ActionBase,
   ActionType,
@@ -526,4 +526,129 @@ export function edit_fieldShapeRedo(): Edit_fieldShapeRedo {
   }
 }
 
+
+//--- helpers
+
+/**
+ * updates the lines connected to the field (the field is connected to a symbol and we changed the symbol width)
+ * @param fieldId
+ * @param oldSymbolWidth
+ * @param newSymbolWidth
+ */
+export function adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth(fieldId: number, oldSymbolWidth: number, newSymbolWidth: number): MultiActions {
+  return (dispatch, getState) => {
+
+    const beforeField = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (beforeField === undefined) {
+      Logger.fatal('[internal] could not find the field')
+      return
+    }
+
+    const _fieldSymbol = beforeField.createdFromSymbolGuid === null
+      ? null
+      : getState().fieldSymbolState.present.find(p => p.guid === beforeField.createdFromSymbolGuid)
+
+    if (_fieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the fieldSymbol')
+      return
+    }
+
+    const beforeFieldSymbol: FieldSymbol = {
+      ..._fieldSymbol,
+      width: oldSymbolWidth
+    }
+
+    const afterField = beforeField
+
+    const afterFieldSymbol: FieldSymbol = {
+      ..._fieldSymbol,
+      width: newSymbolWidth
+    }
+
+    adjustLinesFromAnchorPoints(beforeField, afterField, beforeFieldSymbol, afterFieldSymbol)
+  }
+}
+
+/**
+ * updates the lines connected to the field (the field is connected to a symbol and we changed the symbol width)
+ * @param fieldId
+ * @param oldSymbolHeight
+ * @param newSymbolHeight
+ */
+export function adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight(fieldId: number, oldSymbolHeight: number, newSymbolHeight: number): MultiActions {
+  return (dispatch, getState) => {
+
+    const beforeField = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (beforeField === undefined) {
+      Logger.fatal('[internal] could not find the field')
+      return
+    }
+
+    const _fieldSymbol = beforeField.createdFromSymbolGuid === null
+      ? null
+      : getState().fieldSymbolState.present.find(p => p.guid === beforeField.createdFromSymbolGuid)
+
+    if (_fieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the fieldSymbol')
+      return
+    }
+
+    const beforeFieldSymbol: FieldSymbol = {
+      ..._fieldSymbol,
+      height: oldSymbolHeight,
+    }
+
+    const afterField = beforeField
+
+    const afterFieldSymbol: FieldSymbol = {
+      ..._fieldSymbol,
+      height: newSymbolHeight,
+    }
+
+    adjustLinesFromAnchorPoints(beforeField, afterField, beforeFieldSymbol, afterFieldSymbol)
+  }
+}
+
+/**
+ * updates the lines connected to the field (the field is connected to a symbol and we changed the symbol rotation)
+ * @param fieldId
+ * @param oldSymbolRotation
+ * @param newSymbolRotation
+ */
+export function adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation(fieldId: number, oldSymbolRotation: number, newSymbolRotation: number): MultiActions {
+  return (dispatch, getState) => {
+
+    const beforeField = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (beforeField === undefined) {
+      Logger.fatal('[internal] could not find the field')
+      return
+    }
+
+    const _fieldSymbol = beforeField.createdFromSymbolGuid === null
+      ? null
+      : getState().fieldSymbolState.present.find(p => p.guid === beforeField.createdFromSymbolGuid)
+
+    if (_fieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the fieldSymbol')
+      return
+    }
+
+    const beforeFieldSymbol: FieldSymbol = {
+      ..._fieldSymbol,
+      rotationInDegree: oldSymbolRotation
+    }
+
+    const afterField = beforeField
+
+    const afterFieldSymbol: FieldSymbol = {
+      ..._fieldSymbol,
+      rotationInDegree: newSymbolRotation
+    }
+
+    adjustLinesFromAnchorPoints(beforeField, afterField, beforeFieldSymbol, afterFieldSymbol)
+  }
+}
 

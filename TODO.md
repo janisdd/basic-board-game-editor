@@ -29,7 +29,7 @@ ISSUES
       undone but is not visible for the user
 
   - when a line is connected to a symbol field and we change the symbol width/height/rotation
-    - the line gets disconnected
+    - change ALL instances not only on the current tile
 
   - when we change field symbol update connected lines pos
 

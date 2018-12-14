@@ -75,9 +75,6 @@ some of the notable issues are
 - when a line is connected to a field anchor point then moving the field/line undo is bugged
 	- this could also mess up the field connected lines list
 
-- when a line is connected (through an anchor point) to a field symbol instance and we change the width/height of the symbol
-  - then the line is still connected to the field but is not moved!
-
 - printing (vars) maybe not all vars are found
 
 - variable check maybe not all vars are found
