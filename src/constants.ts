@@ -18,6 +18,9 @@ export const appProperties = {
   exportFileNamePrefix: 'bbge'
 }
 
+
+export const changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol = true
+
 export  const exportPngImagesBgColor: string | null = 'white'
 
 export const qrCodeSizeInPx = 300

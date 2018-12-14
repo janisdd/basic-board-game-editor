@@ -1,10 +1,9 @@
 import {
   ActionType,
-  SET_selectedFieldSymbolGuidAction, SET_selectedImgSymbolGuidAction, SET_selectedLineSymbolGuidAction
+  SET_selectedFieldSymbolGuidAction,
+  SET_selectedImgSymbolGuidAction,
+  SET_selectedLineSymbolGuidAction
 } from "./symbolsReducer";
-import {MultiActions} from "../../../../types/ui";
-import {set_editor_rightTabActiveIndex} from "../actions";
-import {RightTileEditorTabs} from "../tileEditorReducer";
 
 
 export function set_selectedFieldSymbolGuid(selectedFieldSymbolGuid: string | null): SET_selectedFieldSymbolGuidAction {

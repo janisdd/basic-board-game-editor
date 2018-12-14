@@ -169,7 +169,7 @@ export interface LangObj {
   "Adds a new shape that is linked to the symbol. When the symbol changes the shape will changetoo. Can be changed later": string
   "Removing a symbol will disconnect all shapes from that symbol. The shapes will stay but use its own properties again": string
   "What is a symbol": string
-  "A symbol is like a plan for a shape, it defines properties. If you create an instance of this symbol then the created shape will keep a connection to the symbol and use the symbol properties instead of its own properties. Thus when you change the symbol all connected shapes will update too! Symbol instances are marked with a small indicator in the corner. To add a symbol select a shape and create a symbol from shape": string
+  "A symbol is like a plan for a shape, it defines properties. If you create an instance of this symbol then the created shape will keep a connection to the symbol and use the symbol properties instead of its own properties. Thus when you change the symbol all connected shapes will update too! Symbol instances are marked with a small indicator in the corner. To add a symbol select a shape and create a symbol from shape. Note that changes to symbols are global (applied to all tiles) and are applied immediately (without apply changes) and cannot be cancelled": string
   //--- border points tab
   "Border points": string
   "Top border points": string

@@ -49,6 +49,8 @@ import {
   setEditor_isChooseFieldShapeBackgroundImageLibraryDisplayed,
   setEditor_IsChooseImgShapeImageLibraryDisplayed
 } from "../../../state/reducers/tileEditor/actions";
+import {Logger} from "../../../helpers/logger";
+import {changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol} from "../../../constants";
 
 export interface MyProps {
   //readonly test: string
@@ -68,6 +70,8 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     lineSymbols: rootState.lineSymbolState.present,
 
     fieldShapes: rootState.tileEditorFieldShapesState.present,
+    possibleTiles: rootState.tileLibraryState.possibleTiles,
+    tileGuide: rootState.tileEditorState.tileProps.guid,
     isChooseImgShapeImageLibraryDisplayed: rootState.tileEditorState.isChooseImgShapeImageLibraryDisplayed,
     isChooseFieldShapeBackgroundImageLibraryDisplayed: rootState.tileEditorState.isChooseFieldShapeBackgroundImageLibraryDisplayed,
 
@@ -181,17 +185,49 @@ class symbolPropertyEditorWrapper extends React.Component<Props, any> {
                                    this.props.set_fieldSymbol_rotationInDegree(selectedFieldSymbol.guid,
                                      newRotationInDegree)
 
+                                   if (changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol) {
+
+                                     //this will change the line points in the tile library
+                                     //but the current tile is a copy (mostly) so if we change the lines only in the tile library...
+                                     //... and click on cancel everything is fine because the world displays the tile library tiles
+                                     //....or click on apply then we overwrite the corrected lines with the lines in the single tile editor
+
+                                     for (let i = 0; i < this.props.possibleTiles.length; i++) {
+                                       const possibleTile = this.props.possibleTiles[i]
+
+                                       if (possibleTile.guid === this.props.tileGuide) continue //this is the default case, handled below
+
+
+                                       //update the connected lines of all dependent fields
+                                       for (const field of possibleTile.fieldShapes) {
+                                         if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
+                                           this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation(
+                                             field,
+                                             selectedFieldSymbol,
+                                             possibleTile.lineShapes,
+                                             possibleTile.guid,
+                                             oldRotationInDegree,
+                                             newRotationInDegree,
+                                           )
+                                         }
+                                       }
+                                     }
+                                   }
+
                                    //update the connected lines of all dependent fields
                                    for (const field of this.props.fieldShapes) {
                                      if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
+
                                        this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation(
-                                         field.id,
+                                         field,
+                                         selectedFieldSymbol,
+                                         null,
+                                         null,
                                          oldRotationInDegree,
                                          newRotationInDegree
                                        )
                                      }
                                    }
-
 
                                  }}
                                  setPropertyEditor_FieldIsBasedOnSymbol={nop}
@@ -237,16 +273,53 @@ class symbolPropertyEditorWrapper extends React.Component<Props, any> {
                                  setPropertyEditor_FieldWidth={(oldWidth, newWidth) => {
                                    this.props.set_fieldSymbol_width(selectedFieldSymbol.guid, newWidth)
 
+                                   if (changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol) {
+
+                                     //this will change the line points in the tile library
+                                     //but the current tile is a copy (mostly) so if we change the lines only in the tile library...
+                                     //... and click on cancel everything is fine because the world displays the tile library tiles
+                                     //....or click on apply then we overwrite the corrected lines with the lines in the single tile editor
+
+                                     for (let i = 0; i < this.props.possibleTiles.length; i++) {
+                                       const possibleTile = this.props.possibleTiles[i]
+
+                                       if (possibleTile.guid === this.props.tileGuide) continue //this is the default case, handled below
+
+                                       //update the connected lines of all dependent fields
+                                       for (const field of possibleTile.fieldShapes) {
+                                         if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
+
+                                           this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth(
+                                             field,
+                                             selectedFieldSymbol,
+                                             possibleTile.lineShapes,
+                                             possibleTile.guid,
+                                             oldWidth,
+                                             newWidth,
+                                           )
+                                         }
+                                       }
+
+                                     }
+
+
+                                   }
+
                                    //update the connected lines of all dependent fields
                                    for (const field of this.props.fieldShapes) {
                                      if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
+
                                        this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth(
-                                         field.id,
+                                         field,
+                                         selectedFieldSymbol,
+                                         null,
+                                         null,
                                          oldWidth,
                                          newWidth,
                                        )
                                      }
                                    }
+
 
                                  }}
                                  setPropertyEditor_FieldVerticalAlign={verticalAlign => {
@@ -261,17 +334,51 @@ class symbolPropertyEditorWrapper extends React.Component<Props, any> {
                                  setPropertyEditor_FieldHeight={(oldHeight, newHeight) => {
                                    this.props.set_fieldSymbol_height(selectedFieldSymbol.guid, newHeight)
 
+                                   if (changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol) {
+
+                                     //this will change the line points in the tile library
+                                     //but the current tile is a copy (mostly) so if we change the lines only in the tile library...
+                                     //... and click on cancel everything is fine because the world displays the tile library tiles
+                                     //....or click on apply then we overwrite the corrected lines with the lines in the single tile editor
+
+                                     for (let i = 0; i < this.props.possibleTiles.length; i++) {
+                                       const possibleTile = this.props.possibleTiles[i]
+
+                                       if (possibleTile.guid === this.props.tileGuide) continue //this is the default case, handled below
+
+                                       //update the connected lines of all dependent fields
+                                       for (const field of possibleTile.fieldShapes) {
+                                         if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
+                                           this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight(
+                                             field,
+                                             selectedFieldSymbol,
+                                             possibleTile.lineShapes,
+                                             possibleTile.guid,
+                                             oldHeight,
+                                             newHeight,
+                                           )
+                                         }
+                                       }
+                                     }
+
+                                   }
+
                                    //update the connected lines of all dependent fields
                                    for (const field of this.props.fieldShapes) {
-
                                      if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
+
                                        this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight(
-                                         field.id,
+                                         field,
+                                         selectedFieldSymbol,
+                                         null,
+                                         null,
                                          oldHeight,
                                          newHeight,
                                        )
                                      }
                                    }
+
+
                                  }}
                                  setPropertyEditor_FieldCornerRadiusInPx={(oldCornerRadiusInPx, newCornerRadiusInPx) => {
                                    this.props.set_fieldSymbol_cornerRadiusInPx(selectedFieldSymbol.guid,

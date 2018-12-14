@@ -473,6 +473,7 @@ export function reducer(state: State = initial, action: AllActions): State {
     case ActionType.SET_editor_isCreatingNewTile:
       return {
         ...initial, //full reset
+        isLeftTabMenuExpanded: state.isLeftTabMenuExpanded,
         isCreatingNewTile: action.isCreatingNewTile,
         tileProps: action.tile
       }

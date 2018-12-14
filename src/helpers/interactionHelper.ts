@@ -391,8 +391,7 @@ function connectFieldsFromRootFieldByCmdText(
         lineShapes
       )
 
-    }
-    else if (statement.type === 'control_ifElse') {
+    } else if (statement.type === 'control_ifElse') {
 
       lastZIndex = connectFields(rootField,
         rootFieldSymbol,
@@ -625,8 +624,7 @@ function connectPointsWithLine(startFieldX: number, startFieldY: number, startFi
         y: endFieldY + (endIsBorderPoint ? 0 : endFieldHeight)
       }
     }
-  }
-  else if (majorLineDirection === MajorLineDirection.leftToRight || majorLineDirection === MajorLineDirection.rightToLeft) {
+  } else if (majorLineDirection === MajorLineDirection.leftToRight || majorLineDirection === MajorLineDirection.rightToLeft) {
 
     if (startFieldX <= endFieldX) {
       //line goes from left to right
@@ -640,8 +638,7 @@ function connectPointsWithLine(startFieldX: number, startFieldY: number, startFi
         x: endFieldX,
         y: endFieldY + (endIsBorderPoint ? 0 : endFieldHeight / 2)
       }
-    }
-    else {
+    } else {
       //line goes from right to left
 
       startPoint = {
@@ -715,8 +712,7 @@ export function getNiceBezierCurveBetween(startPoint: PlainPoint, endPoint: Plai
 
     cp2X = endPoint.x
     cp2Y = endPoint.y - deltaY / 3
-  }
-  else {
+  } else {
     cp1X = startPoint.x + deltaX / 3
     cp1Y = startPoint.y
 
@@ -750,14 +746,19 @@ export function getNiceBezierCurveBetween(startPoint: PlainPoint, endPoint: Plai
  * if a line point is connected to an anchor point and thus we need to move the line too
  * @param fieldBefore
  * @param fieldAfter
+ * @param allLines all possible lines to search
  * @param fieldSymbolBefore the symbol for the before field or null
  * @param fieldSymbolAfter the symbol for the after field (can be the updated symbol)
+ * @param set_selectedLinePointNewPosAction
  */
-export function adjustLinesFromAnchorPoints(fieldBefore: FieldShape, fieldAfter: FieldShape, fieldSymbolBefore: FieldSymbol | null, fieldSymbolAfter: FieldSymbol | null): void {
+export function adjustLinesFromAnchorPoints(fieldBefore: FieldShape, fieldAfter: FieldShape,
+                                            allLines: ReadonlyArray<LineShape>, fieldSymbolBefore: FieldSymbol | null, fieldSymbolAfter: FieldSymbol | null,
+                                            set_selectedLinePointNewPosAction: (lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => any
+): void {
 
   //TODO MAYBE maybe we can make this faster??
 
-  const allLines = globalState.getState().tileEditorLineShapeState.present
+  // const allLines = globalState.getState().tileEditorLineShapeState.present
 
   for (const key in fieldBefore.connectedLinesThroughAnchorPoints) {
     const lineId = parseInt(key)
@@ -803,7 +804,8 @@ export function adjustLinesFromAnchorPoints(fieldBefore: FieldShape, fieldAfter:
       if (connectedLinePointIds.indexOf(line.startPoint.id) !== -1 &&
         line.startPoint.x === anchorPoint.x && line.startPoint.y === anchorPoint.y) {
         //move the line point to the new anchor point pos
-        globalState.dispatch(set_selectedLinePointNewPosAction(line.id, line.startPoint.id, newAnchorPoint, false))
+        // globalState.dispatch(set_selectedLinePointNewPosAction(line.id, line.startPoint.id, newAnchorPoint, false))
+        set_selectedLinePointNewPosAction(line.id, line.startPoint.id, newAnchorPoint, false)
       }
 
       for (const intermediatePointsInLine of line.points) {
@@ -811,8 +813,8 @@ export function adjustLinesFromAnchorPoints(fieldBefore: FieldShape, fieldAfter:
         if (connectedLinePointIds.indexOf(intermediatePointsInLine.id) !== -1 &&
           intermediatePointsInLine.x === anchorPoint.x && intermediatePointsInLine.y === anchorPoint.y) {
           //move the line point to the new anchor point pos
-          globalState.dispatch(
-            set_selectedLinePointNewPosAction(line.id, intermediatePointsInLine.id, newAnchorPoint, false))
+          // globalState.dispatch(set_selectedLinePointNewPosAction(line.id, intermediatePointsInLine.id, newAnchorPoint, false))
+          set_selectedLinePointNewPosAction(line.id, intermediatePointsInLine.id, newAnchorPoint, false)
         }
       }
     }
@@ -861,8 +863,7 @@ export function isFieldAndLineConnectedThroughAnchorPoints(field: FieldShape, fi
     const distance = getPointDistance(line.startPoint, anchorPoint)
     if (line.startPoint.x === anchorPoint.x && line.startPoint.y === anchorPoint.y) {
       connectedPointsIds.push(line.startPoint.id)
-    }
-    else if (distance <= anchorPointSnapToleranceRadiusInPx) {
+    } else if (distance <= anchorPointSnapToleranceRadiusInPx) {
 
       connectedPointsIds.push(line.startPoint.id)
       globalState.dispatch(set_selectedLinePointNewPosAction(line.id, line.startPoint.id, anchorPoint, false))
@@ -873,8 +874,7 @@ export function isFieldAndLineConnectedThroughAnchorPoints(field: FieldShape, fi
 
       if (intermediatePointsInLine.x === anchorPoint.x && intermediatePointsInLine.y === anchorPoint.y) {
         connectedPointsIds.push(intermediatePointsInLine.id)
-      }
-      else if (distance <= anchorPointSnapToleranceRadiusInPx) {
+      } else if (distance <= anchorPointSnapToleranceRadiusInPx) {
         connectedPointsIds.push(intermediatePointsInLine.id)
         globalState.dispatch(
           set_selectedLinePointNewPosAction(line.id, intermediatePointsInLine.id, anchorPoint, false))

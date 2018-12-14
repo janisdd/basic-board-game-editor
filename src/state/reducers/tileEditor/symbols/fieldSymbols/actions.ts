@@ -79,11 +79,7 @@ export function set_fieldSymbol_width(fieldSymbolGuid: string, width: number): M
 
     //we only set the symbol props ... the field values are not touched ... we only draw the fields like the symbol
 
-    //TODO we may need to update all lines in ALL known tiles...
-
     dispatch(_set_fieldSymbol_width(fieldSymbolGuid, width))
-
-
   }
 }
 
@@ -99,11 +95,7 @@ export function set_fieldSymbol_height(fieldSymbolGuid: string, height: number):
   return (dispatch, getState) => {
 
     //we only set the symbol props ... the field values are not touched ... we only draw the fields like the symbol
-
-    //TODO we may need to update all lines in ALL known tiles...
-
     dispatch(_set_fieldSymbol_height(fieldSymbolGuid, height))
-
   }
 }
 

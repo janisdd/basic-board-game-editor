@@ -77,8 +77,8 @@ class fieldSymbolsMenu extends React.Component<Props, any> {
                 "What is a symbol")
             }
           </span>
-          <IconToolTip iconSize="large" message={getI18n(this.props.langId,
-            "A symbol is like a plan for a shape, it defines properties. If you create an instance of this symbol then the created shape will keep a connection to the symbol and use the symbol properties instead of its own properties. Thus when you change the symbol all connected shapes will update too! Symbol instances are marked with a small indicator in the corner. To add a symbol select a shape and create a symbol from shape")}/>
+          <IconToolTip wide iconSize="large" message={getI18n(this.props.langId,
+            "A symbol is like a plan for a shape, it defines properties. If you create an instance of this symbol then the created shape will keep a connection to the symbol and use the symbol properties instead of its own properties. Thus when you change the symbol all connected shapes will update too! Symbol instances are marked with a small indicator in the corner. To add a symbol select a shape and create a symbol from shape. Note that changes to symbols are global (applied to all tiles) and are applied immediately (without apply changes) and cannot be cancelled")}/>
         </div>
 
         <div className="flexed">

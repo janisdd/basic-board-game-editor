@@ -28,11 +28,6 @@ ISSUES
     - when a line is connected to an anchor point and moved a bit (so that it is not detached) then this can be
       undone but is not visible for the user
 
-  - when a line is connected to a symbol field and we change the symbol width/height/rotation
-    - change ALL instances not only on the current tile
-
-  - when we change field symbol update connected lines pos
-
 - when a line is connected (through an anchor point) to a field symbol instance and we change the width/height of the symbol
   - then the line is still connected to the field but is not moved!
 
