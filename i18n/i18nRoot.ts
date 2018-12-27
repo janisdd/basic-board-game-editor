@@ -169,6 +169,8 @@ export interface LangObj {
   "Symbols": string
   "Outline": string
   //--- symbol editors
+  "Overwrite": string
+  "Overwritten by symbol": string
   "Adds a new shape with the props of the symbol": string
   "Adds a new shape that is linked to the symbol. When the symbol changes the shape will changetoo. Can be changed later": string
   "Removing a symbol will disconnect all shapes from that symbol. The shapes will stay but use its own properties again": string

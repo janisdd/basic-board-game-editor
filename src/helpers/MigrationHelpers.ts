@@ -386,7 +386,52 @@ class Migration_1_2_0__to__1_2_1 implements MigrationClass {
       worldSettings: {
         ...exportWorld.worldSettings,
         printScale: 1
-      }
+      },
+      fieldSymbols: exportWorld.fieldSymbols.map(fieldSymbol => {
+        return {
+          ...fieldSymbol,
+          overwriteBackgroundImage: true,
+          overwriteRotationInDeg: true,
+          overwriteCornerRadius: true,
+          overwritePadding:true,
+          overwriteVerticalTextAlign:true,
+          overwriteHorizontalTextAlign:true,
+          overwriteHeight:true,
+          overwriteWidth:true,
+          overwriteColor:true,
+          overwriteBgColor:true,
+          overwriteBorderColor:true,
+          overwriteBorderSizeInPx:true,
+          overwriteFontName:true,
+          overwriteFontSizeInPx:true,
+          overwriteFontDecoration:true,
+          overwriteText:true,
+        }
+      }),
+      imgSymbols: exportWorld.imgSymbols.map(imgSymbol => {
+        return {
+          ...imgSymbol,
+          overwriteHeight:true,
+          overwriteImage:true,
+          overwriteIsDisabledForMouseSelection:true,
+          overwriteRotationInDeg:true,
+          overwriteSkewX:true,
+          overwriteSkewY:true,
+          overwriteWidth:true,
+        }
+      }),
+      lineSymbols: exportWorld.lineSymbols.map(lineSymbol => {
+        return {
+          ...lineSymbol,
+          overwriteArrowHeight:true,
+          overwriteArrowWidth:true,
+          overwriteColor:true,
+          overwriteGapsInPx:true,
+          overwriteHasEndArrow:true,
+          overwriteHasStartArrow:true,
+          overwriteThicknessInPx:true,
+        }
+      })
     }
 
     return copy

@@ -353,8 +353,7 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
     if (!res) {
       symbolForShape = null
       Logger.log('TODO symbol needed but not found')
-    }
-    else {
+    } else {
       symbolForShape = res
     }
   }
@@ -366,12 +365,12 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
 
 
   //--start
-  const borderSize = (symbolForShape !== null ? symbolForShape.borderSizeInPx : field.borderSizeInPx)
-  const borderColor = symbolForShape !== null ? symbolForShape.borderColor : field.borderColor
+  const borderSize = (symbolForShape !== null && symbolForShape.overwriteBorderSizeInPx ? symbolForShape.borderSizeInPx : field.borderSizeInPx)
+  const borderColor = symbolForShape !== null && symbolForShape.overwriteBorderColor ? symbolForShape.borderColor : field.borderColor
 
-  graphics = graphics.beginFill(symbolForShape !== null ? symbolForShape.bgColor : field.bgColor)
+  graphics = graphics.beginFill(symbolForShape !== null && symbolForShape.overwriteBgColor ? symbolForShape.bgColor : field.bgColor)
 
-  if ((symbolForShape !== null ? symbolForShape.cornerRadiusInPx : field.cornerRadiusInPx) > 0) {
+  if ((symbolForShape !== null && symbolForShape.overwriteCornerRadius ? symbolForShape.cornerRadiusInPx : field.cornerRadiusInPx) > 0) {
 
     if (borderSize > 0) {
       // borderShape.graphics
@@ -391,15 +390,14 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
       .drawRoundRect(
         (borderSize / 2), //the border grows in both directions...
         (borderSize / 2),
-        (symbolForShape !== null ? symbolForShape.width : field.width) - borderSize,
-        (symbolForShape !== null ? symbolForShape.height : field.height) - borderSize,
-        symbolForShape !== null ? symbolForShape.cornerRadiusInPx : field.cornerRadiusInPx
+        (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width) - borderSize,
+        (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height) - borderSize,
+        symbolForShape !== null && symbolForShape.overwriteCornerRadius ? symbolForShape.cornerRadiusInPx : field.cornerRadiusInPx
       )
 
 
     //graphics.drawRoundRectComplex() //maybe?
-  }
-  else {
+  } else {
     if (borderSize > 0) {
       // borderShape.graphics
       //   .beginFill(borderColor)
@@ -416,15 +414,15 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
     graphics.drawRect(
       (borderSize / 2), //the border grows in both directions...
       (borderSize / 2),
-      (symbolForShape !== null ? symbolForShape.width : field.width) - borderSize,
-      (symbolForShape !== null ? symbolForShape.height : field.height) - borderSize
+      (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width) - borderSize,
+      (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height) - borderSize
     )
   }
   rectShape.setBounds(
     0,
     0,
-    symbolForShape !== null ? symbolForShape.width : field.width,
-    symbolForShape !== null ? symbolForShape.height : field.height
+    symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width,
+    symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height
   )
 
 
@@ -434,7 +432,7 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
   container.addChild(rectShape)
 
   const backgroundImg = ImgStorage.getImgFromGuid(
-    symbolForShape !== null ? symbolForShape.backgroundImgGuid : field.backgroundImgGuid)
+    symbolForShape !== null && symbolForShape.overwriteBackgroundImage ? symbolForShape.backgroundImgGuid : field.backgroundImgGuid)
 
   if (backgroundImg !== null) {
 
@@ -448,8 +446,8 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
     //   (symbolForShape !== null ? symbolForShape.height : field.height)
     // )
 
-    bitmap.scaleX = (symbolForShape !== null ? symbolForShape.width : field.width) / bitmap.image.width
-    bitmap.scaleY = (symbolForShape !== null ? symbolForShape.height : field.height) / bitmap.image.height
+    bitmap.scaleX = (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width) / bitmap.image.width
+    bitmap.scaleY = (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height) / bitmap.image.height
 
     container.addChild(bitmap)
 
@@ -466,59 +464,55 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
     border.graphics.drawRect(
       0 - borderThickness,
       0 - borderThickness,
-      (symbolForShape !== null ? symbolForShape.width : field.width) + borderThickness * 2,
-      (symbolForShape !== null ? symbolForShape.height : field.height) + borderThickness * 2
+      (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width) + borderThickness * 2,
+      (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height) + borderThickness * 2
     )
 
     container.addChild(border)
   }
 
-  if ((symbolForShape !== null ? symbolForShape.text : field.text) !== null) {
+  if ((symbolForShape !== null && symbolForShape.overwriteText ? symbolForShape.text : field.text) !== null) {
 
     let textShape = new createjs.Text();
-    textShape.text = (symbolForShape !== null ? symbolForShape.text : field.text) || ''
+    textShape.text = (symbolForShape !== null && symbolForShape.overwriteText ? symbolForShape.text : field.text) || ''
 
-    if (symbolForShape !== null) {
-      textShape.font = `${symbolForShape.isFontBold ? 'bold ' : ''}${symbolForShape.isFontItalic ? 'italic ' : ''}${symbolForShape.fontSizeInPx}px '${symbolForShape.fontName}'`
-    } else {
-      textShape.font = `${field.isFontBold ? 'bold ' : ''}${field.isFontItalic ? 'italic ' : ''}${field.fontSizeInPx}px '${field.fontName}'`
-    }
+    let fontSizeInPx = (symbolForShape !== null && symbolForShape.overwriteFontSizeInPx ? symbolForShape.fontSizeInPx : field.fontSizeInPx)
+    let fontName = (symbolForShape !== null && symbolForShape.overwriteFontName ? symbolForShape.fontName : field.fontName)
+    let isFontBold = (symbolForShape !== null && symbolForShape.overwriteFontDecoration ? symbolForShape.isFontBold : field.isFontBold)
+    let isFontItalic = (symbolForShape !== null && symbolForShape.overwriteFontDecoration ? symbolForShape.isFontItalic : field.isFontItalic)
 
-    textShape.color = symbolForShape !== null ? symbolForShape.color : field.color
+    textShape.font = `${isFontBold ? 'bold ' : ''}${isFontItalic ? 'italic ' : ''}${fontSizeInPx}px '${fontName}'`
 
+    textShape.color = symbolForShape !== null && symbolForShape.overwriteColor ? symbolForShape.color : field.color
 
-    textShape.lineWidth = symbolForShape !== null ? symbolForShape.width : field.width
+    textShape.lineWidth = symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width
     //textShape.lineHeight= field.height
 
     const {x, y} = container.getBounds()
 
     //horizontal text align
-    if ((symbolForShape !== null ? symbolForShape.horizontalTextAlign : field.horizontalTextAlign) === HorizontalAlign.center) {
+    if ((symbolForShape !== null && symbolForShape.overwriteHorizontalTextAlign ? symbolForShape.horizontalTextAlign : field.horizontalTextAlign) === HorizontalAlign.center) {
       textShape.textAlign = 'center'
-      textShape.x = (symbolForShape !== null ? symbolForShape.width : field.width) / 2 + x
-    }
-    else if ((symbolForShape !== null ? symbolForShape.horizontalTextAlign : field.horizontalTextAlign) === HorizontalAlign.left) {
+      textShape.x = (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width) / 2 + x
+    } else if ((symbolForShape !== null && symbolForShape.overwriteHorizontalTextAlign ? symbolForShape.horizontalTextAlign : field.horizontalTextAlign) === HorizontalAlign.left) {
       textShape.textAlign = 'left'
-      textShape.x = x + (symbolForShape !== null ? symbolForShape.padding.left : field.padding.left) + borderSize
-    }
-    else if ((symbolForShape !== null ? symbolForShape.horizontalTextAlign : field.horizontalTextAlign) === HorizontalAlign.right) {
+      textShape.x = x + (symbolForShape !== null && symbolForShape.overwritePadding ? symbolForShape.padding.left : field.padding.left) + borderSize
+    } else if ((symbolForShape !== null && symbolForShape.overwriteHorizontalTextAlign ? symbolForShape.horizontalTextAlign : field.horizontalTextAlign) === HorizontalAlign.right) {
       textShape.textAlign = 'right'
-      textShape.x = x + (symbolForShape !== null ? symbolForShape.width : field.width) - (symbolForShape !== null ? symbolForShape.padding.right : field.padding.right) - borderSize
+      textShape.x = x + (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width) - (symbolForShape !== null ? symbolForShape.padding.right : field.padding.right) - borderSize
     }
 
     //vertical text align
-    if ((symbolForShape !== null ? symbolForShape.verticalTextAlign : field.verticalTextAlign) === VerticalAlign.center) {
+    if ((symbolForShape !== null && symbolForShape.overwriteVerticalTextAlign ? symbolForShape.verticalTextAlign : field.verticalTextAlign) === VerticalAlign.center) {
       textShape.textBaseline = 'middle'
-      textShape.y = y + (symbolForShape !== null ? symbolForShape.height : field.height) / 2
-    }
-    else if ((symbolForShape !== null ? symbolForShape.verticalTextAlign : field.verticalTextAlign) === VerticalAlign.top) {
+      textShape.y = y + (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height) / 2
+    } else if ((symbolForShape !== null && symbolForShape.overwriteVerticalTextAlign ? symbolForShape.verticalTextAlign : field.verticalTextAlign) === VerticalAlign.top) {
       textShape.textBaseline = 'top'
-      textShape.y = y + (symbolForShape !== null ? symbolForShape.padding.top : field.padding.top) + borderSize
-    }
-    else if ((symbolForShape !== null ? symbolForShape.verticalTextAlign : field.verticalTextAlign) === VerticalAlign.bottom) {
+      textShape.y = y + (symbolForShape !== null && symbolForShape.overwritePadding ? symbolForShape.padding.top : field.padding.top) + borderSize
+    } else if ((symbolForShape !== null && symbolForShape.overwriteVerticalTextAlign ? symbolForShape.verticalTextAlign : field.verticalTextAlign) === VerticalAlign.bottom) {
       textShape.textBaseline = 'bottom'
-      textShape.y = y + (symbolForShape !== null ? symbolForShape.height : field.height) -
-        (symbolForShape !== null ? symbolForShape.padding.bottom : field.padding.bottom) - borderSize
+      textShape.y = y + (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height) -
+        (symbolForShape !== null && symbolForShape.overwritePadding ? symbolForShape.padding.bottom : field.padding.bottom) - borderSize
     }
 
     container.addChild(textShape)
@@ -542,13 +536,13 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
     rectShape.graphics
       .beginStroke(worldSettings.fieldSequenceBoxColor)
 
-      .drawRect((symbolForShape !== null ? symbolForShape.width : field.width),
+      .drawRect((symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width),
         0 - rectHeight,
         rectWidth,
         rectHeight
       )
 
-    rectShape.setBounds((symbolForShape !== null ? symbolForShape.width : field.width),
+    rectShape.setBounds((symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width),
       0 - rectHeight,
       rectWidth,
       rectHeight
@@ -588,8 +582,8 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
     const anchorPoints = calcAnchorPoints(
       0,
       0,
-      symbolForShape !== null ? symbolForShape.width : field.width,
-      symbolForShape !== null ? symbolForShape.height : field.height,
+      symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width,
+      symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height,
       (symbolForShape !== null ? symbolForShape.anchorPoints : field.anchorPoints), xOffset, yOffset,
       0, //the container is rotated no need to do it here...
     )
@@ -629,17 +623,17 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
   container.setBounds(
     field.x + xOffset,
     field.y + yOffset,
-    (symbolForShape !== null ? symbolForShape.width : field.width),
-    (symbolForShape !== null ? symbolForShape.height : field.height)
+    (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width),
+    (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height)
   )
 
   //for rotation we need to set the props on the container
   //and draw all inside relative to the container coords e.g. NOT field.x + xOffset, but 0 + xOffset
-  container.x = field.x + xOffset + (symbolForShape !== null ? symbolForShape.width : field.width) / 2
-  container.y = field.y + yOffset + (symbolForShape !== null ? symbolForShape.height : field.height) / 2
-  container.regX = (symbolForShape !== null ? symbolForShape.width : field.width) / 2
-  container.regY = (symbolForShape !== null ? symbolForShape.height : field.height) / 2
-  container.rotation = symbolForShape !== null ? symbolForShape.rotationInDegree : field.rotationInDegree
+  container.x = field.x + xOffset + (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width) / 2
+  container.y = field.y + yOffset + (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height) / 2
+  container.regX = (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width) / 2
+  container.regY = (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height) / 2
+  container.rotation = symbolForShape !== null && symbolForShape.overwriteRotationInDeg ? symbolForShape.rotationInDegree : field.rotationInDegree
 
 
   // if (isSelected && field.createdFromSymbolGuid === null) {
@@ -789,8 +783,7 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
     if (!res) {
       symbolForShape = null
       console.log('TODO symbol needed but not found')
-    }
-    else {
+    } else {
       symbolForShape = res
     }
   }
@@ -829,8 +822,7 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
         if (pStart.x <= pEnd.x) {
           beforeStart = interpolate2DPoint(pStart, pEnd, tStart)
           beforeEnd = interpolate2DPoint(pStart, pEnd, tEnd)
-        }
-        else {
+        } else {
           beforeStart = interpolate2DPoint(pEnd, pStart, tStart)
           beforeEnd = interpolate2DPoint(pEnd, pStart, tEnd)
         }
@@ -924,8 +916,7 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
 
     if (pathLine.points.length === 1) {
       p0 = pathLine.startPoint
-    }
-    else {
+    } else {
       p0 = pathLine.points[pathLine.points.length - 2]
     }
 
@@ -1187,8 +1178,7 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     if (!res) {
       symbolForShape = null
       console.log('TODO symbol needed but not found')
-    }
-    else {
+    } else {
       symbolForShape = res
     }
   }
@@ -1459,12 +1449,10 @@ export function drawPlayer(stage: Stage,
       container.x = field.x + field.width - playerBodyWidth + xOffset + shiftXInPx
       container.y = field.y + yOffset + shiftYInPx
 
-    }
-    else if (field.horizontalTextAlign === HorizontalAlign.right) {
+    } else if (field.horizontalTextAlign === HorizontalAlign.right) {
       container.x = field.x + xOffset - shiftXInPx
       container.y = field.y + yOffset + shiftYInPx
-    }
-    else {
+    } else {
       container.x = field.x + xOffset - shiftXInPx
       container.y = field.y + yOffset + shiftYInPx
     }

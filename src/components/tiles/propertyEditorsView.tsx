@@ -237,6 +237,7 @@ class propertyEditorsView extends React.Component<Props, any> {
           <div>
             <FieldPropertyEditor
               fieldShape={selectedFieldShapes}
+              fieldSymbols={this.props.fieldSymbols}
 
               isChooseFieldShapeBackgroundImageLibraryDisplayed={this.props.isChooseFieldShapeBackgroundImageLibraryDisplayed}
 
@@ -744,7 +745,25 @@ function createFieldSymbolFromFieldShape(fieldShape: FieldShape, displayIndex: n
     isFontItalic: fieldShape.isFontItalic,
     isFontUnderlined: fieldShape.isFontUnderlined,
     rotationInDegree: fieldShape.rotationInDegree,
-    backgroundImgGuid: fieldShape.backgroundImgGuid
+    backgroundImgGuid: fieldShape.backgroundImgGuid,
+
+    overwriteBackgroundImage: true,
+    overwriteRotationInDeg: true,
+    overwriteCornerRadius: true,
+    overwritePadding: true,
+    overwriteVerticalTextAlign: true,
+    overwriteHorizontalTextAlign: true,
+    overwriteHeight: true,
+    overwriteWidth: true,
+    overwriteColor: true,
+    overwriteBgColor: true,
+    overwriteBorderColor: true,
+    overwriteBorderSizeInPx: true,
+    overwriteFontName: true,
+    overwriteFontSizeInPx: true,
+    overwriteFontDecoration: true,
+    overwriteText: true,
+    overwriteCmdText: true,
   }
 
   return symbol
@@ -768,7 +787,15 @@ function createImgSymbolFromImgShape(imgShape: ImgShape, displayIndex: number): 
     displayName: 'field symbol ' + id,
     skewX: imgShape.skewX,
     skewY: imgShape.skewY,
-    isMouseSelectionDisabled: imgShape.isMouseSelectionDisabled
+    isMouseSelectionDisabled: imgShape.isMouseSelectionDisabled,
+
+    overwriteHeight: true,
+    overwriteImage: true,
+    overwriteIsDisabledForMouseSelection: true,
+    overwriteRotationInDeg: true,
+    overwriteSkewX: true,
+    overwriteSkewY: true,
+    overwriteWidth: true,
   }
   return symbol
 }
@@ -800,6 +827,14 @@ function createLineSymbolFromLineShape(lineShape: LineShape, displayIndex: numbe
     arrowHeight: lineShape.arrowHeight,
     arrowWidth: lineShape.arrowWidth,
     displayName: 'field symbol ' + id,
+
+    overwriteArrowHeight: true,
+    overwriteArrowWidth: true,
+    overwriteColor: true,
+    overwriteGapsInPx: true,
+    overwriteHasEndArrow: true,
+    overwriteHasStartArrow: true,
+    overwriteThicknessInPx: true,
   }
 
   return symbol

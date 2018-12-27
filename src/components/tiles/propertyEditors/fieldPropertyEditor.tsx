@@ -20,7 +20,9 @@ import {Logger} from "../../../helpers/logger";
 
 export interface MyProps {
 
-  readonly fieldShape: ReadonlyArray<FieldShape> | FieldSymbol
+  readonly fieldShape: ReadonlyArray<FieldShape>
+
+  readonly fieldSymbols: ReadonlyArray<FieldSymbol>
 
   readonly isChooseFieldShapeBackgroundImageLibraryDisplayed: boolean
 
@@ -139,18 +141,15 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
 
     const areFieldShapes = Array.isArray(this.props.fieldShape)
-    const isSymbol = !Array.isArray(this.props.fieldShape)
     let isSingleField = false
 
-    if (Array.isArray(this.props.fieldShape)) {
+    if (areFieldShapes) {
       isSingleField = this.props.fieldShape.length === 1
     }
 
-    const fieldSymbol: FieldSymbol | null = isSymbol
-      ? this.props.fieldShape as FieldSymbol
-      : null
+
     //we need to specify an old val when we have multiple fields to we take the first
-    const singleField: FieldShape | null = isSymbol === false
+    const singleField: FieldShape | null = isSingleField
       ? (this.props.fieldShape as ReadonlyArray<FieldShape>)[0]
       : null
 
@@ -159,13 +158,25 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
     let connectedPointsList = ''
 
-    if (isSymbol === false && isSingleField) {
+    if (isSingleField) {
       let points: number[] = []
       for (const key in singleField.connectedLinesThroughAnchorPoints) {
         const list = singleField.connectedLinesThroughAnchorPoints[key]
         points = points.concat(list)
       }
       connectedPointsList = points.join(', ')
+    }
+
+    const isBasedOnSymbol = isSingleField && isSomeFieldBasedOnSymbol
+
+    let fieldSymbol: FieldSymbol | null = null
+
+    if (isBasedOnSymbol) {
+      const temp = this.props.fieldSymbols.find(p => p.guid === singleField.createdFromSymbolGuid)
+
+      if (temp) {
+        fieldSymbol = temp
+      }
     }
 
 
@@ -228,7 +239,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               </Button>
             </ToolTip>}
 
-            {isSymbol === false && <Button.Group>
+            {isBasedOnSymbol === false && <Button.Group>
               <ToolTip
                 message={getRawI18n(
                   this.props.langId,
@@ -276,12 +287,12 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             </Button.Group>}
 
 
-            {isSymbol === false && <Button color="red" icon
-                                           onClick={() => {
+            {isBasedOnSymbol === false && <Button color="red" icon
+                                                  onClick={() => {
 
-                                             this.props.setPropertyEditor_removeFieldShape()
+                                                    this.props.setPropertyEditor_removeFieldShape()
 
-                                           }}
+                                                  }}
             >
               <Icon name="trash"/>
             </Button>}
@@ -293,8 +304,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Id")}: {singleField.id}</label>
           </Form.Field>}
         {//we use field symbols only for shape not for commands
-          (isSymbol === false && isSingleField) && <div>
-
+          isSingleField && <div>
             <Form.Field>
               <label>{getI18n(this.props.langId, "Command text")}
                 <IconToolTip
@@ -339,10 +349,16 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                   }}
                 >
                 </IconToolTip>
+
+                {
+                  isBasedOnSymbol && fieldSymbol.overwriteCmdText &&
+                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                }
               </label>
               <EditorWrapper
                 id={fieldCmdTextEditorId}
-                value={(isSymbol
+                readony={isBasedOnSymbol && fieldSymbol.overwriteCmdText}
+                value={(isBasedOnSymbol && fieldSymbol.overwriteCmdText
                   ? fieldSymbol.cmdText
                   : isSingleField
                     ? singleField.cmdText
@@ -372,24 +388,17 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
           </div>}
 
-        {isSymbol && <Form.Field>
+        {isBasedOnSymbol && <Form.Field>
           <label>{getI18n(this.props.langId, "Name")}</label>
-          <input value={fieldSymbol.displayName}
-                 onChange={(e) => this.props.set_fieldSymbol_displayName(e.currentTarget.value)}
-          />
+          <input value={fieldSymbol.displayName} disabled/>
         </Form.Field>}
 
         {isSingleField && <Form.Group widths='equal'>
           <Form.Field>
             <label>X</label>
             <input type="number"
-                   value={isSymbol
-                     ? fieldSymbol.x
-                     : singleField.x}
-
-                   onChange={(e) => this.props.setPropertyEditor_FieldX(isSymbol
-                     ? fieldSymbol.x
-                     : singleField.x,
+                   value={singleField.x}
+                   onChange={(e) => this.props.setPropertyEditor_FieldX(singleField.x,
                      parseInt(e.currentTarget.value)
                    )}
             />
@@ -397,13 +406,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           <Form.Field>
             <label>Y</label>
             <input type="number"
-                   value={isSymbol
-                     ? fieldSymbol.y
-                     : singleField.y}
+                   value={singleField.y}
 
-                   onChange={(e) => this.props.setPropertyEditor_FieldY(isSymbol
-                     ? fieldSymbol.y
-                     : singleField.y,
+                   onChange={(e) => this.props.setPropertyEditor_FieldY(singleField.y,
                      parseInt(e.currentTarget.value)
                    )}
             />
@@ -411,16 +416,21 @@ class fieldPropertyEditor extends React.Component<Props, any> {
         </Form.Group>}
 
         {//if this field is based on a symbol... we cannot change this
-          isSomeFieldBasedOnSymbol === false && <Form.Group widths='equal'>
+          <Form.Group widths='equal'>
             <Form.Field>
-              <label>{getI18n(this.props.langId, "Height")}</label>
-              <input type="number"
-                     value={isSymbol
+              <label>{getI18n(this.props.langId, "Height")}
+                {
+                  isBasedOnSymbol && fieldSymbol.overwriteHeight &&
+                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                }
+              </label>
+              <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteHeight}
+                     value={isBasedOnSymbol && fieldSymbol.overwriteHeight
                        ? fieldSymbol.height
-                       : isSingleField
+                       : isSingleField /* what is this??? */
                          ? singleField.height
                          : singleField.height}
-                     onChange={(e) => this.props.setPropertyEditor_FieldHeight(isSymbol
+                     onChange={(e) => this.props.setPropertyEditor_FieldHeight(isBasedOnSymbol && fieldSymbol.overwriteHeight
                        ? fieldSymbol.height
                        : singleField.height,
                        parseInt(e.currentTarget.value)
@@ -428,14 +438,19 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               />
             </Form.Field>
             <Form.Field>
-              <label>{getI18n(this.props.langId, "Width")}</label>
-              <input type="number"
-                     value={isSymbol
+              <label>{getI18n(this.props.langId, "Width")}
+                {
+                  isBasedOnSymbol && fieldSymbol.overwriteWidth &&
+                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                }
+              </label>
+              <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteWidth}
+                     value={isBasedOnSymbol && fieldSymbol.overwriteWidth
                        ? fieldSymbol.width
                        : isSingleField
                          ? singleField.width
                          : singleField.width}
-                     onChange={(e) => this.props.setPropertyEditor_FieldWidth(isSymbol
+                     onChange={(e) => this.props.setPropertyEditor_FieldWidth(isBasedOnSymbol && fieldSymbol.overwriteWidth
                        ? fieldSymbol.width
                        : singleField.width,
                        parseInt(e.currentTarget.value)
@@ -444,13 +459,16 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             </Form.Field>
           </Form.Group>}
 
-        {//if this field is based on a symbol... we cannot change this
-          isSomeFieldBasedOnSymbol === false && <Form.Group widths='equal'>
+          <Form.Group widths='equal'>
             <Form.Field>
               <label>{getI18n(this.props.langId, "Color")}
                 <IconToolTip message={getI18n(this.props.langId,
                   "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
                 )}/>
+                {
+                  isBasedOnSymbol && fieldSymbol.overwriteColor &&
+                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                }
               </label>
               {/*<input type="color"*/}
               {/*value={*/}
@@ -472,13 +490,16 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                 on="click"
                 offset={horizontalIconPopupOffsetInPx}
                 content={<ChromePicker
-                  color={isSymbol
+                  color={isBasedOnSymbol && fieldSymbol.overwriteColor
                     ? fieldSymbol.color
                     : isSingleField
                       ? singleField.color
                       : singleField.color}
                   onChangeComplete={color => {
-                    this.props.setPropertyEditor_FieldColor(isSymbol
+
+                    if (isBasedOnSymbol && fieldSymbol.overwriteColor) return
+
+                    this.props.setPropertyEditor_FieldColor(isBasedOnSymbol && fieldSymbol.overwriteColor
                       ? fieldSymbol.color
                       : singleField.color, color.hex)
                   }}
@@ -491,6 +512,10 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                 <IconToolTip message={getI18n(this.props.langId,
                   "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
                 )}/>
+                {
+                  isBasedOnSymbol && fieldSymbol.overwriteBgColor &&
+                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                }
               </label>
 
               <div className="flexed-well-spaced">
@@ -503,13 +528,16 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                   on="click"
                   offset={horizontalIconPopupOffsetInPx}
                   content={<ChromePicker
-                    color={isSymbol
+                    color={isBasedOnSymbol && fieldSymbol.overwriteBgColor
                       ? fieldSymbol.bgColor
                       : isSingleField
                         ? singleField.bgColor
                         : singleField.bgColor}
                     onChangeComplete={color => {
-                      this.props.setPropertyEditor_FieldBgColor(isSymbol
+
+                      if (isBasedOnSymbol) return
+
+                      this.props.setPropertyEditor_FieldBgColor(isBasedOnSymbol && fieldSymbol.overwriteBgColor
                         ? fieldSymbol.bgColor
                         : singleField.bgColor, color.hex)
                     }}
@@ -521,7 +549,10 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                     message={getI18n(this.props.langId, "Transparent color")}
                     icon="circle outline"
                     onClick={() => {
-                      this.props.setPropertyEditor_FieldBgColor(isSymbol
+
+                      if (isBasedOnSymbol) return
+
+                      this.props.setPropertyEditor_FieldBgColor(isBasedOnSymbol
                         ? fieldSymbol.bgColor
                         : singleField.bgColor, 'transparent')
                     }}
@@ -530,385 +561,434 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               </div>
 
             </Form.Field>
-          </Form.Group>}
+          </Form.Group>
 
-        {//if this field is based on a symbol... we cannot change this
-          isSomeFieldBasedOnSymbol === false && <Form.Group widths='equal'>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Border color")}
-                <IconToolTip message={getI18n(this.props.langId,
-                  "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
-                )}/>
-              </label>
-              <Popup
-                trigger={<div className="hoverable">
-                  <Icon style={{
-                    'color': 'black'
-                  }} name="paint brush"/>
-                </div>}
-                on="click"
-                offset={horizontalIconPopupOffsetInPx}
-                content={<ChromePicker
-                  color={isSymbol
-                    ? fieldSymbol.borderColor
-                    : isSingleField
-                      ? singleField.borderColor
-                      : singleField.borderColor}
-                  onChangeComplete={color => {
-                    this.props.setPropertyEditor_FieldBorderColor(isSymbol
-                      ? fieldSymbol.bgColor
-                      : singleField.bgColor, color.hex)
-                  }}
-                />}
-              />
-            </Form.Field>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Border size in px")}</label>
-              <input type="number"
-                     value={isSymbol
-                       ? fieldSymbol.borderSizeInPx
-                       : isSingleField
-                         ? singleField.borderSizeInPx
-                         : singleField.borderSizeInPx}
-
-                     onChange={(e) => this.props.setPropertyEditor_FieldBorderSizeInPx(isSymbol
-                       ? fieldSymbol.borderSizeInPx
-                       : singleField.borderSizeInPx,
-                       parseInt(e.currentTarget.value)
-                     )}
-              />
-            </Form.Field>
-          </Form.Group>}
-
-        {//if this field is based on a symbol... we cannot change this
-          isSomeFieldBasedOnSymbol === false && <Form.Group widths='equal'>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Font name")}</label>
-              <input type="text"
-                     value={isSymbol
-                       ? fieldSymbol.fontName
-                       : isSingleField
-                         ? singleField.fontName
-                         : singleField.fontName}
-                     onChange={(e) => this.props.setPropertyEditor_FieldFontName(isSymbol
-                       ? fieldSymbol.fontName
-                       : singleField.fontName,
-                       e.currentTarget.value
-                     )}
-              />
-            </Form.Field>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Font size in px")}</label>
-              <input type="number"
-                     value={isSymbol
-                       ? fieldSymbol.fontSizeInPx
-                       : isSingleField
-                         ? singleField.fontSizeInPx
-                         : singleField.fontSizeInPx}
-
-                     onChange={(e) => this.props.setPropertyEditor_FieldFontSizeInPx(isSymbol
-                       ? fieldSymbol.fontSizeInPx
-                       : singleField.fontSizeInPx,
-                       parseInt(e.currentTarget.value)
-                     )}
-              />
-            </Form.Field>
-          </Form.Group>}
-
-        {//if this field is based on a symbol... we cannot change this
-          isSomeFieldBasedOnSymbol === false && <Form.Field>
-            <label>{getI18n(this.props.langId, "Text decoration")}</label>
-            <Button.Group>
-              <Button
-                active={isSymbol
-                  ? fieldSymbol.isFontBold
+        <Form.Group widths='equal'>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Border color")}
+              <IconToolTip message={getI18n(this.props.langId,
+                "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
+              )}/>
+              {
+                isBasedOnSymbol && fieldSymbol.overwriteBorderColor &&
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              }
+            </label>
+            <Popup
+              trigger={<div className="hoverable">
+                <Icon style={{
+                  'color': 'black'
+                }} name="paint brush"/>
+              </div>}
+              on="click"
+              offset={horizontalIconPopupOffsetInPx}
+              content={<ChromePicker
+                color={isBasedOnSymbol && fieldSymbol.overwriteBorderColor
+                  ? fieldSymbol.borderColor
                   : isSingleField
-                    ? singleField.isFontBold
-                    : singleField.isFontBold}
-                icon
-                onClick={() => {
-                  this.props.setPropertyEditor_FieldIsFontBold(
-                    isSymbol
-                      ? fieldSymbol.isFontBold
-                      : singleField.isFontBold, !(isSymbol
-                      ? fieldSymbol.isFontBold
-                      : singleField.isFontBold))
-                }}
-              >
-                <Icon name='bold'/>
-              </Button>
-              <Button
-                active={isSymbol
-                  ? fieldSymbol.isFontItalic
-                  : isSingleField
-                    ? singleField.isFontItalic
-                    : singleField.isFontItalic}
-                icon
-                onClick={() => {
+                    ? singleField.borderColor
+                    : singleField.borderColor}
+                onChangeComplete={color => {
 
-                  this.props.setPropertyEditor_FieldIsFontItalic(
-                    isSymbol
-                      ? fieldSymbol.isFontItalic
-                      : singleField.isFontItalic, !(isSymbol
-                      ? fieldSymbol.isFontItalic
-                      : singleField.isFontItalic))
-                }}
-              >
-                <Icon name='italic'/>
-              </Button>
-              {/*<Button*/}
-              {/*active={*/}
-              {/*(isSymbol*/}
-              {/*? fieldSymbol.horizontalTextAlign*/}
-              {/*: isSingleField ? singleField.horizontalTextAlign*/}
-              {/*: singleField.horizontalTextAlign) === HorizontalAlign.right*/}
-              {/*}*/}
-              {/*icon*/}
-              {/*onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(*/}
-              {/*HorizontalAlign.right)}*/}
-              {/*>*/}
-              {/*<Icon name='underline'/>*/}
-              {/*</Button>*/}
-            </Button.Group>
-          </Form.Field>}
+                  if (isBasedOnSymbol  && fieldSymbol.overwriteBorderColor) return
 
-        {isSomeFieldBasedOnSymbol === false && <Form.Field>
-          <label>{getI18n(this.props.langId, "Text")}</label>
-          <textarea rows={2}
-                    value={isSymbol
+                  this.props.setPropertyEditor_FieldBorderColor(isBasedOnSymbol && fieldSymbol.overwriteBorderColor
+                    ? fieldSymbol.bgColor
+                    : singleField.bgColor, color.hex)
+                }}
+              />}
+            />
+          </Form.Field>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Border size in px")}
+              {
+                isBasedOnSymbol && fieldSymbol.overwriteBorderSizeInPx &&
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              }
+            </label>
+            <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteBorderSizeInPx}
+                   value={isBasedOnSymbol && fieldSymbol.overwriteBorderSizeInPx
+                     ? fieldSymbol.borderSizeInPx
+                     : isSingleField
+                       ? singleField.borderSizeInPx
+                       : singleField.borderSizeInPx}
+
+                   onChange={(e) => this.props.setPropertyEditor_FieldBorderSizeInPx(isBasedOnSymbol && fieldSymbol.overwriteBorderSizeInPx
+                     ? fieldSymbol.borderSizeInPx
+                     : singleField.borderSizeInPx,
+                     parseInt(e.currentTarget.value)
+                   )}
+            />
+          </Form.Field>
+        </Form.Group>
+
+
+        <Form.Group widths='equal'>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Font name")}
+              {
+                isBasedOnSymbol && fieldSymbol.overwriteFontName &&
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              }
+            </label>
+            <input type="text" disabled={isBasedOnSymbol && fieldSymbol.overwriteFontName}
+                   value={isBasedOnSymbol && fieldSymbol.overwriteFontName
+                     ? fieldSymbol.fontName
+                     : isSingleField
+                       ? singleField.fontName
+                       : singleField.fontName}
+                   onChange={(e) => this.props.setPropertyEditor_FieldFontName(isBasedOnSymbol && fieldSymbol.overwriteFontName
+                     ? fieldSymbol.fontName
+                     : singleField.fontName,
+                     e.currentTarget.value
+                   )}
+            />
+          </Form.Field>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Font size in px")}
+              {
+                isBasedOnSymbol && fieldSymbol.overwriteFontSizeInPx &&
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              }
+            </label>
+            <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteFontSizeInPx}
+                   value={isBasedOnSymbol && fieldSymbol.overwriteFontSizeInPx
+                     ? fieldSymbol.fontSizeInPx
+                     : isSingleField
+                       ? singleField.fontSizeInPx
+                       : singleField.fontSizeInPx}
+
+                   onChange={(e) => this.props.setPropertyEditor_FieldFontSizeInPx(isBasedOnSymbol && fieldSymbol.overwriteFontSizeInPx
+                     ? fieldSymbol.fontSizeInPx
+                     : singleField.fontSizeInPx,
+                     parseInt(e.currentTarget.value)
+                   )}
+            />
+          </Form.Field>
+        </Form.Group>
+
+
+        <Form.Field>
+          <label>{getI18n(this.props.langId, "Text decoration")}
+            {
+              isBasedOnSymbol && fieldSymbol.overwriteFontDecoration &&
+              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+            }
+          </label>
+          <Button.Group>
+            <Button disabled={isBasedOnSymbol && fieldSymbol.overwriteFontDecoration}
+                    active={isBasedOnSymbol && fieldSymbol.overwriteFontDecoration
+                      ? fieldSymbol.isFontBold
+                      : isSingleField
+                        ? singleField.isFontBold
+                        : singleField.isFontBold}
+                    icon
+                    onClick={() => {
+                      this.props.setPropertyEditor_FieldIsFontBold(
+                        isBasedOnSymbol && fieldSymbol.overwriteFontDecoration
+                          ? fieldSymbol.isFontBold
+                          : singleField.isFontBold, !(isBasedOnSymbol && fieldSymbol.overwriteFontDecoration
+                          ? fieldSymbol.isFontBold
+                          : singleField.isFontBold))
+                    }}
+            >
+              <Icon name='bold'/>
+            </Button>
+            <Button disabled={isBasedOnSymbol && fieldSymbol.overwriteFontDecoration}
+                    active={isBasedOnSymbol && fieldSymbol.overwriteFontDecoration
+                      ? fieldSymbol.isFontItalic
+                      : isSingleField
+                        ? singleField.isFontItalic
+                        : singleField.isFontItalic}
+                    icon
+                    onClick={() => {
+
+                      this.props.setPropertyEditor_FieldIsFontItalic(
+                        isBasedOnSymbol && fieldSymbol.overwriteFontDecoration
+                          ? fieldSymbol.isFontItalic
+                          : singleField.isFontItalic, !(isBasedOnSymbol && fieldSymbol.overwriteFontDecoration
+                          ? fieldSymbol.isFontItalic
+                          : singleField.isFontItalic))
+                    }}
+            >
+              <Icon name='italic'/>
+            </Button>
+            {/*<Button*/}
+            {/*active={*/}
+            {/*(isSymbol*/}
+            {/*? fieldSymbol.horizontalTextAlign*/}
+            {/*: isSingleField ? singleField.horizontalTextAlign*/}
+            {/*: singleField.horizontalTextAlign) === HorizontalAlign.right*/}
+            {/*}*/}
+            {/*icon*/}
+            {/*onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(*/}
+            {/*HorizontalAlign.right)}*/}
+            {/*>*/}
+            {/*<Icon name='underline'/>*/}
+            {/*</Button>*/}
+          </Button.Group>
+        </Form.Field>
+
+        <Form.Field>
+          <label>{getI18n(this.props.langId, "Text")}
+            {
+              isBasedOnSymbol && fieldSymbol.overwriteText &&
+              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+            }
+          </label>
+          <textarea rows={2} disabled={isBasedOnSymbol && fieldSymbol.overwriteText}
+                    value={isBasedOnSymbol && fieldSymbol.overwriteText
                       ? fieldSymbol.text
                       : isSingleField
                         ? singleField.text
                         : singleField.text}
-                    onChange={(e) => this.props.setPropertyEditor_FieldText(isSymbol
+                    onChange={(e) => this.props.setPropertyEditor_FieldText(isBasedOnSymbol && fieldSymbol.overwriteText
                       ? fieldSymbol.text
                       : singleField.text, e.currentTarget.value)}
           />
-        </Form.Field>}
+        </Form.Field>
 
-        {//if this field is based on a symbol... we cannot change this
-          isSomeFieldBasedOnSymbol === false && <Form.Group widths='equal'>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Horizontal text align")}</label>
-              <Button.Group>
-                <Button
-                  active={(isSymbol
-                    ? fieldSymbol.horizontalTextAlign
-                    : isSingleField
-                      ? singleField.horizontalTextAlign
-                      : singleField.horizontalTextAlign) === HorizontalAlign.left}
-                  icon
-                  onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.left)}
-                >
-                  <Icon name='align left'/>
-                </Button>
-                <Button
-                  active={(isSymbol
-                    ? fieldSymbol.horizontalTextAlign
-                    : isSingleField
-                      ? singleField.horizontalTextAlign
-                      : singleField.horizontalTextAlign) === HorizontalAlign.center}
-                  icon
-                  onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.center)}
-                >
-                  <Icon name='align center'/>
-                </Button>
-                <Button
-                  active={(isSymbol
-                    ? fieldSymbol.horizontalTextAlign
-                    : isSingleField
-                      ? singleField.horizontalTextAlign
-                      : singleField.horizontalTextAlign) === HorizontalAlign.right}
-                  icon
-                  onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.right)}
-                >
-                  <Icon name='align right'/>
-                </Button>
-              </Button.Group>
-            </Form.Field>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Vertical text align")}</label>
-              <Button.Group>
-                <Button
-                  active={(isSymbol
-                    ? fieldSymbol.verticalTextAlign
-                    : isSingleField
-                      ? singleField.verticalTextAlign
-                      : singleField.verticalTextAlign) === VerticalAlign.top}
-                  icon
-                  onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.top)}
-                >
-                  <Icon name='caret up'/>
-                </Button>
-                <Button
-                  active={(isSymbol
-                    ? fieldSymbol.verticalTextAlign
-                    : isSingleField
-                      ? singleField.verticalTextAlign
-                      : singleField.verticalTextAlign) === VerticalAlign.center}
-                  icon
-                  onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.center)}
-                >
-                  <Icon name='align center'/>
-                </Button>
-                <Button
-                  active={(isSymbol
-                    ? fieldSymbol.verticalTextAlign
-                    : isSingleField
-                      ? singleField.verticalTextAlign
-                      : singleField.verticalTextAlign) === VerticalAlign.bottom}
-                  icon
-                  onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.bottom)}
-                >
-                  <Icon name='caret down'/>
-                </Button>
-              </Button.Group>
-            </Form.Field>
-          </Form.Group>}
 
-        {//if this field is based on a symbol... we cannot change this
-          isSomeFieldBasedOnSymbol === false && <Form.Field>
-            <label>{getI18n(this.props.langId, "padding (for text align)")}</label>
+        <Form.Group widths='equal'>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Horizontal text align")}
+              {
+                isBasedOnSymbol && fieldSymbol.overwriteHorizontalTextAlign &&
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              }
+            </label>
+            <Button.Group>
+              <Button disabled={isBasedOnSymbol && fieldSymbol.overwriteHorizontalTextAlign}
+                      active={(isBasedOnSymbol && fieldSymbol.overwriteHorizontalTextAlign
+                        ? fieldSymbol.horizontalTextAlign
+                        : isSingleField
+                          ? singleField.horizontalTextAlign
+                          : singleField.horizontalTextAlign) === HorizontalAlign.left}
+                      icon
+                      onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.left)}
+              >
+                <Icon name='align left'/>
+              </Button>
+              <Button disabled={isBasedOnSymbol && fieldSymbol.overwriteHorizontalTextAlign}
+                      active={(isBasedOnSymbol && fieldSymbol.overwriteHorizontalTextAlign
+                        ? fieldSymbol.horizontalTextAlign
+                        : isSingleField
+                          ? singleField.horizontalTextAlign
+                          : singleField.horizontalTextAlign) === HorizontalAlign.center}
+                      icon
+                      onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.center)}
+              >
+                <Icon name='align center'/>
+              </Button>
+              <Button disabled={isBasedOnSymbol && fieldSymbol.overwriteHorizontalTextAlign}
+                      active={(isBasedOnSymbol && fieldSymbol.overwriteHorizontalTextAlign
+                        ? fieldSymbol.horizontalTextAlign
+                        : isSingleField
+                          ? singleField.horizontalTextAlign
+                          : singleField.horizontalTextAlign) === HorizontalAlign.right}
+                      icon
+                      onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.right)}
+              >
+                <Icon name='align right'/>
+              </Button>
+            </Button.Group>
+          </Form.Field>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Vertical text align")}
+              {
+                isBasedOnSymbol && fieldSymbol.overwriteVerticalTextAlign &&
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              }
+            </label>
+            <Button.Group>
+              <Button disabled={isBasedOnSymbol && fieldSymbol.overwriteVerticalTextAlign}
+                      active={(isBasedOnSymbol && fieldSymbol.overwriteVerticalTextAlign
+                        ? fieldSymbol.verticalTextAlign
+                        : isSingleField
+                          ? singleField.verticalTextAlign
+                          : singleField.verticalTextAlign) === VerticalAlign.top}
+                      icon
+                      onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.top)}
+              >
+                <Icon name='caret up'/>
+              </Button>
+              <Button disabled={isBasedOnSymbol && fieldSymbol.overwriteVerticalTextAlign}
+                      active={(isBasedOnSymbol && fieldSymbol.overwriteVerticalTextAlign
+                        ? fieldSymbol.verticalTextAlign
+                        : isSingleField
+                          ? singleField.verticalTextAlign
+                          : singleField.verticalTextAlign) === VerticalAlign.center}
+                      icon
+                      onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.center)}
+              >
+                <Icon name='align center'/>
+              </Button>
+              <Button disabled={isBasedOnSymbol && fieldSymbol.overwriteVerticalTextAlign}
+                      active={(isBasedOnSymbol && fieldSymbol.overwriteVerticalTextAlign
+                        ? fieldSymbol.verticalTextAlign
+                        : isSingleField
+                          ? singleField.verticalTextAlign
+                          : singleField.verticalTextAlign) === VerticalAlign.bottom}
+                      icon
+                      onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.bottom)}
+              >
+                <Icon name='caret down'/>
+              </Button>
+            </Button.Group>
+          </Form.Field>
+        </Form.Group>
 
-            <div className="padding-inputs">
-              <Input type="number"
-                     value={isSymbol
+        <Form.Field>
+          <label>{getI18n(this.props.langId, "padding (for text align)")}
+            {
+              isBasedOnSymbol && fieldSymbol.overwritePadding &&
+              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+            }
+          </label>
+
+          <div className="padding-inputs">
+            <Input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwritePadding}
+                   value={isBasedOnSymbol && fieldSymbol.overwritePadding
+                     ? fieldSymbol.padding.left
+                     : isSingleField
+                       ? singleField.padding.left
+                       : singleField.padding.left}
+
+                   onChange={(e) => this.props.setPropertyEditor_FieldPadding(isBasedOnSymbol && fieldSymbol.overwritePadding
+                     ? fieldSymbol.padding.top
+                     : singleField.padding.top, isBasedOnSymbol && fieldSymbol.overwritePadding
+                     ? fieldSymbol.padding.right
+                     : singleField.padding.right,
+                     isBasedOnSymbol && fieldSymbol.overwritePadding
+                       ? fieldSymbol.padding.bottom
+                       : singleField.padding.bottom, isBasedOnSymbol && fieldSymbol.overwritePadding
                        ? fieldSymbol.padding.left
-                       : isSingleField
-                         ? singleField.padding.left
-                         : singleField.padding.left}
+                       : singleField.padding.left,
 
-                     onChange={(e) => this.props.setPropertyEditor_FieldPadding(isSymbol
+                     isBasedOnSymbol && fieldSymbol.overwritePadding
                        ? fieldSymbol.padding.top
-                       : singleField.padding.top, isSymbol
+                       : singleField.padding.top, isBasedOnSymbol && fieldSymbol.overwritePadding
+                       ? fieldSymbol.padding.right
+                       : singleField.padding.right, isBasedOnSymbol && fieldSymbol.overwritePadding
+                       ? fieldSymbol.padding.bottom
+                       : singleField.padding.bottom,
+                     parseInt(e.currentTarget.value)
+                   )}
+            />
+
+            <div>
+              <Input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwritePadding}
+                     value={isBasedOnSymbol && fieldSymbol.overwritePadding
+                       ? fieldSymbol.padding.top
+                       : isSingleField
+                         ? singleField.padding.top
+                         : singleField.padding.top}
+                     onChange={(e) => this.props.setPropertyEditor_FieldPadding(isBasedOnSymbol && fieldSymbol.overwritePadding
+                       ? fieldSymbol.padding.top
+                       : singleField.padding.top, isBasedOnSymbol && fieldSymbol.overwritePadding
                        ? fieldSymbol.padding.right
                        : singleField.padding.right,
-                       isSymbol
+                       isBasedOnSymbol && fieldSymbol.overwritePadding
                          ? fieldSymbol.padding.bottom
-                         : singleField.padding.bottom, isSymbol
+                         : singleField.padding.bottom, isBasedOnSymbol && fieldSymbol.overwritePadding
                          ? fieldSymbol.padding.left
                          : singleField.padding.left,
 
-                       isSymbol
-                         ? fieldSymbol.padding.top
-                         : singleField.padding.top, isSymbol
+                       parseInt(e.currentTarget.value), isBasedOnSymbol && fieldSymbol.overwritePadding
                          ? fieldSymbol.padding.right
-                         : singleField.padding.right, isSymbol
+                         : singleField.padding.right, isBasedOnSymbol && fieldSymbol.overwritePadding
                          ? fieldSymbol.padding.bottom
                          : singleField.padding.bottom,
-                       parseInt(e.currentTarget.value)
+                       isBasedOnSymbol && fieldSymbol.overwritePadding
+                         ? fieldSymbol.padding.left
+                         : singleField.padding.left
                      )}
               />
-
-              <div>
-                <Input type="number"
-                       value={isSymbol
-                         ? fieldSymbol.padding.top
-                         : isSingleField
-                           ? singleField.padding.top
-                           : singleField.padding.top}
-                       onChange={(e) => this.props.setPropertyEditor_FieldPadding(isSymbol
-                         ? fieldSymbol.padding.top
-                         : singleField.padding.top, isSymbol
-                         ? fieldSymbol.padding.right
-                         : singleField.padding.right,
-                         isSymbol
-                           ? fieldSymbol.padding.bottom
-                           : singleField.padding.bottom, isSymbol
-                           ? fieldSymbol.padding.left
-                           : singleField.padding.left,
-
-                         parseInt(e.currentTarget.value), isSymbol
-                           ? fieldSymbol.padding.right
-                           : singleField.padding.right, isSymbol
-                           ? fieldSymbol.padding.bottom
-                           : singleField.padding.bottom,
-                         isSymbol
-                           ? fieldSymbol.padding.left
-                           : singleField.padding.left
-                       )}
-                />
-                <br/>
-                <Input type="number"
-                       value={isSymbol
-                         ? fieldSymbol.padding.bottom
-                         : isSingleField
-                           ? singleField.padding.bottom
-                           : singleField.padding.bottom}
-                       onChange={(e) => this.props.setPropertyEditor_FieldPadding(isSymbol
-                         ? fieldSymbol.padding.top
-                         : singleField.padding.top, isSymbol
-                         ? fieldSymbol.padding.right
-                         : singleField.padding.right,
-                         isSymbol
-                           ? fieldSymbol.padding.bottom
-                           : singleField.padding.bottom, isSymbol
-                           ? fieldSymbol.padding.left
-                           : singleField.padding.left,
-
-                         isSymbol
-                           ? fieldSymbol.padding.top
-                           : singleField.padding.top, isSymbol
-                           ? fieldSymbol.padding.right
-                           : singleField.padding.right, parseInt(e.currentTarget.value),
-                         isSymbol
-                           ? fieldSymbol.padding.left
-                           : singleField.padding.left
-                       )}
-                />
-              </div>
-
-              <Input type="number"
-                     value={isSymbol
-                       ? fieldSymbol.padding.right
+              <br/>
+              <Input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwritePadding}
+                     value={isBasedOnSymbol && fieldSymbol.overwritePadding
+                       ? fieldSymbol.padding.bottom
                        : isSingleField
-                         ? singleField.padding.right
-                         : singleField.padding.right}
-                     onChange={(e) => this.props.setPropertyEditor_FieldPadding(isSymbol
+                         ? singleField.padding.bottom
+                         : singleField.padding.bottom}
+                     onChange={(e) => this.props.setPropertyEditor_FieldPadding(isBasedOnSymbol && fieldSymbol.overwritePadding
                        ? fieldSymbol.padding.top
-                       : singleField.padding.top, isSymbol
+                       : singleField.padding.top, isBasedOnSymbol && fieldSymbol.overwritePadding
                        ? fieldSymbol.padding.right
                        : singleField.padding.right,
-                       isSymbol
+                       isBasedOnSymbol && fieldSymbol.overwritePadding
                          ? fieldSymbol.padding.bottom
-                         : singleField.padding.bottom, isSymbol
+                         : singleField.padding.bottom, isBasedOnSymbol && fieldSymbol.overwritePadding
                          ? fieldSymbol.padding.left
                          : singleField.padding.left,
 
-                       isSymbol
+                       isBasedOnSymbol && fieldSymbol.overwritePadding
                          ? fieldSymbol.padding.top
-                         : singleField.padding.top, parseInt(e.currentTarget.value), isSymbol
-                         ? fieldSymbol.padding.bottom
-                         : singleField.padding.bottom,
-                       isSymbol
+                         : singleField.padding.top, isBasedOnSymbol && fieldSymbol.overwritePadding
+                         ? fieldSymbol.padding.right
+                         : singleField.padding.right, parseInt(e.currentTarget.value),
+                       isBasedOnSymbol && fieldSymbol.overwritePadding
                          ? fieldSymbol.padding.left
                          : singleField.padding.left
                      )}
               />
             </div>
 
-          </Form.Field>}
+            <Input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwritePadding}
+                   value={isBasedOnSymbol && fieldSymbol.overwritePadding
+                     ? fieldSymbol.padding.right
+                     : isSingleField
+                       ? singleField.padding.right
+                       : singleField.padding.right}
+                   onChange={(e) => this.props.setPropertyEditor_FieldPadding(isBasedOnSymbol && fieldSymbol.overwritePadding
+                     ? fieldSymbol.padding.top
+                     : singleField.padding.top, isBasedOnSymbol && fieldSymbol.overwritePadding
+                     ? fieldSymbol.padding.right
+                     : singleField.padding.right,
+                     isBasedOnSymbol && fieldSymbol.overwritePadding
+                       ? fieldSymbol.padding.bottom
+                       : singleField.padding.bottom, isBasedOnSymbol && fieldSymbol.overwritePadding
+                       ? fieldSymbol.padding.left
+                       : singleField.padding.left,
+
+                     isBasedOnSymbol && fieldSymbol.overwritePadding
+                       ? fieldSymbol.padding.top
+                       : singleField.padding.top, parseInt(e.currentTarget.value), isBasedOnSymbol && fieldSymbol.overwritePadding
+                       ? fieldSymbol.padding.bottom
+                       : singleField.padding.bottom,
+                     isBasedOnSymbol && fieldSymbol.overwritePadding
+                       ? fieldSymbol.padding.left
+                       : singleField.padding.left
+                   )}
+            />
+          </div>
+
+        </Form.Field>
 
 
         <Form.Group widths='equal'>
-          {//if this field is based on a symbol... we cannot change this
-            isSomeFieldBasedOnSymbol === false && <Form.Field>
-              <label>{getI18n(this.props.langId, "Corner radius in px")}</label>
-              <input type="number"
-                     value={isSymbol
-                       ? fieldSymbol.cornerRadiusInPx
-                       : isSingleField
-                         ? singleField.cornerRadiusInPx
-                         : singleField.cornerRadiusInPx}
-                     onChange={(e) => this.props.setPropertyEditor_FieldCornerRadiusInPx(isSymbol
-                       ? fieldSymbol.cornerRadiusInPx
-                       : singleField.cornerRadiusInPx,
-                       parseInt(e.currentTarget.value)
-                     )}
-              />
-            </Form.Field>}
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Corner radius in px")}
+              {
+                isBasedOnSymbol && fieldSymbol.overwriteCornerRadius &&
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              }
+            </label>
+            <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteCornerRadius}
+                   value={isBasedOnSymbol && fieldSymbol.overwriteCornerRadius
+                     ? fieldSymbol.cornerRadiusInPx
+                     : isSingleField
+                       ? singleField.cornerRadiusInPx
+                       : singleField.cornerRadiusInPx}
+                   onChange={(e) => this.props.setPropertyEditor_FieldCornerRadiusInPx(isBasedOnSymbol && fieldSymbol.overwriteCornerRadius
+                     ? fieldSymbol.cornerRadiusInPx
+                     : singleField.cornerRadiusInPx,
+                     parseInt(e.currentTarget.value)
+                   )}
+            />
+          </Form.Field>
 
-          {isSymbol === false && isSingleField && <Form.Field>
+          {isBasedOnSymbol === false && isSingleField && <Form.Field>
             <label>{getI18n(this.props.langId, "Z-index")}({singleField.zIndex})</label>
             <Button.Group icon>
               <Button onClick={() => {
@@ -955,75 +1035,83 @@ class fieldPropertyEditor extends React.Component<Props, any> {
         </Form.Group>
 
 
-        {//if this field is based on a symbol... we cannot change this
-          isSomeFieldBasedOnSymbol === false && <Form.Field>
-            <label>{getI18n(this.props.langId, "Rotation in degree")}</label>
-            <Input
-              value={isSymbol
-                ? fieldSymbol.rotationInDegree
-                : isSingleField
-                  ? singleField.rotationInDegree
-                  : singleField.rotationInDegree}
-              type="number"
-              onChange={(e) => this.props.setPropertyEditor_FieldRotationInDegree(isSymbol
-                ? fieldSymbol.rotationInDegree
-                : singleField.rotationInDegree,
-                parseInt(e.currentTarget.value)
-              )}
-              label={<Button icon onClick={() => {
-                this.props.setPropertyEditor_FieldRotationInDegree(isSymbol
-                  ? fieldSymbol.rotationInDegree
-                  : singleField.rotationInDegree, 0)
-              }}>
-                <Icon name="undo"/>
-              </Button>}
-              labelPosition='right'
+        <Form.Field>
+          <label>{getI18n(this.props.langId, "Rotation in degree")}
+            {
+              isBasedOnSymbol && fieldSymbol.overwriteRotationInDeg &&
+              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+            }
+          </label>
+          <Input disabled={isBasedOnSymbol && fieldSymbol.overwriteRotationInDeg}
+                 value={isBasedOnSymbol && fieldSymbol.overwriteRotationInDeg
+                   ? fieldSymbol.rotationInDegree
+                   : isSingleField
+                     ? singleField.rotationInDegree
+                     : singleField.rotationInDegree}
+                 type="number"
+                 onChange={(e) => this.props.setPropertyEditor_FieldRotationInDegree(isBasedOnSymbol && fieldSymbol.overwriteRotationInDeg
+                   ? fieldSymbol.rotationInDegree
+                   : singleField.rotationInDegree,
+                   parseInt(e.currentTarget.value)
+                 )}
+                 label={<Button icon onClick={() => {
+                   this.props.setPropertyEditor_FieldRotationInDegree(isBasedOnSymbol && fieldSymbol.overwriteRotationInDeg
+                     ? fieldSymbol.rotationInDegree
+                     : singleField.rotationInDegree, 0)
+                 }}>
+                   <Icon name="undo"/>
+                 </Button>}
+                 labelPosition='right'
+          />
+        </Form.Field>
+
+        <Form.Field>
+          <label>{getI18n(this.props.langId, "Image")}
+            {
+              isBasedOnSymbol && fieldSymbol.overwriteBackgroundImage &&
+              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+            }
+          </label>
+
+          <Input labelPosition='right' type='text'>
+            <input disabled={isBasedOnSymbol && fieldSymbol.overwriteRotationInDeg}
+                   readOnly
+                   value={isBasedOnSymbol && fieldSymbol.overwriteBackgroundImage
+                     ? fieldSymbol.backgroundImgGuid === null
+                       ? ''
+                       : fieldSymbol.backgroundImgGuid
+                     : singleField.backgroundImgGuid === null
+                       ? ''
+                       : singleField.backgroundImgGuid}
             />
-          </Form.Field>}
+            <Button icon disabled={isBasedOnSymbol && fieldSymbol.overwriteRotationInDeg}
+                    onClick={() => {
+                      this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(true)
+                    }}>
+              <Icon name="write"/>
+            </Button>
+          </Input>
+          <ImageLibrary
+            isCreatingNewImgShape={false}
+            onImageTaken={(imgSurrogate) => {
+              this.props.setPropertyEditor_field_backgroundImgGuid(isBasedOnSymbol
+                ? fieldSymbol.backgroundImgGuid
+                : singleField.backgroundImgGuid, imgSurrogate.guid)
 
-        {//if this field is based on a symbol... we cannot change this
-          isSomeFieldBasedOnSymbol === false && <Form.Field>
-            <label>{getI18n(this.props.langId, "Image")}</label>
+              this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(false)
+            }}
+            isDisplayed={this.props.isChooseFieldShapeBackgroundImageLibraryDisplayed}
+            set_isDisplayed={(isDisplayed) => {
+              this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(isDisplayed)
+            }}
+          />
 
-            <Input labelPosition='right' type='text'>
-              <input
-                readOnly
-                value={fieldSymbol
-                  ? fieldSymbol.backgroundImgGuid === null
-                    ? ''
-                    : fieldSymbol.backgroundImgGuid
-                  : singleField.backgroundImgGuid === null
-                    ? ''
-                    : singleField.backgroundImgGuid}
-              />
-              <Button icon onClick={() => {
-                this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(true)
-              }}>
-                <Icon name="write"/>
-              </Button>
-            </Input>
-            <ImageLibrary
-              isCreatingNewImgShape={false}
-              onImageTaken={(imgSurrogate) => {
-                this.props.setPropertyEditor_field_backgroundImgGuid(isSymbol
-                  ? fieldSymbol.backgroundImgGuid
-                  : singleField.backgroundImgGuid, imgSurrogate.guid)
-
-                this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(false)
-              }}
-              isDisplayed={this.props.isChooseFieldShapeBackgroundImageLibraryDisplayed}
-              set_isDisplayed={(isDisplayed) => {
-                this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(isDisplayed)
-              }}
-            />
-
-          </Form.Field>}
+        </Form.Field>
 
 
-        {
-
-          isSomeFieldBasedOnSymbol === false && (isSymbol || isSingleField) && <div>
-            {(isSymbol
+        { //anchor points are always overwritten by symbols
+          isSomeFieldBasedOnSymbol === false && (isSingleField) && <div>
+            {(isBasedOnSymbol
               ? fieldSymbol
               : singleField).anchorPoints.map((anchorPoint, index) => {
               return (<div key={index}>
@@ -1042,7 +1130,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                            onChange={(e) => {
 
                              const newPercentageX = parseInt(e.currentTarget.value)
-                             const newList = (isSymbol
+                             const newList = (isBasedOnSymbol
                                ? fieldSymbol
                                : singleField).anchorPoints.map((p, i) => {
                                return i !== index
@@ -1069,7 +1157,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                            onChange={(e) => {
 
                              const newPercentageY = parseInt(e.currentTarget.value)
-                             const newList = (isSymbol
+                             const newList = (isBasedOnSymbol
                                ? fieldSymbol
                                : singleField).anchorPoints.map((p, i) => {
                                return i !== index
@@ -1088,7 +1176,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                   <Form.Field>
                     <Button color="red" icon
                             onClick={() => {
-                              this.props.setPropertyEditor_FieldAnchorPoints((isSymbol
+                              this.props.setPropertyEditor_FieldAnchorPoints((isBasedOnSymbol
                                 ? fieldSymbol
                                 : singleField).anchorPoints.filter(
                                 ((p, i) => i !== index)))
@@ -1112,7 +1200,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                         percentY: 50
                       }
 
-                      this.props.setPropertyEditor_FieldAnchorPoints((isSymbol
+                      this.props.setPropertyEditor_FieldAnchorPoints((isBasedOnSymbol
                         ? fieldSymbol
                         : singleField).anchorPoints.concat(newPoint))
                     }}
@@ -1123,7 +1211,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           </div>}
 
 
-        {isSymbol === false && isSingleField && <Form.Field>
+        {isBasedOnSymbol === false && isSingleField && <Form.Field>
           <label>{getI18n(this.props.langId, "Connected lines")}
             <IconToolTip message={getI18n(this.props.langId, "The connected lines via anchor points")}/>
           </label>

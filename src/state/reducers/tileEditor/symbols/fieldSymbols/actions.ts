@@ -1,19 +1,46 @@
 import {
-  ActionType, Edit_fieldSymbolRedo, Edit_fieldSymbolUndo,
-  SET_fieldSymbol_anchorPointsAction, SET_fieldSymbol_backgroundImgGuidAction,
-  SET_fieldSymbol_bgColorAction, SET_fieldSymbol_borderColorAction, SET_fieldSymbol_borderSizeInPxAction,
+  ActionType,
+  Edit_fieldSymbolRedo,
+  Edit_fieldSymbolUndo,
+  SET_fieldSymbol_anchorPointsAction,
+  SET_fieldSymbol_backgroundImgGuidAction,
+  SET_fieldSymbol_bgColorAction,
+  SET_fieldSymbol_borderColorAction,
+  SET_fieldSymbol_borderSizeInPxAction,
   SET_fieldSymbol_cmdTextAction,
   SET_fieldSymbol_colorAction,
   SET_fieldSymbol_cornerRadiusInPxAction,
   SET_fieldSymbol_displayIndexAction,
-  SET_fieldSymbol_displayNameAction, SET_fieldSymbol_fontNameAction, SET_fieldSymbol_fontSizeInPxAction,
+  SET_fieldSymbol_displayNameAction,
+  SET_fieldSymbol_fontNameAction,
+  SET_fieldSymbol_fontSizeInPxAction,
   SET_fieldSymbol_heightAction,
-  SET_fieldSymbol_horizontalAlignAction, SET_fieldSymbol_isFontBoldAction, SET_fieldSymbol_isFontItalicAction,
-  SET_fieldSymbol_paddingAction, SET_fieldSymbol_rotationInDegreeAction,
+  SET_fieldSymbol_horizontalAlignAction,
+  SET_fieldSymbol_isFontBoldAction,
+  SET_fieldSymbol_isFontItalicAction, SET_fieldSymbol_overwriteBackgroundImageAction,
+  SET_fieldSymbol_overwriteBgColorAction,
+  SET_fieldSymbol_overwriteBorderColorAction,
+  SET_fieldSymbol_overwriteBorderSizeInPxAction,
+  SET_fieldSymbol_overwriteCmdTextAction,
+  SET_fieldSymbol_overwriteColorAction,
+  SET_fieldSymbol_overwriteCornerRadiusAction,
+  SET_fieldSymbol_overwriteFontDecorationAction,
+  SET_fieldSymbol_overwriteFontNameAction,
+  SET_fieldSymbol_overwriteFontSizeInPxAction,
+  SET_fieldSymbol_overwriteHeightAction,
+  SET_fieldSymbol_overwriteHorizontalTextAlignAction,
+  SET_fieldSymbol_overwritePaddingAction,
+  SET_fieldSymbol_overwriteRotationInDegAction,
+  SET_fieldSymbol_overwriteTextAction,
+  SET_fieldSymbol_overwriteVerticalTextAlignAction,
+  SET_fieldSymbol_overwriteWidthAction,
+  SET_fieldSymbol_paddingAction,
+  SET_fieldSymbol_rotationInDegreeAction,
   SET_fieldSymbol_textAction,
   SET_fieldSymbol_verticalAlignAction,
   SET_fieldSymbol_widthAction,
-  SET_fieldSymbolsAction, UndoFieldSymbolType
+  SET_fieldSymbolsAction,
+  UndoFieldSymbolType
 } from "./fieldSymbolReducer";
 import {AnchorPoint, FieldSymbol, HorizontalAlign, VerticalAlign} from "../../../../../types/drawing";
 import {MultiActions} from "../../../../../types/ui";
@@ -282,3 +309,123 @@ export function edit_fieldSymbolRedo(): Edit_fieldSymbolRedo {
   }
 }
 
+
+export function set_fieldSymbol_overwriteCmdText(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteCmdTextAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteCmdText,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteWidth(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteWidthAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteWidth,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteHeight(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteHeightAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteHeight,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteColor(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteColorAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteColor,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteBgColor(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteBgColorAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteBgColor,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteBorderColor(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteBorderColorAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteBorderColor,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteBorderSizeInPx(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteBorderSizeInPxAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteBorderSizeInPx,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteFontName(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteFontNameAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteFontName,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteFontSizeInPx(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteFontSizeInPxAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteFontSizeInPx,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteFontDecoration(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteFontDecorationAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteFontDecoration,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteText(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteTextAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteText,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteHorizontalTextAlign(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteHorizontalTextAlignAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteHorizontalTextAlign,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteVerticalTextAlign(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteVerticalTextAlignAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteVerticalTextAlign,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwritePadding(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwritePaddingAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwritePadding,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteCornerRadius(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteCornerRadiusAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteCornerRadius,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteRotationInDeg(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteRotationInDegAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteRotationInDeg,
+    overwrite,
+    fieldSymbolGuid
+  }
+}
+export function set_fieldSymbol_overwriteBackgroundImage(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteBackgroundImageAction {
+  return {
+    type: ActionType.SET_fieldSymbol_overwriteBackgroundImage,
+    overwrite,
+    fieldSymbolGuid
+  }
+}

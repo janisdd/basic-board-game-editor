@@ -13,6 +13,7 @@ export interface MyProps {
   readonly onDestroyed?: (val: string) => void
   readonly onLostFocus?: (val: string) => void
   readonly height: string
+  readonly readony: boolean
 }
 
 export const editorInstancesMap: { [id: string]: Editor | undefined } = {}
@@ -32,6 +33,10 @@ export default class EditorWrapper extends React.Component<MyProps, any> {
     const editSession = ace.createEditSession(this.props.value, 'ace/mode/bbgel' as any)
     this.editor.setSession(editSession)
 
+    if (this.props.readony) {
+      this.editor.setReadOnly(true)
+    }
+
     editorInstancesMap[this.props.id] = this.editor
 
     let self = this
@@ -49,6 +54,10 @@ export default class EditorWrapper extends React.Component<MyProps, any> {
     //TODO when we focs field1 and then focus field 2 changes are not commited --> no lost focus
     if (this.props.value !== this.editor.getValue()) {
       this.editor.setValue(this.props.value)
+
+      if (this.props.readony) {
+        this.editor.setReadOnly(true)
+      }
 
       this.editor.selection.moveCursorTo(0, 0, false)
       // this.editor.moveCursorTo(0, 0, false)

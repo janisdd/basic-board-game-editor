@@ -86,6 +86,25 @@ export enum ActionType {
   SET_fieldSymbol_displayIndex = 'fieldSymbolReducer_SET_fieldSymbol_displayIndex',
 
   SET_fieldSymbol_displayName = 'fieldSymbolReducer_SET_fieldSymbol_displayName',
+
+  SET_fieldSymbol_overwriteCmdText = 'fieldSymbolReducer_SET_fieldSymbol_overwriteCmdText',
+  SET_fieldSymbol_overwriteWidth = 'fieldSymbolReducer_SET_fieldSymbol_overwriteWidth',
+  SET_fieldSymbol_overwriteHeight = 'fieldSymbolReducer_SET_fieldSymbol_overwriteHeight',
+  SET_fieldSymbol_overwriteColor = 'fieldSymbolReducer_SET_fieldSymbol_overwriteColor',
+  SET_fieldSymbol_overwriteBgColor = 'fieldSymbolReducer_SET_fieldSymbol_overwriteBgColor',
+  SET_fieldSymbol_overwriteBorderColor = 'fieldSymbolReducer_SET_fieldSymbol_overwriteBorderColor',
+  SET_fieldSymbol_overwriteBorderSizeInPx = 'fieldSymbolReducer_SET_fieldSymbol_overwriteBorderSizeInPx',
+  SET_fieldSymbol_overwriteFontName = 'fieldSymbolReducer_SET_fieldSymbol_overwriteFontName',
+  SET_fieldSymbol_overwriteFontSizeInPx = 'fieldSymbolReducer_SET_fieldSymbol_overwriteFontSizeInPx',
+  SET_fieldSymbol_overwriteFontDecoration = 'fieldSymbolReducer_SET_fieldSymbol_overwriteFontDecoration',
+  SET_fieldSymbol_overwriteText = 'fieldSymbolReducer_SET_fieldSymbol_overwriteText',
+  SET_fieldSymbol_overwriteHorizontalTextAlign = 'fieldSymbolReducer_SET_fieldSymbol_overwriteHorizontalTextAlign',
+  SET_fieldSymbol_overwriteVerticalTextAlign = 'fieldSymbolReducer_SET_fieldSymbol_overwriteVerticalTextAlign',
+  SET_fieldSymbol_overwritePadding = 'fieldSymbolReducer_SET_fieldSymbol_overwritePadding',
+  SET_fieldSymbol_overwriteCornerRadius = 'fieldSymbolReducer_SET_fieldSymbol_overwriteCornerRadius',
+  SET_fieldSymbol_overwriteRotationInDeg = 'fieldSymbolReducer_SET_fieldSymbol_overwriteRotationInDeg',
+  SET_fieldSymbol_overwriteBackgroundImage = 'fieldSymbolReducer_SET_fieldSymbol_overwriteBackgroundImage',
+
   RESET = 'fieldSymbolReducer_RESET',
 }
 
@@ -231,6 +250,93 @@ export interface SET_fieldSymbol_backgroundImgGuidAction extends ActionBase {
 }
 
 
+export interface SET_fieldSymbol_overwriteCmdTextAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteCmdText
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteWidthAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteWidth
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteHeightAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteHeight
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteColorAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteColor
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteBgColorAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteBgColor
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteBorderColorAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteBorderColor
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteBorderSizeInPxAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteBorderSizeInPx
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteFontNameAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteFontName
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteFontSizeInPxAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteFontSizeInPx
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteFontDecorationAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteFontDecoration
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteTextAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteText
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteHorizontalTextAlignAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteHorizontalTextAlign
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteVerticalTextAlignAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteVerticalTextAlign
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwritePaddingAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwritePadding
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteCornerRadiusAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteCornerRadius
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteRotationInDegAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteRotationInDeg
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+export interface SET_fieldSymbol_overwriteBackgroundImageAction extends ActionBase {
+  readonly type: ActionType.SET_fieldSymbol_overwriteBackgroundImage
+  readonly overwrite: boolean
+  readonly fieldSymbolGuid: string
+}
+
+
 export interface ResetAction extends ActionBase {
   readonly type: ActionType.RESET
 }
@@ -260,6 +366,24 @@ export type AllActions =
   | SET_fieldSymbol_isFontItalicAction
   | SET_fieldSymbol_rotationInDegreeAction
   | SET_fieldSymbol_backgroundImgGuidAction
+
+ | SET_fieldSymbol_overwriteCmdTextAction
+ | SET_fieldSymbol_overwriteWidthAction
+ | SET_fieldSymbol_overwriteHeightAction
+ | SET_fieldSymbol_overwriteColorAction
+ | SET_fieldSymbol_overwriteBgColorAction
+ | SET_fieldSymbol_overwriteBorderColorAction
+ | SET_fieldSymbol_overwriteBorderSizeInPxAction
+ | SET_fieldSymbol_overwriteFontNameAction
+ | SET_fieldSymbol_overwriteFontSizeInPxAction
+ | SET_fieldSymbol_overwriteFontDecorationAction
+ | SET_fieldSymbol_overwriteTextAction
+ | SET_fieldSymbol_overwriteHorizontalTextAlignAction
+ | SET_fieldSymbol_overwriteVerticalTextAlignAction
+ | SET_fieldSymbol_overwritePaddingAction
+ | SET_fieldSymbol_overwriteCornerRadiusAction
+ | SET_fieldSymbol_overwriteRotationInDegAction
+ | SET_fieldSymbol_overwriteBackgroundImageAction
 
 export function _reducer(state: State = initial, action: AllActions): State {
 
@@ -416,6 +540,143 @@ export function _reducer(state: State = initial, action: AllActions): State {
         return {...p, backgroundImgGuid: action.backgroundImgGuid}
       })
       return res
+    }
+
+    case ActionType.SET_fieldSymbol_overwriteCmdText: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteCmdText: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteWidth: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteWidth: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteHeight: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteHeight: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteColor: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteColor: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteBgColor: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteBgColor: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteBorderColor: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteBorderColor: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteBorderSizeInPx: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid,p => {
+        return {
+          ...p,
+          overwriteBorderSizeInPx: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteFontName: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteFontName: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteFontSizeInPx: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid,p => {
+        return {
+          ...p,
+          overwriteFontSizeInPx: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteFontDecoration: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid,p => {
+        return {
+          ...p,
+          overwriteFontDecoration: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteText: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteText: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteHorizontalTextAlign: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid,p => {
+        return {
+          ...p,
+          overwriteHorizontalTextAlign: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteVerticalTextAlign: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid,p => {
+        return {
+          ...p,
+          overwriteVerticalTextAlign: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwritePadding: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid, p => {
+        return {
+          ...p,
+          overwritePadding: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteCornerRadius: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid,p => {
+        return {
+          ...p,
+          overwriteCornerRadius: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteRotationInDeg: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid,p => {
+        return {
+          ...p,
+          overwriteRotationInDeg: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_fieldSymbol_overwriteBackgroundImage: {
+      return replacePropertyByGuid(state, action.fieldSymbolGuid,p => {
+        return {
+          ...p,
+          overwriteBackgroundImage: action.overwrite
+        }
+      })
     }
 
     case ActionType.RESET:

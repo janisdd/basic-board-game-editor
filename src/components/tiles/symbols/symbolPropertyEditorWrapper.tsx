@@ -3,17 +3,42 @@ import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../../state";
-import {FieldShape, FieldSymbol, ImgShape, ImgSymbol, LineShape, LineSymbol} from "../../../types/drawing";
-import FieldPropertyEditor from '../propertyEditors/fieldPropertyEditor'
+import {FieldSymbol, ImgSymbol, LineSymbol} from "../../../types/drawing";
+import FieldSymbolPropertyEditor from '../propertyEditors/fieldSymbolPropertyEditor'
 import {
-  set_fieldSymbol_anchorPoints, set_fieldSymbol_backgroundImgGuid,
-  set_fieldSymbol_bgColor, set_fieldSymbol_borderColor, set_fieldSymbol_borderSizeInPx,
+  set_fieldSymbol_anchorPoints,
+  set_fieldSymbol_backgroundImgGuid,
+  set_fieldSymbol_bgColor,
+  set_fieldSymbol_borderColor,
+  set_fieldSymbol_borderSizeInPx,
   set_fieldSymbol_cmdText,
   set_fieldSymbol_color,
-  set_fieldSymbol_cornerRadiusInPx, set_fieldSymbol_displayName, set_fieldSymbol_fontName, set_fieldSymbol_fontSizeInPx,
+  set_fieldSymbol_cornerRadiusInPx,
+  set_fieldSymbol_displayName,
+  set_fieldSymbol_fontName,
+  set_fieldSymbol_fontSizeInPx,
   set_fieldSymbol_height,
-  set_fieldSymbol_horizontalAlign, set_fieldSymbol_isFontBold, set_fieldSymbol_isFontItalic,
-  set_fieldSymbol_padding, set_fieldSymbol_rotationInDegree,
+  set_fieldSymbol_horizontalAlign,
+  set_fieldSymbol_isFontBold,
+  set_fieldSymbol_isFontItalic, set_fieldSymbol_overwriteBackgroundImage,
+  set_fieldSymbol_overwriteBgColor,
+  set_fieldSymbol_overwriteBorderColor,
+  set_fieldSymbol_overwriteBorderSizeInPx,
+  set_fieldSymbol_overwriteCmdText,
+  set_fieldSymbol_overwriteColor,
+  set_fieldSymbol_overwriteCornerRadius,
+  set_fieldSymbol_overwriteFontDecoration,
+  set_fieldSymbol_overwriteFontName,
+  set_fieldSymbol_overwriteFontSizeInPx,
+  set_fieldSymbol_overwriteHeight,
+  set_fieldSymbol_overwriteHorizontalTextAlign,
+  set_fieldSymbol_overwritePadding,
+  set_fieldSymbol_overwriteRotationInDeg,
+  set_fieldSymbol_overwriteText,
+  set_fieldSymbol_overwriteVerticalTextAlign,
+  set_fieldSymbol_overwriteWidth,
+  set_fieldSymbol_padding,
+  set_fieldSymbol_rotationInDegree,
   set_fieldSymbol_text,
   set_fieldSymbol_verticalAlign,
   set_fieldSymbol_width
@@ -36,20 +61,24 @@ import {
   set_imgSymbol_width
 } from "../../../state/reducers/tileEditor/symbols/imgSymbols/actions";
 import {
-  set_lineSymbol_arrowHeight, set_lineSymbol_arrowWidth,
-  set_lineSymbol_color, set_lineSymbol_dashArray, set_lineSymbol_displayName, set_lineSymbol_hasEndArrow,
-  set_lineSymbol_hasStartArrow, set_lineSymbol_thicknessInPx
+  set_lineSymbol_arrowHeight,
+  set_lineSymbol_arrowWidth,
+  set_lineSymbol_color,
+  set_lineSymbol_dashArray,
+  set_lineSymbol_displayName,
+  set_lineSymbol_hasEndArrow,
+  set_lineSymbol_hasStartArrow,
+  set_lineSymbol_thicknessInPx
 } from "../../../state/reducers/tileEditor/symbols/lineSymbols/actions";
 import {
-  adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight, adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation,
-  adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth,
-  setPropertyEditor_FieldX
+  adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight,
+  adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation,
+  adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth
 } from "../../../state/reducers/tileEditor/fieldProperties/actions";
 import {
   setEditor_isChooseFieldShapeBackgroundImageLibraryDisplayed,
   setEditor_IsChooseImgShapeImageLibraryDisplayed
 } from "../../../state/reducers/tileEditor/actions";
-import {Logger} from "../../../helpers/logger";
 import {changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol} from "../../../constants";
 
 export interface MyProps {
@@ -135,6 +164,24 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight,
   adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation,
 
+  set_fieldSymbol_overwriteCmdText,
+  set_fieldSymbol_overwriteWidth,
+  set_fieldSymbol_overwriteHeight,
+  set_fieldSymbol_overwriteColor,
+  set_fieldSymbol_overwriteBgColor,
+  set_fieldSymbol_overwriteBorderColor,
+  set_fieldSymbol_overwriteBorderSizeInPx,
+  set_fieldSymbol_overwriteFontName,
+  set_fieldSymbol_overwriteFontSizeInPx,
+  set_fieldSymbol_overwriteFontDecoration,
+  set_fieldSymbol_overwriteText,
+  set_fieldSymbol_overwriteHorizontalTextAlign,
+  set_fieldSymbol_overwriteVerticalTextAlign,
+  set_fieldSymbol_overwritePadding,
+  set_fieldSymbol_overwriteCornerRadius,
+  set_fieldSymbol_overwriteRotationInDeg,
+  set_fieldSymbol_overwriteBackgroundImage,
+
 }, dispatch)
 
 
@@ -168,241 +215,301 @@ class symbolPropertyEditorWrapper extends React.Component<Props, any> {
         {
           selectedFieldSymbol !== null &&
           <div>
-            <FieldPropertyEditor fieldShape={selectedFieldSymbol}
+            <FieldSymbolPropertyEditor fieldShape={selectedFieldSymbol}
 
-                                 isChooseFieldShapeBackgroundImageLibraryDisplayed={this.props.isChooseFieldShapeBackgroundImageLibraryDisplayed}
+                                       set_fieldSymbol_overwriteCmdText={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteCmdText(selectedFieldSymbol.guid, overwrite)
+                                       }}
+                                       set_fieldSymbol_overwriteWidth={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteWidth(selectedFieldSymbol.guid, overwrite)
 
-                                 setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed={isDisplayed => {
-                                   this.props.setEditor_isChooseFieldShapeBackgroundImageLibraryDisplayed(isDisplayed)
-                                 }}
+                                       }}
+                                       set_fieldSymbol_overwriteHeight={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteHeight(selectedFieldSymbol.guid, overwrite)
 
-                                 setPropertyEditor_field_backgroundImgGuid={(oldBackgroundImgGuid, newBackgroundImgGuid) => {
-                                   this.props.set_fieldSymbol_backgroundImgGuid(selectedFieldSymbol.guid,
-                                     newBackgroundImgGuid)
-                                 }}
+                                       }}
+                                       set_fieldSymbol_overwriteColor={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteColor(selectedFieldSymbol.guid, overwrite)
 
-                                 setPropertyEditor_FieldRotationInDegree={(oldRotationInDegree, newRotationInDegree) => {
-                                   this.props.set_fieldSymbol_rotationInDegree(selectedFieldSymbol.guid,
-                                     newRotationInDegree)
+                                       }}
+                                       set_fieldSymbol_overwriteBgColor={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteBgColor(selectedFieldSymbol.guid, overwrite)
 
-                                   if (changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol) {
+                                       }}
+                                       set_fieldSymbol_overwriteBorderColor={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteBorderColor(selectedFieldSymbol.guid, overwrite)
 
-                                     //this will change the line points in the tile library
-                                     //but the current tile is a copy (mostly) so if we change the lines only in the tile library...
-                                     //... and click on cancel everything is fine because the world displays the tile library tiles
-                                     //....or click on apply then we overwrite the corrected lines with the lines in the single tile editor
+                                       }}
+                                       set_fieldSymbol_overwriteBorderSizeInPx={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteBorderSizeInPx(selectedFieldSymbol.guid, overwrite)
 
-                                     for (let i = 0; i < this.props.possibleTiles.length; i++) {
-                                       const possibleTile = this.props.possibleTiles[i]
+                                       }}
+                                       set_fieldSymbol_overwriteFontName={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteFontName(selectedFieldSymbol.guid, overwrite)
 
-                                       if (possibleTile.guid === this.props.tileGuide) continue //this is the default case, handled below
+                                       }}
+                                       set_fieldSymbol_overwriteFontSizeInPx={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteFontSizeInPx(selectedFieldSymbol.guid, overwrite)
+
+                                       }}
+                                       set_fieldSymbol_overwriteFontDecoration={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteFontDecoration(selectedFieldSymbol.guid, overwrite)
+
+                                       }}
+                                       set_fieldSymbol_overwriteText={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteText(selectedFieldSymbol.guid, overwrite)
+
+                                       }}
+                                       set_fieldSymbol_overwriteHorizontalTextAlign={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteHorizontalTextAlign(selectedFieldSymbol.guid, overwrite)
+
+                                       }}
+                                       set_fieldSymbol_overwriteVerticalTextAlign={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteVerticalTextAlign(selectedFieldSymbol.guid, overwrite)
+
+                                       }}
+                                       set_fieldSymbol_overwritePadding={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwritePadding(selectedFieldSymbol.guid, overwrite)
+
+                                       }}
+                                       set_fieldSymbol_overwriteCornerRadius={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteCornerRadius(selectedFieldSymbol.guid, overwrite)
+
+                                       }}
+                                       set_fieldSymbol_overwriteRotationInDeg={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteRotationInDeg(selectedFieldSymbol.guid, overwrite)
+
+                                       }}
+                                       set_fieldSymbol_overwriteBackgroundImage={(overwrite) => {
+                                         this.props.set_fieldSymbol_overwriteBackgroundImage(selectedFieldSymbol.guid, overwrite)
+
+                                       }}
+
+                                       isChooseFieldShapeBackgroundImageLibraryDisplayed={this.props.isChooseFieldShapeBackgroundImageLibraryDisplayed}
+
+                                       setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed={isDisplayed => {
+                                         this.props.setEditor_isChooseFieldShapeBackgroundImageLibraryDisplayed(isDisplayed)
+                                       }}
+
+                                       setPropertyEditor_field_backgroundImgGuid={(newBackgroundImgGuid) => {
+                                         this.props.set_fieldSymbol_backgroundImgGuid(selectedFieldSymbol.guid,
+                                           newBackgroundImgGuid)
+                                       }}
+
+                                       setPropertyEditor_FieldRotationInDegree={(oldRotationInDegree, newRotationInDegree) => {
+                                         this.props.set_fieldSymbol_rotationInDegree(selectedFieldSymbol.guid,
+                                           newRotationInDegree)
+
+                                         if (changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol) {
+
+                                           //this will change the line points in the tile library
+                                           //but the current tile is a copy (mostly) so if we change the lines only in the tile library...
+                                           //... and click on cancel everything is fine because the world displays the tile library tiles
+                                           //....or click on apply then we overwrite the corrected lines with the lines in the single tile editor
+
+                                           for (let i = 0; i < this.props.possibleTiles.length; i++) {
+                                             const possibleTile = this.props.possibleTiles[i]
+
+                                             if (possibleTile.guid === this.props.tileGuide) continue //this is the default case, handled below
 
 
-                                       //update the connected lines of all dependent fields
-                                       for (const field of possibleTile.fieldShapes) {
-                                         if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
-                                           this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation(
-                                             field,
-                                             selectedFieldSymbol,
-                                             possibleTile.lineShapes,
-                                             possibleTile.guid,
-                                             oldRotationInDegree,
-                                             newRotationInDegree,
-                                           )
+                                             //update the connected lines of all dependent fields
+                                             for (const field of possibleTile.fieldShapes) {
+                                               if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
+                                                 this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation(
+                                                   field,
+                                                   selectedFieldSymbol,
+                                                   possibleTile.lineShapes,
+                                                   possibleTile.guid,
+                                                   oldRotationInDegree,
+                                                   newRotationInDegree,
+                                                 )
+                                               }
+                                             }
+                                           }
                                          }
-                                       }
-                                     }
-                                   }
 
-                                   //update the connected lines of all dependent fields
-                                   for (const field of this.props.fieldShapes) {
-                                     if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
+                                         //update the connected lines of all dependent fields
+                                         for (const field of this.props.fieldShapes) {
+                                           if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
 
-                                       this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation(
-                                         field,
-                                         selectedFieldSymbol,
-                                         null,
-                                         null,
-                                         oldRotationInDegree,
-                                         newRotationInDegree
-                                       )
-                                     }
-                                   }
-
-                                 }}
-                                 setPropertyEditor_FieldIsBasedOnSymbol={nop}
-
-                                 setTileEditorSelectingNextField={nop}
-                                 setPropertyEditor_FieldConnectedLinesThroughAnchors={nop}
-
-                                 setPropertyEditor_FieldIsFontItalic={(oldIsFontItalic, newIsFontItalic) => {
-                                   this.props.set_fieldSymbol_isFontItalic(selectedFieldSymbol.guid, newIsFontItalic)
-                                 }}
-
-                                 setPropertyEditor_FieldIsFontBold={(oldIsFontBold, newIsFontBold) => {
-                                   this.props.set_fieldSymbol_isFontBold(selectedFieldSymbol.guid, newIsFontBold)
-                                 }}
-
-                                 onDuplicateFields={nop}
-                                 setPropertyEditor_FieldBorderSizeInPx={(oldBorderSizeInPx, newBorderSizeInPx) => {
-                                   this.props.set_fieldSymbol_borderSizeInPx(selectedFieldSymbol.guid,
-                                     newBorderSizeInPx)
-                                 }}
-                                 setPropertyEditor_FieldBorderColor={(oldColor, newColor) => {
-                                   this.props.set_fieldSymbol_borderColor(selectedFieldSymbol.guid, newColor)
-                                 }}
-
-                                 setPropertyEditor_FieldFontSizeInPx={(oldFontSizeInPx, newFontSizeInPx) => {
-                                   this.props.set_fieldSymbol_fontSizeInPx(selectedFieldSymbol.guid, newFontSizeInPx)
-                                 }}
-                                 setPropertyEditor_FieldFontName={(oldFontName, newFontName) => {
-                                   this.props.set_fieldSymbol_fontName(selectedFieldSymbol.guid, newFontName)
-                                 }}
-
-                                 setPropertyEditor_FieldY={nop}
-                                 setPropertyEditor_FieldX={nop}
-                                 setPropertyEditor_FieldAbsoluteZIndex={nop}
-                                 setPropertyEditor_removeFieldShape={nop}
-
-                                 setPropertyEditor_FieldPadding={(oldPaddingTop, oldPaddingRight, oldPaddingBottom, oldPaddingLeft, newPaddingTop, newPaddingRight, newPaddingBottom, newPaddingLeft) => {
-                                   this.props.set_fieldSymbol_padding(selectedFieldSymbol.guid, newPaddingTop,
-                                     newPaddingRight, newPaddingBottom,
-                                     newPaddingLeft)
-                                 }}
-
-                                 setPropertyEditor_FieldWidth={(oldWidth, newWidth) => {
-                                   this.props.set_fieldSymbol_width(selectedFieldSymbol.guid, newWidth)
-
-                                   if (changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol) {
-
-                                     //this will change the line points in the tile library
-                                     //but the current tile is a copy (mostly) so if we change the lines only in the tile library...
-                                     //... and click on cancel everything is fine because the world displays the tile library tiles
-                                     //....or click on apply then we overwrite the corrected lines with the lines in the single tile editor
-
-                                     for (let i = 0; i < this.props.possibleTiles.length; i++) {
-                                       const possibleTile = this.props.possibleTiles[i]
-
-                                       if (possibleTile.guid === this.props.tileGuide) continue //this is the default case, handled below
-
-                                       //update the connected lines of all dependent fields
-                                       for (const field of possibleTile.fieldShapes) {
-                                         if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
-
-                                           this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth(
-                                             field,
-                                             selectedFieldSymbol,
-                                             possibleTile.lineShapes,
-                                             possibleTile.guid,
-                                             oldWidth,
-                                             newWidth,
-                                           )
+                                             this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation(
+                                               field,
+                                               selectedFieldSymbol,
+                                               null,
+                                               null,
+                                               oldRotationInDegree,
+                                               newRotationInDegree
+                                             )
+                                           }
                                          }
-                                       }
 
-                                     }
+                                       }}
+
+                                       setPropertyEditor_FieldIsFontItalic={(newIsFontItalic) => {
+                                         this.props.set_fieldSymbol_isFontItalic(selectedFieldSymbol.guid, newIsFontItalic)
+                                       }}
+
+                                       setPropertyEditor_FieldIsFontBold={(newIsFontBold) => {
+                                         this.props.set_fieldSymbol_isFontBold(selectedFieldSymbol.guid, newIsFontBold)
+                                       }}
+
+                                       setPropertyEditor_FieldBorderSizeInPx={(newBorderSizeInPx) => {
+                                         this.props.set_fieldSymbol_borderSizeInPx(selectedFieldSymbol.guid,
+                                           newBorderSizeInPx)
+                                       }}
+                                       setPropertyEditor_FieldBorderColor={(newColor) => {
+                                         this.props.set_fieldSymbol_borderColor(selectedFieldSymbol.guid, newColor)
+                                       }}
+
+                                       setPropertyEditor_FieldFontSizeInPx={(newFontSizeInPx) => {
+                                         this.props.set_fieldSymbol_fontSizeInPx(selectedFieldSymbol.guid, newFontSizeInPx)
+                                       }}
+                                       setPropertyEditor_FieldFontName={(newFontName) => {
+                                         this.props.set_fieldSymbol_fontName(selectedFieldSymbol.guid, newFontName)
+                                       }}
 
 
-                                   }
+                                       setPropertyEditor_FieldAbsoluteZIndex={nop}
 
-                                   //update the connected lines of all dependent fields
-                                   for (const field of this.props.fieldShapes) {
-                                     if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
+                                       setPropertyEditor_FieldPadding={(newPaddingTop, newPaddingRight, newPaddingBottom, newPaddingLeft) => {
+                                         this.props.set_fieldSymbol_padding(selectedFieldSymbol.guid, newPaddingTop,
+                                           newPaddingRight, newPaddingBottom,
+                                           newPaddingLeft)
+                                       }}
 
-                                       this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth(
-                                         field,
-                                         selectedFieldSymbol,
-                                         null,
-                                         null,
-                                         oldWidth,
-                                         newWidth,
-                                       )
-                                     }
-                                   }
+                                       setPropertyEditor_FieldWidth={(oldWidth, newWidth) => {
+                                         this.props.set_fieldSymbol_width(selectedFieldSymbol.guid, newWidth)
+
+                                         if (changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol) {
+
+                                           //this will change the line points in the tile library
+                                           //but the current tile is a copy (mostly) so if we change the lines only in the tile library...
+                                           //... and click on cancel everything is fine because the world displays the tile library tiles
+                                           //....or click on apply then we overwrite the corrected lines with the lines in the single tile editor
+
+                                           for (let i = 0; i < this.props.possibleTiles.length; i++) {
+                                             const possibleTile = this.props.possibleTiles[i]
+
+                                             if (possibleTile.guid === this.props.tileGuide) continue //this is the default case, handled below
+
+                                             //update the connected lines of all dependent fields
+                                             for (const field of possibleTile.fieldShapes) {
+                                               if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
+
+                                                 this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth(
+                                                   field,
+                                                   selectedFieldSymbol,
+                                                   possibleTile.lineShapes,
+                                                   possibleTile.guid,
+                                                   oldWidth,
+                                                   newWidth,
+                                                 )
+                                               }
+                                             }
+
+                                           }
 
 
-                                 }}
-                                 setPropertyEditor_FieldVerticalAlign={verticalAlign => {
-                                   this.props.set_fieldSymbol_verticalAlign(selectedFieldSymbol.guid, verticalAlign)
-                                 }}
-                                 setPropertyEditor_FieldText={(oldText, newText) => {
-                                   this.props.set_fieldSymbol_text(selectedFieldSymbol.guid, newText)
-                                 }}
-                                 setPropertyEditor_FieldHorizontalAlign={horizontalAlign => {
-                                   this.props.set_fieldSymbol_horizontalAlign(selectedFieldSymbol.guid, horizontalAlign)
-                                 }}
-                                 setPropertyEditor_FieldHeight={(oldHeight, newHeight) => {
-                                   this.props.set_fieldSymbol_height(selectedFieldSymbol.guid, newHeight)
-
-                                   if (changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol) {
-
-                                     //this will change the line points in the tile library
-                                     //but the current tile is a copy (mostly) so if we change the lines only in the tile library...
-                                     //... and click on cancel everything is fine because the world displays the tile library tiles
-                                     //....or click on apply then we overwrite the corrected lines with the lines in the single tile editor
-
-                                     for (let i = 0; i < this.props.possibleTiles.length; i++) {
-                                       const possibleTile = this.props.possibleTiles[i]
-
-                                       if (possibleTile.guid === this.props.tileGuide) continue //this is the default case, handled below
-
-                                       //update the connected lines of all dependent fields
-                                       for (const field of possibleTile.fieldShapes) {
-                                         if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
-                                           this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight(
-                                             field,
-                                             selectedFieldSymbol,
-                                             possibleTile.lineShapes,
-                                             possibleTile.guid,
-                                             oldHeight,
-                                             newHeight,
-                                           )
                                          }
-                                       }
-                                     }
 
-                                   }
+                                         //update the connected lines of all dependent fields
+                                         for (const field of this.props.fieldShapes) {
+                                           if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
 
-                                   //update the connected lines of all dependent fields
-                                   for (const field of this.props.fieldShapes) {
-                                     if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
-
-                                       this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight(
-                                         field,
-                                         selectedFieldSymbol,
-                                         null,
-                                         null,
-                                         oldHeight,
-                                         newHeight,
-                                       )
-                                     }
-                                   }
+                                             this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth(
+                                               field,
+                                               selectedFieldSymbol,
+                                               null,
+                                               null,
+                                               oldWidth,
+                                               newWidth,
+                                             )
+                                           }
+                                         }
 
 
-                                 }}
-                                 setPropertyEditor_FieldCornerRadiusInPx={(oldCornerRadiusInPx, newCornerRadiusInPx) => {
-                                   this.props.set_fieldSymbol_cornerRadiusInPx(selectedFieldSymbol.guid,
-                                     newCornerRadiusInPx)
-                                 }}
-                                 setPropertyEditor_FieldColor={(oldColor, newColor) => {
-                                   this.props.set_fieldSymbol_color(selectedFieldSymbol.guid, newColor)
-                                 }}
-                                 setPropertyEditor_FieldCmdText={cmdText => {
-                                   this.props.set_fieldSymbol_cmdText(selectedFieldSymbol.guid, cmdText)
-                                 }}
-                                 setPropertyEditor_FieldBgColor={(oldBgColor, newBgColor) => {
-                                   this.props.set_fieldSymbol_bgColor(selectedFieldSymbol.guid, newBgColor)
-                                 }}
-                                 setPropertyEditor_setSelectedFieldToNull={() => this.props.set_selectedFieldSymbolGuid(
-                                   null)}
+                                       }}
+                                       setPropertyEditor_FieldVerticalAlign={verticalAlign => {
+                                         this.props.set_fieldSymbol_verticalAlign(selectedFieldSymbol.guid, verticalAlign)
+                                       }}
+                                       setPropertyEditor_FieldText={(newText) => {
+                                         this.props.set_fieldSymbol_text(selectedFieldSymbol.guid, newText)
+                                       }}
+                                       setPropertyEditor_FieldHorizontalAlign={horizontalAlign => {
+                                         this.props.set_fieldSymbol_horizontalAlign(selectedFieldSymbol.guid, horizontalAlign)
+                                       }}
+                                       setPropertyEditor_FieldHeight={(oldHeight, newHeight) => {
+                                         this.props.set_fieldSymbol_height(selectedFieldSymbol.guid, newHeight)
 
-                                 onAddFieldSymbol={nop}
-                                 setPropertyEditor_FieldAnchorPoints={anchorPoints => {
-                                   this.props.set_fieldSymbol_anchorPoints(selectedFieldSymbol.guid, anchorPoints)
-                                 }}
-                                 set_fieldSymbol_displayName={displayName => {
-                                   this.props.set_fieldSymbol_displayName(selectedFieldSymbol.guid, displayName)
-                                 }}
+                                         if (changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol) {
+
+                                           //this will change the line points in the tile library
+                                           //but the current tile is a copy (mostly) so if we change the lines only in the tile library...
+                                           //... and click on cancel everything is fine because the world displays the tile library tiles
+                                           //....or click on apply then we overwrite the corrected lines with the lines in the single tile editor
+
+                                           for (let i = 0; i < this.props.possibleTiles.length; i++) {
+                                             const possibleTile = this.props.possibleTiles[i]
+
+                                             if (possibleTile.guid === this.props.tileGuide) continue //this is the default case, handled below
+
+                                             //update the connected lines of all dependent fields
+                                             for (const field of possibleTile.fieldShapes) {
+                                               if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
+                                                 this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight(
+                                                   field,
+                                                   selectedFieldSymbol,
+                                                   possibleTile.lineShapes,
+                                                   possibleTile.guid,
+                                                   oldHeight,
+                                                   newHeight,
+                                                 )
+                                               }
+                                             }
+                                           }
+
+                                         }
+
+                                         //update the connected lines of all dependent fields
+                                         for (const field of this.props.fieldShapes) {
+                                           if (field.createdFromSymbolGuid === selectedFieldSymbol.guid) {
+
+                                             this.props.adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight(
+                                               field,
+                                               selectedFieldSymbol,
+                                               null,
+                                               null,
+                                               oldHeight,
+                                               newHeight,
+                                             )
+                                           }
+                                         }
+
+
+                                       }}
+                                       setPropertyEditor_FieldCornerRadiusInPx={(newCornerRadiusInPx) => {
+                                         this.props.set_fieldSymbol_cornerRadiusInPx(selectedFieldSymbol.guid,
+                                           newCornerRadiusInPx)
+                                       }}
+                                       setPropertyEditor_FieldColor={(newColor) => {
+                                         this.props.set_fieldSymbol_color(selectedFieldSymbol.guid, newColor)
+                                       }}
+                                       setPropertyEditor_FieldCmdText={cmdText => {
+                                         this.props.set_fieldSymbol_cmdText(selectedFieldSymbol.guid, cmdText)
+                                       }}
+                                       setPropertyEditor_FieldBgColor={(newBgColor) => {
+                                         this.props.set_fieldSymbol_bgColor(selectedFieldSymbol.guid, newBgColor)
+                                       }}
+                                       setPropertyEditor_setSelectedFieldToNull={() => this.props.set_selectedFieldSymbolGuid(
+                                         null)}
+
+                                       setPropertyEditor_FieldAnchorPoints={anchorPoints => {
+                                         this.props.set_fieldSymbol_anchorPoints(selectedFieldSymbol.guid, anchorPoints)
+                                       }}
+                                       set_fieldSymbol_displayName={displayName => {
+                                         this.props.set_fieldSymbol_displayName(selectedFieldSymbol.guid, displayName)
+                                       }}
             />
 
           </div>

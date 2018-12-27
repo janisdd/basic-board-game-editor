@@ -270,6 +270,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                           </label>
 
                           <EditorWrapper
+                            readony={false}
                             id={editorId}
                             value={this.props.worldSettings.worldCmdText}
                             onLostFocus={(val) => this.props.set_world_worldCmdTextAction(val)}

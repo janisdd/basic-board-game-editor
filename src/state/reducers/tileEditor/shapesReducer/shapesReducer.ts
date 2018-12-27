@@ -29,6 +29,7 @@ import {
   AllActions as AllLineSymbolActions,
   incLineSymbolHistoryId
 } from '../symbols/lineSymbols/lineSymbolReducer'
+import {FieldSymbol} from "../../../../types/drawing";
 
 
 export enum LastEditedShapeType {
@@ -106,6 +107,23 @@ export function _reducer(state: State = initial, action: AllActions): State {
     case FieldSymbolActionTypes.SET_fieldSymbol_isFontItalic:
     case FieldSymbolActionTypes.SET_fieldSymbol_rotationInDegree:
     case FieldSymbolActionTypes.SET_fieldSymbol_backgroundImgGuid:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteCmdText:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteWidth:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteHeight:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteColor:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteBgColor:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteBorderColor:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteBorderSizeInPx:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteFontName:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteFontSizeInPx:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteFontDecoration:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteText:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteHorizontalTextAlign:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteVerticalTextAlign:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwritePadding:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteCornerRadius:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteRotationInDeg:
+    case FieldSymbolActionTypes.SET_fieldSymbol_overwriteBackgroundImage:
     case FieldSymbolActionTypes.RESET: {
       if (state.lastEditedShapeType !== LastEditedShapeType.fieldSymbol) {
         incFieldSymbolHistoryId()
@@ -187,6 +205,7 @@ export function _reducer(state: State = initial, action: AllActions): State {
     case FieldShapedActionTypes.SET_field_rotationInDegree:
     case FieldShapedActionTypes.SET_field_backgroundImgGuid:
     case FieldShapedActionTypes.CLEAR_fieldShape_connectedLines:
+
     case FieldShapedActionTypes.RESET: {
 
       if (state.lastEditedShapeType !== LastEditedShapeType.fieldShape) {

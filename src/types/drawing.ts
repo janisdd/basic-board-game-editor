@@ -153,6 +153,27 @@ export interface FieldSymbol extends FieldBase, GuidAble {
    * 0 is ui top/left, N last
    */
   readonly displayIndex: number
+
+  /**
+   * true: use the symbol prop, false: use field prop
+   */
+  readonly overwriteCmdText: boolean
+  readonly overwriteWidth: boolean
+  readonly overwriteHeight: boolean
+  readonly overwriteColor: boolean
+  readonly overwriteBgColor: boolean
+  readonly overwriteBorderColor: boolean
+  readonly overwriteBorderSizeInPx: boolean
+  readonly overwriteFontName: boolean
+  readonly overwriteFontSizeInPx: boolean
+  readonly overwriteFontDecoration: boolean
+  readonly overwriteText: boolean
+  readonly overwriteHorizontalTextAlign: boolean
+  readonly overwriteVerticalTextAlign: boolean
+  readonly overwritePadding: boolean
+  readonly overwriteCornerRadius: boolean
+  readonly overwriteRotationInDeg: boolean
+  readonly overwriteBackgroundImage: boolean
 }
 
 export interface ImgBase {
@@ -206,6 +227,14 @@ export interface ImgSymbol extends ImgBase, GuidAble {
    * 0 is ui top/left, N last
    */
   readonly displayIndex: number
+
+  readonly overwriteWidth: boolean
+  readonly overwriteHeight: boolean
+  readonly overwriteRotationInDeg: boolean
+  readonly overwriteImage: boolean
+  readonly overwriteSkewX: boolean
+  readonly overwriteSkewY: boolean
+  readonly overwriteIsDisabledForMouseSelection: boolean
 }
 
 
@@ -342,4 +371,12 @@ export interface LineSymbol extends LineBase, GuidAble {
    * 0 is ui top/left, N last
    */
   readonly displayIndex: number
+
+  readonly overwriteColor: boolean
+  readonly overwriteThicknessInPx: boolean
+  readonly overwriteGapsInPx: boolean
+  readonly overwriteHasStartArrow: boolean
+  readonly overwriteHasEndArrow: boolean
+  readonly overwriteArrowWidth: boolean
+  readonly overwriteArrowHeight: boolean
 }
