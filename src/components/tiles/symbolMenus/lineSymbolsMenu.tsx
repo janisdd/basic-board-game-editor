@@ -6,6 +6,7 @@ import {RootState} from "../../../state";
 import SymbolRenderer from '../symbols/symbolRenderer'
 import {set_selectedLineSymbolGuid} from "../../../state/reducers/tileEditor/symbols/actions";
 import {
+  remove_lineSymbol,
   set_lineSymbol_displayIndex,
   set_lineSymbols
 } from "../../../state/reducers/tileEditor/symbols/lineSymbols/actions";
@@ -52,6 +53,8 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_lineSymbol_displayIndex,
 
   set_lineSymbols,
+
+  remove_lineSymbol,
 
   set_editor_rightTabActiveIndex,
 
@@ -143,7 +146,7 @@ class lineSymbolsMenu extends React.Component<Props, any> {
                   >
                     <Button color="red" icon
                             onClick={() => {
-                              this.props.set_lineSymbols(this.props.lineSymbols.filter(p => p.guid !== symbol.guid))
+                              this.props.remove_lineSymbol(symbol,   this.props.lineSymbols)
                             }}
                     >
                       <Icon name="trash"/>

@@ -49,6 +49,7 @@ import {
 } from "../../fieldProperties/actions";
 import {swapDisplayIndexWithGuid} from "../../../../../helpers/someIndexHelper";
 import {Logger} from "../../../../../helpers/logger";
+import {remove_fieldSymbolGlobal} from "../../../world/tileLibrary/actions";
 
 
 export function set_fieldSymbols(fieldSymbols: ReadonlyArray<FieldSymbol>): SET_fieldSymbolsAction {
@@ -71,6 +72,10 @@ export function remove_fieldSymbol(symbol: FieldSymbol, allFieldSymbols: Readonl
       allFieldSymbols,
       (objId: string, newDisplayIndex: number) => dispatch(set_fieldSymbol_displayIndex(objId, newDisplayIndex))
     )
+
+    // this updates the shapes in the library but the current tile in the editor is a copy...
+    // so we need to update it too (see below)
+    dispatch(remove_fieldSymbolGlobal(symbol.guid))
 
     //we need to get the new state because we changed the display index...
     const newList = getState().fieldSymbolState.present.filter(p => p.guid !== symbol.guid)
@@ -101,6 +106,7 @@ export function _set_fieldSymbol_width(fieldSymbolGuid: string, width: number): 
     width
   }
 }
+
 export function set_fieldSymbol_width(fieldSymbolGuid: string, width: number): MultiActions {
   return (dispatch, getState) => {
 
@@ -317,6 +323,7 @@ export function set_fieldSymbol_overwriteCmdText(fieldSymbolGuid: string, overwr
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteWidth(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteWidthAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteWidth,
@@ -324,6 +331,7 @@ export function set_fieldSymbol_overwriteWidth(fieldSymbolGuid: string, overwrit
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteHeight(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteHeightAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteHeight,
@@ -331,6 +339,7 @@ export function set_fieldSymbol_overwriteHeight(fieldSymbolGuid: string, overwri
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteColor(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteColorAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteColor,
@@ -338,6 +347,7 @@ export function set_fieldSymbol_overwriteColor(fieldSymbolGuid: string, overwrit
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteBgColor(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteBgColorAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteBgColor,
@@ -345,6 +355,7 @@ export function set_fieldSymbol_overwriteBgColor(fieldSymbolGuid: string, overwr
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteBorderColor(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteBorderColorAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteBorderColor,
@@ -352,6 +363,7 @@ export function set_fieldSymbol_overwriteBorderColor(fieldSymbolGuid: string, ov
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteBorderSizeInPx(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteBorderSizeInPxAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteBorderSizeInPx,
@@ -359,6 +371,7 @@ export function set_fieldSymbol_overwriteBorderSizeInPx(fieldSymbolGuid: string,
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteFontName(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteFontNameAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteFontName,
@@ -366,6 +379,7 @@ export function set_fieldSymbol_overwriteFontName(fieldSymbolGuid: string, overw
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteFontSizeInPx(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteFontSizeInPxAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteFontSizeInPx,
@@ -373,6 +387,7 @@ export function set_fieldSymbol_overwriteFontSizeInPx(fieldSymbolGuid: string, o
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteFontDecoration(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteFontDecorationAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteFontDecoration,
@@ -380,6 +395,7 @@ export function set_fieldSymbol_overwriteFontDecoration(fieldSymbolGuid: string,
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteText(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteTextAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteText,
@@ -387,6 +403,7 @@ export function set_fieldSymbol_overwriteText(fieldSymbolGuid: string, overwrite
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteHorizontalTextAlign(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteHorizontalTextAlignAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteHorizontalTextAlign,
@@ -394,6 +411,7 @@ export function set_fieldSymbol_overwriteHorizontalTextAlign(fieldSymbolGuid: st
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteVerticalTextAlign(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteVerticalTextAlignAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteVerticalTextAlign,
@@ -401,6 +419,7 @@ export function set_fieldSymbol_overwriteVerticalTextAlign(fieldSymbolGuid: stri
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwritePadding(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwritePaddingAction {
   return {
     type: ActionType.SET_fieldSymbol_overwritePadding,
@@ -408,6 +427,7 @@ export function set_fieldSymbol_overwritePadding(fieldSymbolGuid: string, overwr
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteCornerRadius(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteCornerRadiusAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteCornerRadius,
@@ -415,6 +435,7 @@ export function set_fieldSymbol_overwriteCornerRadius(fieldSymbolGuid: string, o
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteRotationInDeg(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteRotationInDegAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteRotationInDeg,
@@ -422,6 +443,7 @@ export function set_fieldSymbol_overwriteRotationInDeg(fieldSymbolGuid: string, 
     fieldSymbolGuid
   }
 }
+
 export function set_fieldSymbol_overwriteBackgroundImage(fieldSymbolGuid: string, overwrite: boolean): SET_fieldSymbol_overwriteBackgroundImageAction {
   return {
     type: ActionType.SET_fieldSymbol_overwriteBackgroundImage,

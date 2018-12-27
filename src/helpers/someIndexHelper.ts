@@ -20,8 +20,6 @@ interface ObjWithZIndex {
  */
 export function renewAllZIndicesInTile(): void {
 
-
-  Logger.log('renewing z indices')
   //copy to not mutate & to sort
   const fieldShapes = state.getState().tileEditorFieldShapesState.present// as FieldShape[]
   const imgShapes = state.getState().tileEditorImgShapesState.present// as ImgShape[]

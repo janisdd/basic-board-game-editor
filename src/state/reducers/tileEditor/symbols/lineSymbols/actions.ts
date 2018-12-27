@@ -10,8 +10,11 @@ import {
   SET_lineSymbol_displayIndexAction,
   SET_lineSymbol_displayNameAction,
   SET_lineSymbol_hasEndArrowAction,
-  SET_lineSymbol_hasStartArrowAction, SET_lineSymbol_overwriteArrowHeightAction,
-  SET_lineSymbol_overwriteArrowWidthAction, SET_lineSymbol_overwriteColorAction, SET_lineSymbol_overwriteGapsInPxAction,
+  SET_lineSymbol_hasStartArrowAction,
+  SET_lineSymbol_overwriteArrowHeightAction,
+  SET_lineSymbol_overwriteArrowWidthAction,
+  SET_lineSymbol_overwriteColorAction,
+  SET_lineSymbol_overwriteGapsInPxAction,
   SET_lineSymbol_overwriteHasEndArrowAction,
   SET_lineSymbol_overwriteHasStartArrowAction,
   SET_lineSymbol_overwriteThicknessInPxAction,
@@ -22,7 +25,8 @@ import {
 import {MultiActions} from "../../../../../types/ui";
 import {set_imgSymbol_displayIndex} from "../imgSymbols/actions";
 import {setPropertyEditor_LineCreatedFromSymbolId} from "../../lineProperties/actions";
-import { swapDisplayIndexWithGuid} from "../../../../../helpers/someIndexHelper";
+import {swapDisplayIndexWithGuid} from "../../../../../helpers/someIndexHelper";
+import {remove_lineSymbolGlobal} from "../../../world/tileLibrary/actions";
 
 
 export function set_lineSymbols(lineSymbols: ReadonlyArray<LineSymbol>): SET_lineSymbolsAction {
@@ -45,6 +49,11 @@ export function remove_lineSymbol(symbol: LineSymbol, allLineSymbols: ReadonlyAr
       allLineSymbols,
       (objId: string, newDisplayIndex: number) => dispatch(set_imgSymbol_displayIndex(objId, newDisplayIndex))
     )
+
+    //this updates the shapes in the library but the current tile in the editor is a copy...
+    //so we need to update it too (see below)
+    dispatch(remove_lineSymbolGlobal(symbol.guid))
+
     const newList = getState().lineSymbolState.present.filter(p => p.guid !== symbol.guid)
 
     for (const lineFields  of getState().tileEditorLineShapeState.present) {

@@ -25,6 +25,7 @@ import {
 import {MultiActions} from "../../../../../types/ui";
 import {setPropertyEditor_ImageCreatedFromSymbolId} from "../../imgProperties/actions";
 import {swapDisplayIndexWithGuid} from "../../../../../helpers/someIndexHelper";
+import {remove_imgSymbolGlobal} from "../../../world/tileLibrary/actions";
 
 
 export function set_imgSymbols(imgSymbols: ReadonlyArray<ImgSymbol>): SET_imgSymbolsAction {
@@ -47,6 +48,11 @@ export function remove_imgSymbol(symbol: ImgSymbol, allImgSymbols: ReadonlyArray
       allImgSymbols,
       (objId: string, newDisplayIndex: number) => dispatch(set_imgSymbol_displayIndex(objId, newDisplayIndex))
     )
+
+    //this updates the shapes in the library but the current tile in the editor is a copy...
+    //so we need to update it too (see below)
+    dispatch(remove_imgSymbolGlobal(symbol.guid))
+
     const newList = getState().imgSymbolState.present.filter(p => p.guid !== symbol.guid)
 
     for (const imgFields  of getState().tileEditorImgShapesState.present) {

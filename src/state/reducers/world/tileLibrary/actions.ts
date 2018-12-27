@@ -1,14 +1,9 @@
 import {ActionType, SET_possibleTilesAction} from "./tileLibraryReducer";
 import {Tile} from "../../../../types/world";
-import {BezierPoint, FieldShape, LineShape, PlainPoint} from "../../../../types/drawing";
+import {BezierPoint, LineShape, PlainPoint} from "../../../../types/drawing";
 import {MultiActions} from "../../../../types/ui";
-import {
-  checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap,
-  isFieldAndLineConnectedThroughAnchorPoints
-} from "../../../../helpers/interactionHelper";
-import {setPropertyEditor_FieldConnectedLinesThroughAnchors} from "../../tileEditor/fieldProperties/actions";
-import {_setLinePointNewPos} from "../../tileEditor/lineProperties/actions";
 import {Logger} from "../../../../helpers/logger";
+import {setPropertyEditor_FieldCreatedFromSymbolId} from "../../tileEditor/fieldProperties/actions";
 
 
 export function set_tileLibrary_possibleTiles(possibleTiles: ReadonlyArray<Tile>): SET_possibleTilesAction {
@@ -105,4 +100,80 @@ export function set_LinePointNewPosAction(tileGuide: string, lineId: number, old
     )))
 
   }
+}
+
+
+export function remove_fieldSymbolGlobal(fieldSymbolGuid: string): MultiActions {
+  return ((dispatch, getState) => {
+
+    const allTiles = getState().tileLibraryState.possibleTiles
+
+    const copies: Tile[] = []
+
+    for (const tile of allTiles) {
+      const copy: Tile = {
+        ...tile,
+        fieldShapes: tile.fieldShapes.map(p =>
+          p.createdFromSymbolGuid !== fieldSymbolGuid
+            ? p
+            : {
+              ...p,
+              createdFromSymbolGuid: null
+            }
+        )
+      }
+      copies.push(copy)
+    }
+    dispatch(set_tileLibrary_possibleTiles(copies))
+  })
+}
+
+export function remove_imgSymbolGlobal(imgSymbolGuid: string): MultiActions {
+  return ((dispatch, getState) => {
+
+    const allTiles = getState().tileLibraryState.possibleTiles
+
+    const copies: Tile[] = []
+
+    for (const tile of allTiles) {
+      const copy: Tile = {
+        ...tile,
+        imgShapes: tile.imgShapes.map(p =>
+          p.createdFromSymbolGuid !== imgSymbolGuid
+            ? p
+            : {
+              ...p,
+              createdFromSymbolGuid: null
+            }
+        )
+      }
+      copies.push(copy)
+    }
+    dispatch(set_tileLibrary_possibleTiles(copies))
+  })
+}
+
+export function remove_lineSymbolGlobal(lineSymbolGuid: string): MultiActions {
+  return ((dispatch, getState) => {
+
+    const allTiles = getState().tileLibraryState.possibleTiles
+
+    const copies: Tile[] = []
+
+    for (const tile of allTiles) {
+      const copy: Tile = {
+        ...tile,
+        lineShapes: tile.lineShapes.map(p =>
+          p.createdFromSymbolGuid !== lineSymbolGuid
+            ? p
+            : {
+              ...p,
+              createdFromSymbolGuid: null
+            }
+        )
+      }
+      copies.push(copy)
+    }
+    dispatch(set_tileLibrary_possibleTiles(copies))
+  })
 }
