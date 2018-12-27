@@ -86,9 +86,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
     }
 
     //we need to specify an old val when we have multiple imgs to we take the first
-    const singleImg: ImgShape | null = isSingleImg
-      ? (this.props.imgShape as ReadonlyArray<ImgShape>)[0]
-      : null
+    const singleImg: ImgShape = this.props.imgShape[0]
 
     const isSomeImgBasedOnSymbol =
       isSingleImg && singleImg !== null && singleImg.createdFromSymbolGuid !== null

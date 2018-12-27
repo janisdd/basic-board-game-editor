@@ -126,7 +126,10 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           const nextField = nextProps.fieldShape[0] as FieldShape
           if (field.id !== nextField.id) {
             const editor = editorInstancesMap[fieldCmdTextEditorId]
-            this.props.setPropertyEditor_FieldCmdText(editor.getValue())
+
+            if (editor) {
+              this.props.setPropertyEditor_FieldCmdText(editor.getValue())
+            }
           }
         }
       }
@@ -136,18 +139,11 @@ class fieldPropertyEditor extends React.Component<Props, any> {
   render(): JSX.Element {
 
 
-    const areFieldShapes = Array.isArray(this.props.fieldShape)
-    let isSingleField = false
-
-    if (areFieldShapes) {
-      isSingleField = this.props.fieldShape.length === 1
-    }
-
+    const areFieldShapes = this.props.fieldShape.length > 1
+    let isSingleField = this.props.fieldShape.length === 1
 
     //we need to specify an old val when we have multiple fields to we take the first
-    const singleField: FieldShape | null = isSingleField
-      ? (this.props.fieldShape as ReadonlyArray<FieldShape>)[0]
-      : null
+    const singleField: FieldShape = this.props.fieldShape[0]
 
     const isSomeFieldBasedOnSymbol = isSingleField && singleField !== null && singleField.createdFromSymbolGuid !== null || areFieldShapes && (this.props.fieldShape as ReadonlyArray<FieldShape>).some(
       p => p.createdFromSymbolGuid !== null)
@@ -175,125 +171,142 @@ class fieldPropertyEditor extends React.Component<Props, any> {
       }
     }
 
+    const actionsContent = (
+      <Form.Field>
+        <div className="flex-left-right">
+          <ToolTip
+            message={getI18n(this.props.langId, "Deselect shape")}
+          >
+            <Button icon
+                    onClick={() => {
+                      this.props.setPropertyEditor_setSelectedFieldToNull()
+                    }}
+            >
+
+              <Icon.Group>
+                <Icon name='square outline'/>
+                <Icon corner name='x'/>
+              </Icon.Group>
+            </Button>
+          </ToolTip>
+
+          {isSingleField && isSomeFieldBasedOnSymbol === false && <ToolTip
+            message={getI18n(
+              this.props.langId,
+              "Adds the current shape as a new symbol and links this shape to the newly added symbol (this shape is then an instance of the symbol because the properties of the symbols are used for visuals). A little icon is displayed on the shape to indicate a symbol instance"
+            )}
+          >
+            <Button icon
+                    onClick={() => {
+                      this.props.onAddFieldSymbol()
+                    }}
+            >
+              <Icon.Group>
+                <Icon name='clone'/>
+                <Icon corner name='asterisk'/>
+              </Icon.Group>
+            </Button>
+          </ToolTip>}
+          {isSingleField && isSomeFieldBasedOnSymbol && <ToolTip
+            message={getI18n(
+              this.props.langId,
+              "Detaches the shape from the connected symbol. The shape will then use its own properties again"
+            )}
+          >
+            <Button icon
+                    onClick={() => {
+                      this.props.setPropertyEditor_FieldIsBasedOnSymbol(singleField.createdFromSymbolGuid, null)
+                    }}
+            >
+              <Icon.Group>
+                <Icon name='clone'/>
+                <Icon name='x'/>
+              </Icon.Group>
+            </Button>
+          </ToolTip>}
+
+          <Button.Group>
+            <ToolTip
+              message={getRawI18n(
+                this.props.langId,
+                "Copy this shape and increment the first found number in the field text (if enabled in tile editor settings & you selected fields) for all selected shapes from left to right. Shortcut <div class='keys'>ctrl+d</div>, <div class='keys'>cmd+d</div>"
+              )}
+            >
+              <Button icon
+                      onClick={() => {
+
+                        const fieldShapes = (this.props.fieldShape as ReadonlyArray<FieldShape>)
+                        const copies = DuplicateHelper.duplicateFieldShapes(fieldShapes,
+                          this.props.amountOfShapesInTile, this.props.autoIncrementFieldTextNumbersOnDuplicate, false
+                        )
+                        this.props.onDuplicateFields(copies)
+                      }}
+              >
+                <Icon.Group>
+                  <Icon name='paste'/>
+                  <Icon corner name='long arrow alternate right'/>
+                </Icon.Group>
+              </Button>
+            </ToolTip>
+
+            <ToolTip
+              message={getRawI18n(
+                this.props.langId,
+                "Copy this shape and increment the first found number in the field text (if enabled in tile editor settings & you selected fields) for all selected shapes from right to left. Shortcut <div class='keys'>ctrl+shift+d</div>, <div class='keys'>cmd+shift+d</div>"
+              )}
+            >
+              <Button icon
+                      onClick={() => {
+                        const fieldShapes = (this.props.fieldShape as ReadonlyArray<FieldShape>)
+                        const copies = DuplicateHelper.duplicateFieldShapes(fieldShapes,
+                          this.props.amountOfShapesInTile, this.props.autoIncrementFieldTextNumbersOnDuplicate, true
+                        )
+                        this.props.onDuplicateFields(copies)
+                      }}
+              >
+                <Icon.Group>
+                  <Icon name='paste'/>
+                  <Icon corner name='long arrow alternate left'/>
+                </Icon.Group>
+              </Button>
+            </ToolTip>
+          </Button.Group>
+
+
+          <Button color="red" icon
+                  onClick={() => {
+
+                    this.props.setPropertyEditor_removeFieldShape()
+
+                  }}
+          >
+            <Icon name="trash"/>
+          </Button>
+        </div>
+      </Form.Field>
+    )
+
+
+    if (areFieldShapes && isSomeFieldBasedOnSymbol) {
+      return (
+        <div>
+          <Form as="div">
+            {
+              actionsContent
+            }
+          </Form>
+        </div>
+      )
+    }
 
     return (<div>
 
       {//else enter would trigger submission and clear all
       }
       <Form as="div">
-
-        <Form.Field>
-          <div className="flex-left-right">
-            <ToolTip
-              message={getI18n(this.props.langId, "Deselect shape")}
-            >
-              <Button icon
-                      onClick={() => {
-                        this.props.setPropertyEditor_setSelectedFieldToNull()
-                      }}
-              >
-
-                <Icon.Group>
-                  <Icon name='square outline'/>
-                  <Icon corner name='x'/>
-                </Icon.Group>
-              </Button>
-            </ToolTip>
-
-            {isSingleField && isSomeFieldBasedOnSymbol === false && <ToolTip
-              message={getI18n(
-                this.props.langId,
-                "Adds the current shape as a new symbol and links this shape to the newly added symbol (this shape is then an instance of the symbol because the properties of the symbols are used for visuals). A little icon is displayed on the shape to indicate a symbol instance"
-              )}
-            >
-              <Button icon
-                      onClick={() => {
-                        this.props.onAddFieldSymbol()
-                      }}
-              >
-                <Icon.Group>
-                  <Icon name='clone'/>
-                  <Icon corner name='asterisk'/>
-                </Icon.Group>
-              </Button>
-            </ToolTip>}
-            {isSingleField && isSomeFieldBasedOnSymbol && <ToolTip
-              message={getI18n(
-                this.props.langId,
-                "Detaches the shape from the connected symbol. The shape will then use its own properties again"
-              )}
-            >
-              <Button icon
-                      onClick={() => {
-                        this.props.setPropertyEditor_FieldIsBasedOnSymbol(singleField.createdFromSymbolGuid, null)
-                      }}
-              >
-                <Icon.Group>
-                  <Icon name='clone'/>
-                  <Icon name='x'/>
-                </Icon.Group>
-              </Button>
-            </ToolTip>}
-
-            {isBasedOnSymbol === false && <Button.Group>
-              <ToolTip
-                message={getRawI18n(
-                  this.props.langId,
-                  "Copy this shape and increment the first found number in the field text (if enabled in tile editor settings & you selected fields) for all selected shapes from left to right. Shortcut <div class='keys'>ctrl+d</div>, <div class='keys'>cmd+d</div>"
-                )}
-              >
-                <Button icon
-                        onClick={() => {
-
-                          const fieldShapes = (this.props.fieldShape as ReadonlyArray<FieldShape>)
-                          const copies = DuplicateHelper.duplicateFieldShapes(fieldShapes,
-                            this.props.amountOfShapesInTile, this.props.autoIncrementFieldTextNumbersOnDuplicate, false
-                          )
-                          this.props.onDuplicateFields(copies)
-                        }}
-                >
-                  <Icon.Group>
-                    <Icon name='paste'/>
-                    <Icon corner name='long arrow alternate right'/>
-                  </Icon.Group>
-                </Button>
-              </ToolTip>
-
-              <ToolTip
-                message={getRawI18n(
-                  this.props.langId,
-                  "Copy this shape and increment the first found number in the field text (if enabled in tile editor settings & you selected fields) for all selected shapes from right to left. Shortcut <div class='keys'>ctrl+shift+d</div>, <div class='keys'>cmd+shift+d</div>"
-                )}
-              >
-                <Button icon
-                        onClick={() => {
-                          const fieldShapes = (this.props.fieldShape as ReadonlyArray<FieldShape>)
-                          const copies = DuplicateHelper.duplicateFieldShapes(fieldShapes,
-                            this.props.amountOfShapesInTile, this.props.autoIncrementFieldTextNumbersOnDuplicate, true
-                          )
-                          this.props.onDuplicateFields(copies)
-                        }}
-                >
-                  <Icon.Group>
-                    <Icon name='paste'/>
-                    <Icon corner name='long arrow alternate left'/>
-                  </Icon.Group>
-                </Button>
-              </ToolTip>
-            </Button.Group>}
-
-
-            {isBasedOnSymbol === false && <Button color="red" icon
-                                                  onClick={() => {
-
-                                                    this.props.setPropertyEditor_removeFieldShape()
-
-                                                  }}
-            >
-              <Icon name="trash"/>
-            </Button>}
-          </div>
-        </Form.Field>
+        {
+          actionsContent
+        }
 
         {//if this field is based on a symbol... we cannot change this
           isSingleField && <Form.Field>
@@ -373,7 +386,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                 "Enables the next field mode. When you then click on a field (the next field) or a border point then a control goto statement is added to the command text and the next field is selected. To quit the mode click elsewhere on the canvas. Shortcut: <div class='keys'>ctrl+n</div>, <div class='keys'>cmd+n</div>. Press the shortcut again to disable the mode or <div class='keys'>esc</div>."
               )}
             >
-              <Button icon
+              <Button icon disabled={isBasedOnSymbol && fieldSymbol.overwriteCmdText}
                       onClick={() => {
                         this.props.setTileEditorSelectingNextField(true, this.props.fieldShape[0] as FieldShape)
                       }}
@@ -411,153 +424,153 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           </Form.Field>
         </Form.Group>}
 
-        {//if this field is based on a symbol... we cannot change this
-          <Form.Group widths='equal'>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Height")}
-                {
-                  isBasedOnSymbol && fieldSymbol.overwriteHeight &&
-                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
-                }
-              </label>
-              <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteHeight}
-                     value={isBasedOnSymbol && fieldSymbol.overwriteHeight
-                       ? fieldSymbol.height
-                       : isSingleField /* what is this??? */
-                         ? singleField.height
-                         : singleField.height}
-                     onChange={(e) => this.props.setPropertyEditor_FieldHeight(isBasedOnSymbol && fieldSymbol.overwriteHeight
-                       ? fieldSymbol.height
-                       : singleField.height,
-                       parseInt(e.currentTarget.value)
-                     )}
-              />
-            </Form.Field>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Width")}
-                {
-                  isBasedOnSymbol && fieldSymbol.overwriteWidth &&
-                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
-                }
-              </label>
-              <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteWidth}
-                     value={isBasedOnSymbol && fieldSymbol.overwriteWidth
-                       ? fieldSymbol.width
-                       : isSingleField
-                         ? singleField.width
-                         : singleField.width}
-                     onChange={(e) => this.props.setPropertyEditor_FieldWidth(isBasedOnSymbol && fieldSymbol.overwriteWidth
-                       ? fieldSymbol.width
-                       : singleField.width,
-                       parseInt(e.currentTarget.value)
-                     )}
-              />
-            </Form.Field>
-          </Form.Group>}
 
-          <Form.Group widths='equal'>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Color")}
-                <IconToolTip message={getI18n(this.props.langId,
-                  "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
-                )}/>
-                {
-                  isBasedOnSymbol && fieldSymbol.overwriteColor &&
-                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
-                }
-              </label>
-              {/*<input type="color"*/}
-              {/*value={*/}
-              {/*isSymbol*/}
-              {/*? fieldSymbol.color*/}
-              {/*: isSingleField ? singleField.color*/}
-              {/*: singleField.color*/}
-              {/*}*/}
-              {/*onChange={(e) => this.props.setPropertyEditor_FieldColor(*/}
-              {/*isSymbol ? fieldSymbol.color : singleField.color,*/}
-              {/*e.currentTarget.value)}*/}
-              {/*/>*/}
+        <Form.Group widths='equal'>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Height")}
+              {
+                isBasedOnSymbol && fieldSymbol.overwriteHeight &&
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              }
+            </label>
+            <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteHeight}
+                   value={isBasedOnSymbol && fieldSymbol.overwriteHeight
+                     ? fieldSymbol.height
+                     : isSingleField /* what is this??? */
+                       ? singleField.height
+                       : singleField.height}
+                   onChange={(e) => this.props.setPropertyEditor_FieldHeight(isBasedOnSymbol && fieldSymbol.overwriteHeight
+                     ? fieldSymbol.height
+                     : singleField.height,
+                     parseInt(e.currentTarget.value)
+                   )}
+            />
+          </Form.Field>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Width")}
+              {
+                isBasedOnSymbol && fieldSymbol.overwriteWidth &&
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              }
+            </label>
+            <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteWidth}
+                   value={isBasedOnSymbol && fieldSymbol.overwriteWidth
+                     ? fieldSymbol.width
+                     : isSingleField
+                       ? singleField.width
+                       : singleField.width}
+                   onChange={(e) => this.props.setPropertyEditor_FieldWidth(isBasedOnSymbol && fieldSymbol.overwriteWidth
+                     ? fieldSymbol.width
+                     : singleField.width,
+                     parseInt(e.currentTarget.value)
+                   )}
+            />
+          </Form.Field>
+        </Form.Group>
+
+        <Form.Group widths='equal'>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Color")}
+              <IconToolTip message={getI18n(this.props.langId,
+                "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
+              )}/>
+              {
+                isBasedOnSymbol && fieldSymbol.overwriteColor &&
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              }
+            </label>
+            {/*<input type="color"*/}
+            {/*value={*/}
+            {/*isSymbol*/}
+            {/*? fieldSymbol.color*/}
+            {/*: isSingleField ? singleField.color*/}
+            {/*: singleField.color*/}
+            {/*}*/}
+            {/*onChange={(e) => this.props.setPropertyEditor_FieldColor(*/}
+            {/*isSymbol ? fieldSymbol.color : singleField.color,*/}
+            {/*e.currentTarget.value)}*/}
+            {/*/>*/}
+            <Popup
+              trigger={<div className="hoverable">
+                <Icon style={{
+                  'color': 'black' //use black... if we use the selected color e.g. white this is bad/not visible...
+                }} name="paint brush"/>
+              </div>}
+              on="click"
+              offset={horizontalIconPopupOffsetInPx}
+              content={<ChromePicker
+                color={isBasedOnSymbol && fieldSymbol.overwriteColor
+                  ? fieldSymbol.color
+                  : isSingleField
+                    ? singleField.color
+                    : singleField.color}
+                onChangeComplete={color => {
+
+                  if (isBasedOnSymbol && fieldSymbol.overwriteColor) return
+
+                  this.props.setPropertyEditor_FieldColor(isBasedOnSymbol && fieldSymbol.overwriteColor
+                    ? fieldSymbol.color
+                    : singleField.color, color.hex)
+                }}
+              />}
+            />
+
+          </Form.Field>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Background color")}
+              <IconToolTip message={getI18n(this.props.langId,
+                "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
+              )}/>
+              {
+                isBasedOnSymbol && fieldSymbol.overwriteBgColor &&
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              }
+            </label>
+
+            <div className="flexed-well-spaced">
               <Popup
                 trigger={<div className="hoverable">
                   <Icon style={{
-                    'color': 'black' //use black... if we use the selected color e.g. white this is bad/not visible...
+                    'color': 'black'
                   }} name="paint brush"/>
                 </div>}
                 on="click"
                 offset={horizontalIconPopupOffsetInPx}
                 content={<ChromePicker
-                  color={isBasedOnSymbol && fieldSymbol.overwriteColor
-                    ? fieldSymbol.color
+                  color={isBasedOnSymbol && fieldSymbol.overwriteBgColor
+                    ? fieldSymbol.bgColor
                     : isSingleField
-                      ? singleField.color
-                      : singleField.color}
+                      ? singleField.bgColor
+                      : singleField.bgColor}
                   onChangeComplete={color => {
 
-                    if (isBasedOnSymbol && fieldSymbol.overwriteColor) return
+                    if (isBasedOnSymbol && fieldSymbol.overwriteBgColor) return
 
-                    this.props.setPropertyEditor_FieldColor(isBasedOnSymbol && fieldSymbol.overwriteColor
-                      ? fieldSymbol.color
-                      : singleField.color, color.hex)
+                    this.props.setPropertyEditor_FieldBgColor(isBasedOnSymbol && fieldSymbol.overwriteBgColor
+                      ? fieldSymbol.bgColor
+                      : singleField.bgColor, color.hex)
                   }}
                 />}
               />
 
-            </Form.Field>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Background color")}
-                <IconToolTip message={getI18n(this.props.langId,
-                  "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
-                )}/>
-                {
-                  isBasedOnSymbol && fieldSymbol.overwriteBgColor &&
-                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
-                }
-              </label>
+              <div className="hoverable">
+                <IconToolTip
+                  message={getI18n(this.props.langId, "Transparent color")}
+                  icon="circle outline"
+                  onClick={() => {
 
-              <div className="flexed-well-spaced">
-                <Popup
-                  trigger={<div className="hoverable">
-                    <Icon style={{
-                      'color': 'black'
-                    }} name="paint brush"/>
-                  </div>}
-                  on="click"
-                  offset={horizontalIconPopupOffsetInPx}
-                  content={<ChromePicker
-                    color={isBasedOnSymbol && fieldSymbol.overwriteBgColor
+                    if (isBasedOnSymbol && fieldSymbol.overwriteBgColor) return
+
+                    this.props.setPropertyEditor_FieldBgColor(isBasedOnSymbol
                       ? fieldSymbol.bgColor
-                      : isSingleField
-                        ? singleField.bgColor
-                        : singleField.bgColor}
-                    onChangeComplete={color => {
-
-                      if (isBasedOnSymbol && fieldSymbol.overwriteBgColor) return
-
-                      this.props.setPropertyEditor_FieldBgColor(isBasedOnSymbol && fieldSymbol.overwriteBgColor
-                        ? fieldSymbol.bgColor
-                        : singleField.bgColor, color.hex)
-                    }}
-                  />}
+                      : singleField.bgColor, 'transparent')
+                  }}
                 />
-
-                <div className="hoverable">
-                  <IconToolTip
-                    message={getI18n(this.props.langId, "Transparent color")}
-                    icon="circle outline"
-                    onClick={() => {
-
-                      if (isBasedOnSymbol && fieldSymbol.overwriteBgColor) return
-
-                      this.props.setPropertyEditor_FieldBgColor(isBasedOnSymbol
-                        ? fieldSymbol.bgColor
-                        : singleField.bgColor, 'transparent')
-                    }}
-                  />
-                </div>
               </div>
+            </div>
 
-            </Form.Field>
-          </Form.Group>
+          </Form.Field>
+        </Form.Group>
 
         <Form.Group widths='equal'>
           <Form.Field>
@@ -586,7 +599,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                     : singleField.borderColor}
                 onChangeComplete={color => {
 
-                  if (isBasedOnSymbol  && fieldSymbol.overwriteBorderColor) return
+                  if (isBasedOnSymbol && fieldSymbol.overwriteBorderColor) return
 
                   this.props.setPropertyEditor_FieldBorderColor(isBasedOnSymbol && fieldSymbol.overwriteBorderColor
                     ? fieldSymbol.bgColor
@@ -725,24 +738,27 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           </Button.Group>
         </Form.Field>
 
-        <Form.Field>
-          <label>{getI18n(this.props.langId, "Text")}
-            {
-              isBasedOnSymbol && fieldSymbol.overwriteText &&
-              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
-            }
-          </label>
-          <textarea rows={2} disabled={isBasedOnSymbol && fieldSymbol.overwriteText}
-                    value={isBasedOnSymbol && fieldSymbol.overwriteText
-                      ? fieldSymbol.text
-                      : isSingleField
-                        ? singleField.text
-                        : singleField.text}
-                    onChange={(e) => this.props.setPropertyEditor_FieldText(isBasedOnSymbol && fieldSymbol.overwriteText
-                      ? fieldSymbol.text
-                      : singleField.text, e.currentTarget.value)}
-          />
-        </Form.Field>
+        {
+          isSingleField &&
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Text")}
+              {
+                isBasedOnSymbol && fieldSymbol.overwriteText &&
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              }
+            </label>
+            <textarea rows={2} disabled={isBasedOnSymbol && fieldSymbol.overwriteText}
+                      value={isBasedOnSymbol && fieldSymbol.overwriteText
+                        ? fieldSymbol.text
+                        : isSingleField
+                          ? singleField.text
+                          : singleField.text}
+                      onChange={(e) => this.props.setPropertyEditor_FieldText(isBasedOnSymbol && fieldSymbol.overwriteText
+                        ? fieldSymbol.text
+                        : singleField.text, e.currentTarget.value)}
+            />
+          </Form.Field>
+        }
 
 
         <Form.Group widths='equal'>

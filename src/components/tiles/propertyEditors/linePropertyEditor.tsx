@@ -97,7 +97,7 @@ class linePropertyEditor extends React.Component<Props, any> {
     }
 
     //we need to specify an old val when we have multiple fields to we take the first
-    const singleLine: LineShape | null = isSingleLine ? (this.props.lineShape as ReadonlyArray<LineShape>)[0] : null
+    const singleLine: LineShape | null = this.props.lineShape[0]
 
     const isSomeLineBasedOnSymbol =
       isSingleLine && singleLine !== null && singleLine.createdFromSymbolGuid !== null
