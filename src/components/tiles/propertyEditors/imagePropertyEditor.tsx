@@ -78,12 +78,8 @@ type Props = typeof stateProps & typeof dispatchProps;
 class imagePropertyEditor extends React.Component<Props, any> {
   render(): JSX.Element {
 
-    const areImgShapes = Array.isArray(this.props.imgShape)
-    let isSingleImg = false
-
-    if (areImgShapes) {
-      isSingleImg = this.props.imgShape.length === 1
-    }
+    const areImgShapes = this.props.imgShape.length > 1
+    let isSingleImg = this.props.imgShape.length === 1
 
     //we need to specify an old val when we have multiple imgs to we take the first
     const singleImg: ImgShape = this.props.imgShape[0]
@@ -105,6 +101,106 @@ class imagePropertyEditor extends React.Component<Props, any> {
       }
     }
 
+    const actionsButtonsContent = (
+      <Form.Field>
+        <div className="flex-left-right">
+
+          <ToolTip
+            message={getI18n(this.props.langId, "Deselect shape")}
+          >
+            <Button icon
+                    onClick={() => {
+                      this.props.setPropertyEditor_setSelectedImageToNull()
+                    }}
+            >
+              <Icon name="x"/>
+            </Button>
+          </ToolTip>
+
+          {
+            isSingleImg && isSomeImgBasedOnSymbol === false &&
+            <ToolTip
+              message={getI18n(this.props.langId,
+                "Adds the current shape as a new symbol and links this shape to the newly added symbol (this shape is then an instance of the symbol because the properties of the symbols are used for visuals). A little icon is displayed on the shape to indicate a symbol instance")}
+            >
+              <Button icon
+                      onClick={() => {
+                        this.props.onAddImgSymbol()
+                      }}
+              >
+                <Icon.Group>
+                  <Icon name='clone'/>
+                  <Icon corner name='asterisk'/>
+                </Icon.Group>
+              </Button>
+            </ToolTip>
+          }
+          {
+            isSingleImg && isSomeImgBasedOnSymbol &&
+            <ToolTip
+              message={getI18n(this.props.langId,
+                "Detaches the shape from the connected symbol. The shape will then use its own properties again")}
+            >
+              <Button icon
+                      onClick={() => {
+                        this.props.setPropertyEditor_ImageIsBasedOnSymbol(singleImg.createdFromSymbolGuid, null)
+                      }}
+              >
+                <Icon.Group>
+                  <Icon name='clone'/>
+                  <Icon name='x'/>
+                </Icon.Group>
+              </Button>
+            </ToolTip>
+          }
+
+          {
+            isBasedOnSymbol === false &&
+            <ToolTip
+              message={getI18n(this.props.langId, "Duplicate this shape")}
+            >
+              <Button icon
+                      onClick={() => {
+
+                        const imgShapes = (this.props.imgShapes as ReadonlyArray<ImgShape>)
+
+                        const copies = DuplicateHelper.duplicateImgShapes(imgShapes,
+                          this.props.amountOfShapesInTile)
+
+                        this.props.onDuplicateImgs(copies)
+                      }}
+              >
+                <Icon name="paste"/>
+              </Button>
+            </ToolTip>
+          }
+
+          {
+            isBasedOnSymbol === false &&
+            <Button color="red" icon
+                    onClick={() => {
+                      this.props.setPropertyEditor_removeImgShape()
+                    }}
+            >
+              <Icon name="trash"/>
+            </Button>
+          }
+        </div>
+      </Form.Field>
+    )
+
+    if (areImgShapes && isSomeImgBasedOnSymbol) {
+      return (
+        <div>
+          <Form as="div">
+            {
+              actionsButtonsContent
+            }
+          </Form>
+        </div>
+      )
+    }
+
     return (
       <div>
 
@@ -113,91 +209,9 @@ class imagePropertyEditor extends React.Component<Props, any> {
         }
         <Form as="div">
 
-          <Form.Field>
-            <div className="flex-left-right">
-
-              <ToolTip
-                message={getI18n(this.props.langId, "Deselect shape")}
-              >
-                <Button icon
-                        onClick={() => {
-                          this.props.setPropertyEditor_setSelectedImageToNull()
-                        }}
-                >
-                  <Icon name="x"/>
-                </Button>
-              </ToolTip>
-
-              {
-                isSingleImg && isSomeImgBasedOnSymbol === false &&
-                <ToolTip
-                  message={getI18n(this.props.langId,
-                    "Adds the current shape as a new symbol and links this shape to the newly added symbol (this shape is then an instance of the symbol because the properties of the symbols are used for visuals). A little icon is displayed on the shape to indicate a symbol instance")}
-                >
-                  <Button icon
-                          onClick={() => {
-                            this.props.onAddImgSymbol()
-                          }}
-                  >
-                    <Icon.Group>
-                      <Icon name='clone'/>
-                      <Icon corner name='asterisk'/>
-                    </Icon.Group>
-                  </Button>
-                </ToolTip>
-              }
-              {
-                isSingleImg && isSomeImgBasedOnSymbol &&
-                <ToolTip
-                  message={getI18n(this.props.langId,
-                    "Detaches the shape from the connected symbol. The shape will then use its own properties again")}
-                >
-                  <Button icon
-                          onClick={() => {
-                            this.props.setPropertyEditor_ImageIsBasedOnSymbol(singleImg.createdFromSymbolGuid, null)
-                          }}
-                  >
-                    <Icon.Group>
-                      <Icon name='clone'/>
-                      <Icon name='x'/>
-                    </Icon.Group>
-                  </Button>
-                </ToolTip>
-              }
-
-              {
-                isBasedOnSymbol === false &&
-                <ToolTip
-                  message={getI18n(this.props.langId, "Duplicate this shape")}
-                >
-                  <Button icon
-                          onClick={() => {
-
-                            const imgShapes = (this.props.imgShapes as ReadonlyArray<ImgShape>)
-
-                            const copies = DuplicateHelper.duplicateImgShapes(imgShapes,
-                              this.props.amountOfShapesInTile)
-
-                            this.props.onDuplicateImgs(copies)
-                          }}
-                  >
-                    <Icon name="paste"/>
-                  </Button>
-                </ToolTip>
-              }
-
-              {
-                isBasedOnSymbol === false &&
-                <Button color="red" icon
-                        onClick={() => {
-                          this.props.setPropertyEditor_removeImgShape()
-                        }}
-                >
-                  <Icon name="trash"/>
-                </Button>
-              }
-            </div>
-          </Form.Field>
+          {
+            actionsButtonsContent
+          }
 
           {
             isSingleImg &&

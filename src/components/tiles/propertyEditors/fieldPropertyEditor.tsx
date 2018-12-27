@@ -171,7 +171,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
       }
     }
 
-    const actionsContent = (
+    const actionsButtonsContent = (
       <Form.Field>
         <div className="flex-left-right">
           <ToolTip
@@ -292,7 +292,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
         <div>
           <Form as="div">
             {
-              actionsContent
+              actionsButtonsContent
             }
           </Form>
         </div>
@@ -305,7 +305,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
       }
       <Form as="div">
         {
-          actionsContent
+          actionsButtonsContent
         }
 
         {//if this field is based on a symbol... we cannot change this

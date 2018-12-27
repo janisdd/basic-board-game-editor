@@ -89,12 +89,9 @@ type Props = typeof stateProps & typeof dispatchProps;
 class linePropertyEditor extends React.Component<Props, any> {
   render(): JSX.Element {
 
-    const areLineShapes = Array.isArray(this.props.lineShape)
-    let isSingleLine = false
+    const areLineShapes = this.props.lineShape.length > 1
+    let isSingleLine = this.props.lineShape.length === 1
 
-    if (areLineShapes) {
-      isSingleLine = this.props.lineShape.length === 1
-    }
 
     //we need to specify an old val when we have multiple fields to we take the first
     const singleLine: LineShape | null = this.props.lineShape[0]
@@ -116,6 +113,100 @@ class linePropertyEditor extends React.Component<Props, any> {
       }
     }
 
+    const actionsButtonsContent = (
+      <Form.Field>
+        <div className="flex-left-right">
+          <ToolTip
+            message={getI18n(this.props.langId, "Deselect shape")}
+          >
+            <Button icon
+                    onClick={() => {
+                      this.props.setPropertyEditor_setSelectedLineToNull()
+                    }}
+            >
+              <Icon name="x"/>
+            </Button>
+          </ToolTip>
+
+          {
+            isSingleLine && isSomeLineBasedOnSymbol === false &&
+            <ToolTip
+              message={getI18n(this.props.langId,
+                "Adds the current shape as a new symbol and links this shape to the newly added symbol (this shape is then an instance of the symbol because the properties of the symbols are used for visuals). A little icon is displayed on the shape to indicate a symbol instance")}
+            >
+              <Button icon
+                      onClick={() => {
+                        this.props.onAddLineSymbol()
+                      }}
+              >
+                <Icon.Group>
+                  <Icon name='clone'/>
+                  <Icon corner name='asterisk'/>
+                </Icon.Group>
+              </Button>
+            </ToolTip>
+          }
+          {
+            isSingleLine && isSomeLineBasedOnSymbol &&
+            <ToolTip
+              message={getI18n(this.props.langId,
+                "Detaches the shape from the connected symbol. The shape will then use its own properties again")}
+            >
+              <Button icon
+                      onClick={() => {
+                        this.props.setPropertyEditor_LineIsBasedOnSymbol(singleLine.createdFromSymbolGuid, null)
+                      }}
+              >
+                <Icon.Group>
+                  <Icon name='clone'/>
+                  <Icon name='x'/>
+                </Icon.Group>
+              </Button>
+            </ToolTip>
+          }
+
+          <ToolTip
+            message={getI18n(this.props.langId, "Duplicate this shape")}
+          >
+            <Button icon
+                    onClick={() => {
+
+                      const lineShapes = (this.props.lineShape as ReadonlyArray<LineShape>)
+                      const copies = DuplicateHelper.duplicateLineShapes(lineShapes,
+                        this.props.amountOfShapesInTile)
+
+                      this.props.onDuplicateLines(copies)
+                    }}
+            >
+              <Icon name="paste"/>
+            </Button>
+          </ToolTip>
+
+
+          <Button color="red" icon
+                  onClick={() => {
+                    this.props.setPropertyEditor_removeLineShape()
+                  }}
+          >
+            <Icon name="trash"/>
+          </Button>
+
+        </div>
+      </Form.Field>
+    )
+
+    if (areLineShapes && isSomeLineBasedOnSymbol) {
+      return (
+        <div>
+          <Form as="div">
+            {
+              actionsButtonsContent
+            }
+          </Form>
+        </div>
+      )
+    }
+
     return (
       <div>
 
@@ -124,87 +215,9 @@ class linePropertyEditor extends React.Component<Props, any> {
         }
         <Form as="div">
 
-
-          <Form.Field>
-            <div className="flex-left-right">
-              <ToolTip
-                message={getI18n(this.props.langId, "Deselect shape")}
-              >
-                <Button icon
-                        onClick={() => {
-                          this.props.setPropertyEditor_setSelectedLineToNull()
-                        }}
-                >
-                  <Icon name="x"/>
-                </Button>
-              </ToolTip>
-
-              {
-                isSingleLine && isSomeLineBasedOnSymbol === false &&
-                <ToolTip
-                  message={getI18n(this.props.langId,
-                    "Adds the current shape as a new symbol and links this shape to the newly added symbol (this shape is then an instance of the symbol because the properties of the symbols are used for visuals). A little icon is displayed on the shape to indicate a symbol instance")}
-                >
-                  <Button icon
-                          onClick={() => {
-                            this.props.onAddLineSymbol()
-                          }}
-                  >
-                    <Icon.Group>
-                      <Icon name='clone'/>
-                      <Icon corner name='asterisk'/>
-                    </Icon.Group>
-                  </Button>
-                </ToolTip>
-              }
-              {
-                isSingleLine && isSomeLineBasedOnSymbol &&
-                <ToolTip
-                  message={getI18n(this.props.langId,
-                    "Detaches the shape from the connected symbol. The shape will then use its own properties again")}
-                >
-                  <Button icon
-                          onClick={() => {
-                            this.props.setPropertyEditor_LineIsBasedOnSymbol(singleLine.createdFromSymbolGuid, null)
-                          }}
-                  >
-                    <Icon.Group>
-                      <Icon name='clone'/>
-                      <Icon name='x'/>
-                    </Icon.Group>
-                  </Button>
-                </ToolTip>
-              }
-
-              <ToolTip
-                message={getI18n(this.props.langId, "Duplicate this shape")}
-              >
-                <Button icon
-                        onClick={() => {
-
-                          const lineShapes = (this.props.lineShape as ReadonlyArray<LineShape>)
-                          const copies = DuplicateHelper.duplicateLineShapes(lineShapes,
-                            this.props.amountOfShapesInTile)
-
-                          this.props.onDuplicateLines(copies)
-                        }}
-                >
-                  <Icon name="paste"/>
-                </Button>
-              </ToolTip>
-
-
-              <Button color="red" icon
-                      onClick={() => {
-                        this.props.setPropertyEditor_removeLineShape()
-                      }}
-              >
-                <Icon name="trash"/>
-              </Button>
-
-            </div>
-          </Form.Field>
-
+          {
+            actionsButtonsContent
+          }
 
           {
             //if this field is based on a symbol... we cannot change this
