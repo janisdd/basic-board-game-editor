@@ -130,8 +130,7 @@ export function rotatePointBy(originX: number, originY: number, x: number, y: nu
 //too lazy https://stackoverflow.com/questions/9614109/how-to-calculate-an-angle-from-points
 /**
  * returns the angle in degree between the two points
- * 0/360 is east
- * add +90 in order to set 0 to north
+ * 0/360 is east (of anchor is top left from x,y
  * @param {number} anchorX
  * @param {number} anchorY
  * @param {number} x

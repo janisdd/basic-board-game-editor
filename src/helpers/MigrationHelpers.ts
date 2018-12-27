@@ -20,7 +20,7 @@ interface MigrationClass {
    * changes the tile to match the new version
    *
    * this must create a new tile (no reference)
-   * @param {ExportTile} exportTile
+   * @param {ExportTile} exportTile exportWorld the old tile
    * @returns {ExportTile}
    */
   migrateTile(exportTile: ExportTile): ExportTile
@@ -29,8 +29,8 @@ interface MigrationClass {
    * changes the world to match the new version
    *
    * this must create a new world (no reference)
-   * @param {ExportWorld} exportWorld
-   * @returns {ExportWorld}
+   * @param {ExportWorld} exportWorld the old world
+   * @returns {ExportWorld} the migrated world
    */
   migrateWorld(exportWorld: ExportWorld): ExportWorld
 }
@@ -257,6 +257,7 @@ class Migration_1_0_3__to__1_1_0 implements MigrationClass {
 
         worldCmdText: defaultGameInitCode,
         printGameAsOneImage: false,
+        printScale: 1,
 
         timeInS_rollDice: 2,
         timeInS_choose_bool_func: 2,
@@ -357,6 +358,33 @@ class Migration_1_1_0__to__1_1_1 implements MigrationClass {
 
 }
 
+class Migration_1_2_0__to__1_2_1 implements MigrationClass {
+
+  oldVersion = '1.2.0'
+  newVersion = '1.2.1'
+
+  migrateTile(exportTile: ExportTile): ExportTile {
+    const copy: ExportTile = {
+      ...exportTile,
+      editorVersion: this.newVersion
+    }
+
+    return copy
+  }
+
+  migrateWorld(exportWorld: ExportWorld): ExportWorld {
+    const copy: ExportWorld = {
+      ...exportWorld,
+      worldSettings: {
+        ...exportWorld.worldSettings,
+        printScale: 1
+      }
+    }
+
+    return copy
+  }
+}
+
 /**
  * a helper to create a shallow migration (no field/img/line props are changed, model) only ui stuff
  * @param {string} oldVersion
@@ -399,7 +427,8 @@ export class MigrationHelper {
     createVersionShallowMigration('1.0.2', '1.0.3'),
     new Migration_1_0_3__to__1_1_0(),
     new Migration_1_1_0__to__1_1_1(),
-    createVersionShallowMigration('1.1.1', '1.2.0') //we added var export & fixed some simulation lang issues
+    createVersionShallowMigration('1.1.1', '1.2.0'), //we added var export & fixed some simulation lang issues
+    new Migration_1_2_0__to__1_2_1(),
   ]
 
   /**
@@ -439,8 +468,8 @@ export class MigrationHelper {
   }
 
   /**
-   * applies all pending migrations to the tile
-   * the returned tile version is the latest version
+   * applies all pending migrations to the world
+   * the returned world version is the latest version
    *
    * a new obj is created
    * @param {ExportWorld} exportWorld

@@ -870,6 +870,11 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
     const p2 = pathLine.points[0].cp1
     const angleDeg = getAngleInDeg(p1.x, p1.y, p2.x, p2.y) - 90
 
+    //also works without... because we use -angleDeg below???
+    // if (angleDeg < 0) {
+    //   angleDeg = 270 + 90 - (-angleDeg)
+    // }
+
     const p0 = pathLine.points[0]
     const b = new Bezier(p1.x, p1.y, p0.cp1.x, p0.cp1.y, p0.cp2.x, p0.cp2.y, p0.x, p0.y)
 

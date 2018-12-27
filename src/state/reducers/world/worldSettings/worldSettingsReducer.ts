@@ -74,6 +74,12 @@ export interface WorldSettings {
    */
   readonly printGameAsOneImage: boolean
 
+  /**
+   *  the scale e.g. to print one tile on A4
+   * (default should be 1)
+   */
+  readonly printScale: number
+
 
   readonly timeInS_rollDice: number
   readonly timeInS_choose_bool_func: number
@@ -137,6 +143,7 @@ export const initial: State = {
 
   worldCmdText: defaultGameInitCode,
   printGameAsOneImage: false,
+  printScale: 1.2,
 
 
   timeInS_rollDice: SimulationTimes.timeInS_rollDice_default,
@@ -204,6 +211,7 @@ export enum ActionType {
 
   SET_world_worldCmdText = 'worldSettingsReducer_SET_world_worldCmdText',
   SET_world_printGameAsOneImage = 'worldSettingsReducer_SET_world_printGameAsOneImage',
+  SET_world_printScale = 'worldSettingsReducer_SET_world_printScale',
 
 
   SET_world_timeInS_rollDice = 'worldSettingsReducer_SET_timeInS_rollDice',
@@ -386,6 +394,11 @@ export interface SET_world_printGameAsOneImageAction extends ActionBase {
   readonly printGameAsOneImage: boolean
 }
 
+export interface SET_world_printScaleAction extends ActionBase {
+  readonly type: ActionType.SET_world_printScale
+  readonly printScale: number
+}
+
 //--- times for simulation
 export interface SET_world_timeInS_rollDiceAction extends ActionBase {
   readonly type: ActionType.SET_world_timeInS_rollDice
@@ -516,6 +529,7 @@ export type AllActions =
   | SET_world_expectedTileHeightAction
   | SET_world_worldCmdTextAction
   | SET_world_printGameAsOneImageAction
+  | SET_world_printScaleAction
 
   | SET_world_timeInS_rollDiceAction
   | SET_world_timeInS_choose_bool_funcAction
@@ -709,7 +723,11 @@ export function reducer(state: State = initial, action: AllActions): State {
         ...state,
         printGameAsOneImage: action.printGameAsOneImage
       }
-
+    case ActionType.SET_world_printScale:
+      return {
+        ...state,
+        printScale: action.printScale
+      }
 
     case ActionType.SET_world_timeInS_rollDice:
 

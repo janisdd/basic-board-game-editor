@@ -56,6 +56,8 @@ export interface LangObj {
   "World height in tiles": string
   "Tile width": string
   "Tile height": string
+  "Print scale": string
+  "The images will be scaled by this factor. If it is less than 1 then the images will be larger, if is more than 1 the images will be smaller": string
   "Game setup code": string
   "Click to validate the code": string
   //---- world settings simulation times

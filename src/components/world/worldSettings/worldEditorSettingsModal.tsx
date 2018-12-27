@@ -30,6 +30,7 @@ import {
   set_world_timeInS_expr_sumAction,
   set_world_timeInS_expr_termAction,
   set_world_timeInS_expr_factorAction,
+  set_world_printScale
 
 } from "../../../state/reducers/world/worldSettings/actions";
 import {
@@ -73,6 +74,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_world_isWorldSettingsModalDisplayed,
   set_world_worldCmdTextAction,
   set_world_printGameAsOneImageAction,
+  set_world_printScale,
 
   set_world_timeInS_rollDiceAction,
   set_world_timeInS_choose_bool_funcAction,
@@ -140,6 +142,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                    style={{width: '100px'}}
                                    onChange={(e: SyntheticEvent<HTMLInputElement>) => {
                                      const val = parseInt(e.currentTarget.value)
+                                     if (isNaN(val) || val < 0) return
                                      this.props.set_world_worldWidthInTiles(val)
                                    }}
                             />
@@ -150,6 +153,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                    style={{width: '100px'}}
                                    onChange={(e: SyntheticEvent<HTMLInputElement>) => {
                                      const val = parseInt(e.currentTarget.value)
+                                     if (isNaN(val) || val < 0) return
                                      this.props.set_world_worldHeightInTiles(val)
                                    }}
                             />
@@ -164,6 +168,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                    style={{width: '100px'}}
                                    onChange={(e: SyntheticEvent<HTMLInputElement>) => {
                                      const val = parseInt(e.currentTarget.value)
+                                     if (isNaN(val) || val < 0) return
                                      this.props.set_world_expectedTileWidth(val)
                                    }}
                             />
@@ -174,24 +179,46 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                    style={{width: '100px'}}
                                    onChange={(e: SyntheticEvent<HTMLInputElement>) => {
                                      const val = parseInt(e.currentTarget.value)
+                                     if (isNaN(val) || val < 0) return
                                      this.props.set_world_expectedTileHeight(val)
                                    }}
                             />
                           </Form.Field>
                         </Form.Group>
 
-                        <Form.Field>
-                          <Checkbox label={getI18n(this.props.langId, "Print game as one image")}
-                                    checked={this.props.worldSettings.printGameAsOneImage}
-                                    onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
-                                      this.props.set_world_printGameAsOneImageAction(data.checked)
-                                    }}
-                          />
-                          <IconToolTip
-                            message={getI18n(this.props.langId,
-                              "If enable this will print all game tiles combined into one image. The variables will be put into separate images.")}
-                          />
-                        </Form.Field>
+                        <Form.Group widths='equal'>
+                          <Form.Field>
+                            <Checkbox label={getI18n(this.props.langId, "Print game as one image")}
+                                      checked={this.props.worldSettings.printGameAsOneImage}
+                                      onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
+                                        this.props.set_world_printGameAsOneImageAction(data.checked)
+                                      }}
+                            />
+                            <IconToolTip
+                              message={getI18n(this.props.langId,
+                                "If enable this will print all game tiles combined into one image. The variables will be put into separate images.")}
+                            />
+                          </Form.Field>
+
+                          <Form.Field>
+                            <label>{getI18n(this.props.langId, "Print scale")}
+                              <IconToolTip
+                                message={getI18n(this.props.langId,
+                                  "The images will be scaled by this factor. If it is less than 1 then the images will be larger, if is more than 1 the images will be smaller")}
+                              />
+                            </label>
+
+                            <Input type="number" placeholder='1' value={this.props.worldSettings.printScale}
+                                   step='0.1'
+                                   style={{width: '100px'}}
+                                   onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+                                     const val = parseFloat(e.currentTarget.value)
+                                     if (isNaN(val) || val < 0) return
+                                     this.props.set_world_printScale(val)
+                                   }}
+                            />
+                          </Form.Field>
+                        </Form.Group>
 
                         <Form.Field>
 

@@ -259,6 +259,7 @@ class worldActionsBar extends React.Component<Props, any> {
                       printVariableIndicatorStrokeThickness,
                       this.props.variableIndicatorState.drawQrCode,
                       null,
+                      this.props.worldSettings.printScale
                     )
                   }}>
             <Icon name="print"/>
@@ -273,7 +274,8 @@ class worldActionsBar extends React.Component<Props, any> {
             PrintHelper.exportWorldAsLargeImage(this.props.tileSurrogatesState.present, tiles, this.props.fieldSymbols,
               this.props.imgSymbols, this.props.lineSymbols, this.props.allTiles, false, //TODO maybe set to hardcoded to false ??
               10, this.props.worldSettings.gridStrokeThicknessInPx, this.props.worldSettings.gridStrokeColor,
-              this.props.worldSettings, exportPngImagesBgColor, 'svg'
+              this.props.worldSettings, exportPngImagesBgColor, 'svg',
+              this.props.worldSettings.printScale
             )
 
           }}>
@@ -291,7 +293,8 @@ class worldActionsBar extends React.Component<Props, any> {
             PrintHelper.exportWorldAsLargeImage(this.props.tileSurrogatesState.present, tiles, this.props.fieldSymbols,
               this.props.imgSymbols, this.props.lineSymbols, this.props.allTiles, false, //TODO maybe set to hardcoded to false ??
               10, this.props.worldSettings.gridStrokeThicknessInPx, this.props.worldSettings.gridStrokeColor,
-              this.props.worldSettings, exportPngImagesBgColor, 'png'
+              this.props.worldSettings, exportPngImagesBgColor, 'png',
+              this.props.worldSettings.printScale
             )
 
           }}>

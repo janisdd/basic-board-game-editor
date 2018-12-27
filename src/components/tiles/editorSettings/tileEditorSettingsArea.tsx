@@ -9,7 +9,7 @@ import {
   set_editor_stageOffsetScaleCorrection,
   setEditor_showGrid,
   setEditor_stageOffset,
-  setEditor_stageScale
+  setEditor_stageScale, setEditor_tileDisplayName
 } from "../../../state/reducers/tileEditor/actions";
 import {globalMinimalZoom, globalZoomStep} from "../../../constants";
 import {SyntheticEvent} from "react";
@@ -38,6 +38,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   setEditor_stageScale,
   setEditor_stageOffset,
   setEditor_showGrid,
+  setEditor_tileDisplayName,
 
 }, dispatch)
 
@@ -50,6 +51,20 @@ class tileEditorSettingsArea extends React.Component<Props, any> {
   render(): JSX.Element {
     return (
       <div className="settings-area">
+
+        <Input labelPosition='left' placeholder='1' size="small">
+          <Label basic>
+            {
+              getI18n(this.props.langId, "Name")
+            }
+          </Label>
+          <input style={{width: '100px'}}
+                 type="text" value={this.props.editorState.tileProps.tileSettings.displayName}
+                 onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+                   this.props.setEditor_tileDisplayName(e.currentTarget.value)
+                 }}
+          />
+        </Input>
 
         <ToolTip
           message={getI18n(this.props.langId, "Show grid")}

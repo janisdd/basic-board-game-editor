@@ -46,6 +46,7 @@ export class PrintHelper {
     fillBackgroundColor: string | null,
     drawQrCode: boolean,
     format: 'svg' | 'png'
+    //no scale here because one can change the size manually... also these are already optimized for A4 (one per page)
   )
   {
 
@@ -111,9 +112,10 @@ export class PrintHelper {
 
 
   }
+
   /**
    * TODO maybe move this to IO helper?? but this needs many settings
-   * exports the tile as svg
+   * exports the tile
    * @param tile
    * @param {ReadonlyArray<FieldSymbol>} fieldSymbols
    * @param {ReadonlyArray<ImgSymbol>} imgSymbols
@@ -125,8 +127,9 @@ export class PrintHelper {
    * @param {WorldSettings} worldSettings
    * @param fillBackgroundColor null for transparent or the color for the background
    * @param format
+   * @param printScale the scale e.g. to print one tile on A4 (default should be 1)
    */
-  public static exportTileAsLargeSvg(
+  public static exportTileAsLargeImg(
     tile: Tile,
     fieldSymbols: ReadonlyArray<FieldSymbol>,
     imgSymbols: ReadonlyArray<ImgSymbol>,
@@ -134,13 +137,17 @@ export class PrintHelper {
     drawGrid: boolean, gridSizeInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string,
     worldSettings: WorldSettings,
     fillBackgroundColor: string | null,
-    format: 'svg' | 'png'
+    format: 'svg' | 'png',
+    printScale: number
   ) {
 
     let canvas = document.createElement('canvas')
 
-    canvas.width = tile.tileSettings.width
-    canvas.height = tile.tileSettings.height
+    //reset for svg
+    printScale = format === 'svg' ? 1 : printScale
+
+    canvas.width = tile.tileSettings.width * printScale
+    canvas.height = tile.tileSettings.height * printScale
 
     const stage = this.printFullTile(
       tile,
@@ -151,7 +158,8 @@ export class PrintHelper {
       gridStrokeThicknessInPx,
       gridStrokeColor,
       worldSettings,
-      fillBackgroundColor
+      fillBackgroundColor,
+      printScale
     )
 
     if (format === 'svg') {
@@ -197,6 +205,7 @@ export class PrintHelper {
    * @param {WorldSettings} worldSettings
    * @param fillBackgroundColor null for transparent or the color for the background
    * @param format
+   * @param printScale the scale e.g. to print one tile on A4 (default should be 1) (not for svg)
    */
   public static exportWorldAsLargeImage(
     tileSurrogates: ReadonlyArray<WorldTileSurrogate>,
@@ -208,8 +217,12 @@ export class PrintHelper {
     drawGrid: boolean, gridSizeInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string,
     worldSettings: WorldSettings,
     fillBackgroundColor: string | null,
-    format: 'svg' | 'png'
+    format: 'svg' | 'png',
+    printScale: number
   ) {
+
+    //reset for svg
+    printScale = format === 'svg' ? 1 : printScale
 
     const tilesWidth = tilesToPrint[0].tileSettings.width
     const tilesHeight = tilesToPrint[0].tileSettings.height
@@ -223,8 +236,8 @@ export class PrintHelper {
 
     const fullGameCanvas = document.createElement('canvas') as HTMLCanvasElement
 
-    fullGameCanvas.width = fullGameWidth
-    fullGameCanvas.height = fullGameHeight
+    fullGameCanvas.width = fullGameWidth * printScale
+    fullGameCanvas.height = fullGameHeight * printScale
 
     const zIndexCache: ZIndexCache = {}
 
@@ -232,8 +245,8 @@ export class PrintHelper {
 
     stage.clear()
 
-    stage.scaleX = 1
-    stage.scaleY = 1
+    stage.scaleX = printScale
+    stage.scaleY = printScale
     stage.x = 0
     stage.y = 0
 
@@ -366,7 +379,8 @@ export class PrintHelper {
   }
 
   /**
-   *
+   * used to print a (possibly large) tile,
+   * normally called from the tile editor to print the (large) tile
    * @param {Tile} tile
    * @param {ReadonlyArray<FieldSymbol>} fieldSymbols
    * @param {ReadonlyArray<ImgSymbol>} imgSymbols
@@ -386,6 +400,7 @@ export class PrintHelper {
    * @param langId
    *
    * @param fillBackgroundColor null for transparent or the color for the background
+   * @param printScale the scale e.g. to print one tile on A4 (default should be 1)
    */
   public static printLargeTile(tile: Tile,
                                fieldSymbols: ReadonlyArray<FieldSymbol>,
@@ -399,7 +414,8 @@ export class PrintHelper {
                                preferredSubTileHeight: number,
                                splitLargeTileForPrint: boolean,
                                langId: KnownLangs,
-                               fillBackgroundColor: string | null
+                               fillBackgroundColor: string | null,
+                               printScale: number
   ) {
 
     preferredSubTileWidth = Math.min(maxPrintTileWidth, preferredSubTileWidth)
@@ -422,9 +438,10 @@ export class PrintHelper {
     let scaleFactor = dpi / 96;
     scaleFactor = 6
 
+    scaleFactor = scaleFactor * printScale
 
-    canvas.style.width = `${fullTileWidth}px`
-    canvas.style.height = `${fillTileHeight}px`
+    canvas.style.width = `${fullTileWidth * printScale}px`
+    canvas.style.height = `${fillTileHeight * printScale}px`
 
     canvas.width = Math.ceil(fullTileWidth * scaleFactor);
     canvas.height = Math.ceil(fillTileHeight * scaleFactor);
@@ -435,7 +452,7 @@ export class PrintHelper {
     }
 
     const stage = this.printFullTile(tile, fieldSymbols, imgSymbols, lineSymbols, canvas, drawGrid, gridSizeInPx,
-      gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor)
+      gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor, printScale)
 
     stage.scaleX = stage.scaleY = scaleFactor
     stage.update()
@@ -486,8 +503,8 @@ export class PrintHelper {
 
         const pieceCanvas = printWindow.document.createElement('canvas') as HTMLCanvasElement
 
-        pieceCanvas.style.width = `${preferredSubTileWidth}px`
-        pieceCanvas.style.height = `${preferredSubTileHeight}px`
+        pieceCanvas.style.width = `${preferredSubTileWidth * printScale}px`
+        pieceCanvas.style.height = `${preferredSubTileHeight * printScale}px`
 
         pieceCanvas.width = preferredSubTileWidth * scaleFactor
         pieceCanvas.height = preferredSubTileHeight * scaleFactor
@@ -527,7 +544,8 @@ export class PrintHelper {
                                imgSymbols: ReadonlyArray<ImgSymbol>,
                                lineSymbols: ReadonlyArray<LineSymbol>,
                                canvas: HTMLCanvasElement, drawGrid: boolean, gridSizeInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string, worldSettings: WorldSettings,
-                               fillBackgroundColor: string | null
+                               fillBackgroundColor: string | null,
+                               printScale: number
   ): createjs.Stage {
 
     const zIndexCache: ZIndexCache = {}
@@ -536,8 +554,8 @@ export class PrintHelper {
 
     stage.clear()
 
-    stage.scaleX = 1
-    stage.scaleY = 1
+    stage.scaleX = printScale
+    stage.scaleY = printScale
     stage.x = 0
     stage.y = 0
 
@@ -749,7 +767,7 @@ export class PrintHelper {
    * @param {string} gridStrokeColor
    * @param {WorldSettings} worldSettings
    * @param {KnownLangs} langId
-   * @param {boolean} onlyWholeWorld
+   * @param {boolean} onlyWholeWorld only print the world as one image else print all tiles
    * @param outerCircleDiameterInPx
    * @param innerCircleDiameterInPx
    * @param expectTileWidth
@@ -759,6 +777,7 @@ export class PrintHelper {
    * @param variableIndicatorStrokeThickness
    * @param drawQrCode
    * @param fillBackgroundColor null for transparent or the color for the background
+   * @param printScale the scale e.g. to print one tile on A4 (default should be 1)
    */
   public static async printWorld(
     tileSurrogates: ReadonlyArray<WorldTileSurrogate>,
@@ -781,6 +800,7 @@ export class PrintHelper {
     variableIndicatorStrokeThickness: number,
     drawQrCode: boolean,
     fillBackgroundColor: string | null,
+    printScale: number
   ): Promise<void> {
 
 
@@ -795,6 +815,8 @@ export class PrintHelper {
     const dpi = 300
     let scaleFactor = dpi / 96
     scaleFactor = 6
+
+    scaleFactor = scaleFactor * printScale
 
     let printTileCount = 0
 
@@ -814,8 +836,8 @@ export class PrintHelper {
 
       const fullGameCanvas = printWindow.document.createElement('canvas') as HTMLCanvasElement
 
-      fullGameCanvas.style.width = `${fullGameWidth}px`
-      fullGameCanvas.style.height = `${fullGameHeight}px`
+      fullGameCanvas.style.width = `${fullGameWidth * printScale}px`
+      fullGameCanvas.style.height = `${fullGameHeight * printScale}px`
       fullGameCanvas.width = Math.ceil(fullGameWidth * scaleFactor);
       fullGameCanvas.height = Math.ceil(fullGameHeight * scaleFactor);
 
@@ -964,8 +986,8 @@ export class PrintHelper {
         const fullTileWidth = printTile.tileSettings.width
         const fillTileHeight = printTile.tileSettings.height
 
-        canvas.style.width = `${fullTileWidth}px`
-        canvas.style.height = `${fillTileHeight}px`
+        canvas.style.width = `${fullTileWidth * printScale}px`
+        canvas.style.height = `${fillTileHeight * printScale}px`
 
         canvas.width = Math.ceil(fullTileWidth * scaleFactor);
         canvas.height = Math.ceil(fillTileHeight * scaleFactor);
@@ -977,7 +999,7 @@ export class PrintHelper {
 
         const stage = this.printFullTile(printTile, fieldSymbols, imgSymbols, lineSymbols, canvas, drawGrid,
           gridSizeInPx,
-          gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor)
+          gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor, printScale)
 
         stage.scaleX = stage.scaleY = scaleFactor
         stage.update()

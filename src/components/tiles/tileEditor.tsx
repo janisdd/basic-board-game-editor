@@ -432,7 +432,7 @@ class tileEditor extends React.Component<Props, any> {
       }
     }
 
-    PrintHelper.exportTileAsLargeSvg(
+    PrintHelper.exportTileAsLargeImg(
       tile,
       this.props.fieldSymbols,
       this.props.imgSymbols,
@@ -444,6 +444,7 @@ class tileEditor extends React.Component<Props, any> {
       this.props.worldSettings,
       exportPngImagesBgColor,
       format,
+      this.props.worldSettings.printScale
     )
 
   }

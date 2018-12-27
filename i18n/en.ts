@@ -1,4 +1,5 @@
 import {LangObj} from "./i18nRoot";
+import {strict} from "assert";
 
 export const lang_en: LangObj = {
   //--- about
@@ -53,6 +54,8 @@ export const lang_en: LangObj = {
   "World height in tiles": "World height in tiles",
   "Tile width": "Tile width",
   "Tile height": "Tile height",
+  "Print scale": "Print scale",
+  "The images will be scaled by this factor. If it is less than 1 then the images will be larger, if is more than 1 the images will be smaller": "The images will be scaled by this factor. If it is less than 1 then the images will be larger, if is more than 1 the images will be smaller",
   "Game setup code": "Game setup code",
   "Click to validate the code": "Click to validate the code",
   //---- world settings simulation times

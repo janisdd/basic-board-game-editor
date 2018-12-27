@@ -192,7 +192,8 @@ class tileRightActionBar extends React.Component<Props, any> {
             this.props.settings.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
             this.props.settings.tileProps.tileSettings.splitLargeTileForPrint,
             this.props.langId,
-            null
+            null,
+            this.props.worldSettings.printScale
           )
         }}>
           <Icon name="print"/>

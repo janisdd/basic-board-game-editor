@@ -46,7 +46,7 @@ import {
   SET_world_timeInS_expr_relationAction,
   SET_world_timeInS_expr_sumAction,
   SET_world_timeInS_expr_termAction,
-  SET_world_timeInS_expr_factorAction, WorldSettings, replace_worldSettingsAction
+  SET_world_timeInS_expr_factorAction, WorldSettings, replace_worldSettingsAction, SET_world_printScaleAction
 } from "./worldSettingsReducer";
 
 
@@ -250,6 +250,13 @@ export function set_world_printGameAsOneImageAction(printGameAsOneImage: boolean
   return {
     type: ActionType.SET_world_printGameAsOneImage,
     printGameAsOneImage
+  }
+}
+
+export function set_world_printScale(printScale: number): SET_world_printScaleAction {
+  return {
+    type: ActionType.SET_world_printScale,
+    printScale
   }
 }
 

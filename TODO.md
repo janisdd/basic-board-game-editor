@@ -2,6 +2,11 @@
 
 - reattach to symbol?
 
+- add for (some) symbol props checkbox if overwrite obj props
+ 
+- joint tiles into one (create new from many)
+- opt: not connect fields by line if they intersect directly
+
 - add more dev docs
 
 - global setting auto bg/fg color force fields --> like symbol just overwrite style
@@ -11,8 +16,6 @@
   - but we would lose easy undo/redo...
 
 - change the worker deploy... the hash is bad for git because it's changed every build
-
-- multi line text is not properly centered...
 
 ISSUES
 
@@ -27,9 +30,6 @@ ISSUES
     - is works but is not really visible
     - when a line is connected to an anchor point and moved a bit (so that it is not detached) then this can be
       undone but is not visible for the user
-
-- when a line is connected (through an anchor point) to a field symbol instance and we change the width/height of the symbol
-  - then the line is still connected to the field but is not moved!
 
 - printing vars ... will all vars be found?
   - add tests to check this, they are not part of the simulation so create a new dir
@@ -47,7 +47,7 @@ QUESTIONS
 - move showGrid
        gridSizeInPx
        to world settings??
-- hide cp point if multiple lines selected ??
+- hide cp point if multiple lines selected ?? (probably not?)
 - if we delete a symbol ... delete all instances?
 - select multiple e.g. field height: only fixed val for all or delta?
 
