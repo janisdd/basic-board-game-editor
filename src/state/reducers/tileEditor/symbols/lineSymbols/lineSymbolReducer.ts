@@ -1,7 +1,7 @@
 import {Action} from "redux";
 import {LineSymbol} from "../../../../../types/drawing";
 import {notExhaustive} from "../../../_notExhausiveHelper";
-import { replacePropertyByGuid} from "../../../../../helpers/functionHelpers";
+import {replacePropertyByGuid} from "../../../../../helpers/functionHelpers";
 import undoable from "redux-undo";
 import {clearTileEditorEditShapesType, undoShapeLimit} from "../../../../../constants";
 
@@ -56,6 +56,14 @@ export enum ActionType {
 
   SET_lineSymbol_displayIndex = 'lineSymbolReducer_SET_lineSymbol_displayIndex',
   SET_lineSymbol_displayName = 'lineSymbolReducer_SET_lineSymbol_displayName',
+
+  SET_lineSymbol_overwriteColor = 'lineSymbolReducer_SET_lineSymbol_overwriteColor',
+  SET_lineSymbol_overwriteThicknessInPx = 'lineSymbolReducer_SET_lineSymbol_overwriteThicknessInPx',
+  SET_lineSymbol_overwriteGapsInPx = 'lineSymbolReducer_SET_lineSymbol_overwriteGapsInPx',
+  SET_lineSymbol_overwriteHasStartArrow = 'lineSymbolReducer_SET_lineSymbol_overwriteHasStartArrow',
+  SET_lineSymbol_overwriteHasEndArrow = 'lineSymbolReducer_SET_lineSymbol_overwriteHasEndArrow',
+  SET_lineSymbol_overwriteArrowWidth = 'lineSymbolReducer_SET_lineSymbol_overwriteArrowWidth',
+  SET_lineSymbol_overwriteArrowHeight = 'lineSymbolReducer_SET_lineSymbol_overwriteArrowHeight',
 
   RESET = 'lineSymbolReducer_RESET',
 }
@@ -122,6 +130,48 @@ export interface SET_lineSymbol_displayNameAction extends ActionBase {
 }
 
 
+export interface SET_lineSymbol_overwriteColorAction extends ActionBase {
+  readonly type: ActionType.SET_lineSymbol_overwriteColor
+  readonly overwrite: boolean
+  readonly lineSymbolGuid: string
+}
+
+export interface SET_lineSymbol_overwriteThicknessInPxAction extends ActionBase {
+  readonly type: ActionType.SET_lineSymbol_overwriteThicknessInPx
+  readonly overwrite: boolean
+  readonly lineSymbolGuid: string
+}
+
+export interface SET_lineSymbol_overwriteGapsInPxAction extends ActionBase {
+  readonly type: ActionType.SET_lineSymbol_overwriteGapsInPx
+  readonly overwrite: boolean
+  readonly lineSymbolGuid: string
+}
+
+export interface SET_lineSymbol_overwriteHasStartArrowAction extends ActionBase {
+  readonly type: ActionType.SET_lineSymbol_overwriteHasStartArrow
+  readonly overwrite: boolean
+  readonly lineSymbolGuid: string
+}
+
+export interface SET_lineSymbol_overwriteHasEndArrowAction extends ActionBase {
+  readonly type: ActionType.SET_lineSymbol_overwriteHasEndArrow
+  readonly overwrite: boolean
+  readonly lineSymbolGuid: string
+}
+
+export interface SET_lineSymbol_overwriteArrowWidthAction extends ActionBase {
+  readonly type: ActionType.SET_lineSymbol_overwriteArrowWidth
+  readonly overwrite: boolean
+  readonly lineSymbolGuid: string
+}
+
+export interface SET_lineSymbol_overwriteArrowHeightAction extends ActionBase {
+  readonly type: ActionType.SET_lineSymbol_overwriteArrowHeight
+  readonly overwrite: boolean
+  readonly lineSymbolGuid: string
+}
+
 export interface ResetAction extends ActionBase {
   readonly type: ActionType.RESET
 }
@@ -138,6 +188,14 @@ export type AllActions =
   | SET_lineSymbol_arrowWidthAction
   | SET_lineSymbol_arrowHeightAction
   | SET_lineSymbol_displayNameAction
+
+  | SET_lineSymbol_overwriteColorAction
+  | SET_lineSymbol_overwriteThicknessInPxAction
+  | SET_lineSymbol_overwriteGapsInPxAction
+  | SET_lineSymbol_overwriteHasStartArrowAction
+  | SET_lineSymbol_overwriteHasEndArrowAction
+  | SET_lineSymbol_overwriteArrowWidthAction
+  | SET_lineSymbol_overwriteArrowHeightAction
 
 
 export function _reducer(state: State = initial, action: AllActions): State {
@@ -207,6 +265,63 @@ export function _reducer(state: State = initial, action: AllActions): State {
       return res
     }
 
+    case ActionType.SET_lineSymbol_overwriteColor: {
+      return replacePropertyByGuid(state, action.lineSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteColor: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_lineSymbol_overwriteThicknessInPx: {
+      return replacePropertyByGuid(state, action.lineSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteThicknessInPx: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_lineSymbol_overwriteGapsInPx: {
+      return replacePropertyByGuid(state, action.lineSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteGapsInPx: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_lineSymbol_overwriteHasStartArrow: {
+      return replacePropertyByGuid(state, action.lineSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteHasStartArrow: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_lineSymbol_overwriteHasEndArrow: {
+      return replacePropertyByGuid(state, action.lineSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteHasEndArrow: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_lineSymbol_overwriteArrowWidth: {
+      return replacePropertyByGuid(state, action.lineSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteArrowWidth: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_lineSymbol_overwriteArrowHeight: {
+      return replacePropertyByGuid(state, action.lineSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteArrowHeight: action.overwrite
+        }
+      })
+    }
+
     case ActionType.RESET:
       return initial
 
@@ -215,7 +330,6 @@ export function _reducer(state: State = initial, action: AllActions): State {
       return state
   }
 }
-
 
 
 export enum UndoLineSymbolType {

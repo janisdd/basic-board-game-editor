@@ -49,7 +49,7 @@ import {
   set_selectedLineSymbolGuid
 } from "../../../state/reducers/tileEditor/symbols/actions";
 import ImageSymbolPropertyEditor from '../propertyEditors/imageSymbolPropertyEditor'
-import LinePropertyEditor from '../propertyEditors/linePropertyEditor'
+import LineSymbolPropertyEditor from '../propertyEditors/lineSymbolPropertyEditor'
 import {
   set_imgSymbol_displayName,
   set_imgSymbol_height,
@@ -71,6 +71,13 @@ import {
   set_lineSymbol_displayName,
   set_lineSymbol_hasEndArrow,
   set_lineSymbol_hasStartArrow,
+  set_lineSymbol_overwriteArrowHeight,
+  set_lineSymbol_overwriteArrowWidth,
+  set_lineSymbol_overwriteColor,
+  set_lineSymbol_overwriteGapsInPx,
+  set_lineSymbol_overwriteHasEndArrow,
+  set_lineSymbol_overwriteHasStartArrow,
+  set_lineSymbol_overwriteThicknessInPx,
   set_lineSymbol_thicknessInPx
 } from "../../../state/reducers/tileEditor/symbols/lineSymbols/actions";
 import {
@@ -192,6 +199,15 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_imgSymbol_overwriteSkewX,
   set_imgSymbol_overwriteSkewY,
   set_imgSymbol_overwriteIsDisabledForMouseSelection,
+
+
+  set_lineSymbol_overwriteColor,
+  set_lineSymbol_overwriteThicknessInPx,
+  set_lineSymbol_overwriteGapsInPx,
+  set_lineSymbol_overwriteHasStartArrow,
+  set_lineSymbol_overwriteHasEndArrow,
+  set_lineSymbol_overwriteArrowWidth,
+  set_lineSymbol_overwriteArrowHeight,
 
 }, dispatch)
 
@@ -598,16 +614,36 @@ class symbolPropertyEditorWrapper extends React.Component<Props, any> {
         {
           selectedLineSymbol !== null &&
           <div>
-            <LinePropertyEditor
+            <LineSymbolPropertyEditor
               lineShape={selectedLineSymbol}
 
-              setPropertyEditor_LineIsBasedOnSymbol={nop}
+              set_lineSymbol_overwriteColor={(overwrite: boolean) => {
+              this.props.set_lineSymbol_overwriteColor(selectedLineSymbol.guid, overwrite)}
+              }
+              set_lineSymbol_overwriteThicknessInPx={(overwrite: boolean) => {
+                this.props.set_lineSymbol_overwriteThicknessInPx(selectedLineSymbol.guid, overwrite)
+              }}
+              set_lineSymbol_overwriteGapsInPx={(overwrite: boolean) => {
+                this.props.set_lineSymbol_overwriteGapsInPx(selectedLineSymbol.guid, overwrite)
+              }}
+              set_lineSymbol_overwriteHasStartArrow={(overwrite: boolean) => {
+                this.props.set_lineSymbol_overwriteHasStartArrow(selectedLineSymbol.guid, overwrite)
+              }}
+              set_lineSymbol_overwriteHasEndArrow={(overwrite: boolean) => {
+                this.props.set_lineSymbol_overwriteHasEndArrow(selectedLineSymbol.guid, overwrite)
+              }}
+              set_lineSymbol_overwriteArrowWidth={(overwrite: boolean) => {
+                this.props.set_lineSymbol_overwriteArrowWidth(selectedLineSymbol.guid, overwrite)
+              }}
+              set_lineSymbol_overwriteArrowHeight={(overwrite: boolean) => {
+                this.props.set_lineSymbol_overwriteArrowHeight(selectedLineSymbol.guid, overwrite)
+              }}
+
 
               onDuplicateLines={nop}
-              setLinePointCurveMode={nop}
 
               setPropertyEditor_setSelectedLineToNull={() => this.props.set_selectedLineSymbolGuid(null)}
-              setPropertyEditor_removeLineShape={nop}
+
               setPropertyEditor_LineThicknessInPx={(oldThicknessInPx, newThicknessInPx) => {
                 this.props.set_lineSymbol_thicknessInPx(selectedLineSymbol.guid, newThicknessInPx)
               }}
@@ -624,11 +660,7 @@ class symbolPropertyEditorWrapper extends React.Component<Props, any> {
               setPropertyEditor_LineColor={(oldColor, newColor) => {
                 this.props.set_lineSymbol_color(selectedLineSymbol.guid, newColor)
               }}
-              setPropertyEditor_LineAbsoluteZIndex={nop}
-              setPropertyEditor_addPointToLineShape={nop}
-              removePointFromLineShape={nop}
-              setLinePointNewPos={nop}
-              onAddLineSymbol={nop}
+
               setPropertyEditor_LineArrowWidth={(oldArrowWidth, newArrowWidth) => {
                 this.props.set_lineSymbol_arrowWidth(selectedLineSymbol.guid, newArrowWidth)
               }}

@@ -7,7 +7,7 @@ import {Form, Divider, Button, Icon, Checkbox, Popup, Radio} from 'semantic-ui-r
 import {swapZIndexInTile} from "../../../helpers/someIndexHelper";
 import {getNiceBezierCurveBetween} from "../../../helpers/interactionHelper";
 import {
-  BezierPoint, CurveMode,
+  BezierPoint, CurveMode, FieldSymbol,
   LineShape,
   LineSymbol,
   PlainPoint
@@ -24,7 +24,9 @@ import {MajorLineDirection} from "../../../types/world";
 export interface MyProps {
   //readonly test: string
 
-  readonly lineShape: ReadonlyArray<LineShape> | LineSymbol
+  readonly lineShape: ReadonlyArray<LineShape>
+
+  readonly lineSymbols: ReadonlyArray<LineSymbol>
 
   //--actions
   readonly setPropertyEditor_setSelectedLineToNull: () => void
@@ -88,21 +90,31 @@ class linePropertyEditor extends React.Component<Props, any> {
   render(): JSX.Element {
 
     const areLineShapes = Array.isArray(this.props.lineShape)
-    const isSymbol = !Array.isArray(this.props.lineShape)
     let isSingleLine = false
 
-    if (Array.isArray(this.props.lineShape)) {
+    if (areLineShapes) {
       isSingleLine = this.props.lineShape.length === 1
     }
 
-    const lineSymbol: LineSymbol | null = isSymbol ? this.props.lineShape as LineSymbol : null
     //we need to specify an old val when we have multiple fields to we take the first
-    const singleLine: LineShape | null = isSymbol === false ? (this.props.lineShape as ReadonlyArray<LineShape>)[0] : null
+    const singleLine: LineShape | null = isSingleLine ? (this.props.lineShape as ReadonlyArray<LineShape>)[0] : null
 
     const isSomeLineBasedOnSymbol =
       isSingleLine && singleLine !== null && singleLine.createdFromSymbolGuid !== null
       ||
       areLineShapes && (this.props.lineShape as ReadonlyArray<LineShape>).some(p => p.createdFromSymbolGuid !== null)
+
+    const isBasedOnSymbol = isSingleLine && isSomeLineBasedOnSymbol
+
+    let lineSymbol: LineSymbol | null = null
+
+    if (isBasedOnSymbol) {
+      const temp = this.props.lineSymbols.find(p => p.guid === singleLine.createdFromSymbolGuid)
+
+      if (temp) {
+        lineSymbol = temp
+      }
+    }
 
     return (
       <div>
@@ -164,36 +176,32 @@ class linePropertyEditor extends React.Component<Props, any> {
                 </ToolTip>
               }
 
-              {
-                isSymbol === false &&
-                <ToolTip
-                  message={getI18n(this.props.langId, "Duplicate this shape")}
-                >
-                  <Button icon
-                          onClick={() => {
-
-                            const lineShapes = (this.props.lineShape as ReadonlyArray<LineShape>)
-                            const copies = DuplicateHelper.duplicateLineShapes(lineShapes,
-                              this.props.amountOfShapesInTile)
-
-                            this.props.onDuplicateLines(copies)
-                          }}
-                  >
-                    <Icon name="paste"/>
-                  </Button>
-                </ToolTip>
-              }
-
-              {
-                isSymbol === false &&
-                <Button color="red" icon
+              <ToolTip
+                message={getI18n(this.props.langId, "Duplicate this shape")}
+              >
+                <Button icon
                         onClick={() => {
-                          this.props.setPropertyEditor_removeLineShape()
+
+                          const lineShapes = (this.props.lineShape as ReadonlyArray<LineShape>)
+                          const copies = DuplicateHelper.duplicateLineShapes(lineShapes,
+                            this.props.amountOfShapesInTile)
+
+                          this.props.onDuplicateLines(copies)
                         }}
                 >
-                  <Icon name="trash"/>
+                  <Icon name="paste"/>
                 </Button>
-              }
+              </ToolTip>
+
+
+              <Button color="red" icon
+                      onClick={() => {
+                        this.props.setPropertyEditor_removeLineShape()
+                      }}
+              >
+                <Icon name="trash"/>
+              </Button>
+
             </div>
           </Form.Field>
 
@@ -210,7 +218,7 @@ class linePropertyEditor extends React.Component<Props, any> {
           }
 
           {
-            isSymbol &&
+            isBasedOnSymbol &&
             <Form.Field>
               <label>{getI18n(this.props.langId, "Name")}</label>
               <input value={lineSymbol.displayName}
@@ -225,7 +233,13 @@ class linePropertyEditor extends React.Component<Props, any> {
             <Form.Group widths='equal'>
               <Form.Field>
                 <label>{getI18n(this.props.langId, "Color")}
-                  <IconToolTip message={getI18n(this.props.langId, "To use transparent set the color to black (0, 0, 0) and then set alpha to 0")}/>
+                  <IconToolTip
+                    message={getI18n(this.props.langId, "To use transparent set the color to black (0, 0, 0) and then set alpha to 0")}/>
+
+                  {
+                    isBasedOnSymbol && lineSymbol.overwriteColor &&
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                  }
                 </label>
                 <Popup
                   trigger={
@@ -241,14 +255,17 @@ class linePropertyEditor extends React.Component<Props, any> {
                   content={
                     <ChromePicker
                       color={
-                        isSymbol
+                        isBasedOnSymbol && lineSymbol.overwriteColor
                           ? lineSymbol.color
                           : isSingleLine ? singleLine.color
                           : singleLine.color
                       }
                       onChangeComplete={color => {
+
+                        if (isBasedOnSymbol && lineSymbol.overwriteColor) return
+
                         this.props.setPropertyEditor_LineColor(
-                          isSymbol ? lineSymbol.color : singleLine.color,
+                          isBasedOnSymbol && lineSymbol.overwriteColor ? lineSymbol.color : singleLine.color,
                           color.hex)
                       }}
                     />
@@ -256,31 +273,41 @@ class linePropertyEditor extends React.Component<Props, any> {
                 />
               </Form.Field>
               <Form.Field>
-                <label>{getI18n(this.props.langId, "Thickness in px")}</label>
+                <label>{getI18n(this.props.langId, "Thickness in px")}
+                  {
+                    isBasedOnSymbol && lineSymbol.overwriteThicknessInPx &&
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                  }
+                </label>
                 <input type="number"
                        value={
-                         isSymbol
+                         isBasedOnSymbol && lineSymbol.overwriteThicknessInPx
                            ? lineSymbol.lineThicknessInPx
                            : isSingleLine ? singleLine.lineThicknessInPx
                            : singleLine.lineThicknessInPx
                        }
                        onChange={(e) => this.props.setPropertyEditor_LineThicknessInPx(
-                         isSymbol ? lineSymbol.lineThicknessInPx : singleLine.lineThicknessInPx,
+                         isBasedOnSymbol && lineSymbol.overwriteThicknessInPx ? lineSymbol.lineThicknessInPx : singleLine.lineThicknessInPx,
                          parseInt(e.currentTarget.value))}
                 />
               </Form.Field>
 
               <Form.Field>
-                <label>{getI18n(this.props.langId, "Gaps in px")}</label>
+                <label>{getI18n(this.props.langId, "Gaps in px")}
+                  {
+                    isBasedOnSymbol && lineSymbol.overwriteGapsInPx &&
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                  }
+                </label>
                 <input type="number"
                        value={
-                         isSymbol
+                         isBasedOnSymbol && lineSymbol.overwriteGapsInPx
                            ? lineSymbol.dashArray[0]
                            : isSingleLine ? singleLine.dashArray[0]
                            : singleLine.dashArray[0]
                        }
                        onChange={(e) => this.props.setPropertyEditor_LineDashArray(
-                         (isSymbol ? lineSymbol.dashArray : singleLine.dashArray) as number[],
+                         (isBasedOnSymbol && lineSymbol.overwriteGapsInPx ? lineSymbol.dashArray : singleLine.dashArray) as number[],
                          [parseInt(e.currentTarget.value)])}
                 />
               </Form.Field>
@@ -320,23 +347,35 @@ class linePropertyEditor extends React.Component<Props, any> {
             isSomeLineBasedOnSymbol === false &&
             <Form.Group widths='equal'>
               <Form.Field>
-                <Checkbox label={getI18n(this.props.langId, "Start arrow")}
-                          checked={isSymbol ? lineSymbol.hasStartArrow : singleLine.hasStartArrow}
-                          onChange={(event: any, data: { checked: boolean }) => {
-                            this.props.setPropertyEditor_LineHasStartArrow(
-                              isSymbol ? lineSymbol.hasStartArrow : singleLine.hasStartArrow,
-                              data.checked)
-                          }}
+                <label>{getI18n(this.props.langId, "Start arrow")}
+                  {
+                    isBasedOnSymbol && lineSymbol.overwriteHasStartArrow &&
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                  }
+                </label>
+                <Checkbox
+                  checked={isBasedOnSymbol && lineSymbol.overwriteHasStartArrow ? lineSymbol.hasStartArrow : singleLine.hasStartArrow}
+                  onChange={(event: any, data: { checked: boolean }) => {
+                    this.props.setPropertyEditor_LineHasStartArrow(
+                      isBasedOnSymbol && lineSymbol.overwriteHasStartArrow ? lineSymbol.hasStartArrow : singleLine.hasStartArrow,
+                      data.checked)
+                  }}
                 />
               </Form.Field>
               <Form.Field>
-                <Checkbox label={getI18n(this.props.langId, "End arrow")}
-                          checked={isSymbol ? lineSymbol.hasEndArrow : singleLine.hasEndArrow}
-                          onChange={(event: any, data: { checked: boolean }) => {
-                            this.props.setPropertyEditor_LineHasEndArrow(
-                              isSymbol ? lineSymbol.hasEndArrow : singleLine.hasEndArrow,
-                              data.checked)
-                          }}
+                <label>{getI18n(this.props.langId, "End arrow")}
+                  {
+                    isBasedOnSymbol && lineSymbol.overwriteHasEndArrow &&
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                  }
+                </label>
+                <Checkbox
+                  checked={isBasedOnSymbol && lineSymbol.overwriteHasEndArrow ? lineSymbol.hasEndArrow : singleLine.hasEndArrow}
+                  onChange={(event: any, data: { checked: boolean }) => {
+                    this.props.setPropertyEditor_LineHasEndArrow(
+                      isBasedOnSymbol && lineSymbol.overwriteHasEndArrow ? lineSymbol.hasEndArrow : singleLine.hasEndArrow,
+                      data.checked)
+                  }}
                 />
               </Form.Field>
             </Form.Group>
@@ -420,31 +459,41 @@ class linePropertyEditor extends React.Component<Props, any> {
             isSomeLineBasedOnSymbol === false &&
             <Form.Group widths='equal'>
               <Form.Field>
-                <label>{getI18n(this.props.langId, "Arrow width")}</label>
+                <label>{getI18n(this.props.langId, "Arrow width")}
+                  {
+                    isBasedOnSymbol && lineSymbol.overwriteArrowWidth &&
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                  }
+                </label>
                 <input type="number" min="1"
                        value={
-                         isSymbol
+                         isBasedOnSymbol && lineSymbol.overwriteArrowWidth
                            ? lineSymbol.arrowWidth
                            : isSingleLine ? singleLine.arrowWidth
                            : singleLine.arrowWidth
                        }
                        onChange={(e) => this.props.setPropertyEditor_LineArrowWidth(
-                         isSymbol ? lineSymbol.arrowWidth : singleLine.arrowWidth,
+                         isBasedOnSymbol && lineSymbol.overwriteArrowWidth ? lineSymbol.arrowWidth : singleLine.arrowWidth,
                          parseInt(e.currentTarget.value))}
                 />
 
               </Form.Field>
               <Form.Field>
-                <label>{getI18n(this.props.langId, "Arrow height")}</label>
+                <label>{getI18n(this.props.langId, "Arrow height")}
+                  {
+                    isBasedOnSymbol && lineSymbol.overwriteArrowHeight &&
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                  }
+                </label>
                 <input type="number" min="1"
                        value={
-                         isSymbol
+                         isBasedOnSymbol && lineSymbol.overwriteArrowHeight
                            ? lineSymbol.arrowHeight
                            : isSingleLine ? singleLine.arrowHeight
                            : singleLine.arrowHeight
                        }
                        onChange={(e) => this.props.setPropertyEditor_LineArrowHeight(
-                         isSymbol ? lineSymbol.arrowHeight : singleLine.arrowHeight,
+                         isBasedOnSymbol && lineSymbol.overwriteArrowHeight ? lineSymbol.arrowHeight : singleLine.arrowHeight,
                          parseInt(e.currentTarget.value))}
                 />
               </Form.Field>

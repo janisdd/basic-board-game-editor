@@ -811,11 +811,11 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
         let tStart = 0.0
         let tEnd = 1.0
 
-        if ((symbolForShape !== null ? symbolForShape.hasStartArrow : pathLine.hasStartArrow)) {
+        if ((symbolForShape !== null && symbolForShape.overwriteHasStartArrow ? symbolForShape.hasStartArrow : pathLine.hasStartArrow)) {
           tStart = 0.5
         }
 
-        if (symbolForShape !== null ? symbolForShape.hasEndArrow : pathLine.hasEndArrow) {
+        if (symbolForShape !== null  && symbolForShape.overwriteHasEndArrow ? symbolForShape.hasEndArrow : pathLine.hasEndArrow) {
           tEnd = 0.5
         }
 
@@ -855,7 +855,7 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
   let endPoint: PlainPoint = pathLine.points[pathLine.points.length - 1]
 
   //start arrow
-  if ((symbolForShape !== null ? symbolForShape.hasStartArrow : pathLine.hasStartArrow)) {
+  if ((symbolForShape !== null  && symbolForShape.overwriteHasStartArrow ? symbolForShape.hasStartArrow : pathLine.hasStartArrow)) {
 
     //too lazy... https://gist.github.com/conorbuck/2606166
     const p1 = pathLine.startPoint
@@ -870,30 +870,31 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
     const p0 = pathLine.points[0]
     const b = new Bezier(p1.x, p1.y, p0.cp1.x, p0.cp1.y, p0.cp2.x, p0.cp2.y, p0.x, p0.y)
 
-    const arrowLength = pathLine.arrowHeight / 2
+    const arrowWidth = ( symbolForShape !== null && symbolForShape.overwriteArrowWidth ? symbolForShape.arrowWidth : pathLine.arrowWidth)
+    const arrowHeight = ( symbolForShape !== null && symbolForShape.overwriteArrowHeight ? symbolForShape.arrowHeight : pathLine.arrowHeight)
+
+    const arrowLength = arrowHeight / 2
     const percentageArrowLength = arrowLength / b.length()
     startPoint = b.compute(percentageArrowLength)
 
-    const arrowWidth = pathLine.arrowWidth
-
     const rightArrowHeadPoint: PlainPoint = {
       x: p1.x + arrowWidth / 2,
-      y: p1.y + pathLine.arrowHeight
+      y: p1.y + arrowHeight
     }
     const rotatedRightArrowHeadPoint = rotatePointBy(p1.x, p1.y, rightArrowHeadPoint.x, rightArrowHeadPoint.y,
       -angleDeg)
 
     const leftArrowHeadPoint: PlainPoint = {
       x: p1.x - arrowWidth / 2,
-      y: p1.y + pathLine.arrowHeight
+      y: p1.y + arrowHeight
     }
 
     const rotatedLeftArrowHeadPoint = rotatePointBy(p1.x, p1.y, leftArrowHeadPoint.x, leftArrowHeadPoint.y, -angleDeg)
 
 
     lineShape.graphics
-      .beginFill(symbolForShape !== null ? symbolForShape.color : pathLine.color)
-      .setStrokeStyle(symbolForShape !== null ? symbolForShape.lineThicknessInPx : pathLine.lineThicknessInPx)
+      .beginFill(symbolForShape !== null  && symbolForShape.overwriteColor ? symbolForShape.color : pathLine.color)
+      .setStrokeStyle(symbolForShape !== null  && symbolForShape.overwriteThicknessInPx ? symbolForShape.lineThicknessInPx : pathLine.lineThicknessInPx)
       .moveTo(p1.x + xOffset, p1.y + yOffset)
       .lineTo(rotatedRightArrowHeadPoint.x + xOffset, rotatedRightArrowHeadPoint.y + yOffset)
       .lineTo(rotatedLeftArrowHeadPoint.x + xOffset, rotatedLeftArrowHeadPoint.y + yOffset)
@@ -905,7 +906,7 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
   }
 
   //end arrow
-  if ((symbolForShape !== null ? symbolForShape.hasEndArrow : pathLine.hasEndArrow)) {
+  if ((symbolForShape !== null  && symbolForShape.overwriteHasEndArrow ? symbolForShape.hasEndArrow : pathLine.hasEndArrow)) {
 
     //too lazy... https://gist.github.com/conorbuck/2606166
     const p2 = pathLine.points[pathLine.points.length - 1].cp2 //point before end
@@ -922,31 +923,33 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
 
     const b = new Bezier(p0.x, p0.y, p1.cp1.x, p1.cp1.y, p1.cp2.x, p1.cp2.y, p1.x, p1.y)
 
-    const arrowLength = pathLine.arrowHeight / 2
+    const arrowWidth = ( symbolForShape !== null && symbolForShape.overwriteArrowWidth ? symbolForShape.arrowWidth : pathLine.arrowWidth)
+    const arrowHeight = ( symbolForShape !== null && symbolForShape.overwriteArrowHeight ? symbolForShape.arrowHeight : pathLine.arrowHeight)
+
+    const arrowLength = arrowHeight / 2
     const percentageArrowLength = arrowLength / b.length()
     const lineEndPoint = b.compute(1 - percentageArrowLength)
     endPoint = lineEndPoint
 
-    const arrowWidth = pathLine.arrowWidth
 
     const rightArrowHeadPoint: PlainPoint = {
       x: p1.x + arrowWidth / 2,
-      y: p1.y + pathLine.arrowHeight
+      y: p1.y + arrowHeight
     }
     const rotatedRightArrowHeadPoint = rotatePointBy(p1.x, p1.y, rightArrowHeadPoint.x, rightArrowHeadPoint.y,
       -angleDeg)
 
     const leftArrowHeadPoint: PlainPoint = {
       x: p1.x - arrowWidth / 2,
-      y: p1.y + pathLine.arrowHeight
+      y: p1.y + arrowHeight
     }
 
     const rotatedLeftArrowHeadPoint = rotatePointBy(p1.x, p1.y, leftArrowHeadPoint.x, leftArrowHeadPoint.y, -angleDeg)
 
 
     lineShape.graphics
-      .beginFill(symbolForShape !== null ? symbolForShape.color : pathLine.color)
-      .setStrokeStyle(symbolForShape !== null ? symbolForShape.lineThicknessInPx : pathLine.lineThicknessInPx)
+      .beginFill(symbolForShape !== null  && symbolForShape.overwriteColor ? symbolForShape.color : pathLine.color)
+      .setStrokeStyle(symbolForShape !== null  && symbolForShape.overwriteThicknessInPx ? symbolForShape.lineThicknessInPx : pathLine.lineThicknessInPx)
       .moveTo(p1.x + xOffset, p1.y + yOffset)
       .lineTo(rotatedRightArrowHeadPoint.x + xOffset, rotatedRightArrowHeadPoint.y + yOffset)
       .lineTo(rotatedLeftArrowHeadPoint.x + xOffset, rotatedLeftArrowHeadPoint.y + yOffset)
@@ -963,9 +966,9 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
 
 
   lineShape.graphics
-    .beginStroke(symbolForShape !== null ? symbolForShape.color : pathLine.color)
-    .setStrokeStyle(symbolForShape !== null ? symbolForShape.lineThicknessInPx : pathLine.lineThicknessInPx)
-    .setStrokeDash((symbolForShape !== null ? symbolForShape.dashArray : pathLine.dashArray) as number[])
+    .beginStroke(symbolForShape !== null  && symbolForShape.overwriteColor ? symbolForShape.color : pathLine.color)
+    .setStrokeStyle(symbolForShape !== null  && symbolForShape.overwriteThicknessInPx ? symbolForShape.lineThicknessInPx : pathLine.lineThicknessInPx)
+    .setStrokeDash((symbolForShape !== null  && symbolForShape.overwriteGapsInPx ? symbolForShape.dashArray : pathLine.dashArray) as number[])
     .moveTo(startPoint.x + xOffset, startPoint.y + yOffset)
 
 

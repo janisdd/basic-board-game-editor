@@ -570,6 +570,8 @@ class propertyEditorsView extends React.Component<Props, any> {
           <div>
             <LinePropertyEditor lineShape={selectedLineShapes}
 
+                                lineSymbols={this.props.lineSymbols}
+
                                 setPropertyEditor_LineIsBasedOnSymbol={(oldSymbolGuid, symbolGuid) => {
                                   if (selectedLineShapes.length === 1) {
                                     this.props.setPropertyEditor_LineCreatedFromSymbolId(selectedLineShapes[0].id,

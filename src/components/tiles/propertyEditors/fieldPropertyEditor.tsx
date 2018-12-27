@@ -531,7 +531,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                         : singleField.bgColor}
                     onChangeComplete={color => {
 
-                      if (isBasedOnSymbol) return
+                      if (isBasedOnSymbol && fieldSymbol.overwriteBgColor) return
 
                       this.props.setPropertyEditor_FieldBgColor(isBasedOnSymbol && fieldSymbol.overwriteBgColor
                         ? fieldSymbol.bgColor
@@ -546,7 +546,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                     icon="circle outline"
                     onClick={() => {
 
-                      if (isBasedOnSymbol) return
+                      if (isBasedOnSymbol && fieldSymbol.overwriteBgColor) return
 
                       this.props.setPropertyEditor_FieldBgColor(isBasedOnSymbol
                         ? fieldSymbol.bgColor

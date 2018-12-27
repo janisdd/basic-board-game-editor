@@ -173,6 +173,13 @@ export function _reducer(state: State = initial, action: AllActions): State {
     case LineSymbolActionTypes.SET_lineSymbol_arrowWidth:
     case LineSymbolActionTypes.SET_lineSymbol_arrowHeight:
     case LineSymbolActionTypes.SET_lineSymbol_displayName:
+    case LineSymbolActionTypes.SET_lineSymbol_overwriteColor:
+    case LineSymbolActionTypes.SET_lineSymbol_overwriteThicknessInPx:
+    case LineSymbolActionTypes.SET_lineSymbol_overwriteGapsInPx:
+    case LineSymbolActionTypes.SET_lineSymbol_overwriteHasStartArrow:
+    case LineSymbolActionTypes.SET_lineSymbol_overwriteHasEndArrow:
+    case LineSymbolActionTypes.SET_lineSymbol_overwriteArrowWidth:
+    case LineSymbolActionTypes.SET_lineSymbol_overwriteArrowHeight:
     case LineSymbolActionTypes.RESET: {
       if (state.lastEditedShapeType !== LastEditedShapeType.lineSymbol) {
         incLineSymbolHistoryId()

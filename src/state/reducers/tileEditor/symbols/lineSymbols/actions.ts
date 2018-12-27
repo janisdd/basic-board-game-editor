@@ -10,9 +10,14 @@ import {
   SET_lineSymbol_displayIndexAction,
   SET_lineSymbol_displayNameAction,
   SET_lineSymbol_hasEndArrowAction,
-  SET_lineSymbol_hasStartArrowAction,
+  SET_lineSymbol_hasStartArrowAction, SET_lineSymbol_overwriteArrowHeightAction,
+  SET_lineSymbol_overwriteArrowWidthAction, SET_lineSymbol_overwriteColorAction, SET_lineSymbol_overwriteGapsInPxAction,
+  SET_lineSymbol_overwriteHasEndArrowAction,
+  SET_lineSymbol_overwriteHasStartArrowAction,
+  SET_lineSymbol_overwriteThicknessInPxAction,
   SET_lineSymbol_thicknessInPxAction,
-  SET_lineSymbolsAction, UndoLineSymbolType,
+  SET_lineSymbolsAction,
+  UndoLineSymbolType,
 } from "./lineSymbolReducer";
 import {MultiActions} from "../../../../../types/ui";
 import {set_imgSymbol_displayIndex} from "../imgSymbols/actions";
@@ -135,5 +140,55 @@ export function edit_lineSymbolUndo(): Edit_lineSymbolUndo {
 export function edit_lineSymbolRedo(): Edit_lineSymbolRedo {
   return {
     type: UndoLineSymbolType.redo
+  }
+}
+
+export function set_lineSymbol_overwriteColor(lineSymbolGuid: string, overwrite: boolean): SET_lineSymbol_overwriteColorAction {
+  return {
+    type: ActionType.SET_lineSymbol_overwriteColor,
+    overwrite,
+    lineSymbolGuid
+  }
+}
+export function set_lineSymbol_overwriteThicknessInPx(lineSymbolGuid: string, overwrite: boolean): SET_lineSymbol_overwriteThicknessInPxAction {
+  return {
+    type: ActionType.SET_lineSymbol_overwriteThicknessInPx,
+    overwrite,
+    lineSymbolGuid
+  }
+}
+export function set_lineSymbol_overwriteGapsInPx(lineSymbolGuid: string, overwrite: boolean): SET_lineSymbol_overwriteGapsInPxAction {
+  return {
+    type: ActionType.SET_lineSymbol_overwriteGapsInPx,
+    overwrite,
+    lineSymbolGuid
+  }
+}
+export function set_lineSymbol_overwriteHasStartArrow(lineSymbolGuid: string, overwrite: boolean): SET_lineSymbol_overwriteHasStartArrowAction {
+  return {
+    type: ActionType.SET_lineSymbol_overwriteHasStartArrow,
+    overwrite,
+    lineSymbolGuid
+  }
+}
+export function set_lineSymbol_overwriteHasEndArrow(lineSymbolGuid: string, overwrite: boolean): SET_lineSymbol_overwriteHasEndArrowAction {
+  return {
+    type: ActionType.SET_lineSymbol_overwriteHasEndArrow,
+    overwrite,
+    lineSymbolGuid
+  }
+}
+export function set_lineSymbol_overwriteArrowWidth(lineSymbolGuid: string, overwrite: boolean): SET_lineSymbol_overwriteArrowWidthAction {
+  return {
+    type: ActionType.SET_lineSymbol_overwriteArrowWidth,
+    overwrite,
+    lineSymbolGuid
+  }
+}
+export function set_lineSymbol_overwriteArrowHeight(lineSymbolGuid: string, overwrite: boolean): SET_lineSymbol_overwriteArrowHeightAction {
+  return {
+    type: ActionType.SET_lineSymbol_overwriteArrowHeight,
+    overwrite,
+    lineSymbolGuid
   }
 }

@@ -52,7 +52,6 @@ export enum ActionType {
   SET_lineArrowHeight = 'tileEditorReducer_SET_lineArrowHeight',
   SET_lineArrowWidth = 'tileEditorReducer_SET_lineArrowWidth',
 
-
   RESET = 'linePropertyReducer_RESET',
 }
 
