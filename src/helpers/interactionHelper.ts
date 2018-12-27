@@ -88,6 +88,11 @@ export function calcLineBoundingBox(line: LineShape): Rect {
 }
 
 //from https://stackoverflow.com/questions/2752349/fast-rectangle-to-rectangle-intersection
+/**
+ * check is done with strict compare (less than not less equal)
+ * @param r1
+ * @param r2
+ */
 export function intersectRect(r1: Rect, r2: Rect): boolean {
 
   if (r1.width < 0) {
@@ -103,6 +108,29 @@ export function intersectRect(r1: Rect, r2: Rect): boolean {
     r2.x + r2.width < r1.x ||
     r2.y > r1.y + r1.height ||
     r2.y + r2.height < r1.y);
+}
+
+/**
+ * check is done with strict compare (less than not less equal)
+ * @param rect1
+ * @param point
+ */
+export function intersectPoint(rect1: Rect, point: PlainPoint) {
+
+  if (rect1.width < 0) {
+    rect1.x = rect1.x + rect1.width
+    rect1.width = -rect1.width
+  }
+  if (rect1.height < 0) {
+    rect1.y = rect1.y + rect1.height
+    rect1.height = -rect1.height
+  }
+
+  return !(point.x > rect1.x + rect1.width ||
+    point.x  < rect1.x ||
+    point.y > rect1.y + rect1.height ||
+    point.y < rect1.y)
+
 }
 
 //too lazy https://stackoverflow.com/questions/17410809/how-to-calculate-rotation-in-2d-in-javascript
@@ -184,6 +212,7 @@ export function calcAnchorPoints(fieldX: number, fieldY: number, fieldWidth: num
  * @param borderPointsDiameterInPx
  * @param majorLineDirection the line direction to start with (to know where the line start (head) should be)
  * @param lineShapes the lines to check if a border point is connected to a line (not add a line twice)
+ * @param insertLinesEvenIfFieldsIntersect
  */
 export function autoConnectFieldsWithLinesByCmdText(
   fields: ReadonlyArray<FieldShape>,
@@ -197,7 +226,8 @@ export function autoConnectFieldsWithLinesByCmdText(
   tileHeight: number,
   borderPointsDiameterInPx: number,
   majorLineDirection: MajorLineDirection,
-  lineShapes: ReadonlyArray<LineShape>
+  lineShapes: ReadonlyArray<LineShape>,
+  insertLinesEvenIfFieldsIntersect: boolean
 ): void {
 
   //one field is possible if we connect a border point to a field
@@ -251,7 +281,7 @@ export function autoConnectFieldsWithLinesByCmdText(
   let lastZIndex = newZIndex
   for (const field of fields) {
     lastZIndex = connectFieldsFromRootFieldByCmdText(field, fields, fieldSymbols, lastZIndex, majorLineDirection,
-      allBorderPoints, borderPointsDiameterInPx, lineShapes)
+      allBorderPoints, borderPointsDiameterInPx, lineShapes, insertLinesEvenIfFieldsIntersect)
   }
 
   //connect border points to the fields
@@ -280,6 +310,14 @@ export function autoConnectFieldsWithLinesByCmdText(
       throw new Error(`next field not found! from border point: ${borderPoint.id}`)
     }
 
+    if (insertLinesEvenIfFieldsIntersect === false) {
+        //check if they intersect
+      if (intersectPoint(nextField, borderPoint)) {
+        continue
+      }
+    }
+
+    //some lines might already exit
     let connectedLinesThroughAnchorPoints = getConnectedLinesThroughAnchorPointsForBorderPoint(borderPoint, lineShapes)
 
     const borderPointConnectedLinesIds = Object.keys(connectedLinesThroughAnchorPoints)
@@ -333,6 +371,7 @@ export function autoConnectFieldsWithLinesByCmdText(
  * @param allBorderPoints
  * @param borderPointsDiameterInPx
  * @param lineShapes the lines to check if a border point is connected to a line (not add a line twice)
+ * @param insertLinesEvenIfFieldsIntersect
  * @returns {number} the new z index
  */
 function connectFieldsFromRootFieldByCmdText(
@@ -343,7 +382,8 @@ function connectFieldsFromRootFieldByCmdText(
   majorLineDirection: MajorLineDirection,
   allBorderPoints: ReadonlyArray<BorderPointWithPos>,
   borderPointsDiameterInPx: number,
-  lineShapes: ReadonlyArray<LineShape>
+  lineShapes: ReadonlyArray<LineShape>,
+  insertLinesEvenIfFieldsIntersect: boolean
 ): number {
 
   if (rootField.cmdText === null || rootField.cmdText.trim() === '') return
@@ -387,7 +427,8 @@ function connectFieldsFromRootFieldByCmdText(
         borderPointsDiameterInPx,
         false,
         lastZIndex,
-        lineShapes
+        lineShapes,
+        insertLinesEvenIfFieldsIntersect
       )
 
     } else if (statement.type === 'control_ifElse') {
@@ -404,7 +445,8 @@ function connectFieldsFromRootFieldByCmdText(
         borderPointsDiameterInPx,
         true,
         lastZIndex,
-        lineShapes
+        lineShapes,
+        insertLinesEvenIfFieldsIntersect
       )
 
       lastZIndex = connectFields(rootField,
@@ -419,7 +461,8 @@ function connectFieldsFromRootFieldByCmdText(
         borderPointsDiameterInPx,
         true,
         lastZIndex,
-        lineShapes
+        lineShapes,
+        insertLinesEvenIfFieldsIntersect
       )
 
     }
@@ -444,6 +487,7 @@ function connectFieldsFromRootFieldByCmdText(
  * @param showLineEndArrow true: show line end arrow, false: not, if the next field is a border point the end arrow is drawn ignoring this value
  * @param {number} zIndex
  * @param lineShapes the lines to check if a border point is connected to a line (not add a line twice)
+ * @param insertLinesEvenIfFieldsIntersect
  * @returns {number} returns the next z index
  */
 function connectFields(rootField: FieldShape,
@@ -458,7 +502,8 @@ function connectFields(rootField: FieldShape,
                        borderPointsDiameterInPx: number,
                        showLineEndArrow: boolean,
                        zIndex: number,
-                       lineShapes: ReadonlyArray<LineShape>
+                       lineShapes: ReadonlyArray<LineShape>,
+                       insertLinesEvenIfFieldsIntersect: boolean
 ): number {
 
   let nextFieldSymbol: FieldSymbol | null = null
@@ -475,6 +520,12 @@ function connectFields(rootField: FieldShape,
     if (!targetBorderPoint) {
       Logger.fatal(`next field/border point not found id: ${nextFieldId}! from field: ${rootField.id}`)
       return
+    }
+
+    if (insertLinesEvenIfFieldsIntersect === false) {
+      if (intersectPoint(rootField, targetBorderPoint)) {
+        return zIndex
+      }
     }
 
     //the connected lines could be calculated inside autoConnectFieldsWithLinesByCmdText for all lines...
@@ -502,6 +553,20 @@ function connectFields(rootField: FieldShape,
 
     if (symbol) {
       nextFieldSymbol = symbol
+    }
+  }
+
+  if (insertLinesEvenIfFieldsIntersect === false) {
+
+    const targetRect: Rect = {
+      x: nextField.x,
+      y: nextField.y,
+      width: (nextFieldSymbol !== null ? nextFieldSymbol.width : nextField.width),
+      height: (nextFieldSymbol !== null ? nextFieldSymbol.height : nextField.height),
+    }
+
+    if (intersectRect(rootField, targetRect)) {
+      return zIndex
     }
   }
 
@@ -540,6 +605,11 @@ function connectFields(rootField: FieldShape,
 }
 
 
+/**
+ * returns a map representing which lines are already exist
+ * @param targetBorderPoint
+ * @param lineShapes
+ */
 function getConnectedLinesThroughAnchorPointsForBorderPoint(targetBorderPoint: PlainPoint, lineShapes: ReadonlyArray<LineShape>): ConnectedLinesThroughAnchorPointsMap {
 
   let connectedLinesThroughAnchorPoints: ConnectedLinesThroughAnchorPointsMap = {}
@@ -949,8 +1019,6 @@ export function interpolate2DPoint(p1: PlainPoint, p2: PlainPoint, t: number): P
     Logger.fatal(`interpolate2DPoint, t  must be [0,1] but was: ${t}`)
   }
 
-
-  console.log('asdasdasd')
 
   //y = mx + n   where t = x between [0, 1]
   const deltaX = p2.x - p1.x

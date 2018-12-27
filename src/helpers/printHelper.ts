@@ -3,9 +3,7 @@ import * as graphics from '../../graphics/graphicsCore'
 import {ZIndexCache} from "../types/ui";
 import {FieldSymbol, ImgSymbol, LineSymbol} from "../types/drawing";
 import {
-  appProperties, defaultGameInitCode,
-  maxPrintTileHeight,
-  maxPrintTileWidth,
+  appProperties,
   printLargeTileBgColor,
   worldTileBorderColor
 } from "../constants";
@@ -418,8 +416,9 @@ export class PrintHelper {
                                printScale: number
   ) {
 
-    preferredSubTileWidth = Math.min(maxPrintTileWidth, preferredSubTileWidth)
-    preferredSubTileHeight = Math.min(maxPrintTileHeight, preferredSubTileHeight)
+    //allow any print tile size
+    // preferredSubTileWidth = Math.min(maxPrintTileWidth, preferredSubTileWidth)
+    // preferredSubTileHeight = Math.min(maxPrintTileHeight, preferredSubTileHeight)
 
     const {html: boilerplateHtml1, idDataAttributeKey, idCheckboxDataAttributeKey, idCheckboxDataSetKey, fullCanvasClass} = this.getHtmlBoilerplate(
       !splitLargeTileForPrint,

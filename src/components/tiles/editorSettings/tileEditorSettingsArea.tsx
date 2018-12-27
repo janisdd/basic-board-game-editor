@@ -52,13 +52,13 @@ class tileEditorSettingsArea extends React.Component<Props, any> {
     return (
       <div className="settings-area">
 
-        <Input labelPosition='left' placeholder='1' size="small">
+        <Input labelPosition='left' placeholder='tile 1' size="small">
           <Label basic>
             {
               getI18n(this.props.langId, "Name")
             }
           </Label>
-          <input style={{width: '100px'}}
+          <input style={{width: '80px'}}
                  type="text" value={this.props.editorState.tileProps.tileSettings.displayName}
                  onChange={(e: SyntheticEvent<HTMLInputElement>) => {
                    this.props.setEditor_tileDisplayName(e.currentTarget.value)

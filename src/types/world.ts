@@ -84,6 +84,11 @@ export interface TileSettings {
    */
   readonly autoIncrementFieldTextNumbersOnDuplicate: boolean
 
+  /**
+   * when fields intersect we normally don't want to connect them via lines (e.g. ladder game)
+   */
+  readonly insertLinesEvenIfFieldsIntersect: boolean
+
   readonly gridSizeInPx: number
   readonly showGrid: boolean
   readonly snapToGrid: boolean

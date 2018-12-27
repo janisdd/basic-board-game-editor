@@ -4,7 +4,7 @@ import {
   RightTileEditorTabs, SET_editor_arePrintGuidesDisplayedAction,
   SET_editor_autoIncrementFieldTextNumbersOnDuplicateAction,
   SET_editor_botBorderPointsAction,
-  SET_editor_gridSizeInPxAction,
+  SET_editor_gridSizeInPxAction, SET_editor_insertLinesEvenIfFieldsIntersectAction,
   SET_editor_isAddImgShapeLibraryDisplayedAction, SET_editor_isChooseFieldShapeBackgroundImageLibraryDisplayedAction,
   SET_editor_isChooseImgShapeImageLibraryDisplayedAction,
   SET_editor_isCreatingNewTileAction, SET_editor_isLeftTabMenuExpandedAction,
@@ -412,6 +412,13 @@ export function set_editor_autoIncrementFieldTextNumbersOnDuplicate(autoIncremen
   return {
     type: ActionType.SET_editor_autoIncrementFieldTextNumbersOnDuplicate,
     autoIncrementFieldTextNumbersOnDuplicate
+  }
+}
+
+export function set_editor_insertLinesEvenIfFieldsIntersect(insertLinesEvenIfFieldsIntersect: boolean): SET_editor_insertLinesEvenIfFieldsIntersectAction {
+  return {
+    type: ActionType.SET_editor_insertLinesEvenIfFieldsIntersect,
+    insertLinesEvenIfFieldsIntersect
   }
 }
 

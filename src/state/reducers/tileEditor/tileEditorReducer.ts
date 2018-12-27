@@ -186,6 +186,7 @@ export enum ActionType {
   SET_editor_leftTabActiveIndex = 'tileEditorReducer_SET_editor_leftTabActiveIndex',
 
   SET_editor_autoIncrementFieldTextNumbersOnDuplicate = 'tileEditorReducer_SET_editor_autoIncrementFieldTextNumbersOnDuplicate',
+  SET_editor_insertLinesEvenIfFieldsIntersect = 'tileEditorReducer_SET_editor_insertLinesEvenIfFieldsIntersect',
 
 
   SET_editor_isSelectingNextField = 'tileEditorReducer_SET_editor_isSelectingNextField',
@@ -351,6 +352,12 @@ export interface SET_editor_autoIncrementFieldTextNumbersOnDuplicateAction exten
   readonly autoIncrementFieldTextNumbersOnDuplicate: boolean
 }
 
+export interface SET_editor_insertLinesEvenIfFieldsIntersectAction extends ActionBase {
+  readonly type: ActionType.SET_editor_insertLinesEvenIfFieldsIntersect
+  readonly insertLinesEvenIfFieldsIntersect: boolean
+}
+
+
 export interface SET_editor_majorLineDirectionAction extends ActionBase {
   readonly type: ActionType.SET_editor_majorLineDirection
   readonly majorLineDirection: MajorLineDirection
@@ -456,6 +463,7 @@ export type AllActions =
   | SET_editor_printLargeTilePreferredHeightInPxAction
   | SET_editor_splitLargeTileForPrintAction
   | SET_editor_autoIncrementFieldTextNumbersOnDuplicateAction
+  | SET_editor_insertLinesEvenIfFieldsIntersectAction
   | SET_editor_majorLineDirectionAction
   | SET_editor_arePrintGuidesDisplayedAction
 
@@ -762,6 +770,17 @@ export function reducer(state: State = initial, action: AllActions): State {
           tileSettings: {
             ...state.tileProps.tileSettings,
             autoIncrementFieldTextNumbersOnDuplicate: action.autoIncrementFieldTextNumbersOnDuplicate
+          }
+        },
+      }
+    case ActionType.SET_editor_insertLinesEvenIfFieldsIntersect:
+      return {
+        ...state,
+        tileProps: {
+          ...state.tileProps,
+          tileSettings: {
+            ...state.tileProps.tileSettings,
+            insertLinesEvenIfFieldsIntersect: action.insertLinesEvenIfFieldsIntersect
           }
         },
       }

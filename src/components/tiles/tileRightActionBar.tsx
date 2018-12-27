@@ -130,7 +130,8 @@ class tileRightActionBar extends React.Component<Props, any> {
                         this.props.tileProps.tileSettings.height,
                         this.props.worldSettings.tileMidPointsDiameter,
                         this.props.settings.tileProps.tileSettings.majorLineDirection,
-                        this.props.lineShapes
+                        this.props.lineShapes,
+                        this.props.settings.tileProps.tileSettings.insertLinesEvenIfFieldsIntersect
                       )
                     } catch (err) {
                       //probably a syntax error
@@ -174,6 +175,7 @@ class tileRightActionBar extends React.Component<Props, any> {
               printLargeTilePreferredWidthInPx: this.props.tileProps.tileSettings.printLargeTilePreferredWidthInPx,
               printLargeTilePreferredHeightInPx: this.props.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
               splitLargeTileForPrint: this.props.tileProps.tileSettings.splitLargeTileForPrint,
+              insertLinesEvenIfFieldsIntersect: this.props.tileProps.tileSettings.insertLinesEvenIfFieldsIntersect
             }
           }
 

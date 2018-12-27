@@ -75,9 +75,10 @@ export const globalMinimalZoom = 0.25
 
 /**
  * larger than 500 and we cannot get 2 tiles on one din a4
+ * removed... the user can specify this... if it makes no sense then the user is to be blamed
  */
-export const maxPrintTileWidth = 500
-export const maxPrintTileHeight = 500
+// export const maxPrintTileWidth = 500
+// export const maxPrintTileHeight = 500
 
 export const printLargeTileBgColor = '#ffffff'
 
@@ -239,6 +240,7 @@ export function getDefaultNewTile(): Tile {
       printLargeTilePreferredWidthInPx: 500,
       printLargeTilePreferredHeightInPx: 500,
       splitLargeTileForPrint: true,
+      insertLinesEvenIfFieldsIntersect: false,
     }
   }
 }

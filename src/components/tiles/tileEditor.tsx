@@ -429,6 +429,7 @@ class tileEditor extends React.Component<Props, any> {
         printLargeTilePreferredWidthInPx: this.props.tileProps.tileSettings.printLargeTilePreferredWidthInPx,
         printLargeTilePreferredHeightInPx: this.props.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
         splitLargeTileForPrint: this.props.tileProps.tileSettings.splitLargeTileForPrint,
+        insertLinesEvenIfFieldsIntersect: this.props.tileProps.tileSettings.insertLinesEvenIfFieldsIntersect
       }
     }
 
@@ -498,6 +499,7 @@ class tileEditor extends React.Component<Props, any> {
                             printLargeTilePreferredWidthInPx: this.props.tileProps.tileSettings.printLargeTilePreferredWidthInPx,
                             printLargeTilePreferredHeightInPx: this.props.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
                             splitLargeTileForPrint: this.props.tileProps.tileSettings.splitLargeTileForPrint,
+                            insertLinesEvenIfFieldsIntersect: this.props.tileProps.tileSettings.insertLinesEvenIfFieldsIntersect
                           }
                         }
 
@@ -545,6 +547,7 @@ class tileEditor extends React.Component<Props, any> {
                             printLargeTilePreferredWidthInPx: this.props.tileProps.tileSettings.printLargeTilePreferredWidthInPx,
                             printLargeTilePreferredHeightInPx: this.props.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
                             splitLargeTileForPrint: this.props.tileProps.tileSettings.splitLargeTileForPrint,
+                            insertLinesEvenIfFieldsIntersect: this.props.tileProps.tileSettings.insertLinesEvenIfFieldsIntersect
                           }
                         }
 

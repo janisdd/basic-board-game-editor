@@ -7,7 +7,7 @@ import {Checkbox, Input, Form, Button, Icon, Divider, Modal, Dropdown, DropdownI
 import {
   set_editor_arePrintGuidesDisplayed,
   set_editor_autoIncrementFieldTextNumbersOnDuplicate,
-  set_editor_botBorderPoints,
+  set_editor_botBorderPoints, set_editor_insertLinesEvenIfFieldsIntersect,
   set_editor_isTileEditorSettingsModalDisplayed,
   set_editor_leftBorderPoints,
   set_editor_majorLineDirectionAction,
@@ -32,9 +32,7 @@ import {SyntheticEvent} from "react";
 import {CheckboxData} from "../../../types/ui";
 import {
   defaultTileHeight,
-  defaultTileWidth,
-  maxPrintTileHeight,
-  maxPrintTileWidth
+  defaultTileWidth
 } from "../../../constants";
 import {getI18n} from "../../../../i18n/i18nRoot";
 import IconToolTip from "../../helpers/IconToolTip";
@@ -83,6 +81,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_editor_autoIncrementFieldTextNumbersOnDuplicate,
   set_editor_majorLineDirectionAction,
   set_editor_arePrintGuidesDisplayed,
+  set_editor_insertLinesEvenIfFieldsIntersect,
 
 }, dispatch)
 
@@ -148,6 +147,16 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
                           onChange={(event: SyntheticEvent<HTMLSelectElement>, data: { value: MajorLineDirection }) => {
                             this.props.set_editor_majorLineDirectionAction(data.value)
                           }}
+                />
+              </Form.Field>
+
+              <Form.Field>
+                <Checkbox
+                  label={getI18n(this.props.langId, "Insert lines even if fields intersect")}
+                  checked={this.props.settings.tileProps.tileSettings.insertLinesEvenIfFieldsIntersect}
+                  onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
+                    this.props.set_editor_insertLinesEvenIfFieldsIntersect(data.checked)
+                  }}
                 />
               </Form.Field>
 
@@ -243,34 +252,52 @@ class tileEditorSettingsModal extends React.Component<Props, any> {
 
               <Form.Group widths='equal'>
                 <Form.Field>
-                  <label>{getI18n(this.props.langId, "Print tile width in px")} ({'<'} {maxPrintTileWidth})</label>
-                  <Input type="number" placeholder={maxPrintTileWidth}
+                  <label>{getI18n(this.props.langId, "Print tile width in px")}
+                  <IconToolTip message={getI18n(this.props.langId, "The print tile size specifies the size of the images that will be printed. If the size is small than the actual tile size the tile is split into smaller pieces (if enabled)")} />
+                  </label>
+                  <Input type="number" placeholder="500"
                          value={this.props.settings.tileProps.tileSettings.printLargeTilePreferredWidthInPx}
                          step="10" min="10"
                          style={{width: '100px'}}
                          onChange={(e: SyntheticEvent<HTMLInputElement>) => {
-                           const val = parseInt(e.currentTarget.value)
-                           this.props.setEditor_printLargeTilePreferredWidthInPx(Math.min(maxPrintTileWidth, val))
+                           let val = parseInt(e.currentTarget.value)
+
+                           //if we disable this check the img will be larger but the area where we draw will still be just
+                           //the actual tile dimension...
+                           if (val > this.props.tileProps.tileSettings.width) {
+                             val = this.props.tileProps.tileSettings.width
+                           }
+
+                           this.props.setEditor_printLargeTilePreferredWidthInPx(val)
                          }}
                   />
                 </Form.Field>
                 <Form.Field>
-                  <label>{getI18n(this.props.langId, "Print tile height in px")} ({'<'} {maxPrintTileHeight})</label>
-                  <Input type="number" placeholder={maxPrintTileHeight}
+                  <label>{getI18n(this.props.langId, "Print tile height in px")}
+                    <IconToolTip message={getI18n(this.props.langId, "The print tile size specifies the size of the images that will be printed. If the size is small than the actual tile size the tile is split into smaller pieces (if enabled)")} />
+                  </label>
+                  <Input type="number" placeholder="500"
                          value={this.props.settings.tileProps.tileSettings.printLargeTilePreferredHeightInPx}
                          step="10" min="10"
                          style={{width: '100px'}}
                          onChange={(e: SyntheticEvent<HTMLInputElement>) => {
-                           const val = parseInt(e.currentTarget.value)
-                           this.props.setEditor_printLargeTilePreferredHeightInPx(Math.min(maxPrintTileHeight, val))
+                           let val = parseInt(e.currentTarget.value)
+
+                           //if we disable this check the img will be larger but the area where we draw will still be just
+                           //the actual tile dimension...
+                           if (val > this.props.tileProps.tileSettings.height) {
+                             val = this.props.tileProps.tileSettings.height
+                           }
+
+                           this.props.setEditor_printLargeTilePreferredHeightInPx(val)
                          }}
                   />
                 </Form.Field>
                 <Form.Field>
                   <Button icon
                           onClick={() => {
-                            this.props.setEditor_printLargeTilePreferredWidthInPx(maxPrintTileWidth)
-                            this.props.setEditor_printLargeTilePreferredHeightInPx(maxPrintTileHeight)
+                            this.props.setEditor_printLargeTilePreferredWidthInPx(500)
+                            this.props.setEditor_printLargeTilePreferredHeightInPx(500)
                           }}>
                     <Icon name="undo"/>
                   </Button>

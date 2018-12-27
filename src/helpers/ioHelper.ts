@@ -173,6 +173,7 @@ export class IoHelper {
         printLargeTilePreferredWidthInPx: exportedTile.tile.tileSettings.printLargeTilePreferredWidthInPx,
         printLargeTilePreferredHeightInPx: exportedTile.tile.tileSettings.printLargeTilePreferredHeightInPx,
         splitLargeTileForPrint: exportedTile.tile.tileSettings.splitLargeTileForPrint,
+        insertLinesEvenIfFieldsIntersect: exportedTile.tile.tileSettings.insertLinesEvenIfFieldsIntersect
       }
     }
 

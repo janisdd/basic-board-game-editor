@@ -143,7 +143,7 @@ export const initial: State = {
 
   worldCmdText: defaultGameInitCode,
   printGameAsOneImage: false,
-  printScale: 1.2,
+  printScale: 1.0,
 
 
   timeInS_rollDice: SimulationTimes.timeInS_rollDice_default,

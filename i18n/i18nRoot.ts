@@ -157,9 +157,11 @@ export interface LangObj {
   "Split tile into smaller pieces": string
   "If enabled and the tile size is larger than the print tile size then the tile will be split into smaller pieces when printing. When disabled the printing tab will display the tile as one image": string
   "Print tile width in px": string
+  "The print tile size specifies the size of the images that will be printed. If the size is small than the actual tile size the tile is split into smaller pieces (if enabled)": string
   "Print tile height in px": string
   "Auto increment field text that contain numbers on duplication": string
   "Display print guides": string
+  "Insert lines even if fields intersect": string
   "top to bottom": string
   "bottom to top": string
   "left to right": string

@@ -202,6 +202,7 @@ class Migration_1_0_3__to__1_1_0 implements MigrationClass {
           printLargeTilePreferredWidthInPx: 500,
           printLargeTilePreferredHeightInPx: 500,
           splitLargeTileForPrint: true,
+          insertLinesEvenIfFieldsIntersect: false,
         }
       }
     }
@@ -366,7 +367,14 @@ class Migration_1_2_0__to__1_2_1 implements MigrationClass {
   migrateTile(exportTile: ExportTile): ExportTile {
     const copy: ExportTile = {
       ...exportTile,
-      editorVersion: this.newVersion
+      editorVersion: this.newVersion,
+      tile: {
+        ...exportTile.tile,
+        tileSettings: {
+          ...exportTile.tile.tileSettings,
+          insertLinesEvenIfFieldsIntersect: false
+        }
+      }
     }
 
     return copy
