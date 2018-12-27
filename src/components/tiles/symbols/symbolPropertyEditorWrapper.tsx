@@ -48,13 +48,16 @@ import {
   set_selectedImgSymbolGuid,
   set_selectedLineSymbolGuid
 } from "../../../state/reducers/tileEditor/symbols/actions";
-import ImagePropertyEditor from '../propertyEditors/imagePropertyEditor'
+import ImageSymbolPropertyEditor from '../propertyEditors/imageSymbolPropertyEditor'
 import LinePropertyEditor from '../propertyEditors/linePropertyEditor'
 import {
   set_imgSymbol_displayName,
   set_imgSymbol_height,
   set_imgSymbol_imgStorageGuid,
   set_imgSymbol_isMouseSelectionDisabled,
+  set_imgSymbol_overwriteHeight, set_imgSymbol_overwriteImage, set_imgSymbol_overwriteIsDisabledForMouseSelection,
+  set_imgSymbol_overwriteRotationInDeg, set_imgSymbol_overwriteSkewX, set_imgSymbol_overwriteSkewY,
+  set_imgSymbol_overwriteWidth,
   set_imgSymbol_rotation,
   set_imgSymbol_skewX,
   set_imgSymbol_skewY,
@@ -181,6 +184,14 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_fieldSymbol_overwriteCornerRadius,
   set_fieldSymbol_overwriteRotationInDeg,
   set_fieldSymbol_overwriteBackgroundImage,
+
+  set_imgSymbol_overwriteWidth,
+  set_imgSymbol_overwriteHeight,
+  set_imgSymbol_overwriteRotationInDeg,
+  set_imgSymbol_overwriteImage,
+  set_imgSymbol_overwriteSkewX,
+  set_imgSymbol_overwriteSkewY,
+  set_imgSymbol_overwriteIsDisabledForMouseSelection,
 
 }, dispatch)
 
@@ -518,13 +529,33 @@ class symbolPropertyEditorWrapper extends React.Component<Props, any> {
         {
           selectedImgSymbol !== null &&
           <div>
-            <ImagePropertyEditor
+            <ImageSymbolPropertyEditor
+
+              set_imgSymbol_overwriteWidth={(overwrite) => {
+              this.props.set_imgSymbol_overwriteWidth(selectedImgSymbol.guid,overwrite)}
+              }
+              set_imgSymbol_overwriteHeight={(overwrite) => {
+                this.props.set_imgSymbol_overwriteHeight(selectedImgSymbol.guid,overwrite)
+              }}
+              set_imgSymbol_overwriteRotationInDeg={(overwrite) => {
+                this.props.set_imgSymbol_overwriteRotationInDeg(selectedImgSymbol.guid,overwrite)
+              }}
+              set_imgSymbol_overwriteImage={(overwrite) => {
+                this.props.set_imgSymbol_overwriteImage(selectedImgSymbol.guid,overwrite)
+              }}
+              set_imgSymbol_overwriteSkewX={(overwrite) => {
+                this.props.set_imgSymbol_overwriteSkewX(selectedImgSymbol.guid,overwrite)
+              }}
+              set_imgSymbol_overwriteSkewY={(overwrite) => {
+                this.props.set_imgSymbol_overwriteSkewY(selectedImgSymbol.guid,overwrite)
+              }}
+              set_imgSymbol_overwriteIsDisabledForMouseSelection={(overwrite) => {
+                this.props.set_imgSymbol_overwriteIsDisabledForMouseSelection(selectedImgSymbol.guid,overwrite)
+              }}
 
               setPropertyEditor_ImageIsMouseDisabled={(oldIsMouseDisabled, newIsMouseDisabled) => {
                 this.props.set_imgSymbol_isMouseDisabled(selectedImgSymbol.guid, newIsMouseDisabled)
               }}
-
-              setPropertyEditor_ImageIsBasedOnSymbol={nop}
 
               setPropertyEditor_ImageSkewY={(oldSkewY, newSkewY) => {
                 this.props.set_imgSymbol_skewY(selectedImgSymbol.guid, newSkewY)
@@ -534,12 +565,8 @@ class symbolPropertyEditorWrapper extends React.Component<Props, any> {
                 this.props.set_imgSymbol_skewX(selectedImgSymbol.guid, newSkewX)
               }}
 
-              setPropertyEditor_ImageAbsoluteZIndex={nop}
-              setPropertyEditor_ImageY={nop}
-              setPropertyEditor_ImageX={nop}
 
               imgShape={selectedImgSymbol}
-              onDuplicateImgs={nop}
 
               setPropertyEditor_setSelectedImageToNull={() => this.props.set_selectedImgSymbolGuid(null)}
               setPropertyEditor_ImageWidth={(oldWidth, newWidth) => {
@@ -552,8 +579,6 @@ class symbolPropertyEditorWrapper extends React.Component<Props, any> {
                 this.props.set_imgSymbol_height(selectedImgSymbol.guid, newHeight)
               }}
 
-              setPropertyEditor_removeImgShape={nop}
-              onAddImgSymbol={nop}
               setPropertyEditor_ImageImgGuid={(oldImgGuid, newImgGuid) => {
                 //then call setPropertyEditor_ImageImgId
                 this.props.set_imgSymbol_imgStorageGuid(selectedImgSymbol.guid, newImgGuid)

@@ -1,15 +1,26 @@
 import {ImgSymbol} from "../../../../../types/drawing";
 import {
-  ActionType, Edit_imgSymbolRedo, Edit_imgSymbolUndo,
+  ActionType,
+  Edit_imgSymbolRedo,
+  Edit_imgSymbolUndo,
   SET_imgSymbol_displayIndexAction,
   SET_imgSymbol_displayNameAction,
   SET_imgSymbol_heightAction,
-  SET_imgSymbol_imgStorageGuidAction, SET_imgSymbol_isMouseSelectionDisabledAction,
+  SET_imgSymbol_imgStorageGuidAction,
+  SET_imgSymbol_isMouseSelectionDisabledAction,
+  SET_imgSymbol_overwriteHeightAction,
+  SET_imgSymbol_overwriteImageAction,
+  SET_imgSymbol_overwriteIsDisabledForMouseSelectionAction,
+  SET_imgSymbol_overwriteRotationInDegAction,
+  SET_imgSymbol_overwriteSkewXAction,
+  SET_imgSymbol_overwriteSkewYAction,
+  SET_imgSymbol_overwriteWidthAction,
   SET_imgSymbol_rotationAction,
   SET_imgSymbol_skewXAction,
   SET_imgSymbol_skewYAction,
   SET_imgSymbol_widthAction,
-  SET_imgSymbolsAction, UndoImgSymbolType
+  SET_imgSymbolsAction,
+  UndoImgSymbolType
 } from "./imgSymbolReducer";
 import {MultiActions} from "../../../../../types/ui";
 import {setPropertyEditor_ImageCreatedFromSymbolId} from "../../imgProperties/actions";
@@ -132,5 +143,56 @@ export function edit_imgSymbolUndo(): Edit_imgSymbolUndo {
 export function edit_imgSymbolRedo(): Edit_imgSymbolRedo {
   return {
     type: UndoImgSymbolType.redo
+  }
+}
+
+
+export function set_imgSymbol_overwriteWidth(imgSymbolGuid: string, overwrite: boolean): SET_imgSymbol_overwriteWidthAction {
+  return {
+    type: ActionType.SET_imgSymbol_overwriteWidth,
+    overwrite,
+    imgSymbolGuid
+  }
+}
+export function set_imgSymbol_overwriteHeight(imgSymbolGuid: string, overwrite: boolean): SET_imgSymbol_overwriteHeightAction {
+  return {
+    type: ActionType.SET_imgSymbol_overwriteHeight,
+    overwrite,
+    imgSymbolGuid
+  }
+}
+export function set_imgSymbol_overwriteRotationInDeg(imgSymbolGuid: string, overwrite: boolean): SET_imgSymbol_overwriteRotationInDegAction {
+  return {
+    type: ActionType.SET_imgSymbol_overwriteRotationInDeg,
+    overwrite,
+    imgSymbolGuid
+  }
+}
+export function set_imgSymbol_overwriteImage(imgSymbolGuid: string, overwrite: boolean): SET_imgSymbol_overwriteImageAction {
+  return {
+    type: ActionType.SET_imgSymbol_overwriteImage,
+    overwrite,
+    imgSymbolGuid
+  }
+}
+export function set_imgSymbol_overwriteSkewX(imgSymbolGuid: string, overwrite: boolean): SET_imgSymbol_overwriteSkewXAction {
+  return {
+    type: ActionType.SET_imgSymbol_overwriteSkewX,
+    overwrite,
+    imgSymbolGuid
+  }
+}
+export function set_imgSymbol_overwriteSkewY(imgSymbolGuid: string, overwrite: boolean): SET_imgSymbol_overwriteSkewYAction {
+  return {
+    type: ActionType.SET_imgSymbol_overwriteSkewY,
+    overwrite,
+    imgSymbolGuid
+  }
+}
+export function set_imgSymbol_overwriteIsDisabledForMouseSelection(imgSymbolGuid: string, overwrite: boolean): SET_imgSymbol_overwriteIsDisabledForMouseSelectionAction {
+  return {
+    type: ActionType.SET_imgSymbol_overwriteIsDisabledForMouseSelection,
+    overwrite,
+    imgSymbolGuid
   }
 }

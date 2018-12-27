@@ -438,7 +438,6 @@ class propertyEditorsView extends React.Component<Props, any> {
                   this.props.setPropertyEditor_FieldAnchorPoints(selectedFieldShapes[0].id, anchorPoints)
                 }
               }}
-              set_fieldSymbol_displayName={nop}
             />
           </div>
         }
@@ -446,6 +445,7 @@ class propertyEditorsView extends React.Component<Props, any> {
           selectedImgShapes.length > 0 &&
           <div>
             <ImagePropertyEditor imgShape={selectedImgShapes}
+                                 imgSymbols={this.props.imgSymbols}
 
                                  setPropertyEditor_ImageIsMouseDisabled={(oldIsMouseDisabled, newIsMouseDisabled) => {
                                    for (const imgShape of selectedImgShapes) {
@@ -562,7 +562,6 @@ class propertyEditorsView extends React.Component<Props, any> {
                                  setEditor_IsChooseImgShapeImageLibraryDisplayed={(isDisplayed: boolean) => {
                                    this.props.setEditor_IsChooseImgShapeImageLibraryDisplayed(isDisplayed)
                                  }}
-                                 set_imgSymbol_displayName={nop}
             />
           </div>
         }

@@ -35,6 +35,15 @@ export enum ActionType {
 
   SET_imgSymbol_isMouseSelectionDisabled = 'imgSymbolReducer_SET_imgSymbol_isMouseSelectionDisabled',
 
+
+  SET_imgSymbol_overwriteWidth = 'imgSymbolReducer_SET_imgSymbol_overwriteWidth',
+  SET_imgSymbol_overwriteHeight = 'imgSymbolReducer_SET_imgSymbol_overwriteHeight',
+  SET_imgSymbol_overwriteRotationInDeg = 'imgSymbolReducer_SET_imgSymbol_overwriteRotationInDeg',
+  SET_imgSymbol_overwriteImage = 'imgSymbolReducer_SET_imgSymbol_overwriteImage',
+  SET_imgSymbol_overwriteSkewX = 'imgSymbolReducer_SET_imgSymbol_overwriteSkewX',
+  SET_imgSymbol_overwriteSkewY = 'imgSymbolReducer_SET_imgSymbol_overwriteSkewY',
+  SET_imgSymbol_overwriteIsDisabledForMouseSelection = 'imgSymbolReducer_SET_imgSymbol_overwriteIsDisabledForMouseSelection',
+
   RESET = 'imgSymbolReducer_RESET',
 }
 
@@ -98,6 +107,41 @@ export interface SET_imgSymbol_isMouseSelectionDisabledAction extends ActionBase
   readonly isMouseSelectionDisabled: boolean
 }
 
+export interface SET_imgSymbol_overwriteWidthAction extends ActionBase {
+  readonly type: ActionType.SET_imgSymbol_overwriteWidth
+  readonly overwrite: boolean
+  readonly imgSymbolGuid: string
+}
+export interface SET_imgSymbol_overwriteHeightAction extends ActionBase {
+  readonly type: ActionType.SET_imgSymbol_overwriteHeight
+  readonly overwrite: boolean
+  readonly imgSymbolGuid: string
+}
+export interface SET_imgSymbol_overwriteRotationInDegAction extends ActionBase {
+  readonly type: ActionType.SET_imgSymbol_overwriteRotationInDeg
+  readonly overwrite: boolean
+  readonly imgSymbolGuid: string
+}
+export interface SET_imgSymbol_overwriteImageAction extends ActionBase {
+  readonly type: ActionType.SET_imgSymbol_overwriteImage
+  readonly overwrite: boolean
+  readonly imgSymbolGuid: string
+}
+export interface SET_imgSymbol_overwriteSkewXAction extends ActionBase {
+  readonly type: ActionType.SET_imgSymbol_overwriteSkewX
+  readonly overwrite: boolean
+  readonly imgSymbolGuid: string
+}
+export interface SET_imgSymbol_overwriteSkewYAction extends ActionBase {
+  readonly type: ActionType.SET_imgSymbol_overwriteSkewY
+  readonly overwrite: boolean
+  readonly imgSymbolGuid: string
+}
+export interface SET_imgSymbol_overwriteIsDisabledForMouseSelectionAction extends ActionBase {
+  readonly type: ActionType.SET_imgSymbol_overwriteIsDisabledForMouseSelection
+  readonly overwrite: boolean
+  readonly imgSymbolGuid: string
+}
 
 export interface ResetAction extends ActionBase {
   readonly type: ActionType.RESET
@@ -115,6 +159,14 @@ export type AllActions =
   | SET_imgSymbol_skewXAction
   | SET_imgSymbol_skewYAction
   | SET_imgSymbol_isMouseSelectionDisabledAction
+
+ | SET_imgSymbol_overwriteWidthAction
+ | SET_imgSymbol_overwriteHeightAction
+ | SET_imgSymbol_overwriteRotationInDegAction
+ | SET_imgSymbol_overwriteImageAction
+ | SET_imgSymbol_overwriteSkewXAction
+ | SET_imgSymbol_overwriteSkewYAction
+ | SET_imgSymbol_overwriteIsDisabledForMouseSelectionAction
 
 export function _reducer(state: State = initial, action: AllActions): State {
 
@@ -184,6 +236,63 @@ export function _reducer(state: State = initial, action: AllActions): State {
         return {...p, isMouseSelectionDisabled: action.isMouseSelectionDisabled}
       })
       return res
+    }
+
+    case ActionType.SET_imgSymbol_overwriteWidth: {
+      return replacePropertyByGuid(state, action.imgSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteWidth: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_imgSymbol_overwriteHeight: {
+      return replacePropertyByGuid(state, action.imgSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteHeight: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_imgSymbol_overwriteRotationInDeg: {
+      return replacePropertyByGuid(state, action.imgSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteRotationInDeg: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_imgSymbol_overwriteImage: {
+      return replacePropertyByGuid(state, action.imgSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteImage: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_imgSymbol_overwriteSkewX: {
+      return replacePropertyByGuid(state, action.imgSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteSkewX: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_imgSymbol_overwriteSkewY: {
+      return replacePropertyByGuid(state, action.imgSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteSkewY: action.overwrite
+        }
+      })
+    }
+    case ActionType.SET_imgSymbol_overwriteIsDisabledForMouseSelection: {
+      return replacePropertyByGuid(state, action.imgSymbolGuid, p => {
+        return {
+          ...p,
+          overwriteIsDisabledForMouseSelection: action.overwrite
+        }
+      })
     }
 
     case ActionType.RESET:

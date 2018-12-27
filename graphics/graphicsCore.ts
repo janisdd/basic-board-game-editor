@@ -1185,10 +1185,10 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
 
 
   let container = new createjs.Container()
-  const img = ImgStorage.getImgFromGuid(symbolForShape !== null ? symbolForShape.imgGuid : imgShape.imgGuid)
+  const img = ImgStorage.getImgFromGuid(symbolForShape !== null && symbolForShape.overwriteImage ? symbolForShape.imgGuid : imgShape.imgGuid)
 
-  let imgWidth = (symbolForShape !== null ? symbolForShape.width : imgShape.width)
-  let imgHeight = (symbolForShape !== null ? symbolForShape.height : imgShape.height)
+  let imgWidth = (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width)
+  let imgHeight = (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
 
   //--start
   let bitmap: Bitmap
@@ -1206,14 +1206,14 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     border.graphics.drawRect(
       0 - imgNotFoundStrokeThickness,
       0 - imgNotFoundStrokeThickness,
-      (symbolForShape !== null ? symbolForShape.width : imgShape.width) + imgNotFoundStrokeThickness * 2,
-      (symbolForShape !== null ? symbolForShape.height : imgShape.height) + imgNotFoundStrokeThickness * 2
+      (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) + imgNotFoundStrokeThickness * 2,
+      (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + imgNotFoundStrokeThickness * 2
     )
 
     border.setBounds(0 - imgNotFoundStrokeThickness,
       0 - imgNotFoundStrokeThickness,
-      (symbolForShape !== null ? symbolForShape.width : imgShape.width) + imgNotFoundStrokeThickness * 2,
-      (symbolForShape !== null ? symbolForShape.height : imgShape.height) + imgNotFoundStrokeThickness * 2
+      (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) + imgNotFoundStrokeThickness * 2,
+      (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + imgNotFoundStrokeThickness * 2
     )
 
     let lineXLeft = new createjs.Shape()
@@ -1251,8 +1251,8 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     bitmap.setBounds(
       imgShape.x + xOffset,
       imgShape.y + yOffset,
-      (symbolForShape !== null ? symbolForShape.width : imgShape.width),
-      (symbolForShape !== null ? symbolForShape.height : imgShape.height)
+      (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width),
+      (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
     )
 
     //this was old without setting the scale
@@ -1289,13 +1289,13 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     container.addChild(bitmap)
   }
 
-  container.x = imgShape.x + xOffset + (symbolForShape !== null ? symbolForShape.width : imgShape.width) / 2
-  container.y = imgShape.y + yOffset + (symbolForShape !== null ? symbolForShape.height : imgShape.height) / 2
-  container.regX = (symbolForShape !== null ? symbolForShape.width : imgShape.width) / 2
-  container.regY = (symbolForShape !== null ? symbolForShape.height : imgShape.height) / 2
+  container.x = imgShape.x + xOffset + (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) / 2
+  container.y = imgShape.y + yOffset + (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) / 2
+  container.regX = (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) / 2
+  container.regY = (symbolForShape !== null   && symbolForShape.overwriteHeight? symbolForShape.height : imgShape.height) / 2
 
-  container.skewX = (symbolForShape !== null ? symbolForShape.skewX : imgShape.skewX)
-  container.skewY = (symbolForShape !== null ? symbolForShape.skewY : imgShape.skewY)
+  container.skewX = (symbolForShape !== null  && symbolForShape.overwriteSkewX ? symbolForShape.skewX : imgShape.skewX)
+  container.skewY = (symbolForShape !== null   && symbolForShape.overwriteSkewY? symbolForShape.skewY : imgShape.skewY)
 
 
   //when we use an svg with width="100%" height="100%" viewBox="0 0 41 103" then the hit test is always wrong
@@ -1312,8 +1312,8 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     .drawRect(
       0,
       0,
-      (symbolForShape !== null ? symbolForShape.width : imgShape.width),
-      (symbolForShape !== null ? symbolForShape.height : imgShape.height)
+      (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width),
+      (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
     )
   container.hitArea = hitTestShape
 
@@ -1328,8 +1328,8 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     border.graphics.drawRect(
       xOffset - borderThickness,
       yOffset - borderThickness,
-      (symbolForShape !== null ? symbolForShape.width : imgShape.width) + borderThickness * 2,
-      (symbolForShape !== null ? symbolForShape.height : imgShape.height) + borderThickness * 2
+      (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) + borderThickness * 2,
+      (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + borderThickness * 2
     )
 
     // border.regX = imgShape.width / 2
@@ -1341,7 +1341,7 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
 
   // container.regX = imgShape.width / 2
   // container.regY = imgShape.height / 2
-  container.rotation = (symbolForShape !== null ? symbolForShape.rotationInDegree : imgShape.rotationInDegree)
+  container.rotation = (symbolForShape !== null  && symbolForShape.overwriteRotationInDeg ? symbolForShape.rotationInDegree : imgShape.rotationInDegree)
 
   if (symbolForShape !== null && drawBasedOnSymbolIndicator) {
     //draw a symbol so that the user knows that this shape is connected to a symbol
@@ -1381,7 +1381,7 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
 
   stage.addChild(container)
 
-  if (symbolForShape !== null ? symbolForShape.isMouseSelectionDisabled : imgShape.isMouseSelectionDisabled) {
+  if (symbolForShape !== null  && symbolForShape.overwriteIsDisabledForMouseSelection ? symbolForShape.isMouseSelectionDisabled : imgShape.isMouseSelectionDisabled) {
     container.mouseEnabled = false
     container.alpha = 0.5
   }

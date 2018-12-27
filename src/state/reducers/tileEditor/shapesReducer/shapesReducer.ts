@@ -145,6 +145,13 @@ export function _reducer(state: State = initial, action: AllActions): State {
     case ImgSymbolActionTypes.SET_imgSymbol_skewX:
     case ImgSymbolActionTypes.SET_imgSymbol_skewY:
     case ImgSymbolActionTypes.SET_imgSymbol_isMouseSelectionDisabled:
+    case ImgSymbolActionTypes.SET_imgSymbol_overwriteWidth:
+    case ImgSymbolActionTypes.SET_imgSymbol_overwriteHeight:
+    case ImgSymbolActionTypes.SET_imgSymbol_overwriteRotationInDeg:
+    case ImgSymbolActionTypes.SET_imgSymbol_overwriteImage:
+    case ImgSymbolActionTypes.SET_imgSymbol_overwriteSkewX:
+    case ImgSymbolActionTypes.SET_imgSymbol_overwriteSkewY:
+    case ImgSymbolActionTypes.SET_imgSymbol_overwriteIsDisabledForMouseSelection:
     case ImgSymbolActionTypes.RESET: {
       if (state.lastEditedShapeType !== LastEditedShapeType.imgSymbol) {
         incImgSymbolHistoryId()

@@ -81,10 +81,6 @@ export interface MyProps {
   readonly setTileEditorSelectingNextField: (
     isSelectingNextField: boolean, sourceForSelectingNextField: FieldShape | null) => void
 
-
-  //--symbol actions
-  readonly set_fieldSymbol_displayName: (displayName: string) => void
-
 }
 
 const mapStateToProps = (rootState: RootState, props: MyProps) => {
