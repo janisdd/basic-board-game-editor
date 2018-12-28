@@ -116,7 +116,7 @@ class lineSymbolsMenu extends React.Component<Props, any> {
 
                   <ToolTip
                     message={getI18n(this.props.langId,
-                      "Adds a new shape that is linked to the symbol. When the symbol changes the shape will changetoo. Can be changed later")}
+                      "Adds a new shape that is linked to the symbol. When the symbol changes the shape will change too. Can be changed later")}
                   >
                     <Button icon
                             onClick={() => {

@@ -58,8 +58,10 @@ export interface MyProps {
   readonly onDuplicateLines: (newLineShapes: ReadonlyArray<LineShape>) => void
 
   //--symbol actions
-
-  readonly set_lineSymbol_displayName: (displayName: string) => void
+  /**
+   * when we click on the overwrite arrow we want to open the symbol from which we inherit the settings
+   */
+  readonly onGotoSymbol: (symbol: LineSymbol) => void
 
 }
 
@@ -99,7 +101,7 @@ class linePropertyEditor extends React.Component<Props, any> {
     const isSomeLineBasedOnSymbol =
       isSingleLine && singleLine !== null && singleLine.createdFromSymbolGuid !== null
       ||
-      areLineShapes && (this.props.lineShape as ReadonlyArray<LineShape>).some(p => p.createdFromSymbolGuid !== null)
+      areLineShapes && this.props.lineShape.some(p => p.createdFromSymbolGuid !== null)
 
     const isBasedOnSymbol = isSingleLine && isSomeLineBasedOnSymbol
 
@@ -112,6 +114,8 @@ class linePropertyEditor extends React.Component<Props, any> {
         lineSymbol = temp
       }
     }
+
+    console.log('render')
 
     const actionsButtonsContent = (
       <Form.Field>
@@ -234,9 +238,7 @@ class linePropertyEditor extends React.Component<Props, any> {
             isBasedOnSymbol &&
             <Form.Field>
               <label>{getI18n(this.props.langId, "Name")}</label>
-              <input value={lineSymbol.displayName}
-                     onChange={(e) => this.props.set_lineSymbol_displayName(e.currentTarget.value)}
-              />
+              <input value={lineSymbol.displayName} disabled/>
             </Form.Field>
           }
 
@@ -251,7 +253,7 @@ class linePropertyEditor extends React.Component<Props, any> {
 
                   {
                     isBasedOnSymbol && lineSymbol.overwriteColor &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(lineSymbol)}/>
                   }
                 </label>
                 <Popup
@@ -289,7 +291,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                 <label>{getI18n(this.props.langId, "Thickness in px")}
                   {
                     isBasedOnSymbol && lineSymbol.overwriteThicknessInPx &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(lineSymbol)}/>
                   }
                 </label>
                 <input type="number"
@@ -309,7 +311,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                 <label>{getI18n(this.props.langId, "Gaps in px")}
                   {
                     isBasedOnSymbol && lineSymbol.overwriteGapsInPx &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(lineSymbol)}/>
                   }
                 </label>
                 <input type="number"
@@ -355,15 +357,12 @@ class linePropertyEditor extends React.Component<Props, any> {
             </Form.Group>
           }
 
-          {
-            //if this field is based on a symbol... we cannot change this
-            isSomeLineBasedOnSymbol === false &&
             <Form.Group widths='equal'>
               <Form.Field>
                 <label>{getI18n(this.props.langId, "Start arrow")}
                   {
                     isBasedOnSymbol && lineSymbol.overwriteHasStartArrow &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(lineSymbol)}/>
                   }
                 </label>
                 <Checkbox
@@ -379,7 +378,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                 <label>{getI18n(this.props.langId, "End arrow")}
                   {
                     isBasedOnSymbol && lineSymbol.overwriteHasEndArrow &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(lineSymbol)}/>
                   }
                 </label>
                 <Checkbox
@@ -392,7 +391,6 @@ class linePropertyEditor extends React.Component<Props, any> {
                 />
               </Form.Field>
             </Form.Group>
-          }
 
 
           {
@@ -467,15 +465,12 @@ class linePropertyEditor extends React.Component<Props, any> {
             </Form.Field>
           }
 
-          {
-            //if this field is based on a symbol... we cannot change this
-            isSomeLineBasedOnSymbol === false &&
             <Form.Group widths='equal'>
               <Form.Field>
                 <label>{getI18n(this.props.langId, "Arrow width")}
                   {
                     isBasedOnSymbol && lineSymbol.overwriteArrowWidth &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(lineSymbol)}/>
                   }
                 </label>
                 <input type="number" min="1"
@@ -495,7 +490,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                 <label>{getI18n(this.props.langId, "Arrow height")}
                   {
                     isBasedOnSymbol && lineSymbol.overwriteArrowHeight &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(lineSymbol)}/>
                   }
                 </label>
                 <input type="number" min="1"
@@ -511,7 +506,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                 />
               </Form.Field>
             </Form.Group>
-          }
+
 
           {
             isSingleLine &&

@@ -225,7 +225,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_fieldSymbol_overwriteCmdText(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
 
               </label>
@@ -258,7 +258,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_fieldSymbol_overwriteHeight(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <input type="number"
@@ -275,7 +275,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_fieldSymbol_overwriteWidth(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <input type="number"
@@ -298,7 +298,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_fieldSymbol_overwriteColor(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               {/*<input type="color"*/}
@@ -338,7 +338,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_fieldSymbol_overwriteBgColor(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
 
@@ -383,7 +383,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_fieldSymbol_overwriteBorderColor(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <Popup
@@ -408,7 +408,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_fieldSymbol_overwriteBorderSizeInPx(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <input type="number"
@@ -429,7 +429,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_fieldSymbol_overwriteFontName(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <input type="text"
@@ -445,7 +445,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_fieldSymbol_overwriteFontSizeInPx(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <input type="number"
@@ -464,7 +464,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                         onChange={(event, data: CheckboxData) => {
                           this.props.set_fieldSymbol_overwriteFontDecoration(data.checked)
                         }}
-                        label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                        label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
               />
             </label>
             <Button.Group>
@@ -509,7 +509,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                         onChange={(event, data: CheckboxData) => {
                           this.props.set_fieldSymbol_overwriteText(data.checked)
               }}
-              label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+              label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
               />
           </label>
           <textarea rows={2}
@@ -526,7 +526,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_fieldSymbol_overwriteHorizontalTextAlign(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <Button.Group>
@@ -559,7 +559,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_fieldSymbol_overwriteVerticalTextAlign(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <Button.Group>
@@ -594,7 +594,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                         onChange={(event, data: CheckboxData) => {
                           this.props.set_fieldSymbol_overwritePadding(data.checked)
                         }}
-                        label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                        label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
               />
             </label>
 
@@ -649,7 +649,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_fieldSymbol_overwriteCornerRadius(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <input type="number"
@@ -670,7 +670,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                         onChange={(event, data: CheckboxData) => {
                           this.props.set_fieldSymbol_overwriteRotationInDeg(data.checked)
                         }}
-                        label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                        label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
               />
             </label>
             <Input
@@ -696,7 +696,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                         onChange={(event, data: CheckboxData) => {
                           this.props.set_fieldSymbol_overwriteBackgroundImage(data.checked)
                         }}
-                        label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                        label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
               />
             </label>
 

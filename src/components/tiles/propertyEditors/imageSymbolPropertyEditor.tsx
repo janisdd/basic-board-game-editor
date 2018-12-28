@@ -120,7 +120,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                             onChange={(event, data: CheckboxData) => {
                               this.props.set_imgSymbol_overwriteHeight(data.checked)
                             }}
-                            label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                            label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                   />
                 </label>
                 <input type="number"
@@ -138,7 +138,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                             onChange={(event, data: CheckboxData) => {
                               this.props.set_imgSymbol_overwriteWidth(data.checked)
                             }}
-                            label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                            label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                   />
                 </label>
                 <input type="number"
@@ -161,7 +161,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_imgSymbol_overwriteRotationInDeg(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <Input
@@ -194,7 +194,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_imgSymbol_overwriteImage(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
 
@@ -234,7 +234,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                             onChange={(event, data: CheckboxData) => {
                               this.props.set_imgSymbol_overwriteSkewX(data.checked)
                             }}
-                            label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                            label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                   />
                 </label>
                 <input type='number'
@@ -254,7 +254,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                             onChange={(event, data: CheckboxData) => {
                               this.props.set_imgSymbol_overwriteSkewY(data.checked)
                             }}
-                            label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                            label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                   />
                 </label>
                 <input type='number'
@@ -280,7 +280,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_imgSymbol_overwriteIsDisabledForMouseSelection(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <Checkbox

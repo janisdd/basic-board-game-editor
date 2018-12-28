@@ -168,10 +168,10 @@ export const lang_en: LangObj = {
   "Symbols": "Symbols",
   "Outline": "Outline",
   //--- symbol editors
-  "Overwrite": "Overwrite",
-  "Overwritten by symbol": "Overwritten by symbol",
+  "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used": "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used",
+  "Overwritten by symbol, click to select symbol": "Overwritten by symbol, click to select symbol",
   "Adds a new shape with the props of the symbol": "Adds a new shape with the props of the symbol",
-  "Adds a new shape that is linked to the symbol. When the symbol changes the shape will changetoo. Can be changed later": "Adds a new shape that is linked to the symbol. When the symbol changes the shape will changetoo. Can be changed later",
+  "Adds a new shape that is linked to the symbol. When the symbol changes the shape will change too. Can be changed later": "Adds a new shape that is linked to the symbol. When the symbol changes the shape will change too. Can be changed later",
   "Removing a symbol will disconnect all shapes from that symbol. The shapes will stay but use its own properties again": "Removing a symbol will disconnect all shapes from that symbol. The shapes will stay but use its own properties again",
   "What is a symbol": "What is a symbol",
   "A symbol is like a plan for a shape, it defines properties. If you create an instance of this symbol then the created shape will keep a connection to the symbol and use the symbol properties instead of its own properties. Thus when you change the symbol all connected shapes will update too! Symbol instances are marked with a small indicator in the corner. To add a symbol select a shape and create a symbol from shape. Note that changes to symbols are global (applied to all tiles) and are applied immediately (without apply changes) and cannot be cancelled": "A symbol is like a plan for a shape, it defines properties. If you create an instance of this symbol then the created shape will keep a connection to the symbol and use the symbol properties instead of its own properties. Thus when you change the symbol all connected shapes will update too! Symbol instances are marked with a small indicator in the corner. To add a symbol select a shape and create a symbol from shape. Note that changes to symbols are global (applied to all tiles) and are applied immediately (without apply changes) and cannot be cancelled",

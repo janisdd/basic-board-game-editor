@@ -81,6 +81,13 @@ export interface MyProps {
   readonly setTileEditorSelectingNextField: (
     isSelectingNextField: boolean, sourceForSelectingNextField: FieldShape | null) => void
 
+  //--symbol actions
+
+  /**
+   * when we click on the overwrite arrow we want to open the symbol from which we inherit the settings
+   */
+  readonly onGotoSymbol: (symbol: FieldSymbol) => void
+
 }
 
 const mapStateToProps = (rootState: RootState, props: MyProps) => {
@@ -145,7 +152,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
     //we need to specify an old val when we have multiple fields to we take the first
     const singleField: FieldShape = this.props.fieldShape[0]
 
-    const isSomeFieldBasedOnSymbol = isSingleField && singleField !== null && singleField.createdFromSymbolGuid !== null || areFieldShapes && (this.props.fieldShape as ReadonlyArray<FieldShape>).some(
+    const isSomeFieldBasedOnSymbol = isSingleField && singleField !== null && singleField.createdFromSymbolGuid !== null || areFieldShapes && this.props.fieldShape.some(
       p => p.createdFromSymbolGuid !== null)
 
     let connectedPointsList = ''
@@ -361,7 +368,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
                 {
                   isBasedOnSymbol && fieldSymbol.overwriteCmdText &&
-                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
                 }
               </label>
               <EditorWrapper
@@ -430,7 +437,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Height")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteHeight &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteHeight}
@@ -450,7 +457,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Width")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteWidth &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteWidth}
@@ -476,7 +483,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               )}/>
               {
                 isBasedOnSymbol && fieldSymbol.overwriteColor &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             {/*<input type="color"*/}
@@ -523,7 +530,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               )}/>
               {
                 isBasedOnSymbol && fieldSymbol.overwriteBgColor &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
 
@@ -580,7 +587,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               )}/>
               {
                 isBasedOnSymbol && fieldSymbol.overwriteBorderColor &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <Popup
@@ -612,7 +619,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Border size in px")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteBorderSizeInPx &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteBorderSizeInPx}
@@ -637,7 +644,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Font name")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteFontName &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <input type="text" disabled={isBasedOnSymbol && fieldSymbol.overwriteFontName}
@@ -657,7 +664,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Font size in px")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteFontSizeInPx &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteFontSizeInPx}
@@ -681,7 +688,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           <label>{getI18n(this.props.langId, "Text decoration")}
             {
               isBasedOnSymbol && fieldSymbol.overwriteFontDecoration &&
-              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
             }
           </label>
           <Button.Group>
@@ -744,7 +751,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Text")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteText &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <textarea rows={2} disabled={isBasedOnSymbol && fieldSymbol.overwriteText}
@@ -766,7 +773,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Horizontal text align")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteHorizontalTextAlign &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <Button.Group>
@@ -809,7 +816,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Vertical text align")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteVerticalTextAlign &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <Button.Group>
@@ -854,7 +861,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           <label>{getI18n(this.props.langId, "padding (for text align)")}
             {
               isBasedOnSymbol && fieldSymbol.overwritePadding &&
-              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
             }
           </label>
 
@@ -983,7 +990,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Corner radius in px")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteCornerRadius &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteCornerRadius}
@@ -1051,7 +1058,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           <label>{getI18n(this.props.langId, "Rotation in degree")}
             {
               isBasedOnSymbol && fieldSymbol.overwriteRotationInDeg &&
-              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
             }
           </label>
           <Input disabled={isBasedOnSymbol && fieldSymbol.overwriteRotationInDeg}
@@ -1081,7 +1088,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           <label>{getI18n(this.props.langId, "Image")}
             {
               isBasedOnSymbol && fieldSymbol.overwriteBackgroundImage &&
-              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
             }
           </label>
 

@@ -2,15 +2,11 @@
 
 - reattach to symbol?
 
-- add for (some) symbol props checkbox if overwrite obj props
- 
+- click on overwrite arrow --> select symbol 
 - joint tiles into one (create new from many)
-- opt: not connect fields by line if they intersect directly
+  - world into tile
 
 - add more dev docs
-
-- global setting auto bg/fg color force fields --> like symbol just overwrite style
-  - useful e.g. for end field (always forced)
 
 - MAYBE migrate to mobx? performance should be better... but a lot of work
   - but we would lose easy undo/redo...

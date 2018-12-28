@@ -49,6 +49,13 @@ export interface MyProps {
 
   readonly onDuplicateImgs: (newImgShape: ReadonlyArray<ImgShape>) => void
 
+  //--symbol actions
+
+  /**
+   * when we click on the overwrite arrow we want to open the symbol from which we inherit the settings
+   */
+  readonly onGotoSymbol: (symbol: ImgSymbol) => void
+
 
 }
 
@@ -87,7 +94,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
     const isSomeImgBasedOnSymbol =
       isSingleImg && singleImg !== null && singleImg.createdFromSymbolGuid !== null
       ||
-      areImgShapes && (this.props.imgShape as ReadonlyArray<ImgShape>).some(p => p.createdFromSymbolGuid !== null)
+      areImgShapes && this.props.imgShape.some(p => p.createdFromSymbolGuid !== null)
 
     const isBasedOnSymbol = isSingleImg && isSomeImgBasedOnSymbol
 
@@ -262,7 +269,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                 <label>{getI18n(this.props.langId, "Height")}
                   {
                     isBasedOnSymbol && imgSymbol.overwriteHeight &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
                   }
                 </label>
                 <input type="number" disabled={isBasedOnSymbol && imgSymbol.overwriteHeight}
@@ -281,7 +288,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                 <label>{getI18n(this.props.langId, "Width")}
                   {
                     isBasedOnSymbol && imgSymbol.overwriteWidth &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
                   }
                 </label>
                 <input type="number" disabled={isBasedOnSymbol && imgSymbol.overwriteWidth}
@@ -304,7 +311,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
               <label>{getI18n(this.props.langId, "Rotation in degree")}
                 {
                   isBasedOnSymbol && imgSymbol.overwriteRotationInDeg &&
-                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
                 }
               </label>
               <Input  disabled={isBasedOnSymbol && imgSymbol.overwriteRotationInDeg}
@@ -338,7 +345,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
               <label>{getI18n(this.props.langId, "Image")}
                 {
                   isBasedOnSymbol && imgSymbol.overwriteImage &&
-                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
                 }
               </label>
 
@@ -379,7 +386,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                 <label>{getI18n(this.props.langId, "Skew x")}
                   {
                     isBasedOnSymbol && imgSymbol.overwriteSkewX &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
                   }
                 </label>
                 <input type='number' disabled={isBasedOnSymbol && imgSymbol.overwriteSkewX}
@@ -399,7 +406,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                 <label>{getI18n(this.props.langId, "Skew y")}
                   {
                     isBasedOnSymbol && imgSymbol.overwriteSkewY &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol")}/>
+                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
                   }
                 </label>
                 <input type='number' disabled={isBasedOnSymbol && imgSymbol.overwriteSkewY}

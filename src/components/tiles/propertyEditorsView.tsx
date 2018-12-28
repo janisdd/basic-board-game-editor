@@ -3,65 +3,62 @@ import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
-import {
-  BezierPoint,
-  FieldShape,
-  FieldSymbol,
-  ImgShape,
-  ImgSymbol,
-  LineShape,
-  LineSymbol,
-  PlainPoint
-} from "../../types/drawing";
-import {renewAllZIndicesInTile, swapDisplayIndex, swapDisplayIndexWithGuid} from "../../helpers/someIndexHelper";
+import {FieldShape, FieldSymbol, ImgShape, ImgSymbol, LineShape, LineSymbol} from "../../types/drawing";
+import {renewAllZIndicesInTile, swapDisplayIndexWithGuid} from "../../helpers/someIndexHelper";
 import FieldPropertyEditor from './propertyEditors/fieldPropertyEditor'
 import LinePropertyEditor from './propertyEditors/linePropertyEditor'
 import ImagePropertyEditor from './propertyEditors/imagePropertyEditor'
 import {
   removeFieldShape,
-  setPropertyEditor_fieldsShapes,
+  setPropertyEditor_field_backgroundImgGuid,
+  setPropertyEditor_field_isFontBold,
+  setPropertyEditor_field_isFontItalic,
+  setPropertyEditor_field_rotationInDegree,
   setPropertyEditor_FieldAbsoluteZIndex,
   setPropertyEditor_FieldAnchorPoints,
   setPropertyEditor_FieldBgColor,
+  setPropertyEditor_fieldBorderColor,
+  setPropertyEditor_fieldBorderSizeInPx,
   setPropertyEditor_FieldCmdText,
   setPropertyEditor_FieldColor,
+  setPropertyEditor_FieldConnectedLinesThroughAnchors,
   setPropertyEditor_FieldCornerRadiusInPx,
   setPropertyEditor_FieldCreatedFromSymbolId,
+  setPropertyEditor_fieldFontName,
+  setPropertyEditor_fieldFontSizeInPx,
   setPropertyEditor_FieldHeight,
   setPropertyEditor_FieldHorizontalAlign,
   setPropertyEditor_FieldPadding,
+  setPropertyEditor_fieldsShapes,
   setPropertyEditor_FieldText,
   setPropertyEditor_FieldVerticalAlign,
   setPropertyEditor_FieldWidth,
   setPropertyEditor_FieldX,
-  setPropertyEditor_FieldY,
-  setPropertyEditor_fieldBorderColor,
-  setPropertyEditor_fieldBorderSizeInPx,
-  setPropertyEditor_fieldFontName,
-  setPropertyEditor_fieldFontSizeInPx,
-  setPropertyEditor_field_isFontItalic,
-  setPropertyEditor_field_isFontBold,
-  setPropertyEditor_FieldConnectedLinesThroughAnchors,
-  setPropertyEditor_field_rotationInDegree,
-  setPropertyEditor_field_backgroundImgGuid
+  setPropertyEditor_FieldY
 } from "../../state/reducers/tileEditor/fieldProperties/actions";
 import {
-  removeLineShape, removePointFromLineShape,
+  removeLineShape,
+  removePointFromLineShape,
   set_selectedLinePointNewPosAction,
   setPropertyEditor_addPointToLineShape,
   setPropertyEditor_LineAbsoluteZIndex,
   setPropertyEditor_LineArrowHeight,
   setPropertyEditor_LineArrowWidth,
-  setPropertyEditor_LineColor, setPropertyEditor_LineCreatedFromSymbolId,
+  setPropertyEditor_LineColor,
+  setPropertyEditor_LineCreatedFromSymbolId,
   setPropertyEditor_LineDashArray,
   setPropertyEditor_LineHasEndArrow,
-  setPropertyEditor_LineHasStartArrow, setPropertyEditor_linePointCurveMode, setPropertyEditor_lineShapes,
+  setPropertyEditor_LineHasStartArrow,
+  setPropertyEditor_linePointCurveMode,
+  setPropertyEditor_lineShapes,
   setPropertyEditor_LineThicknessInPx
 } from "../../state/reducers/tileEditor/lineProperties/actions";
 import {
+  set_editor_isLeftTabMenuExpandedAction,
   set_editor_isSelectingNextField,
   set_editor_leftTabActiveIndex,
   set_editor_restoreRightTabActiveIndex,
+  set_editor_rightTabActiveIndex,
   setEditor_isChooseFieldShapeBackgroundImageLibraryDisplayed,
   setEditor_IsChooseImgShapeImageLibraryDisplayed,
   setSelectedFieldShapeIds,
@@ -73,11 +70,15 @@ import {
   setPropertyEditor_ImageAbsoluteZIndex,
   setPropertyEditor_ImageCreatedFromSymbolId,
   setPropertyEditor_ImageHeight,
-  setPropertyEditor_ImageImgGuid, setPropertyEditor_ImageIsMouseSelectionDisabled,
-  setPropertyEditor_ImageRotationInDegree, setPropertyEditor_ImageSkewX, setPropertyEditor_ImageSkewY,
+  setPropertyEditor_ImageImgGuid,
+  setPropertyEditor_ImageIsMouseSelectionDisabled,
+  setPropertyEditor_ImageRotationInDegree,
+  setPropertyEditor_ImageSkewX,
+  setPropertyEditor_ImageSkewY,
   setPropertyEditor_ImageWidth,
   setPropertyEditor_ImageX,
-  setPropertyEditor_ImageY, setPropertyEditor_imgShapes
+  setPropertyEditor_ImageY,
+  setPropertyEditor_imgShapes
 } from "../../state/reducers/tileEditor/imgProperties/actions";
 import {getNextShapeId} from "../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
 import {getNiceBezierCurveBetween} from "../../helpers/interactionHelper";
@@ -93,8 +94,13 @@ import {
   set_fieldSymbols
 } from "../../state/reducers/tileEditor/symbols/fieldSymbols/actions";
 import {getGuid} from "../../helpers/guid";
-import {LeftTileEditorTabs} from "../../state/reducers/tileEditor/tileEditorReducer";
+import {LeftTileEditorTabs, RightTileEditorTabs} from "../../state/reducers/tileEditor/tileEditorReducer";
 import {MajorLineDirection} from "../../types/world";
+import {
+  set_selectedFieldSymbolGuid,
+  set_selectedImgSymbolGuid,
+  set_selectedLineSymbolGuid
+} from "../../state/reducers/tileEditor/symbols/actions";
 
 //const css = require('./styles.styl');
 
@@ -207,6 +213,13 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
 
   set_editor_leftTabActiveIndex,
 
+  //select symbols
+  set_editor_rightTabActiveIndex,
+  set_selectedFieldSymbolGuid,
+  set_selectedImgSymbolGuid,
+  set_selectedLineSymbolGuid,
+  set_editor_isLeftTabMenuExpandedAction,
+
 }, dispatch)
 
 
@@ -238,6 +251,14 @@ class propertyEditorsView extends React.Component<Props, any> {
             <FieldPropertyEditor
               fieldShape={selectedFieldShapes}
               fieldSymbols={this.props.fieldSymbols}
+
+              onGotoSymbol={(symbol) => {
+                this.props.setSelectedFieldShapeIds([])  //hide normal props editor
+                this.props.set_selectedFieldSymbolGuid(symbol.guid)
+                this.props.set_editor_rightTabActiveIndex(RightTileEditorTabs.propertyEditorTab)
+                this.props.set_editor_leftTabActiveIndex(LeftTileEditorTabs.fieldSymbolsTab)
+                this.props.set_editor_isLeftTabMenuExpandedAction(true)
+              }}
 
               isChooseFieldShapeBackgroundImageLibraryDisplayed={this.props.isChooseFieldShapeBackgroundImageLibraryDisplayed}
 
@@ -447,6 +468,14 @@ class propertyEditorsView extends React.Component<Props, any> {
             <ImagePropertyEditor imgShape={selectedImgShapes}
                                  imgSymbols={this.props.imgSymbols}
 
+                                 onGotoSymbol={(symbol) => {
+                                   this.props.setSelectedImageShapeIds([]) //hide normal props editor
+                                   this.props.set_selectedImgSymbolGuid(symbol.guid)
+                                   this.props.set_editor_rightTabActiveIndex(RightTileEditorTabs.propertyEditorTab)
+                                   this.props.set_editor_leftTabActiveIndex(LeftTileEditorTabs.imgSymbolsTab)
+                                   this.props.set_editor_isLeftTabMenuExpandedAction(true)
+                                 }}
+
                                  setPropertyEditor_ImageIsMouseDisabled={(oldIsMouseDisabled, newIsMouseDisabled) => {
                                    for (const imgShape of selectedImgShapes) {
                                      this.props.setPropertyEditor_ImageIsMouseDisabled(imgShape.id, newIsMouseDisabled)
@@ -569,8 +598,15 @@ class propertyEditorsView extends React.Component<Props, any> {
           selectedLineShapes.length > 0 &&
           <div>
             <LinePropertyEditor lineShape={selectedLineShapes}
-
                                 lineSymbols={this.props.lineSymbols}
+
+                                onGotoSymbol={(symbol) => {
+                                  this.props.setSelectedLineShapeIds([]) //hide normal props editor
+                                  this.props.set_selectedLineSymbolGuid(symbol.guid)
+                                  this.props.set_editor_rightTabActiveIndex(RightTileEditorTabs.propertyEditorTab)
+                                  this.props.set_editor_leftTabActiveIndex(LeftTileEditorTabs.lineSymbolsTab)
+                                  this.props.set_editor_isLeftTabMenuExpandedAction(true)
+                                }}
 
                                 setPropertyEditor_LineIsBasedOnSymbol={(oldSymbolGuid, symbolGuid) => {
                                   if (selectedLineShapes.length === 1) {
@@ -620,7 +656,6 @@ class propertyEditorsView extends React.Component<Props, any> {
                                   }
                                 }}
 
-                                set_lineSymbol_displayName={nop}
                                 setLinePointNewPos={(oldPointId, newPointPos, canSetFieldAnchorPoints) => {
                                   if (selectedLineShapes.length === 1) {
                                     this.props.setLinePointNewPos(selectedLineShapes[0].id, oldPointId, newPointPos,

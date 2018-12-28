@@ -155,7 +155,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_lineSymbol_overwriteColor(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
 
               </label>
@@ -190,7 +190,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_lineSymbol_overwriteThicknessInPx(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <input type="number"
@@ -209,7 +209,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_lineSymbol_overwriteGapsInPx(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <input type="number"
@@ -231,7 +231,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_lineSymbol_overwriteHasStartArrow(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <Checkbox
@@ -249,7 +249,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_lineSymbol_overwriteHasEndArrow(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <Checkbox
@@ -270,7 +270,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_lineSymbol_overwriteArrowWidth(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <input type="number" min="1"
@@ -289,7 +289,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                           onChange={(event, data: CheckboxData) => {
                             this.props.set_lineSymbol_overwriteArrowHeight(data.checked)
                           }}
-                          label={<label>{getI18n(this.props.langId, "Overwrite")}</label>}
+                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
                 />
               </label>
               <input type="number" min="1"
