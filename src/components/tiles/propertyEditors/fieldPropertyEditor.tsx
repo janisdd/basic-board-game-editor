@@ -16,6 +16,7 @@ import EditorWrapper, {editorInstancesMap} from "../../helpers/editorWrapper";
 import {Simulator} from "../../../../simulation/simulator";
 import {GameUnit} from "../../../../simulation/model/executionUnit";
 import {Logger} from "../../../helpers/logger";
+import SymbolLibrary from "../symbolModalLibrary/symbolLibrary";
 
 
 export interface MyProps {
@@ -87,6 +88,8 @@ export interface MyProps {
    * when we click on the overwrite arrow we want to open the symbol from which we inherit the settings
    */
   readonly onGotoSymbol: (symbol: FieldSymbol) => void
+
+  readonly set_isSymbolLibraryModalDisplayed: () => void
 
 }
 
@@ -190,10 +193,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                     }}
             >
 
-              <Icon.Group>
-                <Icon name='square outline'/>
-                <Icon corner name='x'/>
-              </Icon.Group>
+              <Icon name="remove"/>
             </Button>
           </ToolTip>
 
@@ -214,6 +214,25 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               </Icon.Group>
             </Button>
           </ToolTip>}
+
+          {isSingleField && isSomeFieldBasedOnSymbol === false && <ToolTip
+            message={getI18n(
+              this.props.langId,
+              "Attaches the shape to a symbol. The shape will then use the symbol properties"
+            )}
+          >
+            <Button icon
+                    onClick={() => {
+                      this.props.set_isSymbolLibraryModalDisplayed()
+                    }}
+            >
+              <Icon.Group>
+                <Icon name='clone'/>
+                <Icon corner name='arrow down'/>
+              </Icon.Group>
+            </Button>
+          </ToolTip>}
+
           {isSingleField && isSomeFieldBasedOnSymbol && <ToolTip
             message={getI18n(
               this.props.langId,
@@ -227,7 +246,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             >
               <Icon.Group>
                 <Icon name='clone'/>
-                <Icon name='x'/>
+                <Icon name='remove'/>
               </Icon.Group>
             </Button>
           </ToolTip>}

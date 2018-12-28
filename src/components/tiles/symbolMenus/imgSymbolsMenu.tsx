@@ -4,15 +4,22 @@ import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../../state";
 import SymbolRenderer from '../symbols/symbolRenderer'
-import {set_selectedImgSymbolGuid} from "../../../state/reducers/tileEditor/symbols/actions";
-import {set_editor_rightTabActiveIndex, setSelectedImageShapeIds} from "../../../state/reducers/tileEditor/actions";
+import {
+  set_selectedFieldSymbolGuid,
+  set_selectedImgSymbolGuid
+} from "../../../state/reducers/tileEditor/symbols/actions";
+import {
+  set_editor_restoreRightTabActiveIndex,
+  set_editor_rightTabActiveIndex, setSelectedFieldShapeIds,
+  setSelectedImageShapeIds, setSelectedLineShapeIds
+} from "../../../state/reducers/tileEditor/actions";
 import {addImageShape} from "../../../state/reducers/tileEditor/imgProperties/actions";
 import {
   remove_imgSymbol,
   set_imgSymbol_displayIndex
 } from "../../../state/reducers/tileEditor/symbols/imgSymbols/actions";
 import {renewAllZIndicesInTile, swapDisplayIndex, swapDisplayIndexWithGuid} from "../../../helpers/someIndexHelper";
-import {ui_helpPopupDelayInMs} from "../../../constants";
+import {symbolPreviewHeight, symbolPreviewWidth, ui_helpPopupDelayInMs} from "../../../constants";
 import {ImgShape, ImgSymbol} from "../../../types/drawing";
 import {Button, Icon, Popup} from "semantic-ui-react";
 import {getNextShapeId} from "../../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
@@ -33,6 +40,14 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     //test: props.test
     imgSymbols: rootState.imgSymbolState.present,
 
+    selectedFieldShapeIds: rootState.tileEditorState.selectedFieldShapeIds,
+    selectedLineShapeIds: rootState.tileEditorState.selectedLineShapeIds,
+    selectedImageShapeIds: rootState.tileEditorState.selectedImageShapeIds,
+
+    selectedLineSymbolGuid: rootState.symbolsState.selectedLineSymbolGuid,
+    selectedImgSymbolGuid: rootState.symbolsState.selectedImgSymbolGuid,
+    selectedFieldSymbolGuid: rootState.symbolsState.selectedFieldSymbolGuid,
+
     amountOfShapesInTile: rootState.tileEditorLineShapeState.present.length + rootState.tileEditorImgShapesState.present.length + rootState.tileEditorFieldShapesState.present.length,
     amountOfFieldsInTile: rootState.tileEditorFieldShapesState.present.length,
     langId: rootState.i18nState.langId
@@ -48,6 +63,11 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_imgSymbol_displayIndex,
   remove_imgSymbol,
   set_editor_rightTabActiveIndex,
+
+  setSelectedFieldShapeIds,
+  setSelectedLineShapeIds,
+  set_selectedFieldSymbolGuid,
+  set_editor_restoreRightTabActiveIndex,
 
 }, dispatch)
 
@@ -86,6 +106,47 @@ class imgSymbolsMenu extends React.Component<Props, any> {
                     fieldSymbol={null}
                     imgSymbol={symbol}
                     lineSymbol={null}
+
+                    selectedFieldSymbolGuid={null}
+                    selectedImgSymbolGuid={this.props.selectedImgSymbolGuid}
+                    selectedLineSymbolGuid={null}
+
+                    disableSelection={false}
+                    heightInPx={symbolPreviewWidth}
+                    widthInPx={symbolPreviewHeight}
+
+                    setSelectedImgSymbolGuid={(guid) => {
+                      this.props.setSelectedImageShapeIds([]) //this de selects every img
+                      this.props.set_selectedImgSymbolGuid(guid)
+                      this.props.set_editor_rightTabActiveIndex(RightTileEditorTabs.propertyEditorTab)
+                    }}
+
+                    deselectAllShapes={() => {
+                      //will only be called with empty array to unselect all
+
+                      //we could also had selected a field in another stage
+                      const wasNoShapeSelectedBeforeClear = this.props.selectedFieldShapeIds.length === 0
+                        && this.props.selectedLineShapeIds.length === 0
+                        && this.props.selectedImageShapeIds.length === 0
+                        && this.props.selectedFieldSymbolGuid === null
+                        && this.props.selectedLineSymbolGuid === null
+                        && this.props.selectedImgSymbolGuid === null
+
+                      this.props.setSelectedFieldShapeIds([])
+                      this.props.setSelectedLineShapeIds([])
+                      this.props.setSelectedImageShapeIds([])
+
+                      this.props.set_selectedFieldSymbolGuid(null) //this will deselect all other symbols
+
+                      if (wasNoShapeSelectedBeforeClear) {
+                        //then we don't need to reset
+                        //this can happen if we switch right tabs and no shape is selected
+                        //if we then click on the tile the index should not switch back
+                        return
+                      }
+
+                      this.props.set_editor_restoreRightTabActiveIndex()
+                    }}
                   />
 
                   <div>
@@ -229,6 +290,7 @@ export default connect(mapStateToProps, mapDispatchToProps)(imgSymbolsMenu)
 function createNewImgShapeFromSymbol(symbol: ImgSymbol, zIndex: number, linkToSymbol: boolean): ImgShape {
 
   const shape: ImgShape = {
+    kind: 'img',
     isSymbol: false,
     createdFromSymbolGuid: linkToSymbol ? symbol.guid : null,
     id: getNextShapeId(),

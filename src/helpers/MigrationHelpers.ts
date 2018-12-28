@@ -1,6 +1,6 @@
 import {ExportTile, ExportWorld, MajorLineDirection, Tile} from "../types/world";
 import {Logger} from "./logger";
-import {FieldSymbol} from "../types/drawing";
+import {FieldShape, FieldSymbol, ImgShape, ImgSymbol, LineShape, LineSymbol} from "../types/drawing";
 import {appProperties, defaultGameInitCode, defaultTileHeight, defaultTileWidth, getDefaultNewTile} from "../constants";
 import {SimulationTimes} from "../../simulation/machine/AbstractMachine";
 
@@ -373,8 +373,44 @@ class Migration_1_2_0__to__1_2_1 implements MigrationClass {
         tileSettings: {
           ...exportTile.tile.tileSettings,
           insertLinesEvenIfFieldsIntersect: false
+        },
+        fieldShapes: exportTile.tile.fieldShapes.map<FieldShape>(p => {
+          return {
+            ...p,
+            kind: "field"
+          }
+        }),
+        lineShapes: exportTile.tile.lineShapes.map<LineShape>(p => {
+          return {
+            ...p,
+            kind: "line"
+          }
+        }),
+        imgShapes: exportTile.tile.imgShapes.map<ImgShape>(p => {
+          return {
+            ...p,
+            kind: "img"
+          }
+        }),
+      },
+      fieldSymbols: exportTile.fieldSymbols.map<FieldSymbol>(p => {
+        return {
+          ...p,
+          kind: "field"
         }
-      }
+      }),
+      imgSymbols: exportTile.imgSymbols.map<ImgSymbol>(p => {
+        return {
+          ...p,
+          kind: "img"
+        }
+      }),
+      lineSymbols: exportTile.lineSymbols.map<LineSymbol>(p => {
+        return {
+          ...p,
+          kind: "line"
+        }
+      })
     }
 
     return copy
@@ -387,7 +423,7 @@ class Migration_1_2_0__to__1_2_1 implements MigrationClass {
         ...exportWorld.worldSettings,
         printScale: 1
       },
-      fieldSymbols: exportWorld.fieldSymbols.map(fieldSymbol => {
+      fieldSymbols: exportWorld.fieldSymbols.map<FieldSymbol>(fieldSymbol => {
         return {
           ...fieldSymbol,
           overwriteBackgroundImage: true,
@@ -406,9 +442,10 @@ class Migration_1_2_0__to__1_2_1 implements MigrationClass {
           overwriteFontSizeInPx:true,
           overwriteFontDecoration:true,
           overwriteText:true,
+          kind: "field"
         }
       }),
-      imgSymbols: exportWorld.imgSymbols.map(imgSymbol => {
+      imgSymbols: exportWorld.imgSymbols.map<ImgSymbol>(imgSymbol => {
         return {
           ...imgSymbol,
           overwriteHeight:true,
@@ -418,9 +455,10 @@ class Migration_1_2_0__to__1_2_1 implements MigrationClass {
           overwriteSkewX:true,
           overwriteSkewY:true,
           overwriteWidth:true,
+          kind: "img"
         }
       }),
-      lineSymbols: exportWorld.lineSymbols.map(lineSymbol => {
+      lineSymbols: exportWorld.lineSymbols.map<LineSymbol>(lineSymbol => {
         return {
           ...lineSymbol,
           overwriteArrowHeight:true,
@@ -430,6 +468,31 @@ class Migration_1_2_0__to__1_2_1 implements MigrationClass {
           overwriteHasEndArrow:true,
           overwriteHasStartArrow:true,
           overwriteThicknessInPx:true,
+          kind: "line"
+        } as LineSymbol
+      }),
+
+      allTiles: exportWorld.allTiles.map(tile => {
+        return {
+          ...tile,
+          fieldShapes: tile.fieldShapes.map(p => {
+            return {
+              ...p,
+              kind: "field"
+            }
+          }) as ReadonlyArray<FieldShape>,
+          lineShapes: tile.lineShapes.map(p => {
+            return {
+              ...p,
+              kind: "line"
+            }
+          }) as ReadonlyArray<LineShape>,
+          imgShapes: tile.imgShapes.map(p => {
+            return {
+              ...p,
+              kind: "img"
+            }
+          }) as ReadonlyArray<ImgShape>,
         }
       })
     }

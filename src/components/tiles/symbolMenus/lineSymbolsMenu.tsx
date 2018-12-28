@@ -4,16 +4,23 @@ import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../../state";
 import SymbolRenderer from '../symbols/symbolRenderer'
-import {set_selectedLineSymbolGuid} from "../../../state/reducers/tileEditor/symbols/actions";
+import {
+  set_selectedFieldSymbolGuid,
+  set_selectedLineSymbolGuid
+} from "../../../state/reducers/tileEditor/symbols/actions";
 import {
   remove_lineSymbol,
   set_lineSymbol_displayIndex,
   set_lineSymbols
 } from "../../../state/reducers/tileEditor/symbols/lineSymbols/actions";
-import {set_editor_rightTabActiveIndex, setSelectedLineShapeIds} from "../../../state/reducers/tileEditor/actions";
+import {
+  set_editor_restoreRightTabActiveIndex,
+  set_editor_rightTabActiveIndex, setSelectedFieldShapeIds, setSelectedImageShapeIds,
+  setSelectedLineShapeIds
+} from "../../../state/reducers/tileEditor/actions";
 import {addLineShape} from "../../../state/reducers/tileEditor/lineProperties/actions";
 import {LineShape, LineSymbol} from "../../../types/drawing";
-import {ui_helpPopupDelayInMs} from "../../../constants";
+import {symbolPreviewHeight, symbolPreviewWidth, ui_helpPopupDelayInMs} from "../../../constants";
 import {getNextShapeId} from "../../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
 import {getNiceBezierCurveBetween} from "../../../helpers/interactionHelper";
 import {Button, Icon, Popup} from "semantic-ui-react";
@@ -23,6 +30,7 @@ import ToolTip from '../../helpers/ToolTip'
 import {getI18n} from "../../../../i18n/i18nRoot";
 import IconToolTip from "../../helpers/IconToolTip";
 import {MajorLineDirection} from "../../../types/world";
+import guide from "../../guide/guide";
 
 //const css = require('./styles.styl');
 
@@ -35,6 +43,14 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     //test0: rootState...
     //test: props.test
     lineSymbols: rootState.lineSymbolState.present,
+
+    selectedFieldShapeIds: rootState.tileEditorState.selectedFieldShapeIds,
+    selectedLineShapeIds: rootState.tileEditorState.selectedLineShapeIds,
+    selectedImageShapeIds: rootState.tileEditorState.selectedImageShapeIds,
+
+    selectedLineSymbolGuid: rootState.symbolsState.selectedLineSymbolGuid,
+    selectedImgSymbolGuid: rootState.symbolsState.selectedImgSymbolGuid,
+    selectedFieldSymbolGuid: rootState.symbolsState.selectedFieldSymbolGuid,
 
     amountOfShapesInTile: rootState.tileEditorLineShapeState.present.length + rootState.tileEditorImgShapesState.present.length + rootState.tileEditorFieldShapesState.present.length,
     amountOfFieldsInTile: rootState.tileEditorFieldShapesState.present.length,
@@ -57,6 +73,11 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   remove_lineSymbol,
 
   set_editor_rightTabActiveIndex,
+
+  setSelectedFieldShapeIds,
+  setSelectedImageShapeIds,
+  set_selectedFieldSymbolGuid,
+  set_editor_restoreRightTabActiveIndex,
 
 }, dispatch)
 
@@ -94,6 +115,47 @@ class lineSymbolsMenu extends React.Component<Props, any> {
                   fieldSymbol={null}
                   imgSymbol={null}
                   lineSymbol={symbol}
+
+                  selectedFieldSymbolGuid={null}
+                  selectedImgSymbolGuid={null}
+                  selectedLineSymbolGuid={this.props.selectedLineSymbolGuid}
+
+                  disableSelection={false}
+                  heightInPx={symbolPreviewWidth}
+                  widthInPx={symbolPreviewHeight}
+
+                  setSelectedLineSymbolGuid={(guid) => {
+                    this.props.setSelectedLineShapeIds([]) //this de selects every line
+                    this.props.set_selectedLineSymbolGuid(guid)
+                    this.props.set_editor_rightTabActiveIndex(RightTileEditorTabs.propertyEditorTab)
+                  }}
+
+                  deselectAllShapes={() => {
+                    //will only be called with empty array to unselect all
+
+                    //we could also had selected a field in another stage
+                    const wasNoShapeSelectedBeforeClear = this.props.selectedFieldShapeIds.length === 0
+                      && this.props.selectedLineShapeIds.length === 0
+                      && this.props.selectedImageShapeIds.length === 0
+                      && this.props.selectedFieldSymbolGuid === null
+                      && this.props.selectedLineSymbolGuid === null
+                      && this.props.selectedImgSymbolGuid === null
+
+                    this.props.setSelectedFieldShapeIds([])
+                    this.props.setSelectedLineShapeIds([])
+                    this.props.setSelectedImageShapeIds([])
+
+                    this.props.set_selectedFieldSymbolGuid(null) //this will deselect all other symbols
+
+                    if (wasNoShapeSelectedBeforeClear) {
+                      //then we don't need to reset
+                      //this can happen if we switch right tabs and no shape is selected
+                      //if we then click on the tile the index should not switch back
+                      return
+                    }
+
+                    this.props.set_editor_restoreRightTabActiveIndex()
+                  }}
                 />
 
                 <div>
@@ -238,6 +300,7 @@ export default connect(mapStateToProps, mapDispatchToProps)(lineSymbolsMenu)
 function createNewLinShapeFromSymbol(symbol: LineSymbol, zIndex: number, linkToSymbol: boolean): LineShape {
 
   const shape: LineShape = {
+    kind: "line",
     isSymbol: false,
     createdFromSymbolGuid: linkToSymbol ? symbol.guid : null,
     id: getNextShapeId(),

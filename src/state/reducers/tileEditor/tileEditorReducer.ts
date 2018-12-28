@@ -85,8 +85,9 @@ export type State = {
   readonly isSelectingNextField: boolean
   readonly sourceForSelectingNextField: FieldShape | null
 
-
   readonly isLeftTabMenuExpanded: boolean
+
+  readonly isSymbolLibraryModalDisplayed: boolean
 
 }
 
@@ -128,7 +129,9 @@ export const initial: State = {
 
   isLeftTabMenuExpanded: false,
 
-  isChooseImgShapeImageLibraryDisplayed: false
+  isChooseImgShapeImageLibraryDisplayed: false,
+
+  isSymbolLibraryModalDisplayed: false
 
 }
 
@@ -200,6 +203,7 @@ export enum ActionType {
 
   SET_editor_arePrintGuidesDisplayed = 'tileEditorReducer_SET_editor_arePrintGuidesDisplayed',
 
+  SET_editor_isSymbolLibraryModalDisplayed = 'tileEditorReducer_SET_editor_isSymbolLibraryModalDisplayed',
 
   RESET = 'tileEditorReducer_RESET',
 }
@@ -283,6 +287,12 @@ export interface SET_editor_isLeftTabMenuExpandedAction extends ActionBase {
   readonly type: ActionType.SET_editor_isLeftTabMenuExpanded
   readonly isLeftTabMenuExpanded: boolean
 }
+
+export interface SET_editor_isSymbolLibraryModalDisplayedAction extends ActionBase {
+  readonly type: ActionType.SET_editor_isSymbolLibraryModalDisplayed
+  readonly isSymbolLibraryModalDisplayed: boolean
+}
+
 
 
 //--- editor settings
@@ -438,6 +448,7 @@ export type AllActions =
   | SET_editor_leftTabActiveIndexAction
   | SET_editor_isSelectingNextFieldAction
   | SET_editor_isLeftTabMenuExpandedAction
+  | SET_editor_isSymbolLibraryModalDisplayedAction
 
   | SET_moveControlPointWhenPointIsMovedAction
   | SET_editor_gridSizeInPxAction
@@ -809,6 +820,12 @@ export function reducer(state: State = initial, action: AllActions): State {
         ...state,
         isLeftTabMenuExpanded: action.isLeftTabMenuExpanded,
       }
+    case ActionType.SET_editor_isSymbolLibraryModalDisplayed:
+      return {
+        ...state,
+        isSymbolLibraryModalDisplayed: action.isSymbolLibraryModalDisplayed,
+      }
+
     case ActionType.SET_editor_arePrintGuidesDisplayed:
       return {
         ...state,

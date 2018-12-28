@@ -56,6 +56,7 @@ export interface MyProps {
    */
   readonly onGotoSymbol: (symbol: ImgSymbol) => void
 
+  readonly set_isSymbolLibraryModalDisplayed: () => void
 
 }
 
@@ -120,7 +121,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                       this.props.setPropertyEditor_setSelectedImageToNull()
                     }}
             >
-              <Icon name="x"/>
+              <Icon name="remove"/>
             </Button>
           </ToolTip>
 
@@ -142,6 +143,24 @@ class imagePropertyEditor extends React.Component<Props, any> {
               </Button>
             </ToolTip>
           }
+          {isSingleImg && isSomeImgBasedOnSymbol === false && <ToolTip
+            message={getI18n(
+              this.props.langId,
+              "Attaches the shape to a symbol. The shape will then use the symbol properties"
+            )}
+          >
+            <Button icon
+                    onClick={() => {
+                      this.props.set_isSymbolLibraryModalDisplayed()
+                    }}
+            >
+              <Icon.Group>
+                <Icon name='clone'/>
+                <Icon corner name='arrow down'/>
+              </Icon.Group>
+            </Button>
+          </ToolTip>}
+
           {
             isSingleImg && isSomeImgBasedOnSymbol &&
             <ToolTip
@@ -155,43 +174,39 @@ class imagePropertyEditor extends React.Component<Props, any> {
               >
                 <Icon.Group>
                   <Icon name='clone'/>
-                  <Icon name='x'/>
+                  <Icon name='remove'/>
                 </Icon.Group>
               </Button>
             </ToolTip>
           }
 
-          {
-            isBasedOnSymbol === false &&
-            <ToolTip
-              message={getI18n(this.props.langId, "Duplicate this shape")}
-            >
-              <Button icon
-                      onClick={() => {
 
-                        const imgShapes = (this.props.imgShapes as ReadonlyArray<ImgShape>)
-
-                        const copies = DuplicateHelper.duplicateImgShapes(imgShapes,
-                          this.props.amountOfShapesInTile)
-
-                        this.props.onDuplicateImgs(copies)
-                      }}
-              >
-                <Icon name="paste"/>
-              </Button>
-            </ToolTip>
-          }
-
-          {
-            isBasedOnSymbol === false &&
-            <Button color="red" icon
+          <ToolTip
+            message={getI18n(this.props.langId, "Duplicate this shape")}
+          >
+            <Button icon
                     onClick={() => {
-                      this.props.setPropertyEditor_removeImgShape()
+
+                      const imgShapes = (this.props.imgShapes as ReadonlyArray<ImgShape>)
+
+                      const copies = DuplicateHelper.duplicateImgShapes(imgShapes,
+                        this.props.amountOfShapesInTile)
+
+                      this.props.onDuplicateImgs(copies)
                     }}
             >
-              <Icon name="trash"/>
+              <Icon name="paste"/>
             </Button>
-          }
+          </ToolTip>
+
+          <Button color="red" icon
+                  onClick={() => {
+                    this.props.setPropertyEditor_removeImgShape()
+                  }}
+          >
+            <Icon name="trash"/>
+          </Button>
+
         </div>
       </Form.Field>
     )
@@ -231,7 +246,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
             isBasedOnSymbol &&
             <Form.Field>
               <label>{getI18n(this.props.langId, "Name")}</label>
-              <input value={imgSymbol.displayName} disabled />
+              <input value={imgSymbol.displayName} disabled/>
             </Form.Field>
           }
 
@@ -264,167 +279,178 @@ class imagePropertyEditor extends React.Component<Props, any> {
           }
 
 
-            <Form.Group widths='equal'>
-              <Form.Field>
-                <label>{getI18n(this.props.langId, "Height")}
-                  {
-                    isBasedOnSymbol && imgSymbol.overwriteHeight &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
-                  }
-                </label>
-                <input type="number" disabled={isBasedOnSymbol && imgSymbol.overwriteHeight}
-                       value={
-                         isBasedOnSymbol && imgSymbol.overwriteHeight
-                           ? imgSymbol.height
-                           : isSingleImg ? singleImg.height
-                           : singleImg.height
-                       }
-                       onChange={(e) => this.props.setPropertyEditor_ImageHeight(
-                         isBasedOnSymbol && imgSymbol.overwriteHeight ? imgSymbol.height : singleImg.height,
-                         parseInt(e.currentTarget.value))}
-                />
-              </Form.Field>
-              <Form.Field>
-                <label>{getI18n(this.props.langId, "Width")}
-                  {
-                    isBasedOnSymbol && imgSymbol.overwriteWidth &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
-                  }
-                </label>
-                <input type="number" disabled={isBasedOnSymbol && imgSymbol.overwriteWidth}
-                       value={
-                         isBasedOnSymbol && imgSymbol.overwriteWidth
-                           ? imgSymbol.width
-                           : isSingleImg ? singleImg.width
-                           : singleImg.width
-                       }
-                       onChange={(e) => this.props.setPropertyEditor_ImageWidth(
-                         isBasedOnSymbol && imgSymbol.overwriteWidth ? imgSymbol.width : singleImg.width,
-                         parseInt(e.currentTarget.value))
-                       }
-                />
-              </Form.Field>
-            </Form.Group>
-
-
+          <Form.Group widths='equal'>
             <Form.Field>
-              <label>{getI18n(this.props.langId, "Rotation in degree")}
+              <label>{getI18n(this.props.langId, "Height")}
                 {
-                  isBasedOnSymbol && imgSymbol.overwriteRotationInDeg &&
-                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
+                  isBasedOnSymbol && imgSymbol.overwriteHeight &&
+                  <IconToolTip icon="arrow down"
+                               message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                               onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
                 }
               </label>
-              <Input  disabled={isBasedOnSymbol && imgSymbol.overwriteRotationInDeg}
+              <input type="number" disabled={isBasedOnSymbol && imgSymbol.overwriteHeight}
+                     value={
+                       isBasedOnSymbol && imgSymbol.overwriteHeight
+                         ? imgSymbol.height
+                         : isSingleImg ? singleImg.height
+                         : singleImg.height
+                     }
+                     onChange={(e) => this.props.setPropertyEditor_ImageHeight(
+                       isBasedOnSymbol && imgSymbol.overwriteHeight ? imgSymbol.height : singleImg.height,
+                       parseInt(e.currentTarget.value))}
+              />
+            </Form.Field>
+            <Form.Field>
+              <label>{getI18n(this.props.langId, "Width")}
+                {
+                  isBasedOnSymbol && imgSymbol.overwriteWidth &&
+                  <IconToolTip icon="arrow down"
+                               message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                               onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
+                }
+              </label>
+              <input type="number" disabled={isBasedOnSymbol && imgSymbol.overwriteWidth}
+                     value={
+                       isBasedOnSymbol && imgSymbol.overwriteWidth
+                         ? imgSymbol.width
+                         : isSingleImg ? singleImg.width
+                         : singleImg.width
+                     }
+                     onChange={(e) => this.props.setPropertyEditor_ImageWidth(
+                       isBasedOnSymbol && imgSymbol.overwriteWidth ? imgSymbol.width : singleImg.width,
+                       parseInt(e.currentTarget.value))
+                     }
+              />
+            </Form.Field>
+          </Form.Group>
+
+
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Rotation in degree")}
+              {
+                isBasedOnSymbol && imgSymbol.overwriteRotationInDeg &&
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
+              }
+            </label>
+            <Input disabled={isBasedOnSymbol && imgSymbol.overwriteRotationInDeg}
+                   value={
+                     isBasedOnSymbol && imgSymbol.overwriteRotationInDeg
+                       ? imgSymbol.rotationInDegree
+                       : isSingleImg ? singleImg.rotationInDegree
+                       : singleImg.rotationInDegree
+                   }
+                   type="number"
+                   onChange={(e) =>
+                     this.props.setPropertyEditor_ImageRotationInDegree(
+                       isBasedOnSymbol && imgSymbol.overwriteRotationInDeg ? imgSymbol.rotationInDegree : singleImg.rotationInDegree,
+                       parseInt(e.currentTarget.value))
+                   }
+                   label={
+                     <Button icon onClick={() => {
+                       this.props.setPropertyEditor_ImageRotationInDegree(
+                         isBasedOnSymbol && imgSymbol.overwriteRotationInDeg ? imgSymbol.rotationInDegree : singleImg.rotationInDegree,
+                         0)
+                     }}>
+                       <Icon name="undo"/>
+                     </Button>
+                   }
+                   labelPosition='right'
+            />
+          </Form.Field>
+
+
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Image")}
+              {
+                isBasedOnSymbol && imgSymbol.overwriteImage &&
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
+              }
+            </label>
+
+            <Input labelPosition='right' type='text'>
+              <input
+                readOnly
                 value={
-                  isBasedOnSymbol && imgSymbol.overwriteRotationInDeg
-                    ? imgSymbol.rotationInDegree
-                    : isSingleImg ? singleImg.rotationInDegree
-                    : singleImg.rotationInDegree
+                  isBasedOnSymbol && imgSymbol.overwriteImage
+                    ? imgSymbol.imgGuid === null ? '' : imgSymbol.imgGuid
+                    : singleImg.imgGuid === null ? '' : singleImg.imgGuid
                 }
-                type="number"
-                onChange={(e) =>
-                  this.props.setPropertyEditor_ImageRotationInDegree(
-                    isBasedOnSymbol && imgSymbol.overwriteRotationInDeg ? imgSymbol.rotationInDegree : singleImg.rotationInDegree,
-                    parseInt(e.currentTarget.value))
-                }
-                label={
-                  <Button icon onClick={() => {
-                    this.props.setPropertyEditor_ImageRotationInDegree(
-                      isBasedOnSymbol && imgSymbol.overwriteRotationInDeg ? imgSymbol.rotationInDegree : singleImg.rotationInDegree,
-                      0)
-                  }}>
-                    <Icon name="undo"/>
-                  </Button>
-                }
-                labelPosition='right'
               />
-            </Form.Field>
+              <Button icon disabled={isBasedOnSymbol && imgSymbol.overwriteImage}
+                      onClick={() => {
+                        this.props.setEditor_IsChooseImgShapeImageLibraryDisplayed(true)
+                      }}>
+                <Icon name="write"/>
+              </Button>
+            </Input>
+            <ImageLibrary
+              isCreatingNewImgShape={false}
+              onImageTaken={(imgSurrogate) => {
+                this.props.setPropertyEditor_ImageImgGuid(
+                  isBasedOnSymbol ? imgSymbol.imgGuid : singleImg.imgGuid,
+                  imgSurrogate.guid)
+                this.props.setEditor_IsChooseImgShapeImageLibraryDisplayed(false)
+              }}
+              isDisplayed={this.props.isChooseImgShapeImageLibraryDisplayed}
+              set_isDisplayed={(isDisplayed) => {
+                this.props.setEditor_IsChooseImgShapeImageLibraryDisplayed(isDisplayed)
+              }}
+            />
 
+          </Form.Field>
 
+          <Form.Group widths='equal'>
             <Form.Field>
-              <label>{getI18n(this.props.langId, "Image")}
+              <label>{getI18n(this.props.langId, "Skew x")}
                 {
-                  isBasedOnSymbol && imgSymbol.overwriteImage &&
-                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
+                  isBasedOnSymbol && imgSymbol.overwriteSkewX &&
+                  <IconToolTip icon="arrow down"
+                               message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                               onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
                 }
               </label>
+              <input type='number' disabled={isBasedOnSymbol && imgSymbol.overwriteSkewX}
+                     value={
+                       isBasedOnSymbol && imgSymbol.overwriteSkewX
+                         ? imgSymbol.skewX
+                         : singleImg.skewX
+                     }
+                     onChange={(e) => this.props.setPropertyEditor_ImageSkewX(
+                       isBasedOnSymbol && imgSymbol.overwriteSkewX ? imgSymbol.skewX : singleImg.skewX,
+                       parseInt(e.currentTarget.value))
+                     }
 
-              <Input labelPosition='right' type='text'>
-                <input
-                  readOnly
-                  value={
-                    isBasedOnSymbol && imgSymbol.overwriteImage
-                      ? imgSymbol.imgGuid === null ? '' : imgSymbol.imgGuid
-                      : singleImg.imgGuid === null ? '' : singleImg.imgGuid
-                  }
-                />
-                <Button icon disabled={isBasedOnSymbol && imgSymbol.overwriteImage}
-                        onClick={() => {
-                  this.props.setEditor_IsChooseImgShapeImageLibraryDisplayed(true)
-                }}>
-                  <Icon name="write"/>
-                </Button>
-              </Input>
-              <ImageLibrary
-                isCreatingNewImgShape={false}
-                onImageTaken={(imgSurrogate) => {
-                  this.props.setPropertyEditor_ImageImgGuid(
-                    isBasedOnSymbol ? imgSymbol.imgGuid : singleImg.imgGuid,
-                    imgSurrogate.guid)
-                  this.props.setEditor_IsChooseImgShapeImageLibraryDisplayed(false)
-                }}
-                isDisplayed={this.props.isChooseImgShapeImageLibraryDisplayed}
-                set_isDisplayed={(isDisplayed) => {
-                  this.props.setEditor_IsChooseImgShapeImageLibraryDisplayed(isDisplayed)
-                }}
               />
+            </Form.Field>
+            <Form.Field>
+              <label>{getI18n(this.props.langId, "Skew y")}
+                {
+                  isBasedOnSymbol && imgSymbol.overwriteSkewY &&
+                  <IconToolTip icon="arrow down"
+                               message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                               onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
+                }
+              </label>
+              <input type='number' disabled={isBasedOnSymbol && imgSymbol.overwriteSkewY}
+                     value={
+                       isBasedOnSymbol && imgSymbol.overwriteSkewY
+                         ? imgSymbol.skewY
+                         : singleImg.skewY
+                     }
+                     onChange={(e) => this.props.setPropertyEditor_ImageSkewY(
+                       isBasedOnSymbol && imgSymbol.overwriteSkewY ? imgSymbol.skewY : singleImg.skewY,
+                       parseInt(e.currentTarget.value))
+                     }
 
+              />
             </Form.Field>
 
-            <Form.Group widths='equal'>
-              <Form.Field>
-                <label>{getI18n(this.props.langId, "Skew x")}
-                  {
-                    isBasedOnSymbol && imgSymbol.overwriteSkewX &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
-                  }
-                </label>
-                <input type='number' disabled={isBasedOnSymbol && imgSymbol.overwriteSkewX}
-                       value={
-                         isBasedOnSymbol && imgSymbol.overwriteSkewX
-                           ? imgSymbol.skewX
-                           : singleImg.skewX
-                       }
-                       onChange={(e) => this.props.setPropertyEditor_ImageSkewX(
-                         isBasedOnSymbol && imgSymbol.overwriteSkewX ? imgSymbol.skewX : singleImg.skewX,
-                         parseInt(e.currentTarget.value))
-                       }
-
-                />
-              </Form.Field>
-              <Form.Field>
-                <label>{getI18n(this.props.langId, "Skew y")}
-                  {
-                    isBasedOnSymbol && imgSymbol.overwriteSkewY &&
-                    <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(imgSymbol)}/>
-                  }
-                </label>
-                <input type='number' disabled={isBasedOnSymbol && imgSymbol.overwriteSkewY}
-                       value={
-                         isBasedOnSymbol && imgSymbol.overwriteSkewY
-                           ? imgSymbol.skewY
-                           : singleImg.skewY
-                       }
-                       onChange={(e) => this.props.setPropertyEditor_ImageSkewY(
-                         isBasedOnSymbol && imgSymbol.overwriteSkewY ? imgSymbol.skewY : singleImg.skewY,
-                         parseInt(e.currentTarget.value))
-                       }
-
-                />
-              </Form.Field>
-
-            </Form.Group>
-
+          </Form.Group>
 
 
           {

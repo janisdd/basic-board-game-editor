@@ -63,6 +63,8 @@ export interface MyProps {
    */
   readonly onGotoSymbol: (symbol: LineSymbol) => void
 
+  readonly set_isSymbolLibraryModalDisplayed: () => void
+
 }
 
 const mapStateToProps = (rootState: RootState, props: MyProps) => {
@@ -150,6 +152,23 @@ class linePropertyEditor extends React.Component<Props, any> {
               </Button>
             </ToolTip>
           }
+          {isSingleLine && isSomeLineBasedOnSymbol === false && <ToolTip
+            message={getI18n(
+              this.props.langId,
+              "Attaches the shape to a symbol. The shape will then use the symbol properties"
+            )}
+          >
+            <Button icon
+                    onClick={() => {
+                      this.props.set_isSymbolLibraryModalDisplayed()
+                    }}
+            >
+              <Icon.Group>
+                <Icon name='clone'/>
+                <Icon corner name='arrow down'/>
+              </Icon.Group>
+            </Button>
+          </ToolTip>}
           {
             isSingleLine && isSomeLineBasedOnSymbol &&
             <ToolTip
@@ -163,7 +182,7 @@ class linePropertyEditor extends React.Component<Props, any> {
               >
                 <Icon.Group>
                   <Icon name='clone'/>
-                  <Icon name='x'/>
+                  <Icon name='remove'/>
                 </Icon.Group>
               </Button>
             </ToolTip>

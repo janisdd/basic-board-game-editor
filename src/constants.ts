@@ -18,6 +18,8 @@ export const appProperties = {
   exportFileNamePrefix: 'bbge'
 }
 
+export const symbolPreviewWidth = 150
+export const symbolPreviewHeight = 150
 
 export const changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol = true
 
@@ -132,7 +134,7 @@ export const defaultPadding: AbsolutePosition = {
 function createField(x: number, y: number, fieldId: number, text: string, cmdText: string): FieldShape {
 
   return {
-
+    kind: "field",
     id: fieldId,
     connectedLinesThroughAnchorPoints: [],
     anchorPoints: defaultAnchorPoints,
@@ -247,6 +249,7 @@ export function getDefaultNewTile(): Tile {
 
 
 export const defaultFieldShape: FieldShape = {
+  kind: "field",
   isSymbol: false,
   createdFromSymbolGuid: null,
   connectedLinesThroughAnchorPoints: {},
@@ -277,6 +280,7 @@ export const defaultFieldShape: FieldShape = {
 }
 
 export const defaultLineShape: LineShape = {
+  kind: 'line',
   isSymbol: false,
   createdFromSymbolGuid: null,
   id: -1, //will be set when added
@@ -297,6 +301,7 @@ export const defaultLineShape: LineShape = {
 }
 
 export const defaultImgShapeProps: ImgShape = {
+  kind: "img",
   id: -1, //will be set when added
   x: 100,
   y: 100,

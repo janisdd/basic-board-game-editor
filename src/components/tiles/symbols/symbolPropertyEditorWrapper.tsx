@@ -90,6 +90,7 @@ import {
   setEditor_IsChooseImgShapeImageLibraryDisplayed
 } from "../../../state/reducers/tileEditor/actions";
 import {changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol} from "../../../constants";
+import SymbolLibrary from "../propertyEditorsView";
 
 export interface MyProps {
   //readonly test: string

@@ -732,6 +732,7 @@ function connectPointsWithLine(startFieldX: number, startFieldY: number, startFi
   const point = getNiceBezierCurveBetween(startPoint, endPoint, majorLineDirection)
 
   const line: LineShape = {
+    kind: "line",
     id: getNextShapeId(),
     zIndex: zIndex,
     color: lineShapeDefaultColor,

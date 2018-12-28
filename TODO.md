@@ -1,8 +1,5 @@
 # TODO
 
-- reattach to symbol?
-
-- click on overwrite arrow --> select symbol 
 - joint tiles into one (create new from many)
   - world into tile
 

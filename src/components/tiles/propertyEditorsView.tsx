@@ -55,7 +55,7 @@ import {
 } from "../../state/reducers/tileEditor/lineProperties/actions";
 import {
   set_editor_isLeftTabMenuExpandedAction,
-  set_editor_isSelectingNextField,
+  set_editor_isSelectingNextField, set_editor_isSymbolLibraryModalDisplayed,
   set_editor_leftTabActiveIndex,
   set_editor_restoreRightTabActiveIndex,
   set_editor_rightTabActiveIndex,
@@ -101,6 +101,7 @@ import {
   set_selectedImgSymbolGuid,
   set_selectedLineSymbolGuid
 } from "../../state/reducers/tileEditor/symbols/actions";
+import SymbolLibrary from './symbolModalLibrary/symbolLibrary'
 
 //const css = require('./styles.styl');
 
@@ -123,6 +124,8 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     fieldSymbols: rootState.fieldSymbolState.present,
     imgSymbols: rootState.imgSymbolState.present,
     lineSymbols: rootState.lineSymbolState.present,
+
+    isSymbolLibraryModalDisplayed: rootState.tileEditorState.isSymbolLibraryModalDisplayed,
 
     isChooseImgShapeImageLibraryDisplayed: rootState.tileEditorState.isChooseImgShapeImageLibraryDisplayed,
     isChooseFieldShapeBackgroundImageLibraryDisplayed: rootState.tileEditorState.isChooseFieldShapeBackgroundImageLibraryDisplayed,
@@ -177,7 +180,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   setPropertyEditor_LineArrowHeight,
   setPropertyEditor_LineArrowWidth,
 
-  setLinePointNewPos: set_selectedLinePointNewPosAction,
+  set_selectedLinePointNewPosAction,
   setPropertyEditor_linePointCurveMode,
   setPropertyEditor_addPointToLineShape,
   removePointFromLineShape,
@@ -195,7 +198,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   setPropertyEditor_ImageImgGuid,
   setPropertyEditor_ImageSkewX,
   setPropertyEditor_ImageSkewY,
-  setPropertyEditor_ImageIsMouseDisabled: setPropertyEditor_ImageIsMouseSelectionDisabled,
+  setPropertyEditor_ImageIsMouseSelectionDisabled,
   removeImageShape,
 
   //-- add symbols
@@ -220,6 +223,8 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_selectedLineSymbolGuid,
   set_editor_isLeftTabMenuExpandedAction,
 
+  set_editor_isSymbolLibraryModalDisplayed,
+
 }, dispatch)
 
 
@@ -242,8 +247,53 @@ class propertyEditorsView extends React.Component<Props, any> {
     const selectedLineShapes: ReadonlyArray<LineShape> = this.props.lineShapes.filter(
       p => this.props.selectedLineShapeIds.indexOf(p.id) !== -1)
 
+
+    let libraryFieldSymbols: ReadonlyArray<FieldSymbol> | null = null
+    if (selectedFieldShapes.length === 1 && selectedImgShapes.length === 0 && selectedLineShapes.length === 0) {
+      libraryFieldSymbols = this.props.fieldSymbols
+    }
+
+    let libraryImgSymbols: ReadonlyArray<ImgSymbol> | null = null
+    if (selectedFieldShapes.length === 0 && selectedImgShapes.length === 1 && selectedLineShapes.length === 0) {
+      libraryImgSymbols = this.props.imgSymbols
+    }
+
+    let libraryLineSymbols: ReadonlyArray<LineSymbol> | null = null
+    if (selectedFieldShapes.length === 0 && selectedImgShapes.length === 0 && selectedLineShapes.length === 1) {
+      libraryLineSymbols = this.props.lineSymbols
+    }
+
     return (
       <div className="property-editor-right">
+
+        {
+          //used to attach a shape to a symbol
+        }
+        <SymbolLibrary
+          fieldSymbols={libraryFieldSymbols}
+          lineSymbols={libraryLineSymbols}
+          imgSymbols={libraryImgSymbols}
+          isDisplayed={this.props.isSymbolLibraryModalDisplayed}
+          onFieldSymbolChosen={(symbol) => {
+
+            if (selectedFieldShapes.length !== 1) return
+            this.props.setPropertyEditor_FieldCreatedFromSymbolId(selectedFieldShapes[0].id, symbol.guid)
+          }}
+          onImgSymbolChosen={(symbol) => {
+
+            if (selectedImgShapes.length !== 1) return
+            this.props.setPropertyEditor_ImageCreatedFromSymbolId(selectedImgShapes[0].id, symbol.guid)
+          }}
+          onLineSymbolChosen={(symbol) => {
+
+            if (selectedLineShapes.length !== 1) return
+            this.props.setPropertyEditor_LineCreatedFromSymbolId(selectedLineShapes[0].id, symbol.guid)
+
+          }}
+          set_isDisplayed={(isDisplayed) => {
+            this.props.set_editor_isSymbolLibraryModalDisplayed(isDisplayed)
+          }}
+        />
 
         {
           selectedFieldShapes.length > 0 &&
@@ -251,6 +301,10 @@ class propertyEditorsView extends React.Component<Props, any> {
             <FieldPropertyEditor
               fieldShape={selectedFieldShapes}
               fieldSymbols={this.props.fieldSymbols}
+
+              set_isSymbolLibraryModalDisplayed={() => {
+                this.props.set_editor_isSymbolLibraryModalDisplayed(true)
+              }}
 
               onGotoSymbol={(symbol) => {
                 this.props.setSelectedFieldShapeIds([])  //hide normal props editor
@@ -468,6 +522,10 @@ class propertyEditorsView extends React.Component<Props, any> {
             <ImagePropertyEditor imgShape={selectedImgShapes}
                                  imgSymbols={this.props.imgSymbols}
 
+                                 set_isSymbolLibraryModalDisplayed={() => {
+                                   this.props.set_editor_isSymbolLibraryModalDisplayed(true)
+                                 }}
+
                                  onGotoSymbol={(symbol) => {
                                    this.props.setSelectedImageShapeIds([]) //hide normal props editor
                                    this.props.set_selectedImgSymbolGuid(symbol.guid)
@@ -478,7 +536,7 @@ class propertyEditorsView extends React.Component<Props, any> {
 
                                  setPropertyEditor_ImageIsMouseDisabled={(oldIsMouseDisabled, newIsMouseDisabled) => {
                                    for (const imgShape of selectedImgShapes) {
-                                     this.props.setPropertyEditor_ImageIsMouseDisabled(imgShape.id, newIsMouseDisabled)
+                                     this.props.setPropertyEditor_ImageIsMouseSelectionDisabled(imgShape.id, newIsMouseDisabled)
                                    }
                                  }}
                                  setPropertyEditor_ImageIsBasedOnSymbol={(oldSymbolGuid, symbolGuid) => {
@@ -600,6 +658,10 @@ class propertyEditorsView extends React.Component<Props, any> {
             <LinePropertyEditor lineShape={selectedLineShapes}
                                 lineSymbols={this.props.lineSymbols}
 
+                                set_isSymbolLibraryModalDisplayed={() => {
+                                  this.props.set_editor_isSymbolLibraryModalDisplayed(true)
+                                }}
+
                                 onGotoSymbol={(symbol) => {
                                   this.props.setSelectedLineShapeIds([]) //hide normal props editor
                                   this.props.set_selectedLineSymbolGuid(symbol.guid)
@@ -658,7 +720,7 @@ class propertyEditorsView extends React.Component<Props, any> {
 
                                 setLinePointNewPos={(oldPointId, newPointPos, canSetFieldAnchorPoints) => {
                                   if (selectedLineShapes.length === 1) {
-                                    this.props.setLinePointNewPos(selectedLineShapes[0].id, oldPointId, newPointPos,
+                                    this.props.set_selectedLinePointNewPosAction(selectedLineShapes[0].id, oldPointId, newPointPos,
                                       canSetFieldAnchorPoints)
                                   }
                                 }}
@@ -754,6 +816,7 @@ function createFieldSymbolFromFieldShape(fieldShape: FieldShape, displayIndex: n
 
   const symbol: FieldSymbol = {
     guid: getGuid(),
+    kind: "field",
     displayIndex,
     verticalTextAlign: fieldShape.verticalTextAlign,
     horizontalTextAlign: fieldShape.horizontalTextAlign,
@@ -810,6 +873,7 @@ function createImgSymbolFromImgShape(imgShape: ImgShape, displayIndex: number): 
   const id = getNextShapeId()
   const symbol: ImgSymbol = {
     guid: getGuid(),
+    kind: "img",
     displayIndex,
     rotationInDegree: imgShape.rotationInDegree,
     height: imgShape.height,
@@ -842,6 +906,7 @@ function createLineSymbolFromLineShape(lineShape: LineShape, displayIndex: numbe
   const id = getNextShapeId()
   const symbol: LineSymbol = {
     guid: getGuid(),
+    kind: "line",
     displayIndex,
     lineThicknessInPx: lineShape.lineThicknessInPx,
     color: lineShape.color,

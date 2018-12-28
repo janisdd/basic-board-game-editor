@@ -15,31 +15,7 @@ export interface Rect {
 }
 
 export interface ShapeBase {
-  readonly x: number
-  readonly y: number
-  readonly width: number
-  readonly height: number
-
-  /**
-   * don't allow null, use transparent
-   */
-  readonly bgColor: string
-
-  /**
-   * don't allow null, use transparent
-   */
-  readonly color: string
-
-  /**
-   * space between border and text
-   */
-  readonly padding: AbsolutePosition
-
-  /**
-   * the command to execute (used for simulation)
-   */
-  readonly cmdText: string | null
-
+  readonly kind: 'field' | 'img' | 'line'
   /**
    * the z index 0 is bottom max is top most
    * this is absolute over all shapes
@@ -76,6 +52,34 @@ export interface ConnectedLinesThroughAnchorPointsMap {
 }
 
 export interface FieldBase extends ShapeBase {
+  readonly kind: 'field'
+
+  readonly x: number
+  readonly y: number
+
+  readonly width: number
+  readonly height: number
+
+  /**
+   * don't allow null, use transparent
+   */
+  readonly bgColor: string
+
+  /**
+   * don't allow null, use transparent
+   */
+  readonly color: string
+
+  /**
+   * space between border and text
+   */
+  readonly padding: AbsolutePosition
+
+  /**
+   * the command to execute (used for simulation)
+   */
+  readonly cmdText: string | null
+
   /**
    * true: the field is a symbol for other fields
    * false: normal field
@@ -176,7 +180,8 @@ export interface FieldSymbol extends FieldBase, GuidAble {
   readonly overwriteBackgroundImage: boolean
 }
 
-export interface ImgBase {
+export interface ImgBase extends ShapeBase {
+  readonly kind: 'img'
   /**
    * true: the image is a symbol for other images
    * false: normal image
@@ -322,7 +327,8 @@ export enum CurveMode {
   linear = 2,
 }
 
-export interface LineBase {
+export interface LineBase extends ShapeBase {
+  readonly kind: 'line'
 
   /**
    * true: the line is a symbol for other lines

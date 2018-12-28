@@ -8,7 +8,7 @@ import {
   SET_editor_isAddImgShapeLibraryDisplayedAction, SET_editor_isChooseFieldShapeBackgroundImageLibraryDisplayedAction,
   SET_editor_isChooseImgShapeImageLibraryDisplayedAction,
   SET_editor_isCreatingNewTileAction, SET_editor_isLeftTabMenuExpandedAction,
-  SET_editor_isSelectingNextFieldAction,
+  SET_editor_isSelectingNextFieldAction, SET_editor_isSymbolLibraryModalDisplayedAction,
   SET_editor_isTileEditorSettingsModalDisplayedAction, SET_editor_lastRightTabActiveIndexAction,
   SET_editor_leftBorderPointsAction,
   SET_editor_leftTabActiveIndexAction,
@@ -440,5 +440,12 @@ export function set_editor_arePrintGuidesDisplayed(arePrintGuidesDisplayed: bool
   return {
     type: ActionType.SET_editor_arePrintGuidesDisplayed,
     arePrintGuidesDisplayed
+  }
+}
+
+export function set_editor_isSymbolLibraryModalDisplayed(isSymbolLibraryModalDisplayed: boolean): SET_editor_isSymbolLibraryModalDisplayedAction {
+  return {
+    type: ActionType.SET_editor_isSymbolLibraryModalDisplayed,
+    isSymbolLibraryModalDisplayed
   }
 }

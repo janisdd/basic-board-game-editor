@@ -3,21 +3,8 @@ import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../../state";
-import {FieldBase, FieldShape, FieldSymbol, ImgShape, ImgSymbol, LineShape, LineSymbol} from "../../../types/drawing";
+import {FieldSymbol, ImgSymbol, LineSymbol} from "../../../types/drawing";
 import TileRenderer from '../tileRenderer'
-import {
-  set_selectedFieldSymbolGuid,
-  set_selectedImgSymbolGuid,
-  set_selectedLineSymbolGuid
-} from "../../../state/reducers/tileEditor/symbols/actions";
-import {
-  set_editor_restoreRightTabActiveIndex,
-  set_editor_rightTabActiveIndex,
-  setSelectedFieldShapeIds,
-  setSelectedImageShapeIds,
-  setSelectedLineShapeIds
-} from "../../../state/reducers/tileEditor/actions";
-import {RightTileEditorTabs} from "../../../state/reducers/tileEditor/tileEditorReducer";
 
 //const css = require('./styles.styl');
 
@@ -27,6 +14,20 @@ export interface MyProps {
   readonly fieldSymbol: FieldSymbol | null
   readonly lineSymbol: LineSymbol | null
   readonly imgSymbol: ImgSymbol | null
+
+  readonly disableSelection: boolean
+  readonly widthInPx: number
+  readonly heightInPx: number
+
+  readonly selectedLineSymbolGuid: string | null
+  readonly selectedImgSymbolGuid: string | null
+  readonly selectedFieldSymbolGuid: string | null
+
+  readonly setSelectedFieldSymbolGuid?: (guid: string) => void
+  readonly setSelectedImgSymbolGuid?: (guid: string) => void
+  readonly setSelectedLineSymbolGuid?: (guid: string) => void
+
+  readonly deselectAllShapes?: () => void
 }
 
 const mapStateToProps = (rootState: RootState, props: MyProps) => {
@@ -34,30 +35,11 @@ const mapStateToProps = (rootState: RootState, props: MyProps) => {
     //test0: rootState...
     //test: props.test
     ...props,
-    selectedFieldShapeIds: rootState.tileEditorState.selectedFieldShapeIds,
-    selectedLineShapeIds: rootState.tileEditorState.selectedLineShapeIds,
-    selectedImageShapeIds: rootState.tileEditorState.selectedImageShapeIds,
-
-    selectedLineSymbolGuid: rootState.symbolsState.selectedLineSymbolGuid,
-    selectedImgSymbolGuid: rootState.symbolsState.selectedImgSymbolGuid,
-    selectedFieldSymbolGuid: rootState.symbolsState.selectedFieldSymbolGuid,
   }
 }
 
 const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   //imported reducer funcs here
-
-  set_selectedFieldSymbolGuid,
-  set_selectedImgSymbolGuid,
-  set_selectedLineSymbolGuid,
-
-   setSelectedFieldShapeIds,
-   setSelectedImageShapeIds,
-   setSelectedLineShapeIds,
-
-  set_editor_rightTabActiveIndex,
-  set_editor_restoreRightTabActiveIndex,
-
 }, dispatch)
 
 
@@ -89,10 +71,10 @@ class symbolRenderer extends React.Component<Props, any> {
           leftBorderPoints={[]}
           rightBorderPoint={[]}
           topBorderPoints={[]}
-          canvasWidth={150}
-          canvasHeight={150}
-          viewMaxHeight={150}
-          viewMaxWidth={150}
+          canvasWidth={this.props.widthInPx}
+          canvasHeight={this.props.heightInPx}
+          viewMaxHeight={this.props.heightInPx}
+          viewMaxWidth={this.props.widthInPx}
           lineShapes={this.props.lineSymbol ? [this.props.lineSymbol] : []}
           imgShapes={this.props.imgSymbol ? [this.props.imgSymbol] : []}
           fieldShapes={this.props.fieldSymbol ? [this.props.fieldSymbol] : []}
@@ -103,58 +85,26 @@ class symbolRenderer extends React.Component<Props, any> {
 
           setSelectedLineShapeIds={nop}
           setSelectedImageShapeIds={nop}
-          setSelectedFieldShapeIds={ids => {
+          setSelectedFieldShapeIds={() => {
+            if (this.props.disableSelection) return
 
-            //will only be called with empty array to unselect all
-
-            //we could also had selected a field in another stage
-            const wasNoShapeSelectedBeforeClear = this.props.selectedFieldShapeIds.length === 0
-              && this.props.selectedLineShapeIds.length === 0
-              && this.props.selectedImageShapeIds.length === 0
-              && this.props.selectedFieldSymbolGuid === null
-              && this.props.selectedLineSymbolGuid === null
-              && this.props.selectedImgSymbolGuid === null
-
-
-            if (ids.length === 0) {
-
-              this.props.setSelectedFieldShapeIds([])
-              this.props.setSelectedLineShapeIds([])
-              this.props.setSelectedImageShapeIds([])
-
-              this.props.set_selectedFieldSymbolGuid(null) //this will deselect all other symbols
-
-              if (wasNoShapeSelectedBeforeClear) {
-                //then we don't need to reset
-                //this can happen if we switch right tabs and no shape is selected
-                //if we then click on the tile the index should not switch back
-                return
-              }
-
-              this.props.set_editor_restoreRightTabActiveIndex()
-
-              return
-            }
-
+            if (this.props.deselectAllShapes) this.props.deselectAllShapes()
           }}
 
           setSelectedFieldSymbolGuid={guid => {
-            this.props.setSelectedFieldShapeIds([]) //this de selects every field/img/line
-            this.props.set_selectedFieldSymbolGuid(guid)
+            if (this.props.disableSelection) return
 
-            this.props.set_editor_rightTabActiveIndex(RightTileEditorTabs.propertyEditorTab)
+            if (this.props.setSelectedFieldSymbolGuid) this.props.setSelectedFieldSymbolGuid(guid)
           }}
           setSelectedLineSymbolGuid={guid => {
-            this.props.setSelectedLineShapeIds([])
-            this.props.set_selectedLineSymbolGuid(guid)
+            if (this.props.disableSelection) return
 
-            this.props.set_editor_rightTabActiveIndex(RightTileEditorTabs.propertyEditorTab)
+            if (this.props.setSelectedLineSymbolGuid) this.props.setSelectedLineSymbolGuid(guid)
           }}
           setSelectedImageSymbolGuid={guid => {
-            this.props.setSelectedImageShapeIds([])
-            this.props.set_selectedImgSymbolGuid(guid)
+            if (this.props.disableSelection) return
 
-            this.props.set_editor_rightTabActiveIndex(RightTileEditorTabs.propertyEditorTab)
+            if (this.props.setSelectedImgSymbolGuid) this.props.setSelectedImgSymbolGuid(guid)
           }}
           setPropertyEditor_ImageY={nop}
           setPropertyEditor_ImageX={nop}

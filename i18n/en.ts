@@ -190,6 +190,7 @@ export const lang_en: LangObj = {
   "Id": "Id",
   "Deselect shape": "Deselect shape",
   "Adds the current shape as a new symbol and links this shape to the newly added symbol (this shape is then an instance of the symbol because the properties of the symbols are used for visuals). A little icon is displayed on the shape to indicate a symbol instance": "Adds the current shape as a new symbol and links this shape to the newly added symbol (this shape is then an instance of the symbol because the properties of the symbols are used for visuals). A little icon is displayed on the shape to indicate a symbol instance",
+  "Attaches the shape to a symbol. The shape will then use the symbol properties" : "Attaches the shape to a symbol. The shape will then use the symbol properties",
   "Detaches the shape from the connected symbol. The shape will then use its own properties again": "Detaches the shape from the connected symbol. The shape will then use its own properties again",
   "Copy this shape and increment the first found number in the field text (if enabled in tile editor settings & you selected fields) for all selected shapes from left to right. Shortcut <div class='keys'>ctrl+d</div>, <div class='keys'>cmd+d</div>": "Copy this shape and increment the first found number in the field text (if enabled in tile editor settings & you selected fields) for all selected shapes from left to right. Shortcut <div class='keys'>ctrl+d</div>, <div class='keys'>cmd+d</div>",
   "Copy this shape and increment the first found number in the field text (if enabled in tile editor settings & you selected fields) for all selected shapes from right to left. Shortcut <div class='keys'>ctrl+shift+d</div>, <div class='keys'>cmd+shift+d</div>": "Copy this shape and increment the first found number in the field text (if enabled in tile editor settings & you selected fields) for all selected shapes from right to left. Shortcut <div class='keys'>ctrl+shift+d</div>, <div class='keys'>cmd+shift+d</div>",
@@ -272,5 +273,7 @@ export const lang_en: LangObj = {
   "You can now print the page. Note that this text & other elements will be removed when printing this page. To remove some tiles uncheck them and remove them with a click on the remove button": "You can now print the page. Note that this text & other elements will be removed when printing this page. To remove some tiles uncheck them and remove them with a click on the remove button",
   "Print game as one image": "Print game as one image",
   "If enable this will print all game tiles combined into one image. The variables will be put into separate images.": "If enable this will print all game tiles combined into one image. The variables will be put into separate images.",
-
+  //--- symbol library
+  "Symbol library": "Symbol library",
+  "No symbols": "No symbols",
 }
