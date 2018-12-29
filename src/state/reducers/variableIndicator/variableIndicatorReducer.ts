@@ -26,7 +26,7 @@ export const initial: State = {
   isBoolVar: false,
   fontSizeInPx: 18,
   fontName: 'Arial',
-  drawQrCode: true
+  drawQrCode: false
 }
 
 export interface ActionBase extends Action {

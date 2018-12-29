@@ -50,6 +50,8 @@ export interface LangObj {
   "Export as png (experimental)": string
   "Export as png (experimental), the world tile size is used": string
   "Clone tile": string
+  "Delete tile": string
+  "Are you sure you want to delete the tile and all instances in the world (if any)?": string
   "Delete tile. This will also delete all instances of this tile in the world": string
   "Drop tile files(s) or <br/> click to select tile files(s)": string
   "Name": string

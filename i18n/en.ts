@@ -48,6 +48,8 @@ export const lang_en: LangObj = {
   "Export as png (experimental)": "Export as png (experimental)",
   "Export as png (experimental), the world tile size is used" : "Export as png (experimental), the world tile size is used",
   "Clone tile": "Clone tile",
+  "Delete tile": "Delete tile",
+  "Are you sure you want to delete the tile and all instances in the world (if any)?": "Are you sure you want to delete the tile and all instances in the world (if any)?",
   "Delete tile. This will also delete all instances of this tile in the world": "Delete tile. This will also delete all instances of this tile in the world",
   "Drop tile files(s) or <br/> click to select tile files(s)": "Drop tile files(s) or <br/> click to select tile files(s)",
   "Name": "Name",

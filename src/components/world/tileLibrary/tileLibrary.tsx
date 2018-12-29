@@ -24,6 +24,8 @@ import {getI18n, getRawI18n} from "../../../../i18n/i18nRoot";
 import {Logger} from "../../../helpers/logger";
 import {set_world_tiles} from "../../../state/reducers/world/tileSurrogates/actions";
 import {AvailableAppTabs} from "../../../state/reducers/appReducer";
+import {DialogHelper} from "../../../helpers/dialogHelper";
+import {WorldTilesHelper} from "../../../helpers/worldTilesHelper";
 
 export interface MyProps {
   //readonly test: string
@@ -64,7 +66,6 @@ type Props = typeof stateProps & typeof dispatchProps;
 let nop = (...p: any[]) => {
 }
 
-const allowedTypes = ['tile']
 
 class tileLibrary extends React.Component<Props, any> {
 
@@ -381,12 +382,13 @@ class tileLibrary extends React.Component<Props, any> {
                           >
                             <Button icon onClick={() => {
 
+                              const _copy = WorldTilesHelper.cloneTile(tile)
+
                               const copy: Tile = {
-                                ...tile,
-                                guid: getGuid(),
+                                ..._copy,
                                 tileSettings: {
                                   ...tile.tileSettings,
-                                  displayName: tile.tileSettings.displayName + ' copy'
+                                  displayName: tile.tileSettings.displayName + ' copy',
                                 }
                               }
 
@@ -401,11 +403,16 @@ class tileLibrary extends React.Component<Props, any> {
                               "Delete tile. This will also delete all instances of this tile in the world")}
                           >
                             <Button icon color="red"
-                                    onClick={() => {
+                                    onClick={async () => {
 
-                                      //TOOD ask
+                                     const shouldDelete = await DialogHelper.askDialog(getI18n(this.props.langId, "Delete tile"), getI18n(this.props.langId, "Are you sure you want to delete the tile and all instances in the world (if any)?"))
+
+                                      if (!shouldDelete) return
+
+                                      this.props.set_world_tiles(this.props.worldTiles.filter(p => p.tileGuid !== tile.guid))
+
                                       this.props.set_tileLibrary_possibleTiles(
-                                        this.props.possibleTiles.filter((value, index1) => index !== index1)
+                                        this.props.possibleTiles.filter((value) => value.guid !== tile.guid)
                                       )
                                     }}
                             >

@@ -65,6 +65,19 @@ export class WorldTilesHelper {
   }
 
 
+  public static cloneTile(tile: Tile): Tile {
+
+    //make a real, deep copy
+    const _copy = JSON.parse(JSON.stringify(tile))
+    const copy:Tile = {
+      ..._copy,
+      guid: getGuid()
+    }
+
+    return copy
+
+  }
+
   public static convertWorldToTile(tileSurrogates: ReadonlyArray<WorldTileSurrogate>, allTiles: ReadonlyArray<Tile>, expectedTileWidth: number, expectedTileHeight: number): Tile {
 
 
