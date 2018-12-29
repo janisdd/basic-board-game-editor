@@ -64,6 +64,9 @@ class tileBorderPointsView extends React.Component<Props, any> {
                 this.props.tileProps.topBorderPoints.map((point, index) => {
                   return (
                     <div key={point.id}>
+                      <Form.Field>
+                        <p>{getI18n(this.props.langId, "Id")}: {point.id}</p>
+                      </Form.Field>
                       <Form.Group widths='equal'>
                         <Form.Field>
                           <label>{getI18n(this.props.langId, "Absolute pos in px")}</label>
@@ -157,6 +160,9 @@ class tileBorderPointsView extends React.Component<Props, any> {
                 this.props.tileProps.botBorderPoints.map((point, index) => {
                   return (
                     <div key={point.id}>
+                      <Form.Field>
+                        <p>{getI18n(this.props.langId, "Id")}: {point.id}</p>
+                      </Form.Field>
                       <Form.Group widths='equal'>
                         <Form.Field>
                           <label>{getI18n(this.props.langId, "Absolute pos in px")}</label>
@@ -250,6 +256,9 @@ class tileBorderPointsView extends React.Component<Props, any> {
                 this.props.tileProps.leftBorderPoints.map((point, index) => {
                   return (
                     <div key={point.id}>
+                      <Form.Field>
+                        <p>{getI18n(this.props.langId, "Id")}: {point.id}</p>
+                      </Form.Field>
                       <Form.Group widths='equal'>
                         <Form.Field>
                           <label>{getI18n(this.props.langId, "Absolute pos in px")}</label>
@@ -343,6 +352,9 @@ class tileBorderPointsView extends React.Component<Props, any> {
                 this.props.tileProps.rightBorderPoint.map((point, index) => {
                   return (
                     <div key={point.id}>
+                      <Form.Field>
+                        <p>{getI18n(this.props.langId, "Id")}: {point.id}</p>
+                      </Form.Field>
                       <Form.Group widths='equal'>
                         <Form.Field>
                           <label>{getI18n(this.props.langId, "Absolute pos in px")}</label>

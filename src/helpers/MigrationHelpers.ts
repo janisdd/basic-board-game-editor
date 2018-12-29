@@ -419,6 +419,7 @@ class Migration_1_2_0__to__1_2_1 implements MigrationClass {
   migrateWorld(exportWorld: ExportWorld): ExportWorld {
     const copy: ExportWorld = {
       ...exportWorld,
+      editorVersion: this.newVersion,
       worldSettings: {
         ...exportWorld.worldSettings,
         printScale: 1

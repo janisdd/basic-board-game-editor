@@ -34,6 +34,9 @@ export interface LangObj {
   "Import world": string
   "Export world. This will also export all images in the library": string
   "Print world & all found variables. For the variables the settings in the variable indicator tab are used": string
+  "Convert world into one tile": string
+  "Convert world into one tile. This assumes all tiles have the same size": string
+  "Successfully converted the world into tile. The tile was added to the tile library": string
   "World settings": string
   "Set tile into the selected area": string
   "Edit tile in the selected area": string
@@ -50,6 +53,7 @@ export interface LangObj {
   "Delete tile. This will also delete all instances of this tile in the world": string
   "Drop tile files(s) or <br/> click to select tile files(s)": string
   "Name": string
+  "Guid": string
   //--- world settings
   "World setting": string
   "World width in tiles": string

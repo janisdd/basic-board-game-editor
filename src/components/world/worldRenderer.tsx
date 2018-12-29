@@ -15,6 +15,8 @@ import {
 import {globalMinimalZoom, globalZoomStep, worldSelectedTileBorderColor, worldTileBorderColor} from "../../constants";
 import {set_world_selectedTilePos} from "../../state/reducers/world/actions";
 import {WorldTilesHelper} from "../../helpers/worldTilesHelper";
+import {set_world_tiles} from "../../state/reducers/world/tileSurrogates/actions";
+import * as mousetrap from "mousetrap";
 
 
 //const css = require('./styles.styl');
@@ -49,6 +51,8 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_world_stageScale,
   set_world_selectedTilePos,
   set_world_stageOffsetScaleCorrection,
+
+  set_world_tiles,
 
 }, dispatch)
 
@@ -102,15 +106,27 @@ class worldRenderer extends React.Component<Props, any> {
       self.resizeRenderer()
     }, 200, false))
     self.resizeRenderer()
+
+    mousetrap.bind(['backspace', 'del'], this.removeSelectedTile.bind(this))
   }
 
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.resizeHandler)
+    mousetrap.unbind(['backspace', 'del'])
   }
 
   componentDidUpdate() {
     this.updateCanvasModel()
+  }
+
+  removeSelectedTile() {
+
+    this.props.set_world_tiles(this.props.worldTiles.filter(p =>
+      p.x !== this.props.selectedTilePos.x ||
+      p.y !== this.props.selectedTilePos.y
+    ))
+
   }
 
   onWheel(e: WheelEvent) {

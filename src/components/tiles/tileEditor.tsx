@@ -818,6 +818,11 @@ class tileEditor extends React.Component<Props, any> {
               simulationMachineState={this.props.machineState}
               viewMaxWidth={1000}
               viewMaxHeight={1000}
+              canvasHeight={this.props.tileProps.tileSettings.height}
+              canvasWidth={this.props.tileProps.tileSettings.width}
+              tileWidth={this.props.tileProps.tileSettings.width}
+              tileHeight={this.props.tileProps.tileSettings.height}
+
               topBorderPoints={this.props.tileProps.topBorderPoints}
               botBorderPoints={this.props.tileProps.botBorderPoints}
               leftBorderPoints={this.props.tileProps.leftBorderPoints}
@@ -830,8 +835,6 @@ class tileEditor extends React.Component<Props, any> {
               fieldShapes={this.props.fieldShapes}
               imgShapes={this.props.imgShapes}
               lineShapes={this.props.lineShapes}
-              canvasHeight={this.props.tileProps.tileSettings.height}
-              canvasWidth={this.props.tileProps.tileSettings.width}
 
 
               setPropertyEditor_FieldX={(fieldShape, oldX, newX) => {

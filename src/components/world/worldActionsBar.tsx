@@ -25,6 +25,9 @@ import {PrintHelper} from "../../helpers/printHelper";
 import {world_tileSurrogates_redo, world_tileSurrogates_undo} from "../../state/reducers/world/tileSurrogates/actions";
 import {AvailableAppTabs} from "../../state/reducers/appReducer";
 import {Simulator} from "../../../simulation/simulator";
+import {WorldTilesHelper} from "../../helpers/worldTilesHelper";
+import {set_tileLibrary_possibleTiles} from "../../state/reducers/world/tileLibrary/actions";
+import {DialogHelper} from "../../helpers/dialogHelper";
 
 //const css = require('./styles.styl');
 
@@ -67,6 +70,8 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
 
   world_tileSurrogates_undo,
   world_tileSurrogates_redo,
+
+  set_tileLibrary_possibleTiles,
 }, dispatch)
 
 
@@ -263,6 +268,29 @@ class worldActionsBar extends React.Component<Props, any> {
                     )
                   }}>
             <Icon name="print"/>
+          </Button>
+        </ToolTip>
+
+        <ToolTip
+          message={'Convert world into one tile. This assumes all tiles have the same size'}
+        >
+          <Button icon disabled={tiles.length === 0}
+                  onClick={() => {
+
+            let newTile: Tile
+
+
+            try {
+              newTile = WorldTilesHelper.convertWorldToTile(this.props.tileSurrogatesState.present, this.props.allTiles, this.props.worldSettings.expectedTileWidth, this.props.worldSettings.expectedTileHeight)
+            } catch(err) {
+              return
+            }
+
+            this.props.set_tileLibrary_possibleTiles(this.props.allTiles.concat(newTile))
+            DialogHelper.okDialog(getI18n(this.props.langId, "Convert world into one tile"), getI18n(this.props.langId, "Successfully converted the world into tile. The tile was added to the tile library"))
+
+          }}>
+            <Icon name="compress"/>
           </Button>
         </ToolTip>
 

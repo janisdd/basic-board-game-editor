@@ -18,6 +18,11 @@ export const appProperties = {
   exportFileNamePrefix: 'bbge'
 }
 
+
+//if we have e.g. widht 5000 and height 1000 we get a small rectangle...
+export const maxTileRendererCanvasWidth = 1000
+export const maxTileRendererCanvasHeight = 1000
+
 export const symbolPreviewWidth = 150
 export const symbolPreviewHeight = 150
 

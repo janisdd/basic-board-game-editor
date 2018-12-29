@@ -73,6 +73,8 @@ class symbolRenderer extends React.Component<Props, any> {
           topBorderPoints={[]}
           canvasWidth={this.props.widthInPx}
           canvasHeight={this.props.heightInPx}
+          tileHeight={this.props.heightInPx}
+          tileWidth={this.props.widthInPx}
           viewMaxHeight={this.props.heightInPx}
           viewMaxWidth={this.props.widthInPx}
           lineShapes={this.props.lineSymbol ? [this.props.lineSymbol] : []}
@@ -82,6 +84,7 @@ class symbolRenderer extends React.Component<Props, any> {
           gridSizeInPx={10}
           drawGrid={true}
           drawFieldIds={false}
+
 
           setSelectedLineShapeIds={nop}
           setSelectedImageShapeIds={nop}

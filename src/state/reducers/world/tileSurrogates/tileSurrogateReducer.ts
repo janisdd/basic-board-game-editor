@@ -3,6 +3,9 @@ import {WorldTileSurrogate} from "../../../../../simulation/machine/machineState
 import {notExhaustive} from "../../_notExhausiveHelper";
 import undoable, {includeAction} from "redux-undo";
 
+/**
+ * the world only stores this surrogate, the real tile is in the library
+ */
 export type State = ReadonlyArray<WorldTileSurrogate>
 
 

@@ -1,8 +1,5 @@
 # TODO
 
-- joint tiles into one (create new from many)
-  - world into tile
-
 - add more dev docs
 
 - MAYBE migrate to mobx? performance should be better... but a lot of work

@@ -121,6 +121,12 @@ export interface FieldBase extends ShapeBase {
   /**
    * the order of the anchor points must not change!
    * because we need to know which anchor point was move to adjust the line point pos
+   *
+   * top
+   * bot
+   * left
+   * right
+   *
    * @see adjustLinesFromAnchorPoints
    */
   readonly anchorPoints: ReadonlyArray<AnchorPoint>

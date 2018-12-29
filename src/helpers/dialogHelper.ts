@@ -5,6 +5,26 @@ export class DialogHelper {
   private constructor() {
   }
 
+  public static okDialog(title: string, message: string): Promise<boolean> {
+    const options: SweetAlertOptions = {
+      title: title,
+      text: message,
+      type: translateDialogType(DialogType.success),
+      showConfirmButton: true,
+      showCloseButton: false,
+      showCancelButton: false,
+      confirmButtonText: 'Ok',
+      allowOutsideClick: false,
+      allowEnterKey: true,
+    }
+
+    return new Promise<boolean>((resolve) => {
+      Swal(options)
+        .then((result: { value: boolean }) => {
+          resolve(result.value)
+        })
+    })
+  }
   public static askDialog(title: string, message: string): Promise<boolean> {
 
     const options: SweetAlertOptions = {

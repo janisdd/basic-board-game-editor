@@ -17,7 +17,7 @@ import MouseEvent = createjs.MouseEvent
 import {ZIndexCache} from "../../types/ui";
 import {
   globalMinimalZoom,
-  globalZoomStep,
+  globalZoomStep, maxTileRendererCanvasHeight, maxTileRendererCanvasWidth,
   selectionBgAlpha,
   selectionRectBgColor,
   selectionRectBorderColor
@@ -74,6 +74,18 @@ export interface MyProps {
    * the canvas height with corresponds to the stage size
    */
   readonly canvasHeight: number
+
+  /**
+   * the actual tile width
+   * because the canvasHeight can get cut
+   */
+  readonly tileWidth: number
+
+  /**
+   * the actual tile width
+   * because the canvasHeight can get cut
+   */
+  readonly tileHeight: number
 
   /**
    * the actual width that is rendered by html
@@ -419,20 +431,20 @@ class tileRenderer extends React.Component<Props, any> {
     this.renderStage.x = this.props.stageOffsetX + this.props.stageOffsetXScaleCorrection
     this.renderStage.y = this.props.stageOffsetY + this.props.stageOffsetYScaleCorrection
 
-    const width = (this.renderStage.canvas as HTMLCanvasElement).width
-    const height = (this.renderStage.canvas as HTMLCanvasElement).height
+    // const width = (this.renderStage.canvas as HTMLCanvasElement).width
+    // const height = (this.renderStage.canvas as HTMLCanvasElement).height
 
-    graphics.drawGrid(this.renderStage, width, height, this.props.gridSizeInPx,
+    graphics.drawGrid(this.renderStage, this.props.tileWidth, this.props.tileHeight, this.props.gridSizeInPx,
       this.props.worldSettings.gridStrokeThicknessInPx,
       this.props.worldSettings.gridStrokeColor, !this.props.drawGrid, 0, 0)
 
 
     if (this.props.displayPrintGuidesDisplayed &&
-      (width > this.props.printLargeTilePreferredWidthInPx || height > this.props.printLargeTilePreferredHeightInPx)) {
+      (this.props.tileWidth > this.props.printLargeTilePreferredWidthInPx || this.props.tileHeight > this.props.printLargeTilePreferredHeightInPx)) {
 
       graphics.drawPrintGuides(this.renderStage,
-        width,
-        height,
+        this.props.tileWidth,
+        this.props.tileHeight,
         this.props.printLargeTilePreferredWidthInPx,
         this.props.printLargeTilePreferredHeightInPx,
         this.props.worldSettings.gridStrokeThicknessInPx,
@@ -441,8 +453,8 @@ class tileRenderer extends React.Component<Props, any> {
     }
 
     graphics.drawTileBorderPoints(this.renderStage,
-      width,
-      height,
+      this.props.tileWidth,
+      this.props.tileHeight,
       this.props.topBorderPoints,
       this.props.botBorderPoints,
       this.props.leftBorderPoints,
@@ -879,29 +891,6 @@ class tileRenderer extends React.Component<Props, any> {
     this.renderStage.update()
   }
 
-
-  render(): JSX.Element {
-
-    return (
-      <div className="render-area">
-        {
-          //show drag handles
-        }
-        {/*<DragHandlesContainer canvasLeft={this.canvas !== null ? this.canvas.offsetLeft : 0}*/}
-        {/*canvasTop={this.canvas !== null ? this.canvas.offsetTop : 0}/>*/}
-
-        <canvas
-          className={['tile-canvas', this.props.isSelectingNextField ? 'is-selecting-next-field-cursor' : ''].join(' ')}
-          ref={p => this.canvas = p} width={this.props.canvasWidth}
-          height={this.props.canvasHeight}
-          style={{maxHeight: this.props.viewMaxHeight, maxWidth: this.props.viewMaxWidth}}
-        ></canvas>
-
-
-      </div>
-    )
-  }
-
   onMouseMove(this: tileRenderer, eventObj: MouseEvent): void {
 
 
@@ -1143,6 +1132,29 @@ class tileRenderer extends React.Component<Props, any> {
 
   }
 
+
+  render(): JSX.Element {
+
+    return (
+      <div className="render-area">
+        {
+          //show drag handles
+        }
+        {/*<DragHandlesContainer canvasLeft={this.canvas !== null ? this.canvas.offsetLeft : 0}*/}
+        {/*canvasTop={this.canvas !== null ? this.canvas.offsetTop : 0}/>*/}
+
+        <canvas
+          className={['tile-canvas', this.props.isSelectingNextField ? 'is-selecting-next-field-cursor' : ''].join(' ')}
+          ref={p => this.canvas = p}
+          width={Math.min(this.props.canvasWidth, maxTileRendererCanvasWidth)}
+          height={Math.min(this.props.canvasHeight, maxTileRendererCanvasHeight)}
+          style={{maxHeight: this.props.viewMaxHeight, maxWidth: this.props.viewMaxWidth}}
+        ></canvas>
+
+
+      </div>
+    )
+  }
 
 }
 

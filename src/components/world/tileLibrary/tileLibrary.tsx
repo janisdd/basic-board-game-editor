@@ -279,6 +279,8 @@ class tileLibrary extends React.Component<Props, any> {
                           canvasWidth={500}
                           viewMaxHeight={250}
                           viewMaxWidth={250}
+                          tileWidth={tile.tileSettings.width}
+                          tileHeight={tile.tileSettings.height}
                           topBorderPoints={tile.topBorderPoints}
                           botBorderPoints={tile.botBorderPoints}
                           leftBorderPoints={tile.leftBorderPoints}
@@ -296,6 +298,9 @@ class tileLibrary extends React.Component<Props, any> {
 
                         <div>
                           <span>{getI18n(this.props.langId, "Name")}: {tile.tileSettings.displayName}</span>
+                        </div>
+                        <div>
+                          <span>{getI18n(this.props.langId, "Guid")}: {tile.guid}</span>
                         </div>
 
                         <div className="flex-left-right">
