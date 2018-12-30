@@ -1,12 +1,16 @@
 import {
   AnchorPoint,
-  BezierPoint, BorderPoint, BorderPointWithPos, ConnectedLinesThroughAnchorPointsMap, CurveMode,
-  FieldBase,
+  BezierPoint,
+  BorderPoint,
+  BorderPointWithPos,
+  ConnectedLinesThroughAnchorPointsMap,
+  CurveMode,
   FieldShape,
-  FieldSymbol, IdAble,
+  FieldSymbol,
   LineShape,
   PlainPoint,
-  Point, Rect
+  Point,
+  Rect
 } from "../types/drawing";
 import globalState from '../state/state'
 import {getNextShapeId} from "../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
@@ -127,7 +131,7 @@ export function intersectPoint(rect1: Rect, point: PlainPoint) {
   }
 
   return !(point.x > rect1.x + rect1.width ||
-    point.x  < rect1.x ||
+    point.x < rect1.x ||
     point.y > rect1.y + rect1.height ||
     point.y < rect1.y)
 
@@ -311,7 +315,7 @@ export function autoConnectFieldsWithLinesByCmdText(
     }
 
     if (insertLinesEvenIfFieldsIntersect === false) {
-        //check if they intersect
+      //check if they intersect
       if (intersectPoint(nextField, borderPoint)) {
         continue
       }
@@ -776,17 +780,36 @@ export function getNiceBezierCurveBetween(startPoint: PlainPoint, endPoint: Plai
   let cp2X = 0
   let cp2Y = 0
 
-  if (majorLineDirection === MajorLineDirection.topToBottom || majorLineDirection === MajorLineDirection.bottomToTop) {
+  if (majorLineDirection === MajorLineDirection.topToBottom) {
+
     cp1X = startPoint.x
     cp1Y = startPoint.y + deltaY / 3
 
     cp2X = endPoint.x
     cp2Y = endPoint.y - deltaY / 3
-  } else {
+
+
+  } else if (majorLineDirection === MajorLineDirection.bottomToTop) {
+
+    cp1X = startPoint.x
+    cp1Y = startPoint.y - deltaY / 3
+
+    cp2X = endPoint.x
+    cp2Y = endPoint.y + deltaY / 3
+
+  } else if (majorLineDirection === MajorLineDirection.leftToRight) {
+
     cp1X = startPoint.x + deltaX / 3
     cp1Y = startPoint.y
 
     cp2X = endPoint.x - deltaX / 3
+    cp2Y = endPoint.y
+
+  } else {
+    cp1X = startPoint.x - deltaX / 3
+    cp1Y = startPoint.y
+
+    cp2X = endPoint.x + deltaX / 3
     cp2Y = endPoint.y
   }
 

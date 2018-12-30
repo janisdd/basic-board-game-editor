@@ -14,7 +14,7 @@ export class DuplicateHelper {
    * @param {ReadonlyArray<FieldShape>} fieldShapes
    * @param {number} nextZIndex
    * @param {boolean} autoIncrementFieldTextNumbersOnDuplicate
-   * @param {boolean} invertOrder false: 1,2,3 --> 4,5,6 true: 1,2,3 --> 6,5,4 (e.g. for leiternspiel)
+   * @param {boolean} invertOrder false: 1,2,3 --> 4,5,6 true: 1,2,3 --> 6,5,4 (e.g. for ladder game)
    * @returns {ReadonlyArray<FieldShape>}
    */
   public static duplicateFieldShapes(fieldShapes: ReadonlyArray<FieldShape>, nextZIndex: number, autoIncrementFieldTextNumbersOnDuplicate: boolean, invertOrder: boolean): ReadonlyArray<FieldShape> {

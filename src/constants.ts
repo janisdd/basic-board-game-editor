@@ -54,6 +54,7 @@ export const popupDelay = 1000
 export const lineShapeDefaultColor = '#d4d4d4'
 
 
+//will be used for all new shapes as starting coords (with the current scale + offset)
 export const newField_x = 100
 export const newField_y = 100
 export const newField_width = 100
@@ -297,8 +298,8 @@ export const defaultLineShape: LineShape = {
   dashArray: [15],
   startPoint: { //will be set when added
     id: -1,
-    x: -1,
-    y: -1
+    x: newField_x,
+    y: newField_y
   },
   points: [], //will be set when added
   arrowHeight: defaultArrowHeight,
@@ -308,8 +309,8 @@ export const defaultLineShape: LineShape = {
 export const defaultImgShapeProps: ImgShape = {
   kind: "img",
   id: -1, //will be set when added
-  x: 100,
-  y: 100,
+  x: newField_x,
+  y: newField_y,
   width: defaultAddImgWidth,
   height: defaultAddImgHeight,
   zIndex: -1, //will be set when added

@@ -3,13 +3,13 @@ import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
-import {CurveMode, FieldShape} from "../../types/drawing";
+import {CurveMode, FieldShape, PlainPoint} from "../../types/drawing";
 import {
-   defaultFieldShape, defaultImgShapeProps, defaultLineShape
+  defaultFieldShape, defaultImgShapeProps, defaultLineShape
 } from "../../constants";
 import {MajorLineDirection, Tile} from "../../types/world";
 import {getNextShapeId} from "../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
-import { getNiceBezierCurveBetween} from "../../helpers/interactionHelper";
+import {getNiceBezierCurveBetween} from "../../helpers/interactionHelper";
 import {Button, Icon} from "semantic-ui-react";
 import {addFieldShape} from "../../state/reducers/tileEditor/fieldProperties/actions";
 import {addImageShape} from "../../state/reducers/tileEditor/imgProperties/actions";
@@ -27,6 +27,7 @@ import {getI18n} from "../../../i18n/i18nRoot";
 import ToolTip from "../helpers/ToolTip";
 import {redo_shapeEditor, undo_shapeEditor} from "../../state/reducers/tileEditor/shapesReducer/actions";
 import {renewAllZIndicesInTile} from "../../helpers/someIndexHelper";
+import {CoordHelper} from "../../helpers/CoordHelper";
 
 //const css = require('./styles.styl');
 
@@ -112,11 +113,43 @@ class tileActionsBar extends React.Component<Props, any> {
               <Button icon
                       onClick={() => {
 
+                        const newPoint: PlainPoint = {
+                          x: defaultFieldShape.x,
+                          y: defaultFieldShape.y
+                        }
+
+                        const pos: PlainPoint = CoordHelper.toAbsolutePos(newPoint,
+                          this.props.settings.stageOffsetX,
+                          this.props.settings.stageOffsetY,
+                          this.props.settings.stageScaleX,
+                          this.props.settings.stageScaleY,
+                          this.props.settings.stageOffsetXScaleCorrection,
+                          this.props.settings.stageOffsetYScaleCorrection
+                        )
+
+                        const shiftedPos = this.props.tileProps.tileSettings.snapToGrid
+                          ? CoordHelper.toSnapGridCoords(pos, this.props.tileProps.tileSettings.gridSizeInPx)
+                          : pos
+
+                        console.log('aaaaaaaaaaaaaaaa')
+
+                        //make a deep copy
                         const field: FieldShape = {
                           ...defaultFieldShape,
                           id: getNextShapeId(),
                           zIndex: this.props.amountOfShapesInTile,
                           text: 'field: ' + this.props.amountOfFieldsInTile,
+                          x: shiftedPos.x,
+                          y: shiftedPos.y,
+                          padding: { //copy
+                            ...defaultFieldShape.padding
+                          },
+                          anchorPoints: defaultFieldShape.anchorPoints.map(p => {
+                            return {
+                              ...p
+                            }
+                          }),
+                          connectedLinesThroughAnchorPoints: {}
                         }
 
                         this.props.addFieldShape(field)
@@ -132,19 +165,64 @@ class tileActionsBar extends React.Component<Props, any> {
             >
               <Button icon
                       onClick={() => {
+
+                        const newPoint: PlainPoint = {
+                          x: defaultLineShape.startPoint.x,
+                          y: defaultLineShape.startPoint.y
+                        }
+
+                        const pos: PlainPoint = CoordHelper.toAbsolutePos(newPoint,
+                          this.props.settings.stageOffsetX,
+                          this.props.settings.stageOffsetY,
+                          this.props.settings.stageScaleX,
+                          this.props.settings.stageScaleY,
+                          this.props.settings.stageOffsetXScaleCorrection,
+                          this.props.settings.stageOffsetYScaleCorrection
+                        )
+
+                        const shiftedPos = this.props.tileProps.tileSettings.snapToGrid
+                          ? CoordHelper.toSnapGridCoords(pos, this.props.tileProps.tileSettings.gridSizeInPx)
+                          : pos
+
+                        let firstPointOffsetInPx = 100
+
+                        const newEndPoint = {
+                          x: defaultLineShape.startPoint.x + firstPointOffsetInPx,
+                          y: defaultLineShape.startPoint.y + firstPointOffsetInPx
+                        }
+
+                        const pos2: PlainPoint = CoordHelper.toAbsolutePos(newEndPoint,
+                          this.props.settings.stageOffsetX,
+                          this.props.settings.stageOffsetY,
+                          this.props.settings.stageScaleX,
+                          this.props.settings.stageScaleY,
+                          this.props.settings.stageOffsetXScaleCorrection,
+                          this.props.settings.stageOffsetYScaleCorrection
+                        )
+
+
+                        const shiftedPos2 = this.props.tileProps.tileSettings.snapToGrid
+                          ? CoordHelper.toSnapGridCoords(pos2, this.props.tileProps.tileSettings.gridSizeInPx)
+                          : pos2
+
+
                         this.props.addLineShape({
                           ...defaultLineShape,
+                          dashArray: defaultLineShape.dashArray.concat(), //copy
                           id: getNextShapeId(),
                           zIndex: this.props.amountOfShapesInTile,
                           startPoint: {
                             id: getNextShapeId(),
-                            x: 100,
-                            y: 100,
+                            x: shiftedPos.x,
+                            y: shiftedPos.y,
                           },
                           points: [
                             {
-                              ...getNiceBezierCurveBetween({x: 100, y: 100}, {x: 200, y: 200},
-                                MajorLineDirection.topToBottom),
+                              ...getNiceBezierCurveBetween({x: shiftedPos.x, y: shiftedPos.y}, {
+                                  x: shiftedPos2.x,
+                                  y: shiftedPos2.y
+                                },
+                                this.props.tileProps.tileSettings.majorLineDirection), //MajorLineDirection.topToBottom
                             }
                           ],
                         })
@@ -170,11 +248,32 @@ class tileActionsBar extends React.Component<Props, any> {
             <ImageLibrary
               isCreatingNewImgShape={true}
               onImageTaken={(imgSurrogate) => {
+
+                const newPoint: PlainPoint = {
+                  x: defaultImgShapeProps.x,
+                  y: defaultImgShapeProps.y
+                }
+
+                const pos: PlainPoint = CoordHelper.toAbsolutePos(newPoint,
+                  this.props.settings.stageOffsetX,
+                  this.props.settings.stageOffsetY,
+                  this.props.settings.stageScaleX,
+                  this.props.settings.stageScaleY,
+                  this.props.settings.stageOffsetXScaleCorrection,
+                  this.props.settings.stageOffsetYScaleCorrection
+                )
+
+                const shiftedPos = this.props.tileProps.tileSettings.snapToGrid
+                  ? CoordHelper.toSnapGridCoords(pos, this.props.tileProps.tileSettings.gridSizeInPx)
+                  : pos
+
                 this.props.addImageShape({
                   ...defaultImgShapeProps,
                   id: getNextShapeId(),
                   zIndex: this.props.amountOfShapesInTile,
                   imgGuid: imgSurrogate.guid,
+                  x: shiftedPos.x,
+                  y: shiftedPos.y
                 })
 
                 renewAllZIndicesInTile()
