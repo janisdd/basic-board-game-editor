@@ -546,6 +546,7 @@ export class MigrationHelper {
     new Migration_1_1_0__to__1_1_1(),
     createVersionShallowMigration('1.1.1', '1.2.0'), //we added var export & fixed some simulation lang issues
     new Migration_1_2_0__to__1_2_1(),
+    createVersionShallowMigration('1.2.1', '1.2.2'),
   ]
 
   /**
