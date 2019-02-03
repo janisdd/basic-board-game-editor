@@ -19,7 +19,7 @@ const worldCanvas = document.getElementById('world-renderer-canvas') as HTMLCanv
 let referee: Referee = new Referee()
 let worldDrawer: WorldDrawer = new WorldDrawer()
 let variablesTableWrapperDiv = document.getElementById('variables-table') as HTMLDivElement
-
+let lastDiceValue = 0
 
 /**
  * call this to init video stream
@@ -75,16 +75,24 @@ export function getDiceValue(): number {
 
 }
 
-export function nextRound()  {
+export function getDice() {
 
   const diceValue = getDiceValue()
+  lastDiceValue = diceValue
 
-  referee.simulateNextRound(diceValue)
+}
+
+export function nextRound()  {
+
+  referee.simulateNextRound(lastDiceValue)
   worldDrawer.drawWorld(referee.world, referee.simulationMachineState)
 
   referee.updateVariablesTable(variablesTableWrapperDiv)
 
 }
+
+
+
 
 export function onWorldInputChanged(e: any) {
 
