@@ -4,10 +4,17 @@ import {Cvt} from "./helpers/Cvt";
 import {IoHelper} from "../src/helpers/ioHelper";
 import {ExportWorld, Tile} from "../src/types/world";
 import {MigrationHelper} from "../src/helpers/MigrationHelpers";
-import {MachineState, WorldSimulationPosition} from "../simulation/machine/machineState";
+import {
+  DefinitionTable,
+  isBoolVar,
+  isIntVar,
+  MachineState,
+  WorldSimulationPosition
+} from "../simulation/machine/machineState";
 import {Simulator} from "../simulation/simulator";
 import {Logger} from "../src/helpers/logger";
 import {SimulationStatus} from "../src/types/states";
+import * as React from "react";
 
 declare var cv: any
 
@@ -89,6 +96,114 @@ export class Referee {
 
   }
 
+
+  updateVariablesTable(wrapperDiv: HTMLDivElement) {
+
+
+    if (!this.simulationMachineState) {
+      wrapperDiv.innerHTML = ""
+      return
+    }
+
+    let html = ''
+
+    //--- global vars
+
+    html +=
+      `<h3>global variables</h3>
+`;
+
+    const state = this.simulationMachineState
+
+    html += this._getVarTableHtml(state.globalDefTable)
+
+    //--- player variables
+
+    html += `
+    <h3>player local variables </h3>
+    `
+
+    for (const player of state.players) {
+      html += `
+        <h4>player ${player.id} TOOD color</h4>
+        
+      `
+      html += this._getVarTableHtml(player.defTable)
+
+
+      for(let i = 0; i < player.localDefTables.length;i++) {
+        const defTable = player.localDefTables[i]
+
+        html += `
+          <h4>player local vars in scope level ${i}</h4>
+        `
+
+        html += this._getVarTableHtml(defTable.defTable)
+      }
+
+    }
+
+    wrapperDiv.innerHTML = html
+
+    console.log('print vars')
+
+
+
+  }
+
+  _getVarTableHtml(defTable: DefinitionTable) {
+
+    let html =
+      `
+      <table border="1">
+  <thead>
+    <tr>
+        <th>var</th>
+        <th>value</th>
+        <th>type</th>
+        <th>range</th>
+    </tr>
+  </thead>
+  <tbody>
+      `
+
+    for (const ident in defTable) {
+
+      const entry = defTable[ident]
+
+      if (isBoolVar(entry)) {
+        html +=
+          `<tr>
+                <td>${ident}</td>
+                <td>${entry.boolVal}</td>
+                <td>bool</td>
+                <td></td> 
+           </tr>        
+        `;
+
+      } else if (isIntVar(entry)) {
+
+        html +=
+          `<tr>
+                <td>${ident}</td>
+                <td>${entry.val}</td>
+                <td>int</td>
+                <td>from: ${-(entry.maxVal + 1)} to : ${entry.maxVal}</td> 
+           </tr>        
+        `;
+      }
+    }
+
+    html +=
+      `
+</tbody>
+</table>
+     `
+    return html
+
+  }
+
+
   simulateNextRound(rolledDiceValue?: number) {
 
     const maxSteps = 100
@@ -113,7 +228,7 @@ export class Referee {
     }
 
 
-    console.log('next round')
+    console.log('starting next round')
 
     while (this.simulationMachineState.leftDiceValue > 0) {
 
@@ -129,7 +244,6 @@ export class Referee {
         this.simulationMachineState = Simulator.endRound(this.simulationMachineState)
         return
       }
-
 
 
       const token = this.simulationMachineState.players[this.simulationMachineState.currentPlayerIndex].tokens[this.simulationMachineState.currentPlayerActiveTokenIndex]
@@ -164,7 +278,7 @@ export class Referee {
 
         //when we get on the field execute the force statement immediately
         //here we also check if the current player is on an END field (and has won)
-        const forceExecuteResult = Simulator.executeForceStatements(this.tiles, this.simulationMachineState,false)
+        const forceExecuteResult = Simulator.executeForceStatements(this.tiles, this.simulationMachineState, false)
 
         this.simulationMachineState = forceExecuteResult.state
 
@@ -201,16 +315,14 @@ export class Referee {
         if (this.simulationMachineState.wasStateRolledBack === true) {
 
           this.simulationMachineState = Simulator.endRound(this.simulationMachineState)
-        }
-        else {
+        } else {
 
           try {
 
             //we are still on the same field & we already executed the statements because of force
             if (wasForcedField && afterMovePos.fieldId === afterForcePos.fieldId && afterMovePos.tileGuid === afterForcePos.tileGuid) {
               //do nothing
-            }
-            else {
+            } else {
 
               //the current field was not forced OR we are on another field now
               //so we are sure we don't execute anything twice
@@ -248,7 +360,6 @@ export class Referee {
           }
         }
       }
-
 
 
     }

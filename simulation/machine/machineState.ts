@@ -106,6 +106,10 @@ export interface PlayerObj {
   /**
    * this is the def table for the player vars (like this.X in java)
    * if we use cp.X (this.X) then we use the first localDefTables[0] def table which is the player instance def table
+   *
+   * when we use this.X we use this prop when we just use X we check the local scopes first
+   * also see simulation/__tests__/semantic/statements/builtInFuncs/scopes.ts (in tests for the difference between local and player vars
+   * player vars are like this.X (cp.X) where normal X is a local var for the player in the current scope
    */
   readonly defTable: DefinitionTable
 
@@ -114,6 +118,9 @@ export interface PlayerObj {
    * if we close a scope pop the last def table
    *
    * the current scope is always the last def table
+   * note that we have a default function scope
+   *  @see AbstractMachine.createNewMachineState
+   *  if we are in the default (0) scope vars can be in localDefTables or defTable
    */
   readonly localDefTables: ReadonlyArray<DefinitionTableWrapper>
 

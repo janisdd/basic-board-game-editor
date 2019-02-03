@@ -18,13 +18,13 @@ let ctxSnapshot = canvasSnapshot.getContext('2d');
 const worldCanvas = document.getElementById('world-renderer-canvas') as HTMLCanvasElement
 let referee: Referee = new Referee()
 let worldDrawer: WorldDrawer = new WorldDrawer()
-
+let variablesTableWrapperDiv = document.getElementById('variables-table') as HTMLDivElement
 
 
 /**
  * call this to init video stream
  */
-export function init() {
+export function initVideo() {
   if (!videoStarted) {
     navigator.mediaDevices.getUserMedia({video: true, audio: false})
       .then(function (stream) {
@@ -82,25 +82,9 @@ export function nextRound()  {
   referee.simulateNextRound(diceValue)
   worldDrawer.drawWorld(referee.world, referee.simulationMachineState)
 
-}
+  referee.updateVariablesTable(variablesTableWrapperDiv)
 
-// export function getDices() {
-//
-//   const img = getSnapshot()
-//
-//   const copy = img.clone()
-//
-//   const dices = Referee.getDiceValue(copy)
-//
-//   if (dices.length > 1) {
-//     console.warn(`we got more than 1 dice... using first`)
-//   }
-//
-//   cv.imshow(canvas, copy)
-//
-//   img.delete()
-//   copy.delete()
-// }
+}
 
 export function onWorldInputChanged(e: any) {
 
@@ -132,6 +116,7 @@ export function onWorldInputChanged(e: any) {
     referee.startNewSimulation()
 
     worldDrawer.drawWorld(exportedWorld, referee.simulationMachineState)
+    referee.updateVariablesTable(variablesTableWrapperDiv)
 
   }
 
@@ -152,7 +137,7 @@ export function onWorldInputChanged(e: any) {
  */
 export function onOpenCvReady() {
   console.log('ready, initing...')
-  init()
+  initVideo()
 }
 
 export function initReferee()  {
