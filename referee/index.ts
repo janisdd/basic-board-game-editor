@@ -3,9 +3,12 @@ import {Referee} from "./Referee";
 import {ExportWorld} from "../src/types/world";
 import {MigrationHelper} from "../src/helpers/MigrationHelpers";
 import {WorldDrawer} from "./helpers/worldDrawer";
+import {CvDice} from "./types";
 
 declare var cv: any
 
+
+//zuordnung farbe / player (1mal get token --> farben hsv, benutzer muss dann zuordnen)
 
 let videoStarted = false
 let video = document.getElementById('realImgSrc') as HTMLVideoElement
@@ -15,6 +18,8 @@ let ctxSnapshot = canvasSnapshot.getContext('2d');
 const worldCanvas = document.getElementById('world-renderer-canvas') as HTMLCanvasElement
 let referee: Referee = new Referee()
 let worldDrawer: WorldDrawer = new WorldDrawer()
+
+
 
 /**
  * call this to init video stream
@@ -46,6 +51,38 @@ export function getSnapshot(): any {
   return cv.matFromImageData(ctxSnapshot.getImageData(0, 0, canvasSnapshot.width, canvasSnapshot.height))
 }
 
+
+export function getDiceValue(): number {
+
+  const snapshot = getSnapshot()
+  let lastDiceValue = 0
+
+  try {
+    let dice = referee.getDiceValue(snapshot)
+    lastDiceValue = dice.value
+
+    cv.imshow(canvasSnapshot, snapshot)
+
+  } catch(err) {
+      console.error(err)
+  } finally {
+
+    cv.imshow(canvasSnapshot, snapshot)
+    snapshot.delete()
+  }
+
+  return lastDiceValue
+
+}
+
+export function nextRound()  {
+
+  const diceValue = getDiceValue()
+
+  referee.simulateNextRound(diceValue)
+  worldDrawer.drawWorld(referee.world, referee.simulationMachineState)
+
+}
 
 // export function getDices() {
 //
@@ -92,8 +129,9 @@ export function onWorldInputChanged(e: any) {
     }
 
     referee.importWorld(exportedWorld)
+    referee.startNewSimulation()
 
-    worldDrawer.drawWorld(exportedWorld, null)
+    worldDrawer.drawWorld(exportedWorld, referee.simulationMachineState)
 
   }
 

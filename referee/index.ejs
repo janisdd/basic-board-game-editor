@@ -10,10 +10,8 @@
 <body>
 
 
-<input type="file" accept=".world" onchange="bbge.onWorldInputChanged(event)">
-
 <button onclick="bbge.initReferee()">init</button>
-<button onclick="bbge.stop()">Start</button>
+<input type="file" accept=".world" onchange="bbge.onWorldInputChanged(event)">
 <video style="display: none" autoplay="true" id="realImgSrc" width="1900" height="1080">
 </video>
 
@@ -23,6 +21,7 @@
 
 
 
+<button onclick="bbge.nextRound()">next round</button>
 <canvas id="world-renderer-canvas" width="1000" height="1000"></canvas>
 
 
