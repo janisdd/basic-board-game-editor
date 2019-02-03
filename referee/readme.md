@@ -10,7 +10,9 @@ wait a bit (until opencv js is loaded)
 
 - click init
 - open your .world file
-- rolle the dice make the cam point to the dice (top view), click next round
+- place the tokens from the player under the cam then click detect colors (you need to have the same number tokens as players) 
+- then set the player id to the detect colors
+  - click apply mapping (even if you didn't change anything)
 
 - the simulation will then use the dice value (open console to see result)
 

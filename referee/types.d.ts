@@ -25,6 +25,10 @@ export interface CvToken {
    * hsv color, only 3 items used
    */
   color: CvScalar
+  /**
+   * we swapped indices... its actually BGR when we get it from opencv js ... maybe recompile
+   */
+  colorRgb: CvScalar
   bottomPoint: CvPoint
 
 }

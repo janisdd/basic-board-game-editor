@@ -1,9 +1,11 @@
-import {RefereeHelper} from "./helpers/RefereeHelper";
+import {PlayerColorMap, RefereeHelper} from "./helpers/RefereeHelper";
 import {Referee} from "./Referee";
 import {ExportWorld} from "../src/types/world";
 import {MigrationHelper} from "../src/helpers/MigrationHelpers";
 import {WorldDrawer} from "./helpers/worldDrawer";
-import {CvDice} from "./types";
+import {CvDice, CvScalar} from "./types";
+import {ChangeEvent} from "react";
+import {Cvt} from "./helpers/Cvt";
 
 declare var cv: any
 
@@ -19,7 +21,10 @@ const worldCanvas = document.getElementById('world-renderer-canvas') as HTMLCanv
 let referee: Referee = new Referee()
 let worldDrawer: WorldDrawer = new WorldDrawer()
 let variablesTableWrapperDiv = document.getElementById('variables-table') as HTMLDivElement
-let lastDiceValue = 0
+
+let playerColorMappingTableWrapper = document.getElementById('player-color-mapping-table-wrapper') as HTMLDivElement
+
+let lastDiceValue = 2
 
 /**
  * call this to init video stream
@@ -52,6 +57,133 @@ export function getSnapshot(): any {
 }
 
 
+/**
+ * note that a world needs to be imported here (else we don't know the player count)
+ */
+export function onDetectColors() {
+  const snapshot = getSnapshot()
+
+  //if we don't do this we get wrong colors when we draw tokens?
+  cv.cvtColor(snapshot, snapshot, cv.COLOR_BGRA2BGR);
+
+  const tuple = referee.getTokens(snapshot)
+  const tokens = tuple[0]
+  const debugImgMat = tuple[1]
+
+  cv.imshow(canvasSnapshot, debugImgMat)
+
+
+  let html = `<table>
+<thead>
+<tr>
+    <th>color</th>
+    <th>player id/number</th>
+</tr>
+</thead>
+<tbody>
+`
+
+  const initialMapping: PlayerColorMap = {}
+
+  //start a temp simulation to get the player count...
+  referee.startNewSimulation()
+
+  const preState = referee.simulationMachineState
+
+  const numPlayers = preState.players.length
+
+  if (tokens.length !== numPlayers) {
+    console.log(`we got ${numPlayers} players but ${tokens.length} token(s)...`)
+  }
+
+  const maxSV = 256 //max val for s / v
+
+
+  for (let i = 0; i < numPlayers; i++) {
+
+    const tokenColorHsv = i < tokens.length
+      ? tokens[i].color
+      : [0, 0, 0] as CvScalar
+
+    const tokenColor = i < tokens.length
+      ? tokens[i].colorRgb
+      : [0, 0, 0] as CvScalar
+
+    initialMapping[i] = [tokenColorHsv, tokenColor]
+
+    // const percentageS = tokenColor[1] * 100 / maxSV
+    // const percentageV = tokenColor[2] * 100 / maxSV
+
+    html += `
+    <tr>
+        <td>
+            <div class="player-color-indicator" style="background-color: rgb(${tokenColor[0]}, ${tokenColor[1]}, ${tokenColor[2]})"></div>
+            <span>${tokenColor[0]}, ${tokenColor[1]}, ${tokenColor[2]} (${Cvt.rgbToHex(tokenColor[0], tokenColor[1], tokenColor[2])})</span>
+        </td>
+        <td>
+            <input data-player-color-id="${i}" type="number" value="${i}" />
+        </td>
+    </tr>
+    `
+  }
+
+  html += `
+</tbody>
+<tfoot>
+<tr>
+<td colspan="99">
+    <button onclick="bbge.applyPlayerColorMapping()">apply mapping</button>
+</td>
+</tr>
+</tfoot>
+</table>
+`
+
+  playerColorMappingTableWrapper.innerHTML = html
+
+  referee.playerColorMap = initialMapping
+
+  debugImgMat.delete()
+  snapshot.delete()
+}
+
+export function applyPlayerColorMapping() {
+
+
+  const colorInputs = document.querySelectorAll(`[data-player-color-id]`)
+
+
+  const keys = Object.keys(referee.playerColorMap)
+
+  const newMap: PlayerColorMap = {}
+
+  for (let i = 0; i < keys.length; i++) {
+    const id = i //we assume index never changes
+
+    const input = colorInputs.item(id) as HTMLInputElement
+
+    const playerId = parseInt(input.value)
+
+    if (isNaN(playerId) || playerId > keys.length-1) throw new Error(`player id (${playerId}) is not a number or the id is larger than the player count - 1`)
+
+    const oldPlayerIndex = parseInt(input.getAttribute('data-player-color-id'))
+
+    if (isNaN(oldPlayerIndex)) throw new Error(`player id (${playerId}) old index was not a number (internal error)`)
+
+
+    if (newMap[playerId]) throw new Error(`player id (${playerId}) was set multiple times`)
+
+    newMap[playerId] = referee.playerColorMap[oldPlayerIndex]
+  }
+
+  console.log(newMap)
+
+  referee.applyNewColorMapping(newMap)
+  worldDrawer.drawWorld(referee.world, referee.simulationMachineState)
+
+}
+
+
 export function getDiceValue(): number {
 
   const snapshot = getSnapshot()
@@ -63,8 +195,8 @@ export function getDiceValue(): number {
 
     cv.imshow(canvasSnapshot, snapshot)
 
-  } catch(err) {
-      console.error(err)
+  } catch (err) {
+    console.error(err)
   } finally {
 
     cv.imshow(canvasSnapshot, snapshot)
@@ -82,7 +214,7 @@ export function getDice() {
 
 }
 
-export function nextRound()  {
+export function nextRound() {
 
   referee.simulateNextRound(lastDiceValue)
   worldDrawer.drawWorld(referee.world, referee.simulationMachineState)
@@ -90,8 +222,6 @@ export function nextRound()  {
   referee.updateVariablesTable(variablesTableWrapperDiv)
 
 }
-
-
 
 
 export function onWorldInputChanged(e: any) {
@@ -120,7 +250,7 @@ export function onWorldInputChanged(e: any) {
       return
     }
 
-    referee.importWorld(exportedWorld)
+    referee.settWorld(exportedWorld)
     referee.startNewSimulation()
 
     worldDrawer.drawWorld(exportedWorld, referee.simulationMachineState)
@@ -137,9 +267,6 @@ export function onWorldInputChanged(e: any) {
 }
 
 
-
-
-
 /**
  * called when opencv js is loaded (mostly)
  */
@@ -148,7 +275,7 @@ export function onOpenCvReady() {
   initVideo()
 }
 
-export function initReferee()  {
+export function initReferee() {
   referee.init()
 
   worldDrawer.init(worldCanvas)

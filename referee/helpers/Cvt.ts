@@ -72,12 +72,19 @@ export class Cvt {
         width: tokenFromCv.bbox.width
       },
       bottomPoint: this.convertPoint(tokenFromCv.bottomPoint),
-      color: 'TODO' as any //TODO
+      color: [tokenFromCv.color[0], tokenFromCv.color[1], tokenFromCv.color[2]],
+      colorRgb: [tokenFromCv.colorRgb[2], tokenFromCv.colorRgb[1], tokenFromCv.colorRgb[1]],
     }
 
 
     return token
   }
+
+  //from https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+  static rgbToHex(r: number, g: number, b: number): string {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
 
 
 }

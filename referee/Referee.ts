@@ -1,5 +1,5 @@
-import {RefereeHelper} from "./helpers/RefereeHelper";
-import {CvDice} from "./types";
+import {PlayerColorMap, RefereeHelper} from "./helpers/RefereeHelper";
+import {CvDice, CvScalar, CvToken} from "./types";
 import {Cvt} from "./helpers/Cvt";
 import {IoHelper} from "../src/helpers/ioHelper";
 import {ExportWorld, Tile} from "../src/types/world";
@@ -23,6 +23,7 @@ export class Referee {
   }
 
   diceHelper: any = null
+  tokenHelper: any = null
   world: ExportWorld
 
   simulationMachineState: MachineState | null = null
@@ -31,10 +32,50 @@ export class Referee {
 
   startPos: WorldSimulationPosition
 
+   playerColorMap: PlayerColorMap = {}
+
 
   init() {
     this.diceHelper = new cv.DiceHelper()
+    this.tokenHelper = new cv.TokenHelper()
   }
+
+  getAvailableColorsFromTokens(imgMat: any): CvScalar[] {
+
+    const tokens = this.getTokens(imgMat)
+    return tokens.map(p => p.color)
+  }
+
+  /**
+   * returns [tokens, debug img]
+   * @param imgMat
+   */
+  getTokens(imgMat: any): [CvToken[], any] {
+
+    let hsv = new cv.Mat();
+    let binaryOutImg = new cv.Mat()
+
+    cv.cvtColor(imgMat, hsv, cv.COLOR_BGR2HSV)
+
+    let _tokens = this.tokenHelper.getTokensSlow(hsv, binaryOutImg)
+
+    const tokens: CvToken[] = []
+
+    const numDices = _tokens.size()
+    for (let i = 0; i < numDices; i++) {
+      tokens.push(Cvt.convertToken(_tokens.get(i)))
+      console.log(_tokens.get(i))
+    }
+
+    let copy = this.tokenHelper.drawTokens(imgMat, _tokens);
+
+    binaryOutImg.delete()
+    hsv.delete()
+
+    return [tokens, copy]
+  }
+
+
 
 
   /**
@@ -62,7 +103,7 @@ export class Referee {
   }
 
 
-  importWorld(exportWorld: ExportWorld) {
+  settWorld(exportWorld: ExportWorld) {
     this.world = exportWorld
   }
 
@@ -96,6 +137,30 @@ export class Referee {
 
   }
 
+
+  /**
+   * simulation should be already started here ...
+   */
+  applyNewColorMapping(playerColorMap: PlayerColorMap) {
+    this.playerColorMap = playerColorMap
+
+    this.simulationMachineState = {
+      ...this.simulationMachineState,
+      players: this.simulationMachineState.players.map((p, index) => {
+        return {
+          ...p,
+          color: Cvt.rgbToHex(playerColorMap[index][1][0], playerColorMap[index][1][1], playerColorMap[index][1][2]),
+          tokens: p.tokens.map((token, index1) => {
+            return {
+              ...token,
+              color: Cvt.rgbToHex(playerColorMap[index][1][0], playerColorMap[index][1][1], playerColorMap[index][1][2]),
+            }
+          })
+        }
+      })
+    }
+
+  }
 
   updateVariablesTable(wrapperDiv: HTMLDivElement) {
 
@@ -368,3 +433,4 @@ export class Referee {
 
 
 }
+

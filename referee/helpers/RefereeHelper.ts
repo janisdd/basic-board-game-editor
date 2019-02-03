@@ -6,13 +6,18 @@ import {isBoolVar, isIntVar, MachineState} from "../../simulation/machine/machin
 
 
 /**
+ * [0] hsv
+ * [1] rgb
+ */
+export type PlayerColorMapEntry = [CvScalar, CvScalar]
+/**
  * player to a color map
  */
 export interface PlayerColorMap {
   /**
    * the color is only avg hsv so add some tolerance
    */
-  [playerId: number]: CvScalar
+  [playerId: number]: PlayerColorMapEntry
 }
 
 export class RefereeHelper {
@@ -77,12 +82,12 @@ export class RefereeHelper {
 
       const h = color[0], s = color[1], v = color[2]
 
-      const rh = playerColor[0], rs = playerColor[1], rv = playerColor[2]
+      // const rh = playerColor[0], rs = playerColor[1], rv = playerColor[2]
 
       //TODO add tolerance
-      if (h == rh) {
-        return parseInt(playerId)
-      }
+      // if (h == rh) {
+      //   return parseInt(playerId)
+      // }
 
     }
 
