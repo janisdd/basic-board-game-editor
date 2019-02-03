@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Basic Board Game Editor</title>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="../node_modules/semantic-ui-css/semantic.css">
+    <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.css[0] %>">
+</head>
+<body>
+
+
+<input type="file" accept=".world" onchange="bbge.onWorldInputChanged(event)">
+
+<button onclick="bbge.initReferee()">init</button>
+<button onclick="bbge.stop()">Start</button>
+<video style="display: none" autoplay="true" id="realImgSrc" width="1900" height="1080">
+</video>
+
+<canvas id="canvasSnaptshot" width="1280" height="720"></canvas>
+
+
+
+
+
+<canvas id="world-renderer-canvas" width="1000" height="1000"></canvas>
+
+
+
+
+
+
+
+<script src="../node_modules/react/dist/react.js"></script>
+<script src="../node_modules/react-dom/dist/react-dom.js"></script>
+<script src="../node_modules/createjs-easeljs/lib/easeljs-0.8.2.combined.js"></script>
+
+
+<% for(var i = 0; i < htmlWebpackPlugin.files.js.length;i++) { %>
+
+<script src="<%= htmlWebpackPlugin.files.js[i] %>"></script>
+
+<%}%>
+
+
+<script src="../referee/libs/opencv.js" onload="bbge.onOpenCvReady();"></script>
+</body>
+</html>
