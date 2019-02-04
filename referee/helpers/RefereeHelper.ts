@@ -10,6 +10,7 @@ import {isBoolVar, isIntVar, MachineState} from "../../simulation/machine/machin
  * [1] rgb
  */
 export type PlayerColorMapEntry = [CvScalar, CvScalar]
+
 /**
  * player to a color map
  */
@@ -26,16 +27,22 @@ export class RefereeHelper {
 
   static playerColorMap: PlayerColorMap = {}
 
+  static isTokenInTile(token: CvToken, tileRect: Rect, maxDiffInPx: number = 0): boolean {
+    return intersectPoint(tileRect, token.bottomPoint)
+  }
+
   /**
    * try to clip the given tokens to the fields in the tile
    *
    * ASSUMES every play has only one token
    *  AND every token is on only one field (the first intersecting one is taken)
    * @param tokens
+   * @param tileRect the react (coords) in the real img, use this as offset
    * @param tile
+   * @param playerColorMap
    * @param maxDiffInPx this is added on the size of the field (each direction)
    */
-  static getTokenPositionsFromTile(tokens: CvToken[], tile: Tile, maxDiffInPx: number = 0): TokenPosition[] {
+  static getTokenPositionsFromTile(tokens: CvToken[], tileRect: Rect, tile: Tile, playerColorMap: PlayerColorMap, maxDiffInPx: number = 0): TokenPosition[] {
 
 
     const tokenPositions: TokenPosition[] = []
@@ -44,18 +51,21 @@ export class RefereeHelper {
 
       for (const token of tokens) {
 
+        if (this.isTokenInTile(token, tileRect, maxDiffInPx) === false) continue
+
         const rect: Rect = {
-          x: fieldShape.x - maxDiffInPx,
-          y: fieldShape.y - maxDiffInPx,
+          x: tileRect.x + fieldShape.x - maxDiffInPx,
+          y: tileRect.y + fieldShape.y - maxDiffInPx,
           width: fieldShape.width + maxDiffInPx,
           height: fieldShape.height + maxDiffInPx
         }
         if (!intersectPoint(rect, token.bottomPoint)) continue
 
-        const playerId = this.getPlayerIdFromColor(token.color, this.playerColorMap)
+        const playerId = this.getPlayerIdFromColor(token.color, playerColorMap)
 
         if (playerId === null) {
-          throw new Error(`could not get player id from color (${this.colorToString(token.color)})`)
+          //TODO enable
+          // throw new Error(`could not get player id from color (${this.colorToString(token.color)})`)
         }
 
         tokenPositions.push({
@@ -76,7 +86,7 @@ export class RefereeHelper {
 
   static getPlayerIdFromColor(color: CvScalar, playerColorMap: PlayerColorMap): number | null {
 
-    for(const playerId in playerColorMap) {
+    for (const playerId in playerColorMap) {
 
       const playerColor = playerColorMap[playerId]
 
@@ -145,7 +155,7 @@ export class RefereeHelper {
 
 
     //-- global vars
-    for(const ident in state.globalDefTable) {
+    for (const ident in state.globalDefTable) {
 
       const entry = state.globalDefTable[ident]
 
@@ -168,13 +178,11 @@ export class RefereeHelper {
             return [`var (${ident}) has value (${realEntry.val}) but should have value (${entry.val})`]
           }
 
-        }
-        else {
+        } else {
           return [`var (${ident}) should have type int but is not of type int`]
         }
 
-      }
-      else if (isBoolVar(entry)) {
+      } else if (isBoolVar(entry)) {
 
         const realEntry = realState.globalDefTable[ident]
 
@@ -189,21 +197,17 @@ export class RefereeHelper {
             return [`var (${ident}) has value (${realEntry.boolVal}) but should have value (${entry.boolVal})`]
           }
 
-        }
-        else {
+        } else {
           return [`var (${ident}) should have type bool but is not of type bool`]
         }
 
-      }
-      else {
+      } else {
         return [`unknown var type for var (${ident})`]
       }
     }
 
 
     //-- check player local vars (TODO)
-
-
 
 
     return null

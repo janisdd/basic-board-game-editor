@@ -3,8 +3,7 @@ import {Referee} from "./Referee";
 import {ExportWorld} from "../src/types/world";
 import {MigrationHelper} from "../src/helpers/MigrationHelpers";
 import {WorldDrawer} from "./helpers/worldDrawer";
-import {CvDice, CvScalar, HomographyTuple} from "./types";
-import {ChangeEvent} from "react";
+import {CvScalar, HomographyTuple} from "./types";
 import {Cvt} from "./helpers/Cvt";
 
 declare var cv: any
@@ -26,6 +25,8 @@ let playerColorMappingTableWrapper = document.getElementById('player-color-mappi
 
 let debugSynImgsWrapper = document.getElementById('debug-syn-imgs-wrapper') as HTMLDivElement
 const debugSynHomographiessWrapper = document.getElementById('debug-syn-homographies') as HTMLDivElement
+
+const worldRealCanvas = document.getElementById('world-real-canvas') as HTMLCanvasElement
 
 let synImgCanvases: HTMLCanvasElement[] = []
 let homographies: HomographyTuple[] = [] //one for every img in synImgCanvases
@@ -328,6 +329,7 @@ export function onGetHomography() {
   for (let i = 0; i < synImgMats.length; i++) {
 
     const synImgMat = synImgMats[i]
+    const tuple = synImgCanvases[i]
 
     let homography_real_to_synth = new cv.Mat()
     let homography_synth_to_real = new cv.Mat()
@@ -337,15 +339,19 @@ export function onGetHomography() {
 
     debugImg.delete()
 
-    // homographies.push({
-    //   realToSynMat: homography_real_to_synth,
-    //   synToRealMat: homography_synth_to_real
-    // })
-
     let copy = snapshotWorld.clone()
 
     let worldCorners = referee.worldHelper.drawWorldRect(synImgMat, copy, homography_synth_to_real);
     console.log(worldCorners)
+
+    homographies.push({
+      realToSynMat: homography_real_to_synth,
+      synToRealMat: homography_synth_to_real,
+      tile: (tuple as any).tile,
+      syntheticImgMat: synImgMat,
+      tileRect: Cvt.convertRect(worldCorners)
+    })
+
 
     const canvas = document.createElement('canvas')
 
@@ -359,9 +365,18 @@ export function onGetHomography() {
 
 
   snapshotWorld.delete()
-  synImgMats.forEach(p => p.delete())
+  console.timeEnd('get homography')
 
 }
+
+
+export function drawRealWorldPlain() {
+
+  worldDrawer.drawWorld(worldRealCanvas, referee.world, referee.simulationMachineState)
+  // referee.updateVariablesTable(variablesTableWrapperDiv)
+
+}
+
 
 
 // let streaming = true
