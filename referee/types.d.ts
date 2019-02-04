@@ -75,6 +75,10 @@ export interface TokenPosition {
 
   tileGuid: string
   fieldId: number
+  /**
+   * just for debug
+   */
+  fieldText: string
 }
 
 

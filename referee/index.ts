@@ -3,8 +3,9 @@ import {Referee} from "./Referee";
 import {ExportWorld} from "../src/types/world";
 import {MigrationHelper} from "../src/helpers/MigrationHelpers";
 import {WorldDrawer} from "./helpers/worldDrawer";
-import {CvScalar, HomographyTuple, SyntheticImgTuple} from "./types";
+import {CvRect, CvScalar, HomographyTuple, SyntheticImgTuple, TokenPosition} from "./types";
 import {Cvt} from "./helpers/Cvt";
+import {Simulator} from "../simulation/simulator";
 
 declare var cv: any
 
@@ -31,6 +32,7 @@ const worldRealCanvas = document.getElementById('world-real-canvas') as HTMLCanv
 let synImgCanvases: SyntheticImgTuple[] = []
 let homographies: HomographyTuple[] = [] //one for every img in synImgCanvases --> one for every tile
 
+const refereeHelper = new RefereeHelper()
 
 let lastDiceValue = 2
 
@@ -376,6 +378,102 @@ export function drawRealWorldPlain() {
 
   worldDrawer.drawWorld(worldRealCanvas, referee.world, referee.simulationMachineState)
   // referee.updateVariablesTable(variablesTableWrapperDiv)
+
+}
+
+export function drawTileFieldsOnRealImg(tuple: HomographyTuple, targetMat: any, maxDiffInPx: number = 0)  {
+
+  for (const fieldShape of tuple.tile.fieldShapes) {
+
+    const fieldRect: CvRect = {
+      x: fieldShape.x - maxDiffInPx,
+      y: fieldShape.y - maxDiffInPx,
+      width: fieldShape.width + maxDiffInPx*2,
+      height: fieldShape.height + maxDiffInPx*2
+    }
+
+    const fieldPos = referee.worldHelper.perspectiveTransformRect(fieldRect, tuple.synToRealMat)
+
+    //draw
+    referee.worldHelper.drawRect(fieldPos, targetMat)
+  }
+}
+
+//we assume homographies are already set here
+//get the tokens, clip them on the tiles (outside of tiles is not drawn?), draw tokens on debug synthetic real field
+export function onGetRealState()  {
+
+  //clear
+  drawRealWorldPlain()
+
+  //then get & draw tokens
+  const snapshot = getSnapshot()
+
+
+
+  //if we don't do this we get wrong colors when we draw tokens?
+  cv.cvtColor(snapshot, snapshot, cv.COLOR_BGRA2BGR);
+
+  const snapshotCopy = snapshot.clone()
+
+  const tuple = referee.getTokens(snapshot)
+  const tokens = tuple[0]
+  const debugImgMat = tuple[1]
+
+  cv.imshow(canvasSnapshot, debugImgMat)
+
+  for(let i = 0; i < homographies.length;i++) {
+    const homography = homographies[i]
+
+    let worldCornersVec = referee.worldHelper.drawWorldRect(homography.syntheticImgMat, debugImgMat, homography.synToRealMat);
+    // const tileRect = Cvt.convertRect(worldCornersVec)
+
+    drawTileFieldsOnRealImg(homography, debugImgMat, 10)
+
+    cv.imshow(canvasSnapshot, debugImgMat)
+  }
+
+  let tokenPositions: TokenPosition[] = []
+  for(const homography of homographies) {
+
+    const pos = refereeHelper.getTokenPositionsFromTile(tokens, homography.tileRect, homography.tile, {},
+      homography.synToRealMat, referee.worldHelper,  10)
+      console.log(`tokens on tile ${homography.tile.guid}`, pos)
+      tokenPositions = tokenPositions.concat(pos)
+  }
+
+  //set the token positions in the real synthetic img...
+  //TODO make sure we get the right colors...
+
+  //for debug we set the player id random...
+  let tokenCount = 0
+
+
+  let tempMachineState = Simulator.initNew(referee.startPos, true, referee.world.worldSettings.worldCmdText)
+
+  tempMachineState = {
+    ...tempMachineState,
+    players: tempMachineState.players.map(player => ({
+      ...player,
+      tokens: player.tokens.map(p => {
+
+        if (tokenCount >= tokenPositions.length) return p
+
+        const count = tokenCount++
+        return {
+          ...p,
+          tileGuid: tokenPositions[count].tileGuid,
+          fieldId:tokenPositions[count].fieldId
+        }
+      })
+    }))
+  }
+
+  worldDrawer.drawWorld(worldRealCanvas, referee.world, tempMachineState)
+
+  snapshotCopy.delete()
+  debugImgMat.delete()
+  snapshot.delete()
 
 }
 

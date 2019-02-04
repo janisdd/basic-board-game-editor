@@ -1,8 +1,7 @@
-import {CvRealMachineState, CvScalar, CvToken, TokenPosition} from "../types";
+import {CvRealMachineState, CvRect, CvScalar, CvToken, TokenPosition} from "../types";
 import {Tile} from "../../src/types/world";
-import {intersectPoint} from "../../src/helpers/interactionHelper";
-import {Rect} from "../../src/types/drawing";
 import {isBoolVar, isIntVar, MachineState} from "../../simulation/machine/machineState";
+import {PlainPoint, Rect} from "../../src/types/drawing";
 
 
 /**
@@ -22,13 +21,12 @@ export interface PlayerColorMap {
 }
 
 export class RefereeHelper {
-  private constructor() {
-  }
 
-  static playerColorMap: PlayerColorMap = {}
 
-  static isTokenInTile(token: CvToken, tileRect: Rect, maxDiffInPx: number = 0): boolean {
-    return intersectPoint(tileRect, token.bottomPoint)
+  playerColorMap: PlayerColorMap = {}
+
+  isTokenInTile(token: CvToken, tileRect: CvRect, maxDiffInPx: number = 0): boolean {
+    return this.intersectPoint(tileRect, token.bottomPoint)
   }
 
   /**
@@ -42,37 +40,47 @@ export class RefereeHelper {
    * @param playerColorMap
    * @param maxDiffInPx this is added on the size of the field (each direction)
    */
-  static getTokenPositionsFromTile(tokens: CvToken[], tileRect: Rect, tile: Tile, playerColorMap: PlayerColorMap, maxDiffInPx: number = 0): TokenPosition[] {
+  getTokenPositionsFromTile(tokens: CvToken[], tileRect: CvRect, tile: Tile, playerColorMap: PlayerColorMap, homographyMat: any, worldHelper: any, maxDiffInPx: number = 0): TokenPosition[] {
 
 
     const tokenPositions: TokenPosition[] = []
 
-    for (const fieldShape of tile.fieldShapes) {
+    for (const token of tokens) {
 
-      for (const token of tokens) {
+      for (const fieldShape of tile.fieldShapes) {
 
         if (this.isTokenInTile(token, tileRect, maxDiffInPx) === false) continue
 
-        const rect: Rect = {
-          x: tileRect.x + fieldShape.x - maxDiffInPx,
-          y: tileRect.y + fieldShape.y - maxDiffInPx,
-          width: fieldShape.width + maxDiffInPx,
-          height: fieldShape.height + maxDiffInPx
+        const fieldRect: CvRect = {
+          x: fieldShape.x,
+          y: fieldShape.y,
+          width: fieldShape.width,
+          height: fieldShape.height
         }
-        if (!intersectPoint(rect, token.bottomPoint)) continue
+
+        const fieldPos = worldHelper.perspectiveTransformRect(fieldRect, homographyMat)
+
+        const rect: CvRect = {
+          x: fieldPos.x - maxDiffInPx,
+          y: fieldPos.y - maxDiffInPx,
+          width: fieldPos.width + maxDiffInPx*2,
+          height: fieldPos.height + maxDiffInPx*2
+        }
+        if (!this.intersectPoint(rect, token.bottomPoint)) continue
 
         const playerId = this.getPlayerIdFromColor(token.color, playerColorMap)
 
-        if (playerId === null) {
-          //TODO enable
-          // throw new Error(`could not get player id from color (${this.colorToString(token.color)})`)
-        }
+        // if (playerId === null) {
+        //   //TODO enable
+        //   throw new Error(`could not get player id from color (${this.colorToString(token.color)})`)
+        // }
 
         tokenPositions.push({
           fieldId: fieldShape.id,
           tileGuid: tile.guid,
           tokenId: 0, //TODO only allow 1 token per player
-          playerId
+          playerId,
+          fieldText: fieldShape.text
         })
       }
     }
@@ -80,11 +88,11 @@ export class RefereeHelper {
     return tokenPositions
   }
 
-  static colorToString(color: CvScalar): string {
+  colorToString(color: CvScalar): string {
     return `[${color[0]}, ${color[1]}, ${color[2]}]`
   }
 
-  static getPlayerIdFromColor(color: CvScalar, playerColorMap: PlayerColorMap): number | null {
+  getPlayerIdFromColor(color: CvScalar, playerColorMap: PlayerColorMap): number | null {
 
     for (const playerId in playerColorMap) {
 
@@ -105,7 +113,7 @@ export class RefereeHelper {
   }
 
 
-  static getVarValuesFromIndicator() {
+  getVarValuesFromIndicator() {
     //TODO create DefinitionTable from img
   }
 
@@ -116,7 +124,7 @@ export class RefereeHelper {
    * @param state
    * @param realState
    */
-  static compareStates(state: MachineState, realState: CvRealMachineState): null | [string] {
+  compareStates(state: MachineState, realState: CvRealMachineState): null | [string] {
 
 
     //--- check if tokens are on the same fields
@@ -213,4 +221,23 @@ export class RefereeHelper {
     return null
   }
 
+
+  //IF WE IMPORT THIS FUNC from interactionHelper we get a cyclic dependency somehow...
+  intersectPoint(rect1: Rect, point: PlainPoint) {
+
+    if (rect1.width < 0) {
+      rect1.x = rect1.x + rect1.width
+      rect1.width = -rect1.width
+    }
+    if (rect1.height < 0) {
+      rect1.y = rect1.y + rect1.height
+      rect1.height = -rect1.height
+    }
+
+    return !(point.x > rect1.x + rect1.width ||
+      point.x < rect1.x ||
+      point.y > rect1.y + rect1.height ||
+      point.y < rect1.y)
+
+  }
 }

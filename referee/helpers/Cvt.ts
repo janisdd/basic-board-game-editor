@@ -87,7 +87,7 @@ export class Cvt {
     if (num != 4) throw new Error(`vector should have 4 elements to create a rect`)
 
     const topLeft = this.convertPoint(vec2f.get(0))
-    const bottomRight = this.convertPoint(vec2f.get(0))
+    const bottomRight = this.convertPoint(vec2f.get(2))
 
     const rect: CvRect = {
       x: topLeft.x,
