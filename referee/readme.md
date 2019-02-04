@@ -28,3 +28,14 @@ e.g.
 - `choose`
 
 will be done via simulation (no interaction)
+
+
+
+
+## NOTES
+
+- we now use SURF as keypoint detector which is non-free!! (copied from opencv contrib) 
+
+## Links
+
+- https://webrtchacks.com/video-constraints-2/

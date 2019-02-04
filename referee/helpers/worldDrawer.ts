@@ -1,11 +1,12 @@
 import {WorldTilesHelper} from "../../src/helpers/worldTilesHelper";
 import * as graphics from "../../graphics/graphicsCore";
-import {worldSelectedTileBorderColor, worldTileBorderColor} from "../../src/constants";
+import {exportPngImagesBgColor, worldSelectedTileBorderColor, worldTileBorderColor} from "../../src/constants";
 import {FieldShape} from "../../src/types/drawing";
 import {ExportWorld} from "../../src/types/world";
 import {ZIndexCache} from "../../src/types/ui";
 import MouseEvent = createjs.MouseEvent
 import {MachineState} from "../../simulation/machine/machineState";
+import {PrintHelper} from "../../src/helpers/printHelper";
 
 
 export class WorldDrawer {
@@ -293,5 +294,50 @@ export class WorldDrawer {
 
     this.renderStage.update()
   }
+
+  drawSyntheticImgs(wrapperDiv: HTMLDivElement, synImgCanvases: HTMLCanvasElement[]) {
+
+    wrapperDiv.innerHTML = ""
+
+    synImgCanvases.forEach(p => wrapperDiv.appendChild(p))
+  }
+
+  getWorldSyntheticImgs(exportWorld: ExportWorld): HTMLCanvasElement[] {
+
+    const synImgCanvases: HTMLCanvasElement[] = []
+
+    const usedTiles = exportWorld.allTiles.filter(p => exportWorld.worldTiles.some(surr => surr.tileGuid === p.guid))
+
+    for(const tile of usedTiles) {
+
+      let canvas = document.createElement('canvas')
+      canvas.classList.add('syn-img')
+
+      //reset for svg
+
+      canvas.width = tile.tileSettings.width
+      canvas.height = tile.tileSettings.height
+
+      const stage = PrintHelper.printFullTile(
+        tile,
+        exportWorld.fieldSymbols,
+        exportWorld.imgSymbols, exportWorld.lineSymbols,
+        canvas,
+        false, tile.tileSettings.gridSizeInPx,
+        exportWorld.worldSettings.gridStrokeThicknessInPx,
+        exportWorld.worldSettings.gridStrokeColor,
+        exportWorld.worldSettings,
+        exportPngImagesBgColor,
+        1
+      )
+
+      synImgCanvases.push(canvas)
+
+    }
+
+    return synImgCanvases
+
+  }
+
 }
 

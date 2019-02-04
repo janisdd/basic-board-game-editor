@@ -13,17 +13,26 @@
             border: 1px solid black;
             margin-right: 0.5em;
         }
+        .syn-img {
+            border: 1px solid black;
+        }
     </style>
 </head>
 <body>
 
 
-<button onclick="bbge.initReferee()">init</button>
-<input type="file" accept=".world" onchange="bbge.onWorldInputChanged(event)">
-<video style="display: none" autoplay="true" id="realImgSrc" width="1900" height="1080">
+<!-- style="display: none" -->
+<video  autoplay="true" id="realImgSrc" width="300" height="300">
 </video>
+<!--<video  autoplay="true" id="realImgSrc" >-->
+<!--</video>-->
 
-<canvas id="canvasSnaptshot" width="1280" height="720"></canvas>
+<button onclick="bbge.onInitReferee()">init</button>
+<input type="file" accept=".world" onchange="bbge.onWorldInputChanged(event)">
+
+<canvas id="canvasSnaptshot" width="1900" height="1080"></canvas>
+
+
 
 <br />
 
@@ -34,10 +43,12 @@
 
 </div>
 
+<button onclick="bbge.onGetHomography()">get homography</button>
+
+<button onclick="bbge.onGetDice()">get dice</button>
+<button onclick="bbge.onNextRound()">next round</button>
 
 
-<button onclick="bbge.getDice()">get dice</button>
-<button onclick="bbge.nextRound()">next round</button>
 
 
 <div>
@@ -51,7 +62,16 @@
 
 
 
+<!-- alle synthetic imgs from the world-->
+<h3>debug syn imgs (used for keypoint detection/homography)</h3>
+<div id="debug-syn-imgs-wrapper">
 
+</div>
+
+<h3>debug syn imgs with rects</h3>
+<div id="debug-syn-homographies">
+
+</div>
 
 
 

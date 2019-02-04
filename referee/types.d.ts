@@ -110,3 +110,9 @@ export interface CvRealMachineState {
 }
 
 
+export interface HomographyTuple {
+  synToRealMat: any
+  realToSynMat: any
+}
+
+

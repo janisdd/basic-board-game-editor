@@ -24,6 +24,8 @@ export class Referee {
 
   diceHelper: any = null
   tokenHelper: any = null
+  worldHelper: any = null
+
   world: ExportWorld
 
   simulationMachineState: MachineState | null = null
@@ -38,6 +40,7 @@ export class Referee {
   init() {
     this.diceHelper = new cv.DiceHelper()
     this.tokenHelper = new cv.TokenHelper()
+    this.worldHelper = new cv.WorldHelper()
   }
 
   getAvailableColorsFromTokens(imgMat: any): CvScalar[] {

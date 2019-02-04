@@ -538,7 +538,7 @@ export class PrintHelper {
   }
 
 
-  private static printFullTile(tile: Tile,
+  public static printFullTile(tile: Tile,
                                fieldSymbols: ReadonlyArray<FieldSymbol>,
                                imgSymbols: ReadonlyArray<ImgSymbol>,
                                lineSymbols: ReadonlyArray<LineSymbol>,

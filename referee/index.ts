@@ -3,7 +3,7 @@ import {Referee} from "./Referee";
 import {ExportWorld} from "../src/types/world";
 import {MigrationHelper} from "../src/helpers/MigrationHelpers";
 import {WorldDrawer} from "./helpers/worldDrawer";
-import {CvDice, CvScalar} from "./types";
+import {CvDice, CvScalar, HomographyTuple} from "./types";
 import {ChangeEvent} from "react";
 import {Cvt} from "./helpers/Cvt";
 
@@ -24,6 +24,12 @@ let variablesTableWrapperDiv = document.getElementById('variables-table') as HTM
 
 let playerColorMappingTableWrapper = document.getElementById('player-color-mapping-table-wrapper') as HTMLDivElement
 
+let debugSynImgsWrapper = document.getElementById('debug-syn-imgs-wrapper') as HTMLDivElement
+const debugSynHomographiessWrapper = document.getElementById('debug-syn-homographies') as HTMLDivElement
+
+let synImgCanvases: HTMLCanvasElement[] = []
+let homographies: HomographyTuple[] = [] //one for every img in synImgCanvases
+
 let lastDiceValue = 2
 
 /**
@@ -31,7 +37,19 @@ let lastDiceValue = 2
  */
 export function initVideo() {
   if (!videoStarted) {
-    navigator.mediaDevices.getUserMedia({video: true, audio: false})
+    navigator.mediaDevices.getUserMedia({
+      video: {
+        // width: 1280,
+        // height: 720
+        width: {
+          exact: 1920
+        },
+        height: {
+          exact: 1080
+        }
+      } as any,
+      audio: false
+    })
       .then(function (stream) {
         video.srcObject = stream
         video.play()
@@ -42,6 +60,10 @@ export function initVideo() {
       });
   }
 }
+
+// video.onloadedmetadata = function ()  {
+//   console.log(`actual video2: width: ${video.videoWidth}, height: ${video.videoHeight}`)
+// }
 
 /**
  * returns img as mat
@@ -164,7 +186,7 @@ export function applyPlayerColorMapping() {
 
     const playerId = parseInt(input.value)
 
-    if (isNaN(playerId) || playerId > keys.length-1) throw new Error(`player id (${playerId}) is not a number or the id is larger than the player count - 1`)
+    if (isNaN(playerId) || playerId > keys.length - 1) throw new Error(`player id (${playerId}) is not a number or the id is larger than the player count - 1`)
 
     const oldPlayerIndex = parseInt(input.getAttribute('data-player-color-id'))
 
@@ -207,14 +229,14 @@ export function getDiceValue(): number {
 
 }
 
-export function getDice() {
+export function onGetDice() {
 
   const diceValue = getDiceValue()
   lastDiceValue = diceValue
 
 }
 
-export function nextRound() {
+export function onNextRound() {
 
   referee.simulateNextRound(lastDiceValue)
   worldDrawer.drawWorld(referee.world, referee.simulationMachineState)
@@ -256,6 +278,9 @@ export function onWorldInputChanged(e: any) {
     worldDrawer.drawWorld(exportedWorld, referee.simulationMachineState)
     referee.updateVariablesTable(variablesTableWrapperDiv)
 
+    synImgCanvases = worldDrawer.getWorldSyntheticImgs(exportedWorld)
+    worldDrawer.drawSyntheticImgs(debugSynImgsWrapper, synImgCanvases)
+
   }
 
   fileReader.onerror = ev => {
@@ -263,7 +288,6 @@ export function onWorldInputChanged(e: any) {
   }
 
   fileReader.readAsText(file)
-
 }
 
 
@@ -275,7 +299,7 @@ export function onOpenCvReady() {
   initVideo()
 }
 
-export function initReferee() {
+export function onInitReferee() {
   referee.init()
 
   worldDrawer.init(worldCanvas)
@@ -285,6 +309,58 @@ export function initReferee() {
   cv.imshow(canvasSnapshot, test)
 
   test.delete()
+}
+
+
+export function onGetHomography() {
+
+  const snapshotWorld = getSnapshot()
+
+  let synImgMats = synImgCanvases.map(p => cv.imread(p))
+
+  homographies.forEach(p => {
+    p.synToRealMat.delete()
+    p.realToSynMat.delete()
+  })
+  homographies = []
+  debugSynHomographiessWrapper.innerHTML = ""
+
+  for (let i = 0; i < synImgMats.length; i++) {
+
+    const synImgMat = synImgMats[i]
+
+    let homography_real_to_synth = new cv.Mat()
+    let homography_synth_to_real = new cv.Mat()
+
+    //
+    let debugImg = referee.worldHelper.getWorldHomography(synImgMat, snapshotWorld, homography_real_to_synth, homography_synth_to_real);
+
+    debugImg.delete()
+
+    homographies.push({
+      realToSynMat: homography_real_to_synth,
+      synToRealMat: homography_synth_to_real
+    })
+
+    let copy = snapshotWorld.clone()
+
+    let worldCorners = referee.worldHelper.drawWorldRect(synImgMat, copy, homography_synth_to_real);
+    console.log(worldCorners)
+
+    const canvas = document.createElement('canvas')
+
+    debugSynHomographiessWrapper.appendChild(canvas)
+
+    cv.imshow(canvas, copy)
+
+    copy.delete()
+
+  }
+
+
+  snapshotWorld.delete()
+  synImgMats.forEach(p => p.delete())
+
 }
 
 
