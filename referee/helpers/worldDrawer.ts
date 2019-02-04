@@ -19,12 +19,6 @@ export class WorldDrawer {
 
   zIndexCache: ZIndexCache = {}
 
-  init(canvas: HTMLCanvasElement) {
-    this.canvas = canvas
-    this.renderStage = new createjs.Stage(canvas)
-    this.zIndexCache = {}
-  }
-
   drawWorld(canvas: HTMLCanvasElement, exportWorld: ExportWorld, simulationMachineState: MachineState | null) {
 
     this.canvas = canvas

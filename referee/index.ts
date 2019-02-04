@@ -3,7 +3,7 @@ import {Referee} from "./Referee";
 import {ExportWorld} from "../src/types/world";
 import {MigrationHelper} from "../src/helpers/MigrationHelpers";
 import {WorldDrawer} from "./helpers/worldDrawer";
-import {CvScalar, HomographyTuple} from "./types";
+import {CvScalar, HomographyTuple, SyntheticImgTuple} from "./types";
 import {Cvt} from "./helpers/Cvt";
 
 declare var cv: any
@@ -28,8 +28,9 @@ const debugSynHomographiessWrapper = document.getElementById('debug-syn-homograp
 
 const worldRealCanvas = document.getElementById('world-real-canvas') as HTMLCanvasElement
 
-let synImgCanvases: HTMLCanvasElement[] = []
-let homographies: HomographyTuple[] = [] //one for every img in synImgCanvases
+let synImgCanvases: SyntheticImgTuple[] = []
+let homographies: HomographyTuple[] = [] //one for every img in synImgCanvases --> one for every tile
+
 
 let lastDiceValue = 2
 
@@ -202,7 +203,7 @@ export function applyPlayerColorMapping() {
   console.log(newMap)
 
   referee.applyNewColorMapping(newMap)
-  // worldDrawer.drawWorld(referee.world, referee.simulationMachineState)
+  worldDrawer.drawWorld(worldCanvas,referee.world, referee.simulationMachineState)
 
 }
 
@@ -276,11 +277,11 @@ export function onWorldInputChanged(e: any) {
     referee.settWorld(exportedWorld)
     referee.startNewSimulation()
 
-    // worldDrawer.drawWorld(exportedWorld, referee.simulationMachineState)
+    worldDrawer.drawWorld(worldCanvas,exportedWorld, referee.simulationMachineState)
     referee.updateVariablesTable(variablesTableWrapperDiv)
 
-    // synImgCanvases = worldDrawer.getWorldSyntheticImgs(exportedWorld)
-    worldDrawer.drawSyntheticImgs(debugSynImgsWrapper, synImgCanvases)
+    synImgCanvases = worldDrawer.getWorldSyntheticImgs(exportedWorld)
+    worldDrawer.drawSyntheticImgs(debugSynImgsWrapper, synImgCanvases.map(p => p.canvas))
 
   }
 
@@ -303,7 +304,6 @@ export function onOpenCvReady() {
 export function onInitReferee() {
   referee.init()
 
-  worldDrawer.init(worldCanvas)
 
   const test = getSnapshot()
 
