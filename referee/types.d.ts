@@ -1,4 +1,5 @@
 import {DefinitionTable, PlayerObj} from "../simulation/machine/machineState";
+import {Tile} from "../src/types/world";
 
 
 export interface CvRect {
@@ -113,6 +114,14 @@ export interface CvRealMachineState {
 export interface HomographyTuple {
   synToRealMat: any
   realToSynMat: any
+  tile: Tile
+  syntheticImgMat: any
+  tileRect: CvRect
+}
+
+export interface SyntheticImgTuple {
+  canvas: HTMLCanvasElement
+  tile: Tile
 }
 
 

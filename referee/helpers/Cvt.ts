@@ -1,4 +1,4 @@
-import {CvDice, CvKeyPoint, CvPoint, CvToken} from "../types";
+import {CvDice, CvKeyPoint, CvPoint, CvRect, CvToken} from "../types";
 
 export class Cvt {
   private constructor() {
@@ -78,6 +78,25 @@ export class Cvt {
 
 
     return token
+  }
+
+  static convertRect(vec2f: any): CvRect {
+
+    const num = vec2f.size()
+
+    if (num != 4) throw new Error(`vector should have 4 elements to create a rect`)
+
+    const topLeft = this.convertPoint(vec2f.get(0))
+    const bottomRight = this.convertPoint(vec2f.get(0))
+
+    const rect: CvRect = {
+      x: topLeft.x,
+      y: topLeft.y,
+      width: bottomRight.x - topLeft.x,
+      height: bottomRight.y - topLeft.y
+    }
+
+    return rect
   }
 
   //from https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb

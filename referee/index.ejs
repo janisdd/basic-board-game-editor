@@ -48,15 +48,22 @@
 <button onclick="bbge.onGetDice()">get dice</button>
 <button onclick="bbge.onNextRound()">next round</button>
 
+<button onclick="bbge.onGetRealState()">get real state</button>
 
 
 
 <div>
+    <h3>simulation state</h3>
+
     <canvas id="world-renderer-canvas" width="1000" height="1000"></canvas>
 
     <div id="variables-table" style="float: right">
 
     </div>
+
+    <h3>real (synthetic) state</h3>
+    <canvas id="world-real-canvas" width="1000" height="1000"></canvas>
+
 
 </div>
 

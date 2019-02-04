@@ -201,7 +201,7 @@ export function applyPlayerColorMapping() {
   console.log(newMap)
 
   referee.applyNewColorMapping(newMap)
-  worldDrawer.drawWorld(referee.world, referee.simulationMachineState)
+  // worldDrawer.drawWorld(referee.world, referee.simulationMachineState)
 
 }
 
@@ -239,7 +239,7 @@ export function onGetDice() {
 export function onNextRound() {
 
   referee.simulateNextRound(lastDiceValue)
-  worldDrawer.drawWorld(referee.world, referee.simulationMachineState)
+  // worldDrawer.drawWorld(referee.world, referee.simulationMachineState)
 
   referee.updateVariablesTable(variablesTableWrapperDiv)
 
@@ -275,10 +275,10 @@ export function onWorldInputChanged(e: any) {
     referee.settWorld(exportedWorld)
     referee.startNewSimulation()
 
-    worldDrawer.drawWorld(exportedWorld, referee.simulationMachineState)
+    // worldDrawer.drawWorld(exportedWorld, referee.simulationMachineState)
     referee.updateVariablesTable(variablesTableWrapperDiv)
 
-    synImgCanvases = worldDrawer.getWorldSyntheticImgs(exportedWorld)
+    // synImgCanvases = worldDrawer.getWorldSyntheticImgs(exportedWorld)
     worldDrawer.drawSyntheticImgs(debugSynImgsWrapper, synImgCanvases)
 
   }
@@ -337,10 +337,10 @@ export function onGetHomography() {
 
     debugImg.delete()
 
-    homographies.push({
-      realToSynMat: homography_real_to_synth,
-      synToRealMat: homography_synth_to_real
-    })
+    // homographies.push({
+    //   realToSynMat: homography_real_to_synth,
+    //   synToRealMat: homography_synth_to_real
+    // })
 
     let copy = snapshotWorld.clone()
 

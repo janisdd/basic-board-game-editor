@@ -7,6 +7,7 @@ import {ZIndexCache} from "../../src/types/ui";
 import MouseEvent = createjs.MouseEvent
 import {MachineState} from "../../simulation/machine/machineState";
 import {PrintHelper} from "../../src/helpers/printHelper";
+import {SyntheticImgTuple} from "../types";
 
 
 export class WorldDrawer {
@@ -24,7 +25,11 @@ export class WorldDrawer {
     this.zIndexCache = {}
   }
 
-  drawWorld(exportWorld: ExportWorld, simulationMachineState: MachineState | null) {
+  drawWorld(canvas: HTMLCanvasElement, exportWorld: ExportWorld, simulationMachineState: MachineState | null) {
+
+    this.canvas = canvas
+    this.renderStage = new createjs.Stage(canvas)
+    this.zIndexCache = {}
 
     // canvas.removeEventListener('wheel', this.onWheelReference)
 
@@ -80,18 +85,18 @@ export class WorldDrawer {
         //   )
         // } else {
 
-          //not selected tile
-          graphics.drawGrid(
-            this.renderStage,
-            defaultTileWidth,
-            defaultTileHeight,
-            0,
-            1,
-            worldTileBorderColor,
-            true,
-            i * defaultTileWidth,
-            j * defaultTileHeight
-          )
+        //not selected tile
+        graphics.drawGrid(
+          this.renderStage,
+          defaultTileWidth,
+          defaultTileHeight,
+          0,
+          1,
+          worldTileBorderColor,
+          true,
+          i * defaultTileWidth,
+          j * defaultTileHeight
+        )
         // }
 
 
@@ -302,9 +307,13 @@ export class WorldDrawer {
     synImgCanvases.forEach(p => wrapperDiv.appendChild(p))
   }
 
-  getWorldSyntheticImgs(exportWorld: ExportWorld): HTMLCanvasElement[] {
+  /**
+   * returns all tiles drawn on canvas elements
+   * @param exportWorld
+   */
+  getWorldSyntheticImgs(exportWorld: ExportWorld): SyntheticImgTuple[] {
 
-    const synImgCanvases: HTMLCanvasElement[] = []
+    const synImgCanvases: SyntheticImgTuple[] = []
 
     const usedTiles = exportWorld.allTiles.filter(p => exportWorld.worldTiles.some(surr => surr.tileGuid === p.guid))
 
@@ -331,7 +340,10 @@ export class WorldDrawer {
         1
       )
 
-      synImgCanvases.push(canvas)
+      synImgCanvases.push({
+        canvas,
+        tile
+      })
 
     }
 

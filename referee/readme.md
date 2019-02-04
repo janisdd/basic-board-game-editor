@@ -13,6 +13,10 @@ wait a bit (until opencv js is loaded)
 - place the tokens from the player under the cam then click detect colors (you need to have the same number tokens as players) 
 - then set the player id to the detect colors
   - click apply mapping (even if you didn't change anything)
+  
+- click get homography (see the debug imgs if the tiles are recognized correctly)
+
+
 
 - the simulation will then use the dice value (open console to see result)
 
@@ -29,6 +33,9 @@ e.g.
 
 will be done via simulation (no interaction)
 
+- one cannot add/use the same tile twice
+
+- only 1000 x 1000 px worlds are supported
 
 
 
@@ -39,3 +46,13 @@ will be done via simulation (no interaction)
 ## Links
 
 - https://webrtchacks.com/video-constraints-2/
+
+
+
+## TODO
+
+- debug img mit realem zustand (token einzeichnen (clipping))
+
+
+
+- var indicators
