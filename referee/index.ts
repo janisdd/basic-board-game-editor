@@ -241,7 +241,7 @@ export function onGetDice() {
 export function onNextRound() {
 
   referee.simulateNextRound(lastDiceValue)
-  // worldDrawer.drawWorld(referee.world, referee.simulationMachineState)
+  worldDrawer.drawWorld(worldCanvas,referee.world, referee.simulationMachineState)
 
   referee.updateVariablesTable(variablesTableWrapperDiv)
 
@@ -315,13 +315,15 @@ export function onInitReferee() {
 
 export function onGetHomography() {
 
+  console.time('get homography')
   const snapshotWorld = getSnapshot()
 
-  let synImgMats = synImgCanvases.map(p => cv.imread(p))
+  let synImgMats = synImgCanvases.map(p => cv.imread(p.canvas))
 
   homographies.forEach(p => {
     p.synToRealMat.delete()
     p.realToSynMat.delete()
+    p.syntheticImgMat.delete()
   })
   homographies = []
   debugSynHomographiessWrapper.innerHTML = ""
@@ -347,7 +349,7 @@ export function onGetHomography() {
     homographies.push({
       realToSynMat: homography_real_to_synth,
       synToRealMat: homography_synth_to_real,
-      tile: (tuple as any).tile,
+      tile: tuple.tile,
       syntheticImgMat: synImgMat,
       tileRect: Cvt.convertRect(worldCorners)
     })
