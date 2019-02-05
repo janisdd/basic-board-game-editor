@@ -331,7 +331,8 @@ export class WorldDrawer {
         exportWorld.worldSettings.gridStrokeColor,
         exportWorld.worldSettings,
         exportPngImagesBgColor,
-        1
+        1,
+        true,
       )
 
       synImgCanvases.push({

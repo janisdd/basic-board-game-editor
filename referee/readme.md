@@ -22,6 +22,17 @@ wait a bit (until opencv js is loaded)
 
 
 
+## One round
+
+- roll the dice
+- click get dice and make sure number is right
+- make moves (real)
+- click next round (will run simulation with dice value)
+- click get real state
+- then compare states (TODO automatically?)
+
+- tokens outside if tiles are rendered in default colors
+
 ## Limits
 
 all functions that require additional user interaction are simulation normally
@@ -48,11 +59,16 @@ will be done via simulation (no interaction)
 - https://webrtchacks.com/video-constraints-2/
 
 
+## Opencv Changes
 
-## TODO
+https://github.com/opencv/opencv
 
-- debug img mit realem zustand (token einzeichnen (clipping))
+- we start at commit 287ee9d0eada120e0da5029206c5438682fe06da [287ee9d0e]
+  - from 24. Januar 2019 um 17:22:12 MEZ by Alexander Alekhin <alexander.a.alekhin@gmail.com>
+  (Merge pull request #13687 from rgarnov:gapi_fix_fluid_heterogeneity)
 
 
+
+## NOT IMPLEMENTED
 
 - var indicators

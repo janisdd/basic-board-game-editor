@@ -544,7 +544,9 @@ export class PrintHelper {
                                lineSymbols: ReadonlyArray<LineSymbol>,
                                canvas: HTMLCanvasElement, drawGrid: boolean, gridSizeInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string, worldSettings: WorldSettings,
                                fillBackgroundColor: string | null,
-                               printScale: number
+                               printScale: number,
+                               printBlackBorderForDetector: boolean = false,
+                               printBorderWidth: number = 5
   ): createjs.Stage {
 
     const zIndexCache: ZIndexCache = {}
@@ -562,9 +564,17 @@ export class PrintHelper {
     // const height = canvas.height
 
 
+
     //canvas size is larger for printing (scaled) so use the tile size
-    graphics.drawGrid(stage, tile.tileSettings.width, tile.tileSettings.height, gridSizeInPx, gridStrokeThicknessInPx, gridStrokeColor, !drawGrid,
-      0, 0)
+    if (printBlackBorderForDetector) {
+      graphics.drawGrid(stage, tile.tileSettings.width, tile.tileSettings.height, gridSizeInPx, printBorderWidth, 'black', true,
+        0, 0)
+    }
+    else {
+      graphics.drawGrid(stage, tile.tileSettings.width, tile.tileSettings.height, gridSizeInPx, gridStrokeThicknessInPx, gridStrokeColor, !drawGrid,
+        0, 0)
+    }
+
 
     graphics.drawFieldsOnTile(stage, tile.fieldShapes, [], [], null, null, null, zIndexCache, false, false,
       worldSettings,
@@ -998,7 +1008,7 @@ export class PrintHelper {
 
         const stage = this.printFullTile(printTile, fieldSymbols, imgSymbols, lineSymbols, canvas, drawGrid,
           gridSizeInPx,
-          gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor, printScale)
+          gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor, printScale,true)
 
         stage.scaleX = stage.scaleY = scaleFactor
         stage.update()

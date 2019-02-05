@@ -72,8 +72,8 @@ export class Cvt {
         width: tokenFromCv.bbox.width
       },
       bottomPoint: this.convertPoint(tokenFromCv.bottomPoint),
-      color: [tokenFromCv.color[0], tokenFromCv.color[1], tokenFromCv.color[2]],
-      colorRgb: [tokenFromCv.colorRgb[2], tokenFromCv.colorRgb[1], tokenFromCv.colorRgb[1]],
+      color: [tokenFromCv.color[0], tokenFromCv.color[1], tokenFromCv.color[2], 0],
+      colorRgb: [tokenFromCv.colorRgb[2], tokenFromCv.colorRgb[1], tokenFromCv.colorRgb[1], 0],
     }
 
 
@@ -105,5 +105,12 @@ export class Cvt {
   }
 
 
+  /**
+   * used to convert the s,v values from hsv scalars
+   * @param val
+   */
+  static getPercentageSV (val: number): number {
+  return val * 100 / 256;
+}
 
 }

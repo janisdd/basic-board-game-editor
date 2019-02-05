@@ -4,7 +4,7 @@
     <title>Basic Board Game Editor</title>
     <meta charset="UTF-8">
 
-    <link rel="stylesheet" href="../node_modules/semantic-ui-css/semantic.css">
+    <link rel="stylesheet" href="semantic.min.css">
     <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.css[0] %>">
     <style>
         .player-color-indicator {
@@ -84,18 +84,14 @@
 
 
 
-<script src="../node_modules/createjs-easeljs/lib/easeljs-0.8.2.combined.js"></script>
+<script src="easeljs-0.8.2.combined.js"></script>
 
 <!-- just to init cam stream -->
 <script src="init.js"></script>
 
-<% for(var i = 0; i < htmlWebpackPlugin.files.js.length;i++) { %>
+<script src="opencv.js" onload="onOpenCvReady();"></script>
 
-<script src="<%= htmlWebpackPlugin.files.js[i] %>"></script>
+<!-- app.js will be injected by HtmlWebpackPlugin (with a cache busting hash) -->
 
-<%}%>
-
-
-<script src="../referee/libs/opencv.js" onload="onOpenCvReady();"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@
     "dev": "node node_modules/.bin/webpack-dev-server --host 0.0.0.0",
     "dev2": "node node_modules/.bin/webpack-dev-server --host 0.0.0.0 --config webpack.referee.config.js",
     "build": "node node_modules/.bin/webpack --config webpack.config.dist.js",
+    "build2": "node node_modules/.bin/webpack --config webpack.referee.config.dist.js",
     "buildCompiler": "echo-cli 'if you are on windows then SED is NOT working... SED is used to remove the last 12 lines from the file cliLangCompiler.js and then we insert a } again. this is because in the browser the node stuff is not defined' && node node_modules/.bin/jison simulation/compiler/langCompiler.jison -o simulation/compiler/cliLangCompiler.js && sed -e :a -e '$d;N;2,12ba' -e 'P;D' simulation/compiler/cliLangCompiler.js > simulation/compiler/langCompiler.js && echo-cli '}' >> simulation/compiler/langCompiler.js && node node_modules/.bin/tsc -p simulation/tsconfig.json && echo-cli 'the compiler is now at simulation/compiler/langCompiler.js'",
     "buildCompilerDist": "node node_modules/.bin/webpack --config webpack.interpreter.config.dist.js",
     "test": "node_modules/.bin/jest"

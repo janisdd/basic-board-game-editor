@@ -16,14 +16,14 @@ export interface CvPoint {
 }
 
 /**
- * r,g,b (,alpha) or h,s,v ...
+ * r,g,b (,alpha) or h,s,v ... (h is between 0-360??,  s,v is between 0-256
  */
-export type CvScalar = [number, number, number, number?]
+export type CvScalar = [number, number, number, number]
 
 export interface CvToken {
   bbox: CvRect
   /**
-   * hsv color, only 3 items used
+   * hsv color, only 3 items used (0-256)
    */
   color: CvScalar
   /**
@@ -70,10 +70,14 @@ export interface CvDice {
 
 
 export interface TokenPosition {
-  playerId: number
+  playerId: number | null
   tokenId: number
 
   tileGuid: string
+  /**
+   * if we get multiple for the same token on the same tile use the smallest dist
+   */
+  distToFieldCenterInPx: number
   fieldId: number
   /**
    * just for debug

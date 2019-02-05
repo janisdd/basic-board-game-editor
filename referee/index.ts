@@ -3,17 +3,19 @@ import {Referee} from "./Referee";
 import {ExportWorld} from "../src/types/world";
 import {MigrationHelper} from "../src/helpers/MigrationHelpers";
 import {WorldDrawer} from "./helpers/worldDrawer";
-import {CvRect, CvScalar, HomographyTuple, SyntheticImgTuple, TokenPosition} from "./types";
+import {CvRealMachineState, CvRect, CvScalar, HomographyTuple, SyntheticImgTuple, TokenPosition} from "./types";
 import {Cvt} from "./helpers/Cvt";
 import {Simulator} from "../simulation/simulator";
+import {MachineState} from "../simulation/machine/machineState";
 
 declare var cv: any
 
 
 //zuordnung farbe / player (1mal get token --> farben hsv, benutzer muss dann zuordnen)
 
-let videoStarted = false
-let video = document.getElementById('realImgSrc') as HTMLVideoElement
+declare var videoStarted: boolean
+declare var video: HTMLVideoElement
+
 let canvasSnapshot = document.getElementById("canvasSnaptshot") as HTMLCanvasElement
 let ctxSnapshot = canvasSnapshot.getContext('2d');
 
@@ -25,49 +27,20 @@ let variablesTableWrapperDiv = document.getElementById('variables-table') as HTM
 let playerColorMappingTableWrapper = document.getElementById('player-color-mapping-table-wrapper') as HTMLDivElement
 
 let debugSynImgsWrapper = document.getElementById('debug-syn-imgs-wrapper') as HTMLDivElement
+
+//a read img with the rect of the synthetic img we found
 const debugSynHomographiessWrapper = document.getElementById('debug-syn-homographies') as HTMLDivElement
 
 const worldRealCanvas = document.getElementById('world-real-canvas') as HTMLCanvasElement
 
-let synImgCanvases: SyntheticImgTuple[] = []
+let synImgCanvases: SyntheticImgTuple[] = [] //one for every tile in the world
 let homographies: HomographyTuple[] = [] //one for every img in synImgCanvases --> one for every tile
 
+let realSimulationState: MachineState = null
+let realSimulationStateCv: CvRealMachineState =  null
 const refereeHelper = new RefereeHelper()
 
 let lastDiceValue = 2
-
-/**
- * call this to init video stream
- */
-export function initVideo() {
-  if (!videoStarted) {
-    navigator.mediaDevices.getUserMedia({
-      video: {
-        // width: 1280,
-        // height: 720
-        width: {
-          exact: 1920
-        },
-        height: {
-          exact: 1080
-        }
-      } as any,
-      audio: false
-    })
-      .then(function (stream) {
-        video.srcObject = stream
-        video.play()
-        videoStarted = true
-      })
-      .catch(function (err) {
-        console.log("An error occurred! " + err)
-      });
-  }
-}
-
-// video.onloadedmetadata = function ()  {
-//   console.log(`actual video2: width: ${video.videoWidth}, height: ${video.videoHeight}`)
-// }
 
 /**
  * returns img as mat
@@ -120,20 +93,17 @@ export function onDetectColors() {
 
   if (tokens.length !== numPlayers) {
     console.log(`we got ${numPlayers} players but ${tokens.length} token(s)...`)
+    console.log(`set the player id of tokens with invalid colors to -1`)
   }
 
   const maxSV = 256 //max val for s / v
 
 
-  for (let i = 0; i < numPlayers; i++) {
+  for (let i = 0; i < tokens.length; i++) {
 
-    const tokenColorHsv = i < tokens.length
-      ? tokens[i].color
-      : [0, 0, 0] as CvScalar
+    const tokenColorHsv = tokens[i].color
 
-    const tokenColor = i < tokens.length
-      ? tokens[i].colorRgb
-      : [0, 0, 0] as CvScalar
+    const tokenColor = tokens[i].colorRgb
 
     initialMapping[i] = [tokenColorHsv, tokenColor]
 
@@ -189,6 +159,11 @@ export function applyPlayerColorMapping() {
     const input = colorInputs.item(id) as HTMLInputElement
 
     const playerId = parseInt(input.value)
+
+    if (playerId === -1) {
+      //invalid ... user want's to delete
+      continue
+    }
 
     if (isNaN(playerId) || playerId > keys.length - 1) throw new Error(`player id (${playerId}) is not a number or the id is larger than the player count - 1`)
 
@@ -295,14 +270,6 @@ export function onWorldInputChanged(e: any) {
 }
 
 
-/**
- * called when opencv js is loaded (mostly)
- */
-export function onOpenCvReady() {
-  console.log('ready, initing...')
-  initVideo()
-}
-
 export function onInitReferee() {
   referee.init()
 
@@ -345,7 +312,8 @@ export function onGetHomography() {
 
     let copy = snapshotWorld.clone()
 
-    let worldCorners = referee.worldHelper.drawWorldRect(synImgMat, copy, homography_synth_to_real);
+    const _color: CvScalar = [255,0,0,255] //red, for some reason we need alpha
+    let worldCorners = referee.worldHelper.drawWorldRect(synImgMat, copy, homography_synth_to_real, _color);
     console.log(worldCorners)
 
     homographies.push({
@@ -395,12 +363,15 @@ export function drawTileFieldsOnRealImg(tuple: HomographyTuple, targetMat: any, 
     const fieldPos = referee.worldHelper.perspectiveTransformRect(fieldRect, tuple.synToRealMat)
 
     //draw
-    referee.worldHelper.drawRect(fieldPos, targetMat)
+
+    const _color: CvScalar = [0,0,255,0] //blue
+    referee.worldHelper.drawRect(fieldPos, targetMat, _color)
   }
 }
 
 //we assume homographies are already set here
 //get the tokens, clip them on the tiles (outside of tiles is not drawn?), draw tokens on debug synthetic real field
+//does not refreshs the dice value
 export function onGetRealState()  {
 
   //clear
@@ -419,54 +390,122 @@ export function onGetRealState()  {
   const tuple = referee.getTokens(snapshot)
   const tokens = tuple[0]
   const debugImgMat = tuple[1]
+  const maxDiffInPx = 10
 
   cv.imshow(canvasSnapshot, debugImgMat)
+
+
+  //refresh single synthetic imgs
+  debugSynImgsWrapper.innerHTML = ""
+  synImgCanvases = worldDrawer.getWorldSyntheticImgs(referee.world)
+  worldDrawer.drawSyntheticImgs(debugSynImgsWrapper, synImgCanvases.map(p => p.canvas))
 
   for(let i = 0; i < homographies.length;i++) {
     const homography = homographies[i]
 
-    let worldCornersVec = referee.worldHelper.drawWorldRect(homography.syntheticImgMat, debugImgMat, homography.synToRealMat);
+    const _color: CvScalar = [200,100,10,255] //orange
+    let worldCornersVec = referee.worldHelper.drawWorldRect(homography.syntheticImgMat, debugImgMat, homography.synToRealMat, _color);
     // const tileRect = Cvt.convertRect(worldCornersVec)
 
-    drawTileFieldsOnRealImg(homography, debugImgMat, 10)
+    drawTileFieldsOnRealImg(homography, debugImgMat, maxDiffInPx)
+
+    //also draw the tokens on the synthetic single imgs (the real pos we got, not snapped to a field)
+
+    const synImgCanvas = synImgCanvases[i]
+    const synImgMat = cv.imread(synImgCanvas.canvas)
+
+    //then draw tokens on this tile
+
+    for(const token of tokens) {
+      if (refereeHelper.isTokenInTile(token, homography.tileRect, maxDiffInPx) === false) continue
+      const tokenPos: CvRect = referee.worldHelper.perspectiveTransformRect(token.bbox, homography.realToSynMat)
+      const _color: CvScalar = [255,0,0,255] //red for some reason we need alpha
+      referee.worldHelper.drawRect(tokenPos, synImgMat, _color)
+    }
+
+    cv.imshow(synImgCanvas.canvas, synImgMat)
 
     cv.imshow(canvasSnapshot, debugImgMat)
+    synImgMat.delete()
+  }
+
+  const colorMapKeys = Object.keys(referee.playerColorMap)
+
+  if (colorMapKeys.length === 0) {
+    console.log(`we have currently no color map, player ids will be random (order or discovery), detect colros first`)
   }
 
   let tokenPositions: TokenPosition[] = []
   for(const homography of homographies) {
 
-    const pos = refereeHelper.getTokenPositionsFromTile(tokens, homography.tileRect, homography.tile, {},
-      homography.synToRealMat, referee.worldHelper,  10)
+    const pos = refereeHelper.getTokenPositionsFromTile(tokens, homography.tileRect, homography.tile, referee.playerColorMap,
+      homography.synToRealMat, referee.worldHelper,  false, maxDiffInPx)
       console.log(`tokens on tile ${homography.tile.guid}`, pos)
       tokenPositions = tokenPositions.concat(pos)
   }
 
-  //set the token positions in the real synthetic img...
-  //TODO make sure we get the right colors...
+  //discard unknown tokens
+  const temp_tokenPositions = tokenPositions.filter(p => p.playerId === null)
 
+  if (temp_tokenPositions.length > 0) {
+    console.log(`found ${temp_tokenPositions.length} tokens on tiles that doesn't match any players color, discarding`)
+    tokenPositions = tokenPositions.filter(p => p.playerId !== null)
+  }
+
+
+  //set the token positions in the real synthetic img...
   //for debug we set the player id random...
   let tokenCount = 0
-
 
   let tempMachineState = Simulator.initNew(referee.startPos, true, referee.world.worldSettings.worldCmdText)
 
   tempMachineState = {
     ...tempMachineState,
-    players: tempMachineState.players.map(player => ({
-      ...player,
-      tokens: player.tokens.map(p => {
+    players: tempMachineState.players.map(player => {
+      return {
+        ...player,
+        tokens: player.tokens.map(p => {
 
-        if (tokenCount >= tokenPositions.length) return p
+          if (tokenCount >= tokenPositions.length) return p
 
-        const count = tokenCount++
-        return {
-          ...p,
-          tileGuid: tokenPositions[count].tileGuid,
-          fieldId:tokenPositions[count].fieldId
-        }
-      })
-    }))
+          const count = tokenCount++
+
+          let color = p.color
+
+          if (tokenPositions[count].playerId !== null) {
+
+            let tempColor = referee.playerColorMap[tokenPositions[count].playerId]
+            if (tempColor) {
+              const rgb = tempColor[1]
+              color = Cvt.rgbToHex(rgb[0], rgb[1], rgb[2])
+            }
+            else {
+              console.log(`token on tile (${p.tileGuid}), field id (${p.fieldId}) has known color but not found in color map`)
+            }
+
+          } else {
+            console.log(`token on tile (${p.tileGuid}), field id (${p.fieldId}) has no playerId (or unknown color), using default`)
+          }
+
+          return {
+            ...p,
+            tileGuid: tokenPositions[count].tileGuid,
+            fieldId:tokenPositions[count].fieldId,
+            color
+          }
+        })
+      }
+    })
+  }
+
+  realSimulationState = tempMachineState
+
+  realSimulationStateCv = {
+    globalDefTable:tempMachineState.globalDefTable,
+    tokenPositions: tokenPositions,
+    players: tempMachineState.players,
+    rolledDiceValue: lastDiceValue
+
   }
 
   worldDrawer.drawWorld(worldRealCanvas, referee.world, tempMachineState)
@@ -477,6 +516,33 @@ export function onGetRealState()  {
 
 }
 
+
+export function onCompareStatesClicked()  {
+
+  if (!referee.simulationMachineState) {
+    console.log(`simulation state was null`)
+  }
+
+  if (!realSimulationState) {
+    console.log(`get the real state first`)
+  }
+
+  const checkGlobalVars = false
+  const checkPlayerVars = false
+
+  const res = refereeHelper.compareStates(referee.simulationMachineState, realSimulationStateCv, checkGlobalVars, checkPlayerVars)
+
+
+  if (res === null) {
+    //all ok
+    alert(`all ok! [equal (checkGlobalVars: ${checkGlobalVars}, checkPlayerVars: ${checkPlayerVars})]`)
+  } else {
+    const error = res[0]
+    alert(`something is wrong... [${error}]`)
+  }
+
+
+}
 
 
 // let streaming = true
