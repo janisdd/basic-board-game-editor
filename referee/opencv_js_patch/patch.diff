@@ -1,0 +1,4023 @@
+From ef2a25c783ce821d3dc61fdeedd2b0a2ff1f6ea3 Mon Sep 17 00:00:00 2001
+From: janisdd <janisdd5566@googlemail.com>
+Date: Wed, 30 Jan 2019 20:14:11 +0100
+Subject: [PATCH] build is passing (however js might not work ... runtime
+ error)
+
+---
+ modules/core/include/opencv2/core/types.hpp   |  60 ++
+ .../features2d/include/opencv2/features2d.hpp |  57 ++
+ modules/features2d/src/orb.cpp                | 716 +++++++++++++++++-
+ modules/js/src/core_bindings.cpp              |  14 +
+ modules/js/src/embindgen.py                   |   5 +
+ modules/js/src/helpers.js                     |  53 ++
+ 6 files changed, 896 insertions(+), 9 deletions(-)
+
+diff --git a/modules/core/include/opencv2/core/types.hpp b/modules/core/include/opencv2/core/types.hpp
+index b1fa676e5..4da37d970 100644
+--- a/modules/core/include/opencv2/core/types.hpp
++++ b/modules/core/include/opencv2/core/types.hpp
+@@ -778,6 +778,33 @@ public:
+     CV_PROP_RW int class_id; //!< object class (if the keypoints need to be clustered by an object they belong to)
+ };
+ 
++
++//needs to be after keypoint else has incomplete error
++class CV_EXPORTS_W_SIMPLE Dice {
++public:
++    CV_WRAP Dice();
++    CV_WRAP Dice (int value, std::vector<KeyPoint> pips);
++
++    CV_PROP_RW int value;
++    CV_PROP_RW Point2f centerPoint;
++    CV_PROP_RW std::vector<KeyPoint> pips;
++    //used to calculate the size
++    CV_PROP_RW KeyPoint topLeftPip;
++    CV_PROP_RW KeyPoint bottomLeftPip;
++};
++
++
++//also in modules/js/src/helpers.js and modules/js/src/core_bindings.cpp
++class CV_EXPORTS_W_SIMPLE Token {
++public:
++    CV_WRAP Token();
++    CV_WRAP Token (Rect bbox, Vec3b color, Point bottomPoint);
++
++    CV_PROP_RW Rect bbox;
++    CV_PROP_RW Vec3b color; //hsv color
++    CV_PROP_RW Point bottomPoint;
++};
++
+ #ifdef OPENCV_TRAITS_ENABLE_DEPRECATED
+ template<> class DataType<KeyPoint>
+ {
+@@ -2066,6 +2093,17 @@ RotatedRect::RotatedRect(const Point2f& _center, const Size2f& _size, float _ang
+ 
+ ///////////////////////////////// Range /////////////////////////////////
+ 
++
++//inline
++//Dice::Dice ()
++//        : value(0) {}
++//
++//inline
++//Dice::Dice (int value, std::vector<cv::KeyPoint> pips)
++//: value (value), pips (std::move (pips)) {}
++
++
++
+ inline
+ Range::Range()
+     : start(0), end(0) {}
+@@ -2423,6 +2461,28 @@ Scalar operator * (const Matx<double, 4, 4>& a, const Scalar& b)
+ 
+ //////////////////////////////// KeyPoint ///////////////////////////////
+ 
++inline
++Dice::Dice()
++    : value(0) {}
++
++inline
++Dice::Dice(int value, std::vector<KeyPoint> pips)
++    : value (value), pips (std::move (pips)) {}
++
++
++inline
++Token::Token() {}
++
++
++inline
++Token::Token (cv::Rect bbox, cv::Vec3b color, cv::Point bottomPoint)
++    : bbox (bbox), color (color), bottomPoint (bottomPoint) {}
++
++
++
++
++
++
+ inline
+ KeyPoint::KeyPoint()
+     : pt(0,0), size(0), angle(-1), response(0), octave(0), class_id(-1) {}
+diff --git a/modules/features2d/include/opencv2/features2d.hpp b/modules/features2d/include/opencv2/features2d.hpp
+index c995fbf01..c1258cf35 100644
+--- a/modules/features2d/include/opencv2/features2d.hpp
++++ b/modules/features2d/include/opencv2/features2d.hpp
+@@ -1442,6 +1442,63 @@ protected:
+     Ptr<DescriptorMatcher> dmatcher;
+ };
+ 
++//--- my stuff
++
++//From class CV_EXPORTS_W_SIMPLE DMatch
++//class  Dice {
++//public:
++//    Dice();
++//    Dice (int value, std::vector<KeyPoint> pips) : value (value), pips (std::move (pips)) {}
++//
++//    int value;
++//    Point2f centerPoint;
++//    std::vector<KeyPoint> pips;
++//    //used to calculate the size
++//    KeyPoint topLeftPip;
++//    KeyPoint bottomLeftPip;
++//};
++
++class CV_EXPORTS_W DiceHelper {
++public:
++    CV_WRAP static Ptr<DiceHelper> create();
++
++    CV_WRAP std::vector<Dice> getExampleDiceValues(); //not working because of Dice
++
++    CV_WRAP std::vector<Dice> getDiceValues (const Mat &diceImg, const double maxDistInDice = 75, const float minCircularity = 0.887, const float minArea = 30, const double minDiceRadius = 40);
++
++private:
++    int getNearestNeighbour (const KeyPoint &root, const std::vector<KeyPoint> &keypoints, const double maxDistInDice);
++    double getDistance (const KeyPoint &p1, const KeyPoint &p2);
++    void setMissingDiceProps (const std::vector<Dice> &dices);
++};
++
++
++class CV_EXPORTS_W TokenHelper {
++public:
++    CV_WRAP static Ptr<TokenHelper> create ();
++
++
++    CV_WRAP int getTokensSlow (const Mat &originalHSVImg, const Mat &_binaryImg, std::vector<Token> &tokens, const int minTokenBoundingBoxArea = 2000);
++
++    CV_WRAP Mat drawTokens (const Mat &baseImg, const std::vector<Token> &tokens);
++
++    CV_WRAP Mat drawTokensOnSyntheticImg (const Mat &syntheticWorldImg, const Mat &homography, std::vector<Token> tokens);
++
++private:
++    bool isTokenPixel (int h, int s, int v, const int minSPercentage = 40, const int minVPercentage = 10, const int minHLeftBound = 30, const int minHRightBound = 10);
++    int getPercentage (int val);
++    double toDegrees (double rads);
++    double toRads (double deg);
++};
++
++//class CV_EXPORTS_W WorldHelper {
++//public:
++//    CV_WRAP static Ptr<WorldHelper> create ();
++//    //last 2 params were passed with &
++////    CV_WRAP void getWorldHomography ( Mat syntheticWorldImg,  Mat worldImg,  Mat homography_real_to_synth, Mat homography_synth_to_real);
++////    CV_WRAP void clipTokensInWorld (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real, std::vector<Token> &tokens);
++//};
++
+ //! @} features2d_category
+ 
+ //! @} features2d
+diff --git a/modules/features2d/src/orb.cpp b/modules/features2d/src/orb.cpp
+index a664dcac5..468097716 100644
+--- a/modules/features2d/src/orb.cpp
++++ b/modules/features2d/src/orb.cpp
+@@ -36,6 +36,8 @@
+ 
+ #include "precomp.hpp"
+ #include "opencl_kernels_features2d.hpp"
++#include "../../calib3d/include/opencv2/calib3d/calib3d_c.h"
++#include "../../calib3d/include/opencv2/calib3d.hpp"
+ #include <iterator>
+ 
+ #ifndef CV_IMPL_ADD
+@@ -1203,17 +1205,713 @@ void ORB_Impl::detectAndCompute( InputArray _image, InputArray _mask,
+     }
+ }
+ 
+-Ptr<ORB> ORB::create(int nfeatures, float scaleFactor, int nlevels, int edgeThreshold,
+-           int firstLevel, int wta_k, ORB::ScoreType scoreType, int patchSize, int fastThreshold)
+-{
+-    CV_Assert(firstLevel >= 0);
+-    return makePtr<ORB_Impl>(nfeatures, scaleFactor, nlevels, edgeThreshold,
+-                             firstLevel, wta_k, scoreType, patchSize, fastThreshold);
++
++    Ptr<ORB> ORB::create(int nfeatures, float scaleFactor, int nlevels, int edgeThreshold,
++                         int firstLevel, int wta_k, ORB::ScoreType scoreType, int patchSize, int fastThreshold)
++    {
++        CV_Assert(firstLevel >= 0);
++        return makePtr<ORB_Impl>(nfeatures, scaleFactor, nlevels, edgeThreshold,
++                                 firstLevel, wta_k, scoreType, patchSize, fastThreshold);
++    }
++
++    String ORB::getDefaultName() const
++    {
++        return (Feature2D::getDefaultName() + ".ORB");
++    }
++
++
++
++//--- my stuff
++
++Ptr<DiceHelper> DiceHelper::create () {
++    return new DiceHelper();
+ }
+ 
+-String ORB::getDefaultName() const
+-{
+-    return (Feature2D::getDefaultName() + ".ORB");
++
++std::vector<Dice> DiceHelper::getExampleDiceValues() {
++    std::vector<Dice> dices;
++    std::vector<KeyPoint> dicePips;
++    dices.push_back (Dice (3, dicePips));
++    dices.at (0);
++//    dices->push_back (new Dice (3, dicePips));
++
++    return dices;
++}
++
++/**
++ * note that this is not working properly for e.g. 3 and 2 when the dices are very close (the pip of the 3 will be closer to a pip of the 2 than the other pip of the 2)
++ * @param diceImg
++ * @param maxDistInDice  to count the pips on the dice we start on an arbitrary pip and then search for the nearest neighbour pip (keypoint). if we find no more pips (no keypoints left or all others have >= maxDistInDice) then we have the pips on the dice
++ * @param minCircularity for the pips
++ * @param minArea min area for the pips
++ * @param minDiceRadius  for 1 pip we have not 2 points to get the proper radius
++ * @return
++ */
++std::vector<Dice> DiceHelper::getDiceValues (const Mat &diceImg, const double maxDistInDice,  const float minCircularity, const float minArea, const double minDiceRadius) {
++    SimpleBlobDetector::Params params = SimpleBlobDetector::Params ();
++    params.filterByCircularity = true;
++    params.minCircularity = minCircularity; //~0.9
++    params.filterByArea = true;
++    params.minArea = minArea;
++    cv::Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create (params);
++    std::vector<Dice> dices;
++
++    std::vector<KeyPoint> keypoints;
++    detector->detect (diceImg, keypoints);
++    std::vector<KeyPoint> dicePips;
++
++
++    int currentDiceValue = 0;
++
++    if (keypoints.size () > 0) {
++
++        for (int i = 0; i < keypoints.size (); ++i) {
++            KeyPoint keyPoint = keypoints[i];
++
++            currentDiceValue = 1; //first pip
++            dicePips.push_back (keyPoint);
++            keypoints.erase (keypoints.begin () + i); //remove point because we processed it
++            i--;
++
++            KeyPoint currentKeyPoint = keyPoint;
++
++            //search neighbours until we get none
++            for (int j = 0; j < keypoints.size (); ++j) {
++
++
++
++                int nextPipIndex = getNearestNeighbour (currentKeyPoint, keypoints, maxDistInDice);
++
++                if (nextPipIndex == -1) {
++                    //not found
++                    //start new
++                    dices.push_back (Dice (currentDiceValue, dicePips));
++                    dicePips.clear ();
++                    currentDiceValue = 0;
++                    break;
++                }
++
++                KeyPoint nextKeyPoint = keypoints[nextPipIndex];
++
++                dicePips.push_back (nextKeyPoint);
++
++                currentKeyPoint = nextKeyPoint;
++                currentDiceValue++;
++                keypoints.erase (keypoints.begin () + nextPipIndex); //remove point because we processed it
++                j--;
++            }
++
++        }
++    }
++
++    if (currentDiceValue != 0) {
++        //e.g. if the last dice is a 1 we only get the start pip
++        dices.push_back (Dice (currentDiceValue, dicePips));
++    }
++
++    setMissingDiceProps (dices);
++
++
++    return dices;
++}
++
++
++int DiceHelper::getNearestNeighbour (const KeyPoint &root, const std::vector<KeyPoint> &keypoints, const double maxDistInDice) {
++    double minDist = -1;
++    int index = -1;
++    for (int i = 0; i < keypoints.size (); ++i) {
++
++        if (root.pt.x == keypoints[i].pt.x && root.pt.y == keypoints[i].pt.y) continue;
++
++        double dist = getDistance (root, keypoints[i]);
++//        cout << "dist: " << dist << endl;
++
++        if (dist < maxDistInDice) {
++
++            if ((dist < minDist || minDist == -1)) {
++                minDist = dist;
++                index = i;
++            }
++        }
++    }
++    return index;
++}
++
++double DiceHelper::getDistance (const KeyPoint &p1, const KeyPoint &p2) {
++    return sqrt (
++            (p1.pt.x - p2.pt.x) * (p1.pt.x - p2.pt.x) +
++            (p1.pt.y - p2.pt.y) * (p1.pt.y - p2.pt.y)
++    );
++}
++
++
++void DiceHelper::setMissingDiceProps (const std::vector<Dice> &dices) {
++
++    for (int i = 0; i < dices.size (); ++i) {
++        auto dice = dices[i];
++
++        if (dice.pips.size () == 0) {
++            //should not happen
++//                std::cout << "error no pips";
++            continue;
++        }
++
++        //set center
++        //search for the left most point
++        KeyPoint *topLeftPoint = nullptr; //we might to flip 180 deg... e.g. if we have 3 pips like
++        /*      o
++         *    o
++         *  o (1)
++         */
++        //then we set the top left point to 1 and then swap y with bottomRightPoint
++
++        //search for the right most point
++        KeyPoint *bottomRightPoint = nullptr;
++
++        //for 4 pips this can give us the both at the top...
++//        for (int j = 0; j < dice->pips.size (); ++j) {
++//            KeyPoint* pip = &(dice->pips[j]);
++//
++//            if (topLeftPoint == nullptr || pip->pt.x < topLeftPoint->pt.x) {
++//                topLeftPoint = pip;
++//            }
++//
++//            if (bottomRightPoint == nullptr || pip->pt.x > bottomRightPoint->pt.x) {
++//                bottomRightPoint = pip;
++//            }
++//        }
++
++        //get the left most one
++        for (int j = 0; j < dice.pips.size (); ++j) {
++            KeyPoint* pip = &(dice.pips[j]);
++            if (topLeftPoint == nullptr || pip->pt.x < topLeftPoint->pt.x) {
++                topLeftPoint = pip;
++            }
++        }
++
++        //the other should be the pip with the most distance...
++        double maxDist = -1; //-1 for 1 pip we need to set bot and top to the same points
++
++        for (int k = 0; k < dice.pips.size (); ++k) {
++            KeyPoint* pip = &(dice.pips[k]);
++
++            double  dist = getDistance (*topLeftPoint, *pip);
++
++            if (dist > maxDist) {
++                maxDist = dist;
++                bottomRightPoint = pip;
++            }
++        }
++
++
++//        if (topLeftPoint == nullptr || bottomRightPoint == nullptr) {
++//            cout <<"asd";
++//        }
++
++
++        //make copy in case we swap y vals...
++        dice.topLeftPip = *topLeftPoint;
++        dice.bottomLeftPip = *bottomRightPoint;
++
++
++        if (dice.topLeftPip.pt.y > dice.bottomLeftPip.pt.y) {
++            float temp = dice.topLeftPip.pt.y;
++            dice.topLeftPip.pt.y = dice.bottomLeftPip.pt.y;
++            dice.bottomLeftPip.pt.y = temp;
++        }
++
++        dice.centerPoint = Point2f (
++                (dice.topLeftPip.pt.x + dice.bottomLeftPip.pt.x) / 2,
++                (dice.topLeftPip.pt.y + dice.bottomLeftPip.pt.y) / 2
++        );
++
++        //bounding box is not required... would need rotation better use circle
++
++    }
++
++
++}
++
++
++Ptr<TokenHelper> TokenHelper::create () {
++    return new TokenHelper();
++}
++
++
++/**
++ * input: binary image wiht already filtered token pixels WILL BE CHANGED
++ * returns the rects of the tokens found
++ *
++ * originalHSVImg used to get the token colors
++ */
++int TokenHelper::getTokensSlow (const Mat &originalHSVImg, const Mat &_binaryImg, std::vector<Token> &tokens, const int minTokenBoundingBoxArea) {
++
++
++    const bool debug = false;
++    const bool getAvgColor = true; //performance?? if false defaults to (0,0,0)
++    Mat labels;
++    Mat stats;
++    Mat centroids;
++
++
++
++    //---mapPixels in original code
++    Mat binaryImg = cv::Mat::zeros (Size (originalHSVImg.cols, originalHSVImg.rows), THRESH_BINARY);
++
++
++    auto *_pixelPtr = (uint8_t *) originalHSVImg.data;
++    auto *mappedPixelPtr = (uchar *) binaryImg.data;
++    int _cn = originalHSVImg.channels ();
++    int mappedChannels = binaryImg.channels ();
++
++    //get fast px values https://stackoverflow.com/questions/7899108/opencv-get-pixel-channel-value-from-mat-image
++
++    for (int row = 0; row < originalHSVImg.rows; ++row) {
++
++        for (int col = 0; col < originalHSVImg.cols; ++col) {
++            int h = _pixelPtr[row * originalHSVImg.cols * _cn + col * _cn + 0];
++            int s = _pixelPtr[row * originalHSVImg.cols * _cn + col * _cn + 1];
++            int v = _pixelPtr[row * originalHSVImg.cols * _cn + col * _cn + 2];
++
++            int percentageS = getPercentage (s);
++            int percentageV = getPercentage (v);
++
++            //opencv used uchar internally --> we need to multiply with 2
++
++            bool takePx = isTokenPixel (h * 2, s, v);
++
++            //binaryImg.at <uchar>(row, col) = takePx ? (uchar)255 : (uchar)0;
++
++            mappedPixelPtr[row * binaryImg.cols * mappedChannels +
++                           col * mappedChannels + 0] = takePx ? (uchar) 255
++                                                              : (uchar) 0;
++
++        }
++    }
++
++    //---END mapPixels in original code
++
++
++    Point anchor = Point (-1, -1);
++    Mat M = Mat::ones (5, 5, CV_8U);
++    Mat M2 = Mat::ones (3, 3, CV_8U);
++
++    //https://docs.opencv.org/3.4/d9/d61/tutorial_py_morphological_ops.html
++    cv::morphologyEx (binaryImg, binaryImg, MORPH_OPEN, M, anchor, 2);
++    //cv::morphologyEx (binaryImg, binaryImg, MORPH_CLOSE, M, anchor, 2);
++
++    //morphologyEx (binaryImg, binaryImg, MORPH_DILATE, M, anchor, 2);
++
++    //morphologyEx (binaryImg, binaryImg, MORPH_ERODE, M, anchor, 2);
++
++//    cv::morphologyEx (binaryImg, binaryImg, MORPH_DILATE, M);
++
++
++//    if (debug) imshow ("debug 1", binaryImg);
++
++    morphologyEx (binaryImg, binaryImg, MORPH_DILATE, M, anchor, 2);
++    cv::morphologyEx (binaryImg, binaryImg, MORPH_CLOSE, M, anchor, 2);
++
++
++    int numComponents = connectedComponentsWithStats (binaryImg, labels, stats,
++                                                      centroids, 8);
++
++//    if (debug) imshow ("debug 2", binaryImg);
++
++    //--- make an image where the (tokens) connected components
++
++    int compCount = 0;
++    auto *pixelPtr = (uint8_t *) originalHSVImg.data;
++    int cn = originalHSVImg.channels ();
++
++    for (int i = 1; i < numComponents; i++) {
++
++        //if (i > 1) continue;
++
++        int left = stats.at<int> (i, ConnectedComponentsTypes::CC_STAT_LEFT);
++        int top = stats.at<int> (i, ConnectedComponentsTypes::CC_STAT_TOP);
++
++        int width = stats.at<int> (i, ConnectedComponentsTypes::CC_STAT_WIDTH);
++        int height = stats.at<int> (i,
++                                    ConnectedComponentsTypes::CC_STAT_HEIGHT);
++
++        int area = width * height;
++
++//        cout << "rect area: " << area << endl;
++
++        if (area <
++            minTokenBoundingBoxArea) { //area > maxTokenBoundingBoxArea ||
++//            cout << "rect area too big(" << area <<"), skipping" << endl;
++//            cout << "rect area: " << area << endl;
++            continue; //too big
++        }
++
++        //after dialte & erode ... this might not be true
++//        if (useMoreHeightThanWidthFilter) {
++//            if (width >= height) {
++//                cout << "token was more width than height" << endl;
++//                continue;
++//            }
++//        }
++
++
++        Rect rect = cv::Rect (left, top, width, height);
++//        tokensRects.push_back (
++//                rect);  //tokens.emplace_back (left, top, width, height);
++
++
++        Point bottomPoint (0, 0);
++
++        //use the shorter side and then draw a square from the token bottom and then use the center of that
++        if (height > width) {
++
++            bottomPoint.x = left + width / 2;
++            bottomPoint.y = top + height - width / 2; //from bottom
++
++        } else {
++
++            bottomPoint.x = left + height / 2;
++            bottomPoint.y = top + height - height / 2; //from bottom
++        }
++
++        auto token = new Token (rect, Vec3b (0, 0, 0), bottomPoint);
++        tokens.push_back (*token);
++
++
++//        vector<Point> tokenPoints;
++//        for (int y = top; y < top + height; y++)
++//            for (int x = left; x < left + width; x++) {
++//                int label = labels.at<int> (y, x);
++//                if (label == 0) continue; //background pixel
++//                tokenPoints.push_back (Point(x,y));
++//            }
++//
++//        RotatedRect rotatedRect = minAreaRect (tokenPoints);
++//
++//        Point2f rotatedP(rotatedRect.center.x, rotatedRect.center.y - (rotatedRect.size.height/2));
++//
++//        Point rotatedPoint = RotatePoint (rotatedRect.center, rotatedP, toRads (rotatedRect.angle));
++//
++//        line(originalHSVImg, rotatedRect.center,rotatedPoint , Scalar(0,0,255), 2);
++
++
++        if (getAvgColor == false) {
++//            avarageColors.push_back (Vec3b (0, 0, 0));
++
++        } else {
++
++            int avg_h = 0;
++            double sumsinH = 0;
++            double sumcosH = 0;
++            int avg_s = 0;
++            int avg_v = 0;
++            int numPx = 0;
++
++            int halfHeight = height / 2;
++            int halfWidth = width / 2;
++
++            //see https://www.mathworks.com/matlabcentral/answers/111370-how-can-i-average-hue-value-in-image
++
++            //or use max hue...
++            //performance???
++            for (int y = top + halfHeight / 2;
++                 y < top + height - halfHeight; y++)
++                for (int x = left + halfWidth / 2;
++                     x < left + width - halfWidth; x++) {
++
++//                    int label = labels.at<int> (y, x);
++
++                    uchar h = pixelPtr[y * originalHSVImg.cols * cn + x * cn +
++                                       0];
++                    uchar s = pixelPtr[y * originalHSVImg.cols * cn + x * cn +
++                                       1];
++                    uchar v = pixelPtr[y * originalHSVImg.cols * cn + x * cn +
++                                       2];
++
++                    int hp = h * 2;
++                    int hs = getPercentage (h);
++                    int vs = getPercentage (v);
++
++
++                    sumsinH += sin (toRads (h));
++                    sumcosH += cos (toRads (h));
++
++//                    avg_h += h;
++                    avg_h += (hp + 360);
++                    avg_s += s;
++                    avg_v += v;
++                    numPx++;
++
++
++
++//
++//                    if (h > avg_h ) avg_h = h;
++//                    if (s > avg_s ) avg_s = s;
++//                    if (v > avg_v ) avg_v = v;
++                }
++
++            //avg_h = avg_h / numPx; //this will not work because 0 - 360 and red is 0 and 360 ...
++            avg_h = (int)toDegrees (atan2 (sumsinH, sumcosH));
++            avg_s = avg_s / numPx;
++            avg_v = avg_v / numPx;
++
++            //cout << "h: " << (avg_h*2) << " s: " << getPercentage (avg_s) << " v: " << getPercentage (avg_v) << endl;
++
++//            avarageColors.push_back (Vec3b (avg_h, avg_s, avg_v));
++            tokens.at (tokens.size () - 1).color = Vec3b (avg_h, avg_s, avg_v);
++        }
++
++
++        compCount++;
++
++    }
++
++    return compCount;
++}
++
++
++bool TokenHelper::isTokenPixel (int h, int s, int v, const int minSPercentage, const int minVPercentage, const int minHLeftBound, const int minHRightBound) {
++
++    int blackV = 0; //0 = disable, we cannot use this because of qr codes?
++    int percentageS = getPercentage (s);
++    int percentageV = getPercentage (v);
++
++    if (blackV > 0) {
++        if (percentageV < blackV) {
++            return true;
++        }
++    }
++
++//    if (percentageS > minSPercentage && percentageV > minVPercentage && (h > minHLeftBound && h < minHRightBound)) return true;
++    if (percentageS > minSPercentage && percentageV > minVPercentage &&
++        (h > minHLeftBound || h < minHRightBound))
++        return true;
++
++//    if (percentageS > minSPercentage && percentageV > minVPercentage) return true;
++
++    return false;
++}
++
++int TokenHelper::getPercentage (int val) {
++    int max = 256; //num vals not max
++    return val * 100 / max;
++}
++
++double TokenHelper::toDegrees (double rads) {
++    return (rads * 180) / M_PI;
++}
++
++double TokenHelper::toRads (double deg) {
++    return (deg * M_PI) / 180;
++}
++
++Mat TokenHelper::drawTokens (const Mat &baseImg, const std::vector<Token> &tokens) {
++
++    Mat copy = baseImg.clone ();
++
++//    Scalar color = Scalar (0, 0, 255); //opencv stores B G R ...
++    int max = tokens.size ();
++
++    for (int i = 0; i < max; ++i) {
++
++        //if (i > 0) continue;
++
++        Token token = tokens.at (i);
++        Vec3b _hsv = token.color;
++        //Scalar color = Scalar (0, 0, 255)
++
++        Mat hsv (1, 1, CV_8UC3, Scalar (_hsv[0], _hsv[1], _hsv[2]));
++//        Mat hsv(1,1, CV_8UC3, Scalar(_hsv[0],255, 255));
++        Mat rgb (hsv.size (), hsv.type ());
++        cvtColor (hsv, rgb, COLOR_HSV2BGR);
++
++        Vec3b _rgb = rgb.at<Vec3b> (0, 0);
++
++        Scalar color = Scalar (_rgb[0], _rgb[1],
++                               _rgb[2]); //opencv stores B G R ...
++
++        //cout << "r: " << (int)(_rgb[2]) << " g: " << (int)_rgb[1] << " b: " << (int)_rgb[0] << endl;
++
++        Rect rect = token.bbox;
++
++        int left = rect.x;
++        int top = rect.y;
++
++        int width = rect.width;
++        int height = rect.height;
++
++        circle (copy, Point (left + width / 2, top + height / 2), 3, Scalar (0, 0, 255), 3);
++
++        circle (copy, token.bottomPoint, 3, Scalar (0, 255, 0), 3);
++
++        int halfHeight = height / 2;
++        int halfWidth = width / 2;
++
++
++        rectangle (copy,
++                   Rect (left + halfWidth / 2, top + halfHeight / 2, halfWidth,
++                         halfHeight), Scalar (0, 0, 255), 2);
++
++        rectangle (copy, rect, color, 3);
++    }
++
++    //imshow("aaa", copy);
++
++    return copy;
+ }
+ 
++
++Mat TokenHelper::drawTokensOnSyntheticImg (const Mat &syntheticWorldImg, const Mat &homography, std::vector<Token> tokens) {
++
++    Mat syntheticWorldImgOut = syntheticWorldImg.clone ();
++
++    for (int i = 0; i < tokens.size (); ++i) {
++        Token token = tokens.at (i);
++        Rect tokenRect = token.bbox;
++        Vec3b _hsv = token.color;
++
++        std::vector<Point2f> reaclRectPoints (5);
++        reaclRectPoints[0] = Point2f (tokenRect.x, tokenRect.y);
++        reaclRectPoints[1] = Point2f (tokenRect.x + tokenRect.width, tokenRect.y);
++        reaclRectPoints[2] = Point2f (tokenRect.x + tokenRect.width, tokenRect.y + tokenRect.height);
++        reaclRectPoints[3] = Point2f (tokenRect.x, tokenRect.y + tokenRect.height);
++
++        reaclRectPoints[4] = Point2f(token.bottomPoint.x, token.bottomPoint.y);
++
++        std::vector<Point2f> syntheticRectPoints (5);
++
++        perspectiveTransform (reaclRectPoints, syntheticRectPoints, homography);
++
++
++        Mat hsv (1, 1, CV_8UC3, Scalar (_hsv[0], _hsv[1], _hsv[2]));
++        Mat rgb (hsv.size (), hsv.type ());
++        cvtColor (hsv, rgb, COLOR_HSV2BGR);
++        Vec3b _rgb = rgb.at<Vec3b> (0, 0);
++        Scalar color = Scalar (_rgb[0], _rgb[1], _rgb[2]); //opencv stores B G R ...
++
++
++        Point2f p0 = syntheticRectPoints.at (0);
++        Point2f p2 = syntheticRectPoints.at (2);
++        float width = p2.x - p0.x;
++        float height = p2.y - p0.y;
++
++        rectangle (syntheticWorldImgOut, p0, p2, color, 2);
++
++        Point2f center (p0.x + width / 2, p0.y + height / 2);
++        circle (syntheticWorldImgOut, center, 3, color, 2);
++        circle (syntheticWorldImgOut, syntheticRectPoints.at (4), 3, Scalar(0,255, 0), 2);
++    }
++
++    return syntheticWorldImgOut;
+ }
++
++//Ptr<WorldHelper> WorldHelper::create () {
++//    return new WorldHelper();
++//}
++
++//
++//void WorldHelper::getWorldHomography (  Mat syntheticWorldImg,  Mat worldImg,  Mat homography_real_to_synth, Mat homography_synth_to_real) {
++//
++////    Ptr<cv::SURF> detector = SURF::create ();
++//    Ptr<cv::ORB> detector = ORB::create ();
++//
++//    std::vector<KeyPoint> referenceKeypoints, keypoints;
++//
++//    detector->detect (syntheticWorldImg, referenceKeypoints);
++//    detector->detect (worldImg, keypoints);
++//
++//    Mat reference_descriptors, descriptors;
++//
++//    detector->compute (syntheticWorldImg, referenceKeypoints, reference_descriptors);
++//    detector->compute (worldImg, keypoints, descriptors);
++//
++//
++//    FlannBasedMatcher matcher;
++////    BFMatcher matcher;
++//    std::vector<DMatch> matches;
++//    matcher.match (reference_descriptors, descriptors, matches);
++//
++//
++//    std::vector<Point2f> obj;
++//    std::vector<Point2f> scene;
++//
++//    for (int i = 0; i < matches.size (); i++) {
++//        //-- Get the keypoints from the good matches
++//        obj.push_back (referenceKeypoints[matches[i].queryIdx].pt);
++//        scene.push_back (keypoints[matches[i].trainIdx].pt);
++//    }
++//
++////    Mat homography = findHomography (obj, scene, CV_RANSAC);
++//
++//    //TODo is this worling without & ref passing?
++//    homography_real_to_synth = findHomography (scene, obj, CV_RANSAC); //map from real to synthetic image //8 is ransac
++//    invert (homography_real_to_synth, homography_synth_to_real);
++//
++//    //not we can use  perspectiveTransform( obj_corners, scene_corners, H);
++//
++////    std::vector<Point2f> obj_corners (4);
++////    obj_corners[0] = cvPoint (0, 0);
++////    obj_corners[1] = cvPoint (syntheticWorldImg.cols, 0);
++////    obj_corners[2] = cvPoint (syntheticWorldImg.cols, syntheticWorldImg.rows);
++////    obj_corners[3] = cvPoint (0, syntheticWorldImg.rows);
++////    std::vector<Point2f> scene_corners (4);
++////
++////    perspectiveTransform (obj_corners, scene_corners, homography);
++////
++////    Mat img_matches = worldImg.clone ();
++////
++////    drawMatches( syntheticWorldImg, referenceKeypoints, worldImg, keypoints,
++////                 matches, img_matches, Scalar::all(-1), Scalar::all(-1),
++////                 vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
++////
++////
++////    line (img_matches, scene_corners[0] + Point2f (syntheticWorldImg.cols, 0), scene_corners[1] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
++////    line (img_matches, scene_corners[1] + Point2f (syntheticWorldImg.cols, 0), scene_corners[2] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
++////    line (img_matches, scene_corners[2] + Point2f (syntheticWorldImg.cols, 0), scene_corners[3] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
++////    line (img_matches, scene_corners[3] + Point2f (syntheticWorldImg.cols, 0), scene_corners[0] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
++//
++//
++////    imshow ("matches", img_matches);
++//
++//}
++
++
++/**
++ * gets the world rect from the synthetic world into the real img and then removes (adds index to list) all tokens not in the world rect
++ * @param syntheticWorldImg
++ * @return
++ */
++//void WorldHelper::clipTokensInWorld (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real, std::vector<Token> &tokens) {
++//    std::vector<Point2f> syntheticRectPoints (4);
++//    syntheticRectPoints[0] = cvPoint (0, 0);
++//    syntheticRectPoints[1] = cvPoint (syntheticWorldImg.cols, 0);
++//    syntheticRectPoints[2] = cvPoint (syntheticWorldImg.cols, syntheticWorldImg.rows);
++//    syntheticRectPoints[3] = cvPoint (0, syntheticWorldImg.rows);
++//
++//    std::vector<Point2f> world_corners (4);
++//
++//    perspectiveTransform (syntheticRectPoints, world_corners, homography_synth_to_real);
++//
++//    Point2f p0 = world_corners.at (0);
++//    Point2f p2 = world_corners.at (2);
++//
++//
++//    for (int i = 0; i < tokens.size (); ++i) {
++//
++//        Token token = tokens.at (i);
++//        Rect rect = token.bbox;
++//
++//        if (rect.x < p0.x || rect.x > p2.x) {
++//
++//            tokens.erase (tokens.begin () + i);
++//            i--;
++//            continue;
++//        }
++//        if (rect.y < p0.y || rect.y > p2.y) {
++//            tokens.erase (tokens.begin () + i);
++//            i--;
++//        }
++//    }
++//}
++
++}
+\ No newline at end of file
+diff --git a/modules/js/src/core_bindings.cpp b/modules/js/src/core_bindings.cpp
+index 554f95aa8..4c3e380a2 100644
+--- a/modules/js/src/core_bindings.cpp
++++ b/modules/js/src/core_bindings.cpp
+@@ -341,6 +341,8 @@ EMSCRIPTEN_BINDINGS(binding_utils)
+     register_vector<cv::Mat>("MatVector");
+     register_vector<cv::Rect>("RectVector");
+     register_vector<cv::KeyPoint>("KeyPointVector");
++    register_vector<cv::Dice>("DiceVector");
++    register_vector<cv::Token>("TokenVector");
+ 
+     emscripten::class_<cv::Mat>("Mat")
+         .constructor<>()
+@@ -494,6 +496,18 @@ EMSCRIPTEN_BINDINGS(binding_utils)
+         .field("response", &cv::KeyPoint::response)
+         .field("size", &cv::KeyPoint::size);
+ 
++    emscripten::value_object<cv::Dice>("Dice")
++        .field("value", &cv::Dice::value)
++        .field("centerPoint", &cv::Dice::centerPoint)
++        .field("pips", &cv::Dice::pips)
++        .field("topLeftPip", &cv::Dice::topLeftPip)
++        .field("bottomLeftPip", &cv::Dice::bottomLeftPip);
++
++    emscripten::value_object<cv::Token>("Token")
++        .field("bbox", &cv::Token::bbox)
++        .field("color", &cv::Token::color)
++        .field("bottomPoint", &cv::Token::bottomPoint);
++
+     emscripten::value_array<cv::Scalar_<double>> ("Scalar")
+         .element(index<0>())
+         .element(index<1>())
+diff --git a/modules/js/src/embindgen.py b/modules/js/src/embindgen.py
+index 8e406e038..680b7bb6e 100644
+--- a/modules/js/src/embindgen.py
++++ b/modules/js/src/embindgen.py
+@@ -131,6 +131,11 @@ dnn = {'dnn_Net': ['setInput', 'forward'],
+ features2d = {'Feature2D': ['detect', 'compute', 'detectAndCompute', 'descriptorSize', 'descriptorType', 'defaultNorm', 'empty', 'getDefaultName'],
+               'BRISK': ['create', 'getDefaultName'],
+               'ORB': ['create', 'setMaxFeatures', 'setScaleFactor', 'setNLevels', 'setEdgeThreshold', 'setFirstLevel', 'setWTA_K', 'setScoreType', 'setPatchSize', 'getFastThreshold', 'getDefaultName'],
++
++              'DiceHelper': ['create', 'getDiceValues', 'getNearestNeighbour', 'getExampleDiceValues'],
++              'TokenHelper': ['create', 'getTokensSlow', 'drawTokens', 'drawTokensOnSyntheticImg'],
++              #'WorldHelper': ['create'],
++
+               'MSER': ['create', 'detectRegions', 'setDelta', 'getDelta', 'setMinArea', 'getMinArea', 'setMaxArea', 'getMaxArea', 'setPass2Only', 'getPass2Only', 'getDefaultName'],
+               'FastFeatureDetector': ['create', 'setThreshold', 'getThreshold', 'setNonmaxSuppression', 'getNonmaxSuppression', 'setType', 'getType', 'getDefaultName'],
+               'AgastFeatureDetector': ['create', 'setThreshold', 'getThreshold', 'setNonmaxSuppression', 'getNonmaxSuppression', 'setType', 'getType', 'getDefaultName'],
+diff --git a/modules/js/src/helpers.js b/modules/js/src/helpers.js
+index 08d1a89b2..e8eacedb2 100644
+--- a/modules/js/src/helpers.js
++++ b/modules/js/src/helpers.js
+@@ -211,6 +211,59 @@ function Rect() {
+ 
+ Module['Rect'] = Rect;
+ 
++function Dice() {
++    switch (arguments.length) {
++        case 0: {
++            // new cv.Dice()
++            this.value = 0;
++            this.centerPoint = undefined;
++            this.pips = undefined;
++            this.topLeftPip = undefined;
++            this.bottomLeftPip = undefined;
++            break;
++        }
++        case 2: {
++            // new cv.Dice(value, pips)
++            var value = arguments[0];
++            var pipsVector = arguments[1];
++            this.value = value;
++            this.pips = pipsVector;
++            break;
++        }
++        default: {
++            throw new Error('Invalid arguments');
++        }
++    }
++}
++
++Module['Dice'] = Dice;
++
++
++function Token() {
++    switch (arguments.length) {
++        case 0: {
++            // new cv.Token()
++            this.bbox = undefined;
++            this.color = undefined;
++            this.bottomPoint = undefined;
++            break;
++        }
++        case 3: {
++            // new cv.Token(point, size)
++            this.bbox = arguments[0];
++            this.color = arguments[1];
++            this.bottomPoint = arguments[1];
++            break;
++        }
++        default: {
++            throw new Error('Invalid arguments');
++        }
++    }
++}
++
++Module['Token'] = Token;
++
++
+ function RotatedRect() {
+     switch (arguments.length) {
+         case 0: {
+-- 
+2.18.0
+
+From df4b6fba4d4e7bc424bfa827743bbefc38773cf1 Mon Sep 17 00:00:00 2001
+From: janisdd <janisdd5566@googlemail.com>
+Date: Wed, 30 Jan 2019 20:20:24 +0100
+Subject: [PATCH] build is passing with all needed functions (however js might
+ not work ... runtime error)
+
+---
+ .../features2d/include/opencv2/features2d.hpp |  14 +-
+ modules/features2d/src/orb.cpp                | 190 +++++++++---------
+ modules/js/src/embindgen.py                   |   2 +-
+ 3 files changed, 103 insertions(+), 103 deletions(-)
+
+diff --git a/modules/features2d/include/opencv2/features2d.hpp b/modules/features2d/include/opencv2/features2d.hpp
+index c1258cf35..d09446e9c 100644
+--- a/modules/features2d/include/opencv2/features2d.hpp
++++ b/modules/features2d/include/opencv2/features2d.hpp
+@@ -1491,13 +1491,13 @@ private:
+     double toRads (double deg);
+ };
+ 
+-//class CV_EXPORTS_W WorldHelper {
+-//public:
+-//    CV_WRAP static Ptr<WorldHelper> create ();
+-//    //last 2 params were passed with &
+-////    CV_WRAP void getWorldHomography ( Mat syntheticWorldImg,  Mat worldImg,  Mat homography_real_to_synth, Mat homography_synth_to_real);
+-////    CV_WRAP void clipTokensInWorld (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real, std::vector<Token> &tokens);
+-//};
++class CV_EXPORTS_W WorldHelper {
++public:
++    CV_WRAP static Ptr<WorldHelper> create ();
++    //last 2 params were passed with &
++    CV_WRAP void getWorldHomography ( Mat syntheticWorldImg,  Mat worldImg,  Mat homography_real_to_synth, Mat homography_synth_to_real);
++    CV_WRAP void clipTokensInWorld (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real, std::vector<Token> &tokens);
++};
+ 
+ //! @} features2d_category
+ 
+diff --git a/modules/features2d/src/orb.cpp b/modules/features2d/src/orb.cpp
+index 468097716..0916faad7 100644
+--- a/modules/features2d/src/orb.cpp
++++ b/modules/features2d/src/orb.cpp
+@@ -1805,75 +1805,75 @@ Mat TokenHelper::drawTokensOnSyntheticImg (const Mat &syntheticWorldImg, const M
+     return syntheticWorldImgOut;
+ }
+ 
+-//Ptr<WorldHelper> WorldHelper::create () {
+-//    return new WorldHelper();
+-//}
++Ptr<WorldHelper> WorldHelper::create () {
++    return new WorldHelper();
++}
+ 
++
++void WorldHelper::getWorldHomography (  Mat syntheticWorldImg,  Mat worldImg,  Mat homography_real_to_synth, Mat homography_synth_to_real) {
++
++//    Ptr<cv::SURF> detector = SURF::create ();
++    Ptr<cv::ORB> detector = ORB::create ();
++
++    std::vector<KeyPoint> referenceKeypoints, keypoints;
++
++    detector->detect (syntheticWorldImg, referenceKeypoints);
++    detector->detect (worldImg, keypoints);
++
++    Mat reference_descriptors, descriptors;
++
++    detector->compute (syntheticWorldImg, referenceKeypoints, reference_descriptors);
++    detector->compute (worldImg, keypoints, descriptors);
++
++
++    FlannBasedMatcher matcher;
++//    BFMatcher matcher;
++    std::vector<DMatch> matches;
++    matcher.match (reference_descriptors, descriptors, matches);
++
++
++    std::vector<Point2f> obj;
++    std::vector<Point2f> scene;
++
++    for (int i = 0; i < matches.size (); i++) {
++        //-- Get the keypoints from the good matches
++        obj.push_back (referenceKeypoints[matches[i].queryIdx].pt);
++        scene.push_back (keypoints[matches[i].trainIdx].pt);
++    }
++
++//    Mat homography = findHomography (obj, scene, CV_RANSAC);
++
++    //TODo is this worling without & ref passing?
++    homography_real_to_synth = findHomography (scene, obj, CV_RANSAC); //map from real to synthetic image //8 is ransac
++    invert (homography_real_to_synth, homography_synth_to_real);
++
++    //not we can use  perspectiveTransform( obj_corners, scene_corners, H);
++
++//    std::vector<Point2f> obj_corners (4);
++//    obj_corners[0] = cvPoint (0, 0);
++//    obj_corners[1] = cvPoint (syntheticWorldImg.cols, 0);
++//    obj_corners[2] = cvPoint (syntheticWorldImg.cols, syntheticWorldImg.rows);
++//    obj_corners[3] = cvPoint (0, syntheticWorldImg.rows);
++//    std::vector<Point2f> scene_corners (4);
+ //
+-//void WorldHelper::getWorldHomography (  Mat syntheticWorldImg,  Mat worldImg,  Mat homography_real_to_synth, Mat homography_synth_to_real) {
+-//
+-////    Ptr<cv::SURF> detector = SURF::create ();
+-//    Ptr<cv::ORB> detector = ORB::create ();
+-//
+-//    std::vector<KeyPoint> referenceKeypoints, keypoints;
+-//
+-//    detector->detect (syntheticWorldImg, referenceKeypoints);
+-//    detector->detect (worldImg, keypoints);
+-//
+-//    Mat reference_descriptors, descriptors;
+-//
+-//    detector->compute (syntheticWorldImg, referenceKeypoints, reference_descriptors);
+-//    detector->compute (worldImg, keypoints, descriptors);
+-//
+-//
+-//    FlannBasedMatcher matcher;
+-////    BFMatcher matcher;
+-//    std::vector<DMatch> matches;
+-//    matcher.match (reference_descriptors, descriptors, matches);
+-//
+-//
+-//    std::vector<Point2f> obj;
+-//    std::vector<Point2f> scene;
+-//
+-//    for (int i = 0; i < matches.size (); i++) {
+-//        //-- Get the keypoints from the good matches
+-//        obj.push_back (referenceKeypoints[matches[i].queryIdx].pt);
+-//        scene.push_back (keypoints[matches[i].trainIdx].pt);
+-//    }
+-//
+-////    Mat homography = findHomography (obj, scene, CV_RANSAC);
+-//
+-//    //TODo is this worling without & ref passing?
+-//    homography_real_to_synth = findHomography (scene, obj, CV_RANSAC); //map from real to synthetic image //8 is ransac
+-//    invert (homography_real_to_synth, homography_synth_to_real);
+-//
+-//    //not we can use  perspectiveTransform( obj_corners, scene_corners, H);
++//    perspectiveTransform (obj_corners, scene_corners, homography);
+ //
+-////    std::vector<Point2f> obj_corners (4);
+-////    obj_corners[0] = cvPoint (0, 0);
+-////    obj_corners[1] = cvPoint (syntheticWorldImg.cols, 0);
+-////    obj_corners[2] = cvPoint (syntheticWorldImg.cols, syntheticWorldImg.rows);
+-////    obj_corners[3] = cvPoint (0, syntheticWorldImg.rows);
+-////    std::vector<Point2f> scene_corners (4);
+-////
+-////    perspectiveTransform (obj_corners, scene_corners, homography);
+-////
+-////    Mat img_matches = worldImg.clone ();
+-////
+-////    drawMatches( syntheticWorldImg, referenceKeypoints, worldImg, keypoints,
+-////                 matches, img_matches, Scalar::all(-1), Scalar::all(-1),
+-////                 vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+-////
+-////
+-////    line (img_matches, scene_corners[0] + Point2f (syntheticWorldImg.cols, 0), scene_corners[1] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
+-////    line (img_matches, scene_corners[1] + Point2f (syntheticWorldImg.cols, 0), scene_corners[2] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
+-////    line (img_matches, scene_corners[2] + Point2f (syntheticWorldImg.cols, 0), scene_corners[3] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
+-////    line (img_matches, scene_corners[3] + Point2f (syntheticWorldImg.cols, 0), scene_corners[0] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
++//    Mat img_matches = worldImg.clone ();
+ //
++//    drawMatches( syntheticWorldImg, referenceKeypoints, worldImg, keypoints,
++//                 matches, img_matches, Scalar::all(-1), Scalar::all(-1),
++//                 vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+ //
+-////    imshow ("matches", img_matches);
+ //
+-//}
++//    line (img_matches, scene_corners[0] + Point2f (syntheticWorldImg.cols, 0), scene_corners[1] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
++//    line (img_matches, scene_corners[1] + Point2f (syntheticWorldImg.cols, 0), scene_corners[2] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
++//    line (img_matches, scene_corners[2] + Point2f (syntheticWorldImg.cols, 0), scene_corners[3] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
++//    line (img_matches, scene_corners[3] + Point2f (syntheticWorldImg.cols, 0), scene_corners[0] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
++
++
++//    imshow ("matches", img_matches);
++
++}
+ 
+ 
+ /**
+@@ -1881,37 +1881,37 @@ Mat TokenHelper::drawTokensOnSyntheticImg (const Mat &syntheticWorldImg, const M
+  * @param syntheticWorldImg
+  * @return
+  */
+-//void WorldHelper::clipTokensInWorld (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real, std::vector<Token> &tokens) {
+-//    std::vector<Point2f> syntheticRectPoints (4);
+-//    syntheticRectPoints[0] = cvPoint (0, 0);
+-//    syntheticRectPoints[1] = cvPoint (syntheticWorldImg.cols, 0);
+-//    syntheticRectPoints[2] = cvPoint (syntheticWorldImg.cols, syntheticWorldImg.rows);
+-//    syntheticRectPoints[3] = cvPoint (0, syntheticWorldImg.rows);
+-//
+-//    std::vector<Point2f> world_corners (4);
+-//
+-//    perspectiveTransform (syntheticRectPoints, world_corners, homography_synth_to_real);
+-//
+-//    Point2f p0 = world_corners.at (0);
+-//    Point2f p2 = world_corners.at (2);
+-//
+-//
+-//    for (int i = 0; i < tokens.size (); ++i) {
+-//
+-//        Token token = tokens.at (i);
+-//        Rect rect = token.bbox;
+-//
+-//        if (rect.x < p0.x || rect.x > p2.x) {
+-//
+-//            tokens.erase (tokens.begin () + i);
+-//            i--;
+-//            continue;
+-//        }
+-//        if (rect.y < p0.y || rect.y > p2.y) {
+-//            tokens.erase (tokens.begin () + i);
+-//            i--;
+-//        }
+-//    }
+-//}
++void WorldHelper::clipTokensInWorld (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real, std::vector<Token> &tokens) {
++    std::vector<Point2f> syntheticRectPoints (4);
++    syntheticRectPoints[0] = cvPoint (0, 0);
++    syntheticRectPoints[1] = cvPoint (syntheticWorldImg.cols, 0);
++    syntheticRectPoints[2] = cvPoint (syntheticWorldImg.cols, syntheticWorldImg.rows);
++    syntheticRectPoints[3] = cvPoint (0, syntheticWorldImg.rows);
++
++    std::vector<Point2f> world_corners (4);
++
++    perspectiveTransform (syntheticRectPoints, world_corners, homography_synth_to_real);
++
++    Point2f p0 = world_corners.at (0);
++    Point2f p2 = world_corners.at (2);
++
++
++    for (int i = 0; i < tokens.size (); ++i) {
++
++        Token token = tokens.at (i);
++        Rect rect = token.bbox;
++
++        if (rect.x < p0.x || rect.x > p2.x) {
++
++            tokens.erase (tokens.begin () + i);
++            i--;
++            continue;
++        }
++        if (rect.y < p0.y || rect.y > p2.y) {
++            tokens.erase (tokens.begin () + i);
++            i--;
++        }
++    }
++}
+ 
+ }
+\ No newline at end of file
+diff --git a/modules/js/src/embindgen.py b/modules/js/src/embindgen.py
+index 680b7bb6e..f7b9a318e 100644
+--- a/modules/js/src/embindgen.py
++++ b/modules/js/src/embindgen.py
+@@ -134,7 +134,7 @@ features2d = {'Feature2D': ['detect', 'compute', 'detectAndCompute', 'descriptor
+ 
+               'DiceHelper': ['create', 'getDiceValues', 'getNearestNeighbour', 'getExampleDiceValues'],
+               'TokenHelper': ['create', 'getTokensSlow', 'drawTokens', 'drawTokensOnSyntheticImg'],
+-              #'WorldHelper': ['create'],
++              'WorldHelper': ['create', 'getWorldHomography', 'clipTokensInWorld'],
+ 
+               'MSER': ['create', 'detectRegions', 'setDelta', 'getDelta', 'setMinArea', 'getMinArea', 'setMaxArea', 'getMaxArea', 'setPass2Only', 'getPass2Only', 'getDefaultName'],
+               'FastFeatureDetector': ['create', 'setThreshold', 'getThreshold', 'setNonmaxSuppression', 'getNonmaxSuppression', 'setType', 'getType', 'getDefaultName'],
+-- 
+2.18.0
+
+From 06aaec9af1e24c2a5af5a10f42bf54ad916446eb Mon Sep 17 00:00:00 2001
+From: janisdd <janisdd5566@googlemail.com>
+Date: Wed, 30 Jan 2019 21:10:12 +0100
+Subject: [PATCH] get dices and draw dice debug working - todo: color for debug
+ drawing is black not colored
+
+---
+ .../features2d/include/opencv2/features2d.hpp | 12 ++-
+ modules/features2d/src/orb.cpp                | 88 ++++++++++++++-----
+ modules/js/src/embindgen.py                   |  2 +-
+ 3 files changed, 79 insertions(+), 23 deletions(-)
+
+diff --git a/modules/features2d/include/opencv2/features2d.hpp b/modules/features2d/include/opencv2/features2d.hpp
+index d09446e9c..6ecd1a0b0 100644
+--- a/modules/features2d/include/opencv2/features2d.hpp
++++ b/modules/features2d/include/opencv2/features2d.hpp
+@@ -1466,10 +1466,18 @@ public:
+ 
+     CV_WRAP std::vector<Dice> getDiceValues (const Mat &diceImg, const double maxDistInDice = 75, const float minCircularity = 0.887, const float minArea = 30, const double minDiceRadius = 40);
+ 
++    /**
++     *
++     * @param dices
++     * @param img
++     * @param minDiceRadius for 1 pip we have not 2 points to get the proper radius
++     */
++    CV_WRAP void drawDiceDebug (std::vector<Dice> dices, Mat img, const int minDiceRadius = 40);
++
+ private:
+     int getNearestNeighbour (const KeyPoint &root, const std::vector<KeyPoint> &keypoints, const double maxDistInDice);
+     double getDistance (const KeyPoint &p1, const KeyPoint &p2);
+-    void setMissingDiceProps (const std::vector<Dice> &dices);
++    void setMissingDiceProps (std::vector<Dice> &dices);
+ };
+ 
+ 
+@@ -1478,7 +1486,7 @@ public:
+     CV_WRAP static Ptr<TokenHelper> create ();
+ 
+ 
+-    CV_WRAP int getTokensSlow (const Mat &originalHSVImg, const Mat &_binaryImg, std::vector<Token> &tokens, const int minTokenBoundingBoxArea = 2000);
++    CV_WRAP int getTokensSlow (const Mat &originalHSVImg, std::vector<Token> &tokens, const int minTokenBoundingBoxArea = 2000);
+ 
+     CV_WRAP Mat drawTokens (const Mat &baseImg, const std::vector<Token> &tokens);
+ 
+diff --git a/modules/features2d/src/orb.cpp b/modules/features2d/src/orb.cpp
+index 0916faad7..e8bab6952 100644
+--- a/modules/features2d/src/orb.cpp
++++ b/modules/features2d/src/orb.cpp
+@@ -1316,6 +1316,51 @@ std::vector<Dice> DiceHelper::getDiceValues (const Mat &diceImg, const double ma
+ }
+ 
+ 
++void DiceHelper::drawDiceDebug (std::vector<Dice> dices, Mat img, const int minDiceRadius) {
++
++    std::vector<KeyPoint> keypoints;
++
++    for (int i = 0; i < dices.size (); ++i) {
++        Dice dice = dices[i];
++        //c++ vector push many
++        keypoints.insert (keypoints.end (), std::begin (dice.pips), std::end (dice.pips));
++    }
++
++    // DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures
++    // the size of the circle corresponds to the size of blob
++    drawKeypoints (img, keypoints, img, Scalar (0, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
++
++
++    //draw connected pips
++    for (int j = 0; j < dices.size (); ++j) {
++        Dice dice = dices[j];
++
++        if (dice.pips.size () == 0) {
++            //this should not happen...
++            continue;
++        }
++
++        KeyPoint currPoint = dice.pips[0];
++        for (int i = 1; i < dice.pips.size (); ++i) {
++            KeyPoint nextPoint = dice.pips[i];
++            cv::line (img, currPoint.pt, nextPoint.pt, Scalar (0, 0, 255));
++            currPoint = nextPoint;
++        }
++    }
++
++
++    for (int k = 0; k < dices.size (); ++k) {
++        Dice dice = dices[k];
++
++        double distance = getDistance (dice.topLeftPip, dice.bottomLeftPip);
++
++        double radius = distance; //looks good
++
++        cv::circle (img, dice.centerPoint, dice.pips.size () == 1 ? minDiceRadius : radius, Scalar (255, 0, 0), 2);
++    }
++
++}
++
+ int DiceHelper::getNearestNeighbour (const KeyPoint &root, const std::vector<KeyPoint> &keypoints, const double maxDistInDice) {
+     double minDist = -1;
+     int index = -1;
+@@ -1345,14 +1390,16 @@ double DiceHelper::getDistance (const KeyPoint &p1, const KeyPoint &p2) {
+ }
+ 
+ 
+-void DiceHelper::setMissingDiceProps (const std::vector<Dice> &dices) {
++void DiceHelper::setMissingDiceProps (std::vector<Dice> &dices) {
++
+ 
+     for (int i = 0; i < dices.size (); ++i) {
+-        auto dice = dices[i];
++        Dice* dice = &dices[i];
+ 
+-        if (dice.pips.size () == 0) {
++
++        if (dice->pips.size () == 0) {
+             //should not happen
+-//                std::cout << "error no pips";
++//            cout << "error no pips";
+             continue;
+         }
+ 
+@@ -1372,18 +1419,18 @@ void DiceHelper::setMissingDiceProps (const std::vector<Dice> &dices) {
+ //        for (int j = 0; j < dice->pips.size (); ++j) {
+ //            KeyPoint* pip = &(dice->pips[j]);
+ //
+-//            if (topLeftPoint == nullptr || pip->pt.x < topLeftPoint->pt.x) {
++//            if (topLeftPoint == nullptr || pip.pt.x < topLeftPoint.pt.x) {
+ //                topLeftPoint = pip;
+ //            }
+ //
+-//            if (bottomRightPoint == nullptr || pip->pt.x > bottomRightPoint->pt.x) {
++//            if (bottomRightPoint == nullptr || pip.pt.x > bottomRightPoint.pt.x) {
+ //                bottomRightPoint = pip;
+ //            }
+ //        }
+ 
+         //get the left most one
+-        for (int j = 0; j < dice.pips.size (); ++j) {
+-            KeyPoint* pip = &(dice.pips[j]);
++        for (int j = 0; j < dice->pips.size (); ++j) {
++            KeyPoint* pip = &(dice->pips[j]);
+             if (topLeftPoint == nullptr || pip->pt.x < topLeftPoint->pt.x) {
+                 topLeftPoint = pip;
+             }
+@@ -1392,8 +1439,8 @@ void DiceHelper::setMissingDiceProps (const std::vector<Dice> &dices) {
+         //the other should be the pip with the most distance...
+         double maxDist = -1; //-1 for 1 pip we need to set bot and top to the same points
+ 
+-        for (int k = 0; k < dice.pips.size (); ++k) {
+-            KeyPoint* pip = &(dice.pips[k]);
++        for (int k = 0; k < dice->pips.size (); ++k) {
++            KeyPoint* pip = &(dice->pips[k]);
+ 
+             double  dist = getDistance (*topLeftPoint, *pip);
+ 
+@@ -1410,21 +1457,22 @@ void DiceHelper::setMissingDiceProps (const std::vector<Dice> &dices) {
+ 
+ 
+         //make copy in case we swap y vals...
+-        dice.topLeftPip = *topLeftPoint;
+-        dice.bottomLeftPip = *bottomRightPoint;
++        dice->topLeftPip = *topLeftPoint;
++        dice->bottomLeftPip = *bottomRightPoint;
+ 
+ 
+-        if (dice.topLeftPip.pt.y > dice.bottomLeftPip.pt.y) {
+-            float temp = dice.topLeftPip.pt.y;
+-            dice.topLeftPip.pt.y = dice.bottomLeftPip.pt.y;
+-            dice.bottomLeftPip.pt.y = temp;
++        if (dice->topLeftPip.pt.y > dice->bottomLeftPip.pt.y) {
++            float temp = dice->topLeftPip.pt.y;
++            dice->topLeftPip.pt.y = dice->bottomLeftPip.pt.y;
++            dice->bottomLeftPip.pt.y = temp;
+         }
+ 
+-        dice.centerPoint = Point2f (
+-                (dice.topLeftPip.pt.x + dice.bottomLeftPip.pt.x) / 2,
+-                (dice.topLeftPip.pt.y + dice.bottomLeftPip.pt.y) / 2
++        dice->centerPoint = Point2f (
++                (dice->topLeftPip.pt.x + dice->bottomLeftPip.pt.x) / 2,
++                (dice->topLeftPip.pt.y + dice->bottomLeftPip.pt.y) / 2
+         );
+ 
++
+         //bounding box is not required... would need rotation better use circle
+ 
+     }
+@@ -1444,7 +1492,7 @@ Ptr<TokenHelper> TokenHelper::create () {
+  *
+  * originalHSVImg used to get the token colors
+  */
+-int TokenHelper::getTokensSlow (const Mat &originalHSVImg, const Mat &_binaryImg, std::vector<Token> &tokens, const int minTokenBoundingBoxArea) {
++int TokenHelper::getTokensSlow (const Mat &originalHSVImg, std::vector<Token> &tokens, const int minTokenBoundingBoxArea) {
+ 
+ 
+     const bool debug = false;
+diff --git a/modules/js/src/embindgen.py b/modules/js/src/embindgen.py
+index f7b9a318e..920b1ad17 100644
+--- a/modules/js/src/embindgen.py
++++ b/modules/js/src/embindgen.py
+@@ -132,7 +132,7 @@ features2d = {'Feature2D': ['detect', 'compute', 'detectAndCompute', 'descriptor
+               'BRISK': ['create', 'getDefaultName'],
+               'ORB': ['create', 'setMaxFeatures', 'setScaleFactor', 'setNLevels', 'setEdgeThreshold', 'setFirstLevel', 'setWTA_K', 'setScoreType', 'setPatchSize', 'getFastThreshold', 'getDefaultName'],
+ 
+-              'DiceHelper': ['create', 'getDiceValues', 'getNearestNeighbour', 'getExampleDiceValues'],
++              'DiceHelper': ['create', 'getDiceValues', 'drawDiceDebug', 'getNearestNeighbour', 'getExampleDiceValues'],
+               'TokenHelper': ['create', 'getTokensSlow', 'drawTokens', 'drawTokensOnSyntheticImg'],
+               'WorldHelper': ['create', 'getWorldHomography', 'clipTokensInWorld'],
+ 
+-- 
+2.18.0
+
+From ffb7cc74398ea71e9a7ca21371c09fced2196442 Mon Sep 17 00:00:00 2001
+From: janisdd <janisdd5566@googlemail.com>
+Date: Wed, 30 Jan 2019 22:53:10 +0100
+Subject: [PATCH] draw tokens working
+
+---
+ modules/core/include/opencv2/core/types.hpp   |  21 +--
+ .../features2d/include/opencv2/features2d.hpp |   6 +-
+ modules/features2d/src/orb.cpp                | 171 +++++++++++-------
+ modules/js/src/embindgen.py                   |   4 +-
+ modules/js/src/helpers.js                     |   4 +-
+ 5 files changed, 121 insertions(+), 85 deletions(-)
+
+diff --git a/modules/core/include/opencv2/core/types.hpp b/modules/core/include/opencv2/core/types.hpp
+index 4da37d970..0eff88ad1 100644
+--- a/modules/core/include/opencv2/core/types.hpp
++++ b/modules/core/include/opencv2/core/types.hpp
+@@ -798,11 +798,11 @@ public:
+ class CV_EXPORTS_W_SIMPLE Token {
+ public:
+     CV_WRAP Token();
+-    CV_WRAP Token (Rect bbox, Vec3b color, Point bottomPoint);
++    CV_WRAP Token (Rect bbox, Scalar color, Point2f bottomPoint);
+ 
+     CV_PROP_RW Rect bbox;
+-    CV_PROP_RW Vec3b color; //hsv color
+-    CV_PROP_RW Point bottomPoint;
++    CV_PROP_RW Scalar color; //hsv color, only 3 items used
++    CV_PROP_RW Point2f bottomPoint;
+ };
+ 
+ #ifdef OPENCV_TRAITS_ENABLE_DEPRECATED
+@@ -2093,17 +2093,6 @@ RotatedRect::RotatedRect(const Point2f& _center, const Size2f& _size, float _ang
+ 
+ ///////////////////////////////// Range /////////////////////////////////
+ 
+-
+-//inline
+-//Dice::Dice ()
+-//        : value(0) {}
+-//
+-//inline
+-//Dice::Dice (int value, std::vector<cv::KeyPoint> pips)
+-//: value (value), pips (std::move (pips)) {}
+-
+-
+-
+ inline
+ Range::Range()
+     : start(0), end(0) {}
+@@ -2475,14 +2464,12 @@ Token::Token() {}
+ 
+ 
+ inline
+-Token::Token (cv::Rect bbox, cv::Vec3b color, cv::Point bottomPoint)
++Token::Token (Rect bbox, Scalar color, Point2f bottomPoint)
+     : bbox (bbox), color (color), bottomPoint (bottomPoint) {}
+ 
+ 
+ 
+ 
+-
+-
+ inline
+ KeyPoint::KeyPoint()
+     : pt(0,0), size(0), angle(-1), response(0), octave(0), class_id(-1) {}
+diff --git a/modules/features2d/include/opencv2/features2d.hpp b/modules/features2d/include/opencv2/features2d.hpp
+index 6ecd1a0b0..38164f3ad 100644
+--- a/modules/features2d/include/opencv2/features2d.hpp
++++ b/modules/features2d/include/opencv2/features2d.hpp
+@@ -1485,10 +1485,11 @@ class CV_EXPORTS_W TokenHelper {
+ public:
+     CV_WRAP static Ptr<TokenHelper> create ();
+ 
++    CV_WRAP std::vector<Token> getExampleTokenVector ();
+ 
+-    CV_WRAP int getTokensSlow (const Mat &originalHSVImg, std::vector<Token> &tokens, const int minTokenBoundingBoxArea = 2000);
++    CV_WRAP std::vector<Token> getTokensSlow (const Mat &originalHSVImg, const int minTokenBoundingBoxArea = 2000);
+ 
+-    CV_WRAP Mat drawTokens (const Mat &baseImg, const std::vector<Token> &tokens);
++    CV_WRAP Mat drawTokens (const Mat &baseImg, std::vector<Token> tokens);
+ 
+     CV_WRAP Mat drawTokensOnSyntheticImg (const Mat &syntheticWorldImg, const Mat &homography, std::vector<Token> tokens);
+ 
+@@ -1505,6 +1506,7 @@ public:
+     //last 2 params were passed with &
+     CV_WRAP void getWorldHomography ( Mat syntheticWorldImg,  Mat worldImg,  Mat homography_real_to_synth, Mat homography_synth_to_real);
+     CV_WRAP void clipTokensInWorld (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real, std::vector<Token> &tokens);
++    CV_WRAP Mat drawWorldRect (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real);
+ };
+ 
+ //! @} features2d_category
+diff --git a/modules/features2d/src/orb.cpp b/modules/features2d/src/orb.cpp
+index e8bab6952..0ede0e5fe 100644
+--- a/modules/features2d/src/orb.cpp
++++ b/modules/features2d/src/orb.cpp
+@@ -1205,19 +1205,18 @@ void ORB_Impl::detectAndCompute( InputArray _image, InputArray _mask,
+     }
+ }
+ 
++Ptr<ORB> ORB::create(int nfeatures, float scaleFactor, int nlevels, int edgeThreshold,
++            int firstLevel, int wta_k, ORB::ScoreType scoreType, int patchSize, int fastThreshold)
++{
++    CV_Assert(firstLevel >= 0);
++    return makePtr<ORB_Impl>(nfeatures, scaleFactor, nlevels, edgeThreshold,
++                             firstLevel, wta_k, scoreType, patchSize, fastThreshold);
++}
+ 
+-    Ptr<ORB> ORB::create(int nfeatures, float scaleFactor, int nlevels, int edgeThreshold,
+-                         int firstLevel, int wta_k, ORB::ScoreType scoreType, int patchSize, int fastThreshold)
+-    {
+-        CV_Assert(firstLevel >= 0);
+-        return makePtr<ORB_Impl>(nfeatures, scaleFactor, nlevels, edgeThreshold,
+-                                 firstLevel, wta_k, scoreType, patchSize, fastThreshold);
+-    }
+-
+-    String ORB::getDefaultName() const
+-    {
+-        return (Feature2D::getDefaultName() + ".ORB");
+-    }
++String ORB::getDefaultName() const
++{
++    return (Feature2D::getDefaultName() + ".ORB");
++}
+ 
+ 
+ 
+@@ -1486,15 +1485,29 @@ Ptr<TokenHelper> TokenHelper::create () {
+ }
+ 
+ 
++std::vector<Token> TokenHelper::getExampleTokenVector() {
++    std::vector<Token> tokens;
++
++    Rect rect = cv::Rect (1, 1, 1, 1);
++    Point2f bottomPoint (1, 1);
++//    Token token = Token (rect, Vec3b (0, 0, 0), bottomPoint);
++    Token token = Token (rect, Scalar(0,0,0), bottomPoint);
++    tokens.push_back(token);
++
++    return tokens;
++}
++
++
+ /**
+  * input: binary image wiht already filtered token pixels WILL BE CHANGED
+  * returns the rects of the tokens found
+  *
+  * originalHSVImg used to get the token colors
+  */
+-int TokenHelper::getTokensSlow (const Mat &originalHSVImg, std::vector<Token> &tokens, const int minTokenBoundingBoxArea) {
++std::vector<Token> TokenHelper::getTokensSlow (const Mat &originalHSVImg, const int minTokenBoundingBoxArea) {
+ 
+ 
++    std::vector<Token> tokens;
+     const bool debug = false;
+     const bool getAvgColor = true; //performance?? if false defaults to (0,0,0)
+     Mat labels;
+@@ -1502,7 +1515,6 @@ int TokenHelper::getTokensSlow (const Mat &originalHSVImg, std::vector<Token> &t
+     Mat centroids;
+ 
+ 
+-
+     //---mapPixels in original code
+     Mat binaryImg = cv::Mat::zeros (Size (originalHSVImg.cols, originalHSVImg.rows), THRESH_BINARY);
+ 
+@@ -1566,7 +1578,7 @@ int TokenHelper::getTokensSlow (const Mat &originalHSVImg, std::vector<Token> &t
+ 
+ //    if (debug) imshow ("debug 2", binaryImg);
+ 
+-    //--- make an image where the (tokens) connected components
++    //--- make an image where the connected components
+ 
+     int compCount = 0;
+     auto *pixelPtr = (uint8_t *) originalHSVImg.data;
+@@ -1604,11 +1616,9 @@ int TokenHelper::getTokensSlow (const Mat &originalHSVImg, std::vector<Token> &t
+ 
+ 
+         Rect rect = cv::Rect (left, top, width, height);
+-//        tokensRects.push_back (
+-//                rect);  //tokens.emplace_back (left, top, width, height);
+ 
+ 
+-        Point bottomPoint (0, 0);
++        Point2f bottomPoint (0, 0);
+ 
+         //use the shorter side and then draw a square from the token bottom and then use the center of that
+         if (height > width) {
+@@ -1622,8 +1632,9 @@ int TokenHelper::getTokensSlow (const Mat &originalHSVImg, std::vector<Token> &t
+             bottomPoint.y = top + height - height / 2; //from bottom
+         }
+ 
+-        auto token = new Token (rect, Vec3b (0, 0, 0), bottomPoint);
+-        tokens.push_back (*token);
++//        Token token = Token (rect, Vec3b (0, 0, 0), bottomPoint);
++        Token token = Token (rect, Scalar(0,0,0), bottomPoint);
++        tokens.push_back (token);
+ 
+ 
+ //        vector<Point> tokenPoints;
+@@ -1706,7 +1717,9 @@ int TokenHelper::getTokensSlow (const Mat &originalHSVImg, std::vector<Token> &t
+             //cout << "h: " << (avg_h*2) << " s: " << getPercentage (avg_s) << " v: " << getPercentage (avg_v) << endl;
+ 
+ //            avarageColors.push_back (Vec3b (avg_h, avg_s, avg_v));
+-            tokens.at (tokens.size () - 1).color = Vec3b (avg_h, avg_s, avg_v);
++
++
++            tokens.at (tokens.size () - 1).color = Scalar (avg_h, avg_s, avg_v);
+         }
+ 
+ 
+@@ -1714,7 +1727,7 @@ int TokenHelper::getTokensSlow (const Mat &originalHSVImg, std::vector<Token> &t
+ 
+     }
+ 
+-    return compCount;
++    return tokens;
+ }
+ 
+ 
+@@ -1753,7 +1766,7 @@ double TokenHelper::toRads (double deg) {
+     return (deg * M_PI) / 180;
+ }
+ 
+-Mat TokenHelper::drawTokens (const Mat &baseImg, const std::vector<Token> &tokens) {
++Mat TokenHelper::drawTokens (const Mat &baseImg,  std::vector<Token> tokens) {
+ 
+     Mat copy = baseImg.clone ();
+ 
+@@ -1765,10 +1778,10 @@ Mat TokenHelper::drawTokens (const Mat &baseImg, const std::vector<Token> &token
+         //if (i > 0) continue;
+ 
+         Token token = tokens.at (i);
+-        Vec3b _hsv = token.color;
+-        //Scalar color = Scalar (0, 0, 255)
++        Scalar _hsv = token.color;
++//        Scalar _hsv = Scalar (0, 0, 255);
+ 
+-        Mat hsv (1, 1, CV_8UC3, Scalar (_hsv[0], _hsv[1], _hsv[2]));
++        Mat hsv (1, 1, CV_8UC3, _hsv);
+ //        Mat hsv(1,1, CV_8UC3, Scalar(_hsv[0],255, 255));
+         Mat rgb (hsv.size (), hsv.type ());
+         cvtColor (hsv, rgb, COLOR_HSV2BGR);
+@@ -1813,42 +1826,42 @@ Mat TokenHelper::drawTokensOnSyntheticImg (const Mat &syntheticWorldImg, const M
+ 
+     Mat syntheticWorldImgOut = syntheticWorldImg.clone ();
+ 
+-    for (int i = 0; i < tokens.size (); ++i) {
+-        Token token = tokens.at (i);
+-        Rect tokenRect = token.bbox;
+-        Vec3b _hsv = token.color;
+-
+-        std::vector<Point2f> reaclRectPoints (5);
+-        reaclRectPoints[0] = Point2f (tokenRect.x, tokenRect.y);
+-        reaclRectPoints[1] = Point2f (tokenRect.x + tokenRect.width, tokenRect.y);
+-        reaclRectPoints[2] = Point2f (tokenRect.x + tokenRect.width, tokenRect.y + tokenRect.height);
+-        reaclRectPoints[3] = Point2f (tokenRect.x, tokenRect.y + tokenRect.height);
+-
+-        reaclRectPoints[4] = Point2f(token.bottomPoint.x, token.bottomPoint.y);
+-
+-        std::vector<Point2f> syntheticRectPoints (5);
+-
+-        perspectiveTransform (reaclRectPoints, syntheticRectPoints, homography);
+-
+-
+-        Mat hsv (1, 1, CV_8UC3, Scalar (_hsv[0], _hsv[1], _hsv[2]));
+-        Mat rgb (hsv.size (), hsv.type ());
+-        cvtColor (hsv, rgb, COLOR_HSV2BGR);
+-        Vec3b _rgb = rgb.at<Vec3b> (0, 0);
+-        Scalar color = Scalar (_rgb[0], _rgb[1], _rgb[2]); //opencv stores B G R ...
+-
+-
+-        Point2f p0 = syntheticRectPoints.at (0);
+-        Point2f p2 = syntheticRectPoints.at (2);
+-        float width = p2.x - p0.x;
+-        float height = p2.y - p0.y;
+-
+-        rectangle (syntheticWorldImgOut, p0, p2, color, 2);
+-
+-        Point2f center (p0.x + width / 2, p0.y + height / 2);
+-        circle (syntheticWorldImgOut, center, 3, color, 2);
+-        circle (syntheticWorldImgOut, syntheticRectPoints.at (4), 3, Scalar(0,255, 0), 2);
+-    }
++//    for (int i = 0; i < tokens.size (); ++i) {
++//        Token token = tokens.at (i);
++//        Rect tokenRect = token.bbox;
++//        Vec3b _hsv = token.color;
++//
++//        std::vector<Point2f> reaclRectPoints (5);
++//        reaclRectPoints[0] = Point2f (tokenRect.x, tokenRect.y);
++//        reaclRectPoints[1] = Point2f (tokenRect.x + tokenRect.width, tokenRect.y);
++//        reaclRectPoints[2] = Point2f (tokenRect.x + tokenRect.width, tokenRect.y + tokenRect.height);
++//        reaclRectPoints[3] = Point2f (tokenRect.x, tokenRect.y + tokenRect.height);
++//
++//        reaclRectPoints[4] = Point2f(token.bottomPoint.x, token.bottomPoint.y);
++//
++//        std::vector<Point2f> syntheticRectPoints (5);
++//
++//        perspectiveTransform (reaclRectPoints, syntheticRectPoints, homography);
++//
++//
++//        Mat hsv (1, 1, CV_8UC3, Scalar (_hsv[0], _hsv[1], _hsv[2]));
++//        Mat rgb (hsv.size (), hsv.type ());
++//        cvtColor (hsv, rgb, COLOR_HSV2BGR);
++//        Vec3b _rgb = rgb.at<Vec3b> (0, 0);
++//        Scalar color = Scalar (_rgb[0], _rgb[1], _rgb[2]); //opencv stores B G R ...
++//
++//
++//        Point2f p0 = syntheticRectPoints.at (0);
++//        Point2f p2 = syntheticRectPoints.at (2);
++//        float width = p2.x - p0.x;
++//        float height = p2.y - p0.y;
++//
++//        rectangle (syntheticWorldImgOut, p0, p2, color, 2);
++//
++//        Point2f center (p0.x + width / 2, p0.y + height / 2);
++//        circle (syntheticWorldImgOut, center, 3, color, 2);
++//        circle (syntheticWorldImgOut, syntheticRectPoints.at (4), 3, Scalar(0,255, 0), 2);
++//    }
+ 
+     return syntheticWorldImgOut;
+ }
+@@ -1962,4 +1975,38 @@ void WorldHelper::clipTokensInWorld (Mat syntheticWorldImg, Mat worldImg, Mat ho
+     }
+ }
+ 
++/**
++ * draws on
++ * @param syntheticWorldImg
++ * @param worldImg
++ * @param homography_synth_to_real
++ * @return
++ */
++Mat WorldHelper::drawWorldRect (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real) {
++
++
++    std::vector<Point2f> syntheticRectPoints (4);
++    syntheticRectPoints[0] = cvPoint (0, 0);
++    syntheticRectPoints[1] = cvPoint (syntheticWorldImg.cols, 0);
++    syntheticRectPoints[2] = cvPoint (syntheticWorldImg.cols, syntheticWorldImg.rows);
++    syntheticRectPoints[3] = cvPoint (0, syntheticWorldImg.rows);
++
++    std::vector<Point2f> world_corners (4);
++
++    perspectiveTransform (syntheticRectPoints, world_corners, homography_synth_to_real);
++
++    //Mat img_matches = worldImg.clone ();
++
++    Point2f p0 = world_corners.at (0);
++    Point2f p2 = world_corners.at (2);
++//    float width = p2.x - p0.x;
++//    float height = p2.y - p0.y;
++
++    Mat copy = worldImg.clone ();
++    rectangle (copy, p0, p2, Scalar (0, 0, 255), 2);
++
++    return copy;
++}
++
++
+ }
+\ No newline at end of file
+diff --git a/modules/js/src/embindgen.py b/modules/js/src/embindgen.py
+index 920b1ad17..bd1c5f8e6 100644
+--- a/modules/js/src/embindgen.py
++++ b/modules/js/src/embindgen.py
+@@ -133,8 +133,8 @@ features2d = {'Feature2D': ['detect', 'compute', 'detectAndCompute', 'descriptor
+               'ORB': ['create', 'setMaxFeatures', 'setScaleFactor', 'setNLevels', 'setEdgeThreshold', 'setFirstLevel', 'setWTA_K', 'setScoreType', 'setPatchSize', 'getFastThreshold', 'getDefaultName'],
+ 
+               'DiceHelper': ['create', 'getDiceValues', 'drawDiceDebug', 'getNearestNeighbour', 'getExampleDiceValues'],
+-              'TokenHelper': ['create', 'getTokensSlow', 'drawTokens', 'drawTokensOnSyntheticImg'],
+-              'WorldHelper': ['create', 'getWorldHomography', 'clipTokensInWorld'],
++              'TokenHelper': ['create', 'getTokensSlow', 'drawTokens', 'drawTokensOnSyntheticImg', 'getExampleTokenVector'],
++              'WorldHelper': ['create', 'getWorldHomography', 'clipTokensInWorld', 'drawWorldRect'],
+ 
+               'MSER': ['create', 'detectRegions', 'setDelta', 'getDelta', 'setMinArea', 'getMinArea', 'setMaxArea', 'getMaxArea', 'setPass2Only', 'getPass2Only', 'getDefaultName'],
+               'FastFeatureDetector': ['create', 'setThreshold', 'getThreshold', 'setNonmaxSuppression', 'getNonmaxSuppression', 'setType', 'getType', 'getDefaultName'],
+diff --git a/modules/js/src/helpers.js b/modules/js/src/helpers.js
+index e8eacedb2..8bbc19b89 100644
+--- a/modules/js/src/helpers.js
++++ b/modules/js/src/helpers.js
+@@ -249,10 +249,10 @@ function Token() {
+             break;
+         }
+         case 3: {
+-            // new cv.Token(point, size)
++            // new cv.Token(point color, size)
+             this.bbox = arguments[0];
+             this.color = arguments[1];
+-            this.bottomPoint = arguments[1];
++            this.bottomPoint = arguments[2];
+             break;
+         }
+         default: {
+-- 
+2.18.0
+
+From 16c30f0225e917c3d0676705a176d17d11093d76 Mon Sep 17 00:00:00 2001
+From: janisdd <janisdd5566@googlemail.com>
+Date: Thu, 31 Jan 2019 01:28:03 +0100
+Subject: [PATCH] all but get homography working
+
+---
+ .../features2d/include/opencv2/features2d.hpp |   6 +-
+ modules/features2d/src/orb.cpp                | 124 ++++++++----------
+ modules/js/src/core_bindings.cpp              |   1 +
+ modules/js/src/helpers.js                     |   8 ++
+ 4 files changed, 65 insertions(+), 74 deletions(-)
+
+diff --git a/modules/features2d/include/opencv2/features2d.hpp b/modules/features2d/include/opencv2/features2d.hpp
+index 38164f3ad..9e2e9cd85 100644
+--- a/modules/features2d/include/opencv2/features2d.hpp
++++ b/modules/features2d/include/opencv2/features2d.hpp
+@@ -1491,7 +1491,7 @@ public:
+ 
+     CV_WRAP Mat drawTokens (const Mat &baseImg, std::vector<Token> tokens);
+ 
+-    CV_WRAP Mat drawTokensOnSyntheticImg (const Mat &syntheticWorldImg, const Mat &homography, std::vector<Token> tokens);
++    CV_WRAP Mat drawTokensOnSyntheticImg (Mat syntheticWorldImg, Mat homography, std::vector<Token> tokens);
+ 
+ private:
+     bool isTokenPixel (int h, int s, int v, const int minSPercentage = 40, const int minVPercentage = 10, const int minHLeftBound = 30, const int minHRightBound = 10);
+@@ -1504,9 +1504,9 @@ class CV_EXPORTS_W WorldHelper {
+ public:
+     CV_WRAP static Ptr<WorldHelper> create ();
+     //last 2 params were passed with &
+-    CV_WRAP void getWorldHomography ( Mat syntheticWorldImg,  Mat worldImg,  Mat homography_real_to_synth, Mat homography_synth_to_real);
++    CV_WRAP Mat getWorldHomography ( Mat syntheticWorldImg,  Mat worldImg, OutputArray  homography_real_to_synth, OutputArray  homography_synth_to_real);
+     CV_WRAP void clipTokensInWorld (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real, std::vector<Token> &tokens);
+-    CV_WRAP Mat drawWorldRect (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real);
++    CV_WRAP std::vector<Point2f> drawWorldRect (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real);
+ };
+ 
+ //! @} features2d_category
+diff --git a/modules/features2d/src/orb.cpp b/modules/features2d/src/orb.cpp
+index 0ede0e5fe..a8597015c 100644
+--- a/modules/features2d/src/orb.cpp
++++ b/modules/features2d/src/orb.cpp
+@@ -1822,46 +1822,47 @@ Mat TokenHelper::drawTokens (const Mat &baseImg,  std::vector<Token> tokens) {
+ }
+ 
+ 
+-Mat TokenHelper::drawTokensOnSyntheticImg (const Mat &syntheticWorldImg, const Mat &homography, std::vector<Token> tokens) {
++Mat TokenHelper::drawTokensOnSyntheticImg (Mat syntheticWorldImg, Mat homography, std::vector<Token> tokens) {
+ 
+     Mat syntheticWorldImgOut = syntheticWorldImg.clone ();
+ 
+-//    for (int i = 0; i < tokens.size (); ++i) {
+-//        Token token = tokens.at (i);
+-//        Rect tokenRect = token.bbox;
+-//        Vec3b _hsv = token.color;
+-//
+-//        std::vector<Point2f> reaclRectPoints (5);
+-//        reaclRectPoints[0] = Point2f (tokenRect.x, tokenRect.y);
+-//        reaclRectPoints[1] = Point2f (tokenRect.x + tokenRect.width, tokenRect.y);
+-//        reaclRectPoints[2] = Point2f (tokenRect.x + tokenRect.width, tokenRect.y + tokenRect.height);
+-//        reaclRectPoints[3] = Point2f (tokenRect.x, tokenRect.y + tokenRect.height);
+-//
+-//        reaclRectPoints[4] = Point2f(token.bottomPoint.x, token.bottomPoint.y);
+-//
+-//        std::vector<Point2f> syntheticRectPoints (5);
+-//
+-//        perspectiveTransform (reaclRectPoints, syntheticRectPoints, homography);
+-//
+-//
+-//        Mat hsv (1, 1, CV_8UC3, Scalar (_hsv[0], _hsv[1], _hsv[2]));
+-//        Mat rgb (hsv.size (), hsv.type ());
+-//        cvtColor (hsv, rgb, COLOR_HSV2BGR);
+-//        Vec3b _rgb = rgb.at<Vec3b> (0, 0);
+-//        Scalar color = Scalar (_rgb[0], _rgb[1], _rgb[2]); //opencv stores B G R ...
+-//
+-//
+-//        Point2f p0 = syntheticRectPoints.at (0);
+-//        Point2f p2 = syntheticRectPoints.at (2);
+-//        float width = p2.x - p0.x;
+-//        float height = p2.y - p0.y;
+-//
++    for (int i = 0; i < tokens.size (); ++i) {
++        Token token = tokens.at (i);
++        Rect tokenRect = token.bbox;
++        Scalar _hsv = token.color;
++
++        std::vector<Point2f> reaclRectPoints (5);
++        reaclRectPoints[0] = Point2f (tokenRect.x, tokenRect.y);
++        reaclRectPoints[1] = Point2f (tokenRect.x + tokenRect.width, tokenRect.y);
++        reaclRectPoints[2] = Point2f (tokenRect.x + tokenRect.width, tokenRect.y + tokenRect.height);
++        reaclRectPoints[3] = Point2f (tokenRect.x, tokenRect.y + tokenRect.height);
++
++        reaclRectPoints[4] = Point2f(token.bottomPoint.x, token.bottomPoint.y);
++
++        std::vector<Point2f> syntheticRectPoints (5);
++
++        perspectiveTransform (reaclRectPoints, syntheticRectPoints, homography);
++
++
++        Mat hsv (1, 1, CV_8UC3, _hsv);
++        Mat rgb (hsv.size (), hsv.type ());
++        cvtColor (hsv, rgb, COLOR_HSV2BGR);
++        Vec3b _rgb = rgb.at<Vec3b> (0, 0);
++        Scalar color = Scalar (_rgb[0], _rgb[1], _rgb[2]); //opencv stores B G R ...
++
++
++        Point2f p0 = syntheticRectPoints.at (0);
++        Point2f p2 = syntheticRectPoints.at (2);
++        float width = p2.x - p0.x;
++        float height = p2.y - p0.y;
++
+ //        rectangle (syntheticWorldImgOut, p0, p2, color, 2);
+-//
+-//        Point2f center (p0.x + width / 2, p0.y + height / 2);
+-//        circle (syntheticWorldImgOut, center, 3, color, 2);
+-//        circle (syntheticWorldImgOut, syntheticRectPoints.at (4), 3, Scalar(0,255, 0), 2);
+-//    }
++        rectangle (syntheticWorldImgOut, p0, p2, Scalar(0,0,255), 2);
++
++        Point2f center (p0.x + width / 2, p0.y + height / 2);
++        circle (syntheticWorldImgOut, center, 3, color, 2);
++        circle (syntheticWorldImgOut, syntheticRectPoints.at (4), 3, Scalar(0,255, 0), 2);
++    }
+ 
+     return syntheticWorldImgOut;
+ }
+@@ -1871,10 +1872,11 @@ Ptr<WorldHelper> WorldHelper::create () {
+ }
+ 
+ 
+-void WorldHelper::getWorldHomography (  Mat syntheticWorldImg,  Mat worldImg,  Mat homography_real_to_synth, Mat homography_synth_to_real) {
++Mat WorldHelper::getWorldHomography (Mat syntheticWorldImg,  Mat worldImg,  OutputArray  homography_real_to_synth, OutputArray  homography_synth_to_real) {
+ 
+-//    Ptr<cv::SURF> detector = SURF::create ();
+-    Ptr<cv::ORB> detector = ORB::create ();
++//    Ptr<SURF> detector = SURF::create ();
++    Ptr<ORB> detector = ORB::create ();
++//    cout << "test";
+ 
+     std::vector<KeyPoint> referenceKeypoints, keypoints;
+ 
+@@ -1887,8 +1889,8 @@ void WorldHelper::getWorldHomography (  Mat syntheticWorldImg,  Mat worldImg,  M
+     detector->compute (worldImg, keypoints, descriptors);
+ 
+ 
+-    FlannBasedMatcher matcher;
+-//    BFMatcher matcher;
++//    FlannBasedMatcher matcher; //not working in js
++    BFMatcher matcher;
+     std::vector<DMatch> matches;
+     matcher.match (reference_descriptors, descriptors, matches);
+ 
+@@ -1904,35 +1906,15 @@ void WorldHelper::getWorldHomography (  Mat syntheticWorldImg,  Mat worldImg,  M
+ 
+ //    Mat homography = findHomography (obj, scene, CV_RANSAC);
+ 
+-    //TODo is this worling without & ref passing?
+-    homography_real_to_synth = findHomography (scene, obj, CV_RANSAC); //map from real to synthetic image //8 is ransac
+-    invert (homography_real_to_synth, homography_synth_to_real);
+-
+-    //not we can use  perspectiveTransform( obj_corners, scene_corners, H);
++    Mat _temp_homography_real_to_synth = findHomography (scene, obj, RANSAC); //map from real to synthetic image //8 is ransac
++    _temp_homography_real_to_synth.copyTo (homography_real_to_synth);
+ 
+-//    std::vector<Point2f> obj_corners (4);
+-//    obj_corners[0] = cvPoint (0, 0);
+-//    obj_corners[1] = cvPoint (syntheticWorldImg.cols, 0);
+-//    obj_corners[2] = cvPoint (syntheticWorldImg.cols, syntheticWorldImg.rows);
+-//    obj_corners[3] = cvPoint (0, syntheticWorldImg.rows);
+-//    std::vector<Point2f> scene_corners (4);
+-//
+-//    perspectiveTransform (obj_corners, scene_corners, homography);
+-//
+-//    Mat img_matches = worldImg.clone ();
+-//
+-//    drawMatches( syntheticWorldImg, referenceKeypoints, worldImg, keypoints,
+-//                 matches, img_matches, Scalar::all(-1), Scalar::all(-1),
+-//                 vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+-//
+-//
+-//    line (img_matches, scene_corners[0] + Point2f (syntheticWorldImg.cols, 0), scene_corners[1] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
+-//    line (img_matches, scene_corners[1] + Point2f (syntheticWorldImg.cols, 0), scene_corners[2] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
+-//    line (img_matches, scene_corners[2] + Point2f (syntheticWorldImg.cols, 0), scene_corners[3] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
+-//    line (img_matches, scene_corners[3] + Point2f (syntheticWorldImg.cols, 0), scene_corners[0] + Point2f (syntheticWorldImg.cols, 0), Scalar (0, 255, 0), 4);
++    Mat _temp_homography_synth_to_real;
++    invert (_temp_homography_real_to_synth, _temp_homography_synth_to_real);
+ 
++    _temp_homography_synth_to_real.copyTo (homography_synth_to_real);
+ 
+-//    imshow ("matches", img_matches);
++    return _temp_homography_synth_to_real;
+ 
+ }
+ 
+@@ -1982,7 +1964,7 @@ void WorldHelper::clipTokensInWorld (Mat syntheticWorldImg, Mat worldImg, Mat ho
+  * @param homography_synth_to_real
+  * @return
+  */
+-Mat WorldHelper::drawWorldRect (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real) {
++std::vector<Point2f> WorldHelper::drawWorldRect (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real) {
+ 
+ 
+     std::vector<Point2f> syntheticRectPoints (4);
+@@ -2002,10 +1984,10 @@ Mat WorldHelper::drawWorldRect (Mat syntheticWorldImg, Mat worldImg, Mat homogra
+ //    float width = p2.x - p0.x;
+ //    float height = p2.y - p0.y;
+ 
+-    Mat copy = worldImg.clone ();
+-    rectangle (copy, p0, p2, Scalar (0, 0, 255), 2);
++//    Mat copy = worldImg.clone ();
++    rectangle (worldImg, p0, p2, Scalar (0, 0, 255), 2);
+ 
+-    return copy;
++    return world_corners;
+ }
+ 
+ 
+diff --git a/modules/js/src/core_bindings.cpp b/modules/js/src/core_bindings.cpp
+index 4c3e380a2..64707c9da 100644
+--- a/modules/js/src/core_bindings.cpp
++++ b/modules/js/src/core_bindings.cpp
+@@ -338,6 +338,7 @@ EMSCRIPTEN_BINDINGS(binding_utils)
+     register_vector<float>("FloatVector");
+     register_vector<double>("DoubleVector");
+     register_vector<cv::Point>("PointVector");
++    register_vector<cv::Point2f>("Point2fVector");
+     register_vector<cv::Mat>("MatVector");
+     register_vector<cv::Rect>("RectVector");
+     register_vector<cv::KeyPoint>("KeyPointVector");
+diff --git a/modules/js/src/helpers.js b/modules/js/src/helpers.js
+index 8bbc19b89..7e4bc79a8 100644
+--- a/modules/js/src/helpers.js
++++ b/modules/js/src/helpers.js
+@@ -159,6 +159,14 @@ function Point(x, y) {
+ 
+ Module['Point'] = Point;
+ 
++function Point2f(x, y) {
++    this.x = typeof(x) === 'undefined' ? 0 : x;
++    this.y = typeof(y) === 'undefined' ? 0 : y;
++}
++
++Module['Point2f'] = Point2f;
++
++
+ function Size(width, height) {
+     this.width = typeof(width) === 'undefined' ? 0 : width;
+     this.height = typeof(height) === 'undefined' ? 0 : height;
+-- 
+2.18.0
+
+From fb81163987a5638d0c317eab29e06b0c9c4854d3 Mon Sep 17 00:00:00 2001
+From: janisdd <janisdd5566@googlemail.com>
+Date: Thu, 31 Jan 2019 01:42:58 +0100
+Subject: [PATCH] added index test files - token color is working if we remove
+ the alpha channel...
+
+---
+ .gitignore                 |  3 +-
+ JS_OUT/bin/index.html      | 52 ++++++++++++++++++++++
+ JS_OUT/bin/indexWorld.html | 40 +++++++++++++++++
+ JS_OUT/bin/indexWorld.js   | 90 ++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 184 insertions(+), 1 deletion(-)
+ create mode 100644 JS_OUT/bin/index.html
+ create mode 100644 JS_OUT/bin/indexWorld.html
+ create mode 100644 JS_OUT/bin/indexWorld.js
+
+diff --git a/.gitignore b/.gitignore
+index 89a73c427..35c2c8de1 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -9,7 +9,8 @@
+ Thumbs.db
+ tags
+ tegra/
+-bin/
++bin/opencv.js
++bin/opencv_js.js
+ *.sdf
+ *.opensdf
+ *.obj
+diff --git a/JS_OUT/bin/index.html b/JS_OUT/bin/index.html
+new file mode 100644
+index 000000000..1eff7ade5
+--- /dev/null
++++ b/JS_OUT/bin/index.html
+@@ -0,0 +1,52 @@
++
++<!DOCTYPE html>
++<html>
++<head>
++<meta charset="utf-8">
++<title>Hello OpenCV.js</title>
++</head>
++<body style="background-color: #333333">
++<h2>Hello OpenCV.js</h2>
++<p id="status">OpenCV.js is loading...</p>
++<div>
++  <div class="inputoutput">
++    <img id="imageSrc" alt="No Image" />
++    <div class="caption">imageSrc <input type="file" id="fileInput" name="file" /></div>
++  </div>
++  <div class="inputoutput">
++    <canvas id="canvasOutput" ></canvas>
++    <div class="caption">canvasOutput</div>
++  </div>
++</div>
++<script type="text/javascript">
++let imgElement = document.getElementById('imageSrc');
++let inputElement = document.getElementById('fileInput');
++inputElement.addEventListener('change', (e) => {
++  imgElement.src = URL.createObjectURL(e.target.files[0]);
++}, false);
++imgElement.onload = function() {
++  let mat = cv.imread(imgElement);
++
++  let diceHelper = new cv.DiceHelper()
++
++    console.time('dice');
++
++  let dices = diceHelper.getDiceValues(mat);
++
++  console.log('dbg');
++  diceHelper.drawDiceDebug(dices, mat)
++
++  console.timeEnd('dice')
++
++  console.log(dices)
++
++  cv.imshow('canvasOutput', mat);
++  mat.delete();
++};
++function onOpenCvReady() {
++  document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
++}
++</script>
++<script async src="opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
++</body>
++</html>
+\ No newline at end of file
+diff --git a/JS_OUT/bin/indexWorld.html b/JS_OUT/bin/indexWorld.html
+new file mode 100644
+index 000000000..93131f735
+--- /dev/null
++++ b/JS_OUT/bin/indexWorld.html
+@@ -0,0 +1,40 @@
++<!DOCTYPE html>
++
++<html>
++<head>
++    <meta charset="utf-8">
++    <title>Hello OpenCV.js</title>
++</head>
++<body style="background-color: #333333">
++<h2>Hello OpenCV.js</h2>
++<p id="status">OpenCV.js is loading...</p>
++<div>
++    <div class="inputoutput">
++        <img id="imageSrc" alt="No Image"/>
++        <div class="caption">imageSrc <input type="file" id="fileInput" name="file"/></div>
++
++        <img id="imageSyn" alt="No Image"/>
++        <div class="caption">syn img <input type="file" id="fileInput2" name="file"/></div>
++    </div>
++    <div class="inputoutput">
++        <canvas id="canvasOutput"></canvas>
++        <div class="caption">canvasOutput</div>
++
++        <canvas id="canvasOutput2"></canvas>
++    </div>
++
++    <button onclick="go()">START</button>
++</div>
++<script type="text/javascript">
++
++    function onOpenCvReady() {
++        document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
++    }
++</script>
++
++
++<script src="indexWorld.js"></script>
++<script async src="opencv.js" onload="onOpenCvReady();"></script>
++
++</body>
++</html>
+\ No newline at end of file
+diff --git a/JS_OUT/bin/indexWorld.js b/JS_OUT/bin/indexWorld.js
+new file mode 100644
+index 000000000..032b83054
+--- /dev/null
++++ b/JS_OUT/bin/indexWorld.js
+@@ -0,0 +1,90 @@
++//suppress UnterminatedStatementJS
++let imgElement = document.getElementById('imageSrc');
++let imgSyn = document.getElementById('imageSyn');
++
++let inputElement = document.getElementById('fileInput');
++let inputEl2 = document.getElementById('fileInput2');
++
++inputElement.addEventListener('change', (e) => {
++    imgElement.src = URL.createObjectURL(e.target.files[0]);
++}, false);
++
++inputEl2.addEventListener('change', (e) => {
++    imgSyn.src = URL.createObjectURL(e.target.files[0]);
++}, false);
++
++
++imgElement.onload = function () {
++    console.log('start0')
++}
++
++imgSyn.onload = function () {
++    go()
++};
++
++
++function go() {
++    let _worldImg = cv.imread(imgElement);
++    let _syntheticWorldImg = cv.imread(imgSyn);
++    // let worldImg = cv.imread(imgElement);
++    // let syntheticWorldImg = cv.imread(imgSyn);
++
++    console.log('start')
++
++    let hsv = new cv.Mat();
++
++    let homography_real_to_synth = new cv.Mat()
++    let homography_synth_to_real = new cv.Mat()
++
++    let worldImg = new cv.Mat()
++    let syntheticWorldImg = new cv.Mat()
++
++    cv.cvtColor (_worldImg, worldImg, cv.COLOR_BGRA2BGR);
++    cv.cvtColor (_syntheticWorldImg, syntheticWorldImg, cv.COLOR_BGRA2BGR);
++    
++    
++    cv.cvtColor(worldImg, hsv, cv.COLOR_BGR2HSV);
++
++    let tokenHelper = new cv.TokenHelper()
++    let worldHelper = new cv.WorldHelper()
++
++    console.time('dice');
++
++    let tokens = tokenHelper.getTokensSlow(hsv);
++
++    // console.log(tokens)
++
++    console.timeEnd('dice')
++
++
++    let homography_synth_to_real2 = worldHelper.getWorldHomography(syntheticWorldImg, worldImg, homography_real_to_synth, homography_synth_to_real);
++
++    // console.log(matches)
++
++    // worldHelper.clipTokensInWorld(syntheticWorldImg, worldImg, homography_synth_to_real, tokens);
++
++
++    let copy = tokenHelper.drawTokens(worldImg, tokens);
++    //
++    // let synCopy = tokenHelper.drawTokensOnSyntheticImg(syntheticWorldImg, homography_real_to_synth, tokens);
++
++
++    // copy = worldHelper.drawWorldRect(syntheticWorldImg, copy, homography_synth_to_real);
++
++    let worldCorners = worldHelper.drawWorldRect(syntheticWorldImg, copy, homography_synth_to_real);
++    // let worldCorners = worldHelper.drawWorldRect(worldImg, syntheticWorldImg, homography_real_to_synth);
++
++    console.log(worldCorners)
++
++    cv.imshow('canvasOutput', copy);
++    // cv.imshow('canvasOutput2', syntheticWorldImg);
++
++    // worldImg.delete();
++    // hsv.delete()
++    // syntheticWorldImg.delete()
++    // homography_real_to_synth.delete()
++    // homography_synth_to_real.delete()
++    // copy.delete()
++    // synCopy.delete()
++    // oout.delete()
++}
+\ No newline at end of file
+-- 
+2.18.0
+
+From e1d0fbdcaf0e536106650a59fc0983da2b7960d7 Mon Sep 17 00:00:00 2001
+From: janisdd <janisdd5566@googlemail.com>
+Date: Thu, 31 Jan 2019 22:06:05 +0100
+Subject: [PATCH] added magic fix for wrong hsv values (we need to calcualte
+ 120 - h in js???)
+
+---
+ .../features2d/include/opencv2/features2d.hpp |  2 +-
+ modules/features2d/src/orb.cpp                | 24 +++++++++++++++++--
+ 2 files changed, 23 insertions(+), 3 deletions(-)
+
+diff --git a/modules/features2d/include/opencv2/features2d.hpp b/modules/features2d/include/opencv2/features2d.hpp
+index 9e2e9cd85..dd818dbeb 100644
+--- a/modules/features2d/include/opencv2/features2d.hpp
++++ b/modules/features2d/include/opencv2/features2d.hpp
+@@ -1487,7 +1487,7 @@ public:
+ 
+     CV_WRAP std::vector<Token> getExampleTokenVector ();
+ 
+-    CV_WRAP std::vector<Token> getTokensSlow (const Mat &originalHSVImg, const int minTokenBoundingBoxArea = 2000);
++    CV_WRAP std::vector<Token> getTokensSlow (const Mat &originalHSVImg, OutputArray binaryImgOut, const int minTokenBoundingBoxArea = 2000);
+ 
+     CV_WRAP Mat drawTokens (const Mat &baseImg, std::vector<Token> tokens);
+ 
+diff --git a/modules/features2d/src/orb.cpp b/modules/features2d/src/orb.cpp
+index a8597015c..96515fed2 100644
+--- a/modules/features2d/src/orb.cpp
++++ b/modules/features2d/src/orb.cpp
+@@ -34,6 +34,8 @@
+ 
+ /** Authors: Ethan Rublee, Vincent Rabaud, Gary Bradski */
+ 
++#include <iostream>
++
+ #include "precomp.hpp"
+ #include "opencl_kernels_features2d.hpp"
+ #include "../../calib3d/include/opencv2/calib3d/calib3d_c.h"
+@@ -1504,7 +1506,7 @@ std::vector<Token> TokenHelper::getExampleTokenVector() {
+  *
+  * originalHSVImg used to get the token colors
+  */
+-std::vector<Token> TokenHelper::getTokensSlow (const Mat &originalHSVImg, const int minTokenBoundingBoxArea) {
++std::vector<Token> TokenHelper::getTokensSlow (const Mat &originalHSVImg, OutputArray binaryImgOut, const int minTokenBoundingBoxArea) {
+ 
+ 
+     std::vector<Token> tokens;
+@@ -1519,9 +1521,12 @@ std::vector<Token> TokenHelper::getTokensSlow (const Mat &originalHSVImg, const
+     Mat binaryImg = cv::Mat::zeros (Size (originalHSVImg.cols, originalHSVImg.rows), THRESH_BINARY);
+ 
+ 
+-    auto *_pixelPtr = (uint8_t *) originalHSVImg.data;
++    auto *_pixelPtr = (uchar *) originalHSVImg.data;
+     auto *mappedPixelPtr = (uchar *) binaryImg.data;
+     int _cn = originalHSVImg.channels ();
++
++//    std::cout << "cannels: " << _cn << " " << std::endl; //3
++
+     int mappedChannels = binaryImg.channels ();
+ 
+     //get fast px values https://stackoverflow.com/questions/7899108/opencv-get-pixel-channel-value-from-mat-image
+@@ -1538,8 +1543,21 @@ std::vector<Token> TokenHelper::getTokensSlow (const Mat &originalHSVImg, const
+ 
+             //opencv used uchar internally --> we need to multiply with 2
+ 
++
++            //for some reason in js we get wong h values...
++            //real img: h = 10 --> js h: 110 we always get 120 summed??
++            //FIX
++            h = 120 - h;
++
+             bool takePx = isTokenPixel (h * 2, s, v);
+ 
++//            if (row < 10 && col == 0) {
++//                std::cout << h << " " << s << " " << v << " take? " << takePx << " " << std::endl;
++//            }
++//            if (row == 0 && col < 100) {
++//                std::cout << h << " " << s << " " << v << " take? " << takePx << " " << std::endl;
++//            }
++
+             //binaryImg.at <uchar>(row, col) = takePx ? (uchar)255 : (uchar)0;
+ 
+             mappedPixelPtr[row * binaryImg.cols * mappedChannels +
+@@ -1573,6 +1591,8 @@ std::vector<Token> TokenHelper::getTokensSlow (const Mat &originalHSVImg, const
+     cv::morphologyEx (binaryImg, binaryImg, MORPH_CLOSE, M, anchor, 2);
+ 
+ 
++    binaryImg.copyTo (binaryImgOut);
++
+     int numComponents = connectedComponentsWithStats (binaryImg, labels, stats,
+                                                       centroids, 8);
+ 
+-- 
+2.18.0
+
+From bd18ecaa31d6b133159453af31448dd817355e82 Mon Sep 17 00:00:00 2001
+From: janisdd <janisdd5566@googlemail.com>
+Date: Tue, 5 Feb 2019 20:44:35 +0100
+Subject: [PATCH] - added surf - added some missing functions
+
+---
+ .gitignore                                    |    2 +
+ JS_OUT/bin/indexWorld.js                      |   10 +-
+ modules/core/include/opencv2/core/types.hpp   |    7 +-
+ .../features2d/include/opencv2/features2d.hpp |   52 +-
+ modules/features2d/src/orb.cpp                | 1027 ++++++++++++++++-
+ modules/js/src/core_bindings.cpp              |    2 +
+ modules/js/src/embindgen.py                   |    3 +-
+ modules/js/src/helpers.js                     |    6 +-
+ 8 files changed, 1089 insertions(+), 20 deletions(-)
+
+diff --git a/.gitignore b/.gitignore
+index 35c2c8de1..1786179d8 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -23,3 +23,5 @@ bin/opencv_js.js
+ *.log
+ *.tlog
+ build
++cmake-build-debug
++JS_OUT
+diff --git a/JS_OUT/bin/indexWorld.js b/JS_OUT/bin/indexWorld.js
+index 032b83054..64ee27a1b 100644
+--- a/JS_OUT/bin/indexWorld.js
++++ b/JS_OUT/bin/indexWorld.js
+@@ -50,7 +50,9 @@ function go() {
+ 
+     console.time('dice');
+ 
+-    let tokens = tokenHelper.getTokensSlow(hsv);
++    let binaryOutImg = new cv.Mat()
++
++    let tokens = tokenHelper.getTokensSlow(hsv, binaryOutImg);
+ 
+     // console.log(tokens)
+ 
+@@ -59,7 +61,6 @@ function go() {
+ 
+     let homography_synth_to_real2 = worldHelper.getWorldHomography(syntheticWorldImg, worldImg, homography_real_to_synth, homography_synth_to_real);
+ 
+-    // console.log(matches)
+ 
+     // worldHelper.clipTokensInWorld(syntheticWorldImg, worldImg, homography_synth_to_real, tokens);
+ 
+@@ -72,12 +73,13 @@ function go() {
+     // copy = worldHelper.drawWorldRect(syntheticWorldImg, copy, homography_synth_to_real);
+ 
+     let worldCorners = worldHelper.drawWorldRect(syntheticWorldImg, copy, homography_synth_to_real);
++
+     // let worldCorners = worldHelper.drawWorldRect(worldImg, syntheticWorldImg, homography_real_to_synth);
+ 
+-    console.log(worldCorners)
++    // console.log(worldCorners)
+ 
+     cv.imshow('canvasOutput', copy);
+-    // cv.imshow('canvasOutput2', syntheticWorldImg);
++    cv.imshow('canvasOutput2', homography_synth_to_real2);
+ 
+     // worldImg.delete();
+     // hsv.delete()
+diff --git a/modules/core/include/opencv2/core/types.hpp b/modules/core/include/opencv2/core/types.hpp
+index 0eff88ad1..a370da8dc 100644
+--- a/modules/core/include/opencv2/core/types.hpp
++++ b/modules/core/include/opencv2/core/types.hpp
+@@ -798,10 +798,11 @@ public:
+ class CV_EXPORTS_W_SIMPLE Token {
+ public:
+     CV_WRAP Token();
+-    CV_WRAP Token (Rect bbox, Scalar color, Point2f bottomPoint);
++    CV_WRAP Token (Rect bbox, Scalar color, Scalar colorRgb, Point2f bottomPoint);
+ 
+     CV_PROP_RW Rect bbox;
+     CV_PROP_RW Scalar color; //hsv color, only 3 items used
++    CV_PROP_RW Scalar colorRgb; //rgb color
+     CV_PROP_RW Point2f bottomPoint;
+ };
+ 
+@@ -2464,8 +2465,8 @@ Token::Token() {}
+ 
+ 
+ inline
+-Token::Token (Rect bbox, Scalar color, Point2f bottomPoint)
+-    : bbox (bbox), color (color), bottomPoint (bottomPoint) {}
++Token::Token (Rect bbox, Scalar color, Scalar colorRgb, Point2f bottomPoint)
++    : bbox (bbox), color (color), colorRgb(colorRgb), bottomPoint (bottomPoint) {}
+ 
+ 
+ 
+diff --git a/modules/features2d/include/opencv2/features2d.hpp b/modules/features2d/include/opencv2/features2d.hpp
+index dd818dbeb..781cdec4d 100644
+--- a/modules/features2d/include/opencv2/features2d.hpp
++++ b/modules/features2d/include/opencv2/features2d.hpp
+@@ -1506,13 +1506,63 @@ public:
+     //last 2 params were passed with &
+     CV_WRAP Mat getWorldHomography ( Mat syntheticWorldImg,  Mat worldImg, OutputArray  homography_real_to_synth, OutputArray  homography_synth_to_real);
+     CV_WRAP void clipTokensInWorld (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real, std::vector<Token> &tokens);
+-    CV_WRAP std::vector<Point2f> drawWorldRect (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real);
++    CV_WRAP std::vector<Point2f> drawWorldRect (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real, Scalar rgbColor);
++
++    CV_WRAP void drawRect (Rect rect, Mat img, Scalar rgbColor);
++
++    CV_WRAP Rect perspectiveTransformRect (Rect rect, Mat homography);
++
++    CV_WRAP void printMatrix(Mat mat);
+ };
+ 
++
++//---- MY NONEFREE SURF stuff
++
++class CV_EXPORTS_W SURF : public Feature2D
++{
++public:
++    /**
++    @param hessianThreshold Threshold for hessian keypoint detector used in SURF.
++    @param nOctaves Number of pyramid octaves the keypoint detector will use.
++    @param nOctaveLayers Number of octave layers within each octave.
++    @param extended Extended descriptor flag (true - use extended 128-element descriptors; false - use
++    64-element descriptors).
++    @param upright Up-right or rotated features flag (true - do not compute orientation of features;
++    false - compute orientation).
++     */
++    CV_WRAP static Ptr<SURF> create(double hessianThreshold=100,
++                                    int nOctaves = 4, int nOctaveLayers = 3,
++                                    bool extended = false, bool upright = false);
++
++    CV_WRAP virtual void setHessianThreshold(double hessianThreshold) = 0;
++    CV_WRAP virtual double getHessianThreshold() const = 0;
++
++    CV_WRAP virtual void setNOctaves(int nOctaves) = 0;
++    CV_WRAP virtual int getNOctaves() const = 0;
++
++    CV_WRAP virtual void setNOctaveLayers(int nOctaveLayers) = 0;
++    CV_WRAP virtual int getNOctaveLayers() const = 0;
++
++    CV_WRAP virtual void setExtended(bool extended) = 0;
++    CV_WRAP virtual bool getExtended() const = 0;
++
++    CV_WRAP virtual void setUpright(bool upright) = 0;
++    CV_WRAP virtual bool getUpright() const = 0;
++};
++
++typedef SURF SurfFeatureDetector;
++typedef SURF SurfDescriptorExtractor;
++
++
++
++
+ //! @} features2d_category
+ 
+ //! @} features2d
+ 
+ } /* namespace cv */
+ 
++
++
++
+ #endif
+diff --git a/modules/features2d/src/orb.cpp b/modules/features2d/src/orb.cpp
+index 96515fed2..99fd823ac 100644
+--- a/modules/features2d/src/orb.cpp
++++ b/modules/features2d/src/orb.cpp
+@@ -1493,7 +1493,7 @@ std::vector<Token> TokenHelper::getExampleTokenVector() {
+     Rect rect = cv::Rect (1, 1, 1, 1);
+     Point2f bottomPoint (1, 1);
+ //    Token token = Token (rect, Vec3b (0, 0, 0), bottomPoint);
+-    Token token = Token (rect, Scalar(0,0,0), bottomPoint);
++    Token token = Token (rect, Scalar(0,0,0), Scalar(0,0,0), bottomPoint);
+     tokens.push_back(token);
+ 
+     return tokens;
+@@ -1653,7 +1653,7 @@ std::vector<Token> TokenHelper::getTokensSlow (const Mat &originalHSVImg, Output
+         }
+ 
+ //        Token token = Token (rect, Vec3b (0, 0, 0), bottomPoint);
+-        Token token = Token (rect, Scalar(0,0,0), bottomPoint);
++        Token token = Token (rect, Scalar(0,0,0), Scalar(0,0,0), bottomPoint);
+         tokens.push_back (token);
+ 
+ 
+@@ -1738,10 +1738,20 @@ std::vector<Token> TokenHelper::getTokensSlow (const Mat &originalHSVImg, Output
+ 
+ //            avarageColors.push_back (Vec3b (avg_h, avg_s, avg_v));
+ 
++            Scalar hsv = Scalar (avg_h, avg_s, avg_v);
+ 
+-            tokens.at (tokens.size () - 1).color = Scalar (avg_h, avg_s, avg_v);
+-        }
++            tokens.at (tokens.size () - 1).color = hsv;
++
++            Mat hsvSingle (1, 1, CV_8UC3, hsv);
++            Mat rgb (hsvSingle.size (), hsvSingle.type ());
++            cvtColor (hsvSingle, rgb, COLOR_HSV2BGR);
++
++            Vec3b _rgb = rgb.at<Vec3b> (0, 0);
+ 
++            Scalar RgbColor = Scalar (_rgb[2], _rgb[1], _rgb[0]); //opencv stores B G R ...
++
++            tokens.at (tokens.size () - 1).colorRgb = RgbColor;
++        }
+ 
+         compCount++;
+ 
+@@ -1892,10 +1902,25 @@ Ptr<WorldHelper> WorldHelper::create () {
+ }
+ 
+ 
++void WorldHelper::printMatrix(Mat mat) {
++
++    auto *_pixelPtr = (uchar *) mat.data;
++
++    for (int row = 0; row < mat.rows; ++row) {
++        for (int col = 0; col < mat.cols; ++col) {
++
++            int h = _pixelPtr[row * mat.cols  + col + 0];
++
++            std::cout << h << ", ";
++        }
++        std::cout << std::endl;
++    }
++}
++
+ Mat WorldHelper::getWorldHomography (Mat syntheticWorldImg,  Mat worldImg,  OutputArray  homography_real_to_synth, OutputArray  homography_synth_to_real) {
+ 
+-//    Ptr<SURF> detector = SURF::create ();
+-    Ptr<ORB> detector = ORB::create ();
++    Ptr<SURF> detector = SURF::create ();
++//    Ptr<ORB> detector = ORB::create ();
+ //    cout << "test";
+ 
+     std::vector<KeyPoint> referenceKeypoints, keypoints;
+@@ -1924,17 +1949,28 @@ Mat WorldHelper::getWorldHomography (Mat syntheticWorldImg,  Mat worldImg,  Outp
+         scene.push_back (keypoints[matches[i].trainIdx].pt);
+     }
+ 
++
++    Mat img_matches;
++
++    drawMatches( syntheticWorldImg, referenceKeypoints, worldImg, keypoints, matches, img_matches, Scalar::all(-1), Scalar::all(-1),
++                 std::vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
++
+ //    Mat homography = findHomography (obj, scene, CV_RANSAC);
+ 
+     Mat _temp_homography_real_to_synth = findHomography (scene, obj, RANSAC); //map from real to synthetic image //8 is ransac
++
++
++//    printMatrix(_temp_homography_real_to_synth);
+     _temp_homography_real_to_synth.copyTo (homography_real_to_synth);
+ 
++
+     Mat _temp_homography_synth_to_real;
+     invert (_temp_homography_real_to_synth, _temp_homography_synth_to_real);
+ 
++//    printMatrix(_temp_homography_synth_to_real);
+     _temp_homography_synth_to_real.copyTo (homography_synth_to_real);
+ 
+-    return _temp_homography_synth_to_real;
++    return img_matches;
+ 
+ }
+ 
+@@ -1977,6 +2013,11 @@ void WorldHelper::clipTokensInWorld (Mat syntheticWorldImg, Mat worldImg, Mat ho
+     }
+ }
+ 
++
++void WorldHelper::drawRect (Rect rect, Mat img, Scalar rgbColor) {
++    rectangle (img, Point2f(rect.x, rect.y), Point2f(rect.x+rect.width, rect.y+rect.height), rgbColor, 2);
++}
++
+ /**
+  * draws on
+  * @param syntheticWorldImg
+@@ -1984,7 +2025,7 @@ void WorldHelper::clipTokensInWorld (Mat syntheticWorldImg, Mat worldImg, Mat ho
+  * @param homography_synth_to_real
+  * @return
+  */
+-std::vector<Point2f> WorldHelper::drawWorldRect (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real) {
++std::vector<Point2f> WorldHelper::drawWorldRect (Mat syntheticWorldImg, Mat worldImg, Mat homography_synth_to_real, Scalar rgbColor) {
+ 
+ 
+     std::vector<Point2f> syntheticRectPoints (4);
+@@ -2005,10 +2046,978 @@ std::vector<Point2f> WorldHelper::drawWorldRect (Mat syntheticWorldImg, Mat worl
+ //    float height = p2.y - p0.y;
+ 
+ //    Mat copy = worldImg.clone ();
+-    rectangle (worldImg, p0, p2, Scalar (0, 0, 255), 2);
++    rectangle (worldImg, p0, p2, rgbColor, 2);
+ 
+     return world_corners;
+ }
+ 
+ 
++Rect WorldHelper::perspectiveTransformRect (Rect rect, Mat homography) {
++
++    std::vector<Point2f> syntheticRectPoints (2);
++    syntheticRectPoints[0] = cvPoint (rect.x, rect.y);
++//    syntheticRectPoints[1] = cvPoint (rect.x + rect.width, 0);
++    syntheticRectPoints[1] = cvPoint (rect.x + rect.width, rect.y + rect.height);
++//    syntheticRectPoints[3] = cvPoint (0, rect.height);
++
++    std::vector<Point2f> world_corners (2);
++
++    perspectiveTransform (syntheticRectPoints, world_corners, homography);
++
++    Point2f p0 = world_corners.at (0);
++    Point2f p2 = world_corners.at (1);
++
++    float width = p2.x - p0.x;
++    float height = p2.y - p0.y;
++
++    return Rect(p0.x, p0.y, width, height);
++}
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++//--- MY NONFREE SURF
++
++
++/*
++The class implements SURF algorithm by H. Bay et al.
++*/
++class SURF_Impl : public SURF
++{
++public:
++    //! the full constructor taking all the necessary parameters
++    explicit CV_WRAP SURF_Impl(double hessianThreshold,
++                               int nOctaves = 4, int nOctaveLayers = 2,
++                               bool extended = true, bool upright = false);
++
++    //! returns the descriptor size in float's (64 or 128)
++    CV_WRAP int descriptorSize() const CV_OVERRIDE;
++
++    //! returns the descriptor type
++    CV_WRAP int descriptorType() const CV_OVERRIDE;
++
++    //! returns the descriptor type
++    CV_WRAP int defaultNorm() const CV_OVERRIDE;
++
++    void set(int, double);
++    double get(int) const;
++
++    //! finds the keypoints and computes their descriptors.
++    // Optionally it can compute descriptors for the user-provided keypoints
++    void detectAndCompute(InputArray img, InputArray mask,
++                          CV_OUT std::vector<KeyPoint>& keypoints,
++                          OutputArray descriptors,
++                          bool useProvidedKeypoints = false) CV_OVERRIDE;
++
++    void setHessianThreshold(double hessianThreshold_) CV_OVERRIDE { hessianThreshold = hessianThreshold_; }
++    double getHessianThreshold() const CV_OVERRIDE { return hessianThreshold; }
++
++    void setNOctaves(int nOctaves_) CV_OVERRIDE { nOctaves = nOctaves_; }
++    int getNOctaves() const CV_OVERRIDE { return nOctaves; }
++
++    void setNOctaveLayers(int nOctaveLayers_) CV_OVERRIDE { nOctaveLayers = nOctaveLayers_; }
++    int getNOctaveLayers() const CV_OVERRIDE { return nOctaveLayers; }
++
++    void setExtended(bool extended_) CV_OVERRIDE { extended = extended_; }
++    bool getExtended() const CV_OVERRIDE { return extended; }
++
++    void setUpright(bool upright_) CV_OVERRIDE { upright = upright_; }
++    bool getUpright() const CV_OVERRIDE { return upright; }
++
++    double hessianThreshold;
++    int nOctaves;
++    int nOctaveLayers;
++    bool extended;
++    bool upright;
++};
++
++
++
++    static const int   SURF_ORI_SEARCH_INC = 5;
++    static const float SURF_ORI_SIGMA      = 2.5f;
++    static const float SURF_DESC_SIGMA     = 3.3f;
++
++// Wavelet size at first layer of first octave.
++    static const int SURF_HAAR_SIZE0 = 9;
++
++// Wavelet size increment between layers. This should be an even number,
++// such that the wavelet sizes in an octave are either all even or all odd.
++// This ensures that when looking for the neighbours of a sample, the layers
++// above and below are aligned correctly.
++    static const int SURF_HAAR_SIZE_INC = 6;
++
++
++    struct SurfHF
++    {
++        int p0, p1, p2, p3;
++        float w;
++
++        SurfHF(): p0(0), p1(0), p2(0), p3(0), w(0) {}
++    };
++
++    inline float calcHaarPattern( const int* origin, const SurfHF* f, int n )
++    {
++        double d = 0;
++        for( int k = 0; k < n; k++ )
++            d += (origin[f[k].p0] + origin[f[k].p3] - origin[f[k].p1] - origin[f[k].p2])*f[k].w;
++        return (float)d;
++    }
++
++    static void
++    resizeHaarPattern( const int src[][5], SurfHF* dst, int n, int oldSize, int newSize, int widthStep )
++    {
++        float ratio = (float)newSize/oldSize;
++        for( int k = 0; k < n; k++ )
++        {
++            int dx1 = cvRound( ratio*src[k][0] );
++            int dy1 = cvRound( ratio*src[k][1] );
++            int dx2 = cvRound( ratio*src[k][2] );
++            int dy2 = cvRound( ratio*src[k][3] );
++            dst[k].p0 = dy1*widthStep + dx1;
++            dst[k].p1 = dy2*widthStep + dx1;
++            dst[k].p2 = dy1*widthStep + dx2;
++            dst[k].p3 = dy2*widthStep + dx2;
++            dst[k].w = src[k][4]/((float)(dx2-dx1)*(dy2-dy1));
++        }
++    }
++
++/*
++ * Calculate the determinant and trace of the Hessian for a layer of the
++ * scale-space pyramid
++ */
++    static void calcLayerDetAndTrace( const Mat& sum, int size, int sampleStep,
++                                      Mat& det, Mat& trace )
++    {
++        const int NX=3, NY=3, NXY=4;
++        const int dx_s[NX][5] = { {0, 2, 3, 7, 1}, {3, 2, 6, 7, -2}, {6, 2, 9, 7, 1} };
++        const int dy_s[NY][5] = { {2, 0, 7, 3, 1}, {2, 3, 7, 6, -2}, {2, 6, 7, 9, 1} };
++        const int dxy_s[NXY][5] = { {1, 1, 4, 4, 1}, {5, 1, 8, 4, -1}, {1, 5, 4, 8, -1}, {5, 5, 8, 8, 1} };
++
++        SurfHF Dx[NX], Dy[NY], Dxy[NXY];
++
++        if( size > sum.rows-1 || size > sum.cols-1 )
++            return;
++
++        resizeHaarPattern( dx_s , Dx , NX , 9, size, sum.cols );
++        resizeHaarPattern( dy_s , Dy , NY , 9, size, sum.cols );
++        resizeHaarPattern( dxy_s, Dxy, NXY, 9, size, sum.cols );
++
++        /* The integral image 'sum' is one pixel bigger than the source image */
++        int samples_i = 1+(sum.rows-1-size)/sampleStep;
++        int samples_j = 1+(sum.cols-1-size)/sampleStep;
++
++        /* Ignore pixels where some of the kernel is outside the image */
++        int margin = (size/2)/sampleStep;
++
++        for( int i = 0; i < samples_i; i++ )
++        {
++            const int* sum_ptr = sum.ptr<int>(i*sampleStep);
++            float* det_ptr = &det.at<float>(i+margin, margin);
++            float* trace_ptr = &trace.at<float>(i+margin, margin);
++            for( int j = 0; j < samples_j; j++ )
++            {
++                float dx  = calcHaarPattern( sum_ptr, Dx , 3 );
++                float dy  = calcHaarPattern( sum_ptr, Dy , 3 );
++                float dxy = calcHaarPattern( sum_ptr, Dxy, 4 );
++                sum_ptr += sampleStep;
++                det_ptr[j] = dx*dy - 0.81f*dxy*dxy;
++                trace_ptr[j] = dx + dy;
++            }
++        }
++    }
++
++
++/*
++ * Maxima location interpolation as described in "Invariant Features from
++ * Interest Point Groups" by Matthew Brown and David Lowe. This is performed by
++ * fitting a 3D quadratic to a set of neighbouring samples.
++ *
++ * The gradient vector and Hessian matrix at the initial keypoint location are
++ * approximated using central differences. The linear system Ax = b is then
++ * solved, where A is the Hessian, b is the negative gradient, and x is the
++ * offset of the interpolated maxima coordinates from the initial estimate.
++ * This is equivalent to an iteration of Netwon's optimisation algorithm.
++ *
++ * N9 contains the samples in the 3x3x3 neighbourhood of the maxima
++ * dx is the sampling step in x
++ * dy is the sampling step in y
++ * ds is the sampling step in size
++ * point contains the keypoint coordinates and scale to be modified
++ *
++ * Return value is 1 if interpolation was successful, 0 on failure.
++ */
++    static int
++    interpolateKeypoint( float N9[3][9], int dx, int dy, int ds, KeyPoint& kpt )
++    {
++        Vec3f b(-(N9[1][5]-N9[1][3])/2,  // Negative 1st deriv with respect to x
++                -(N9[1][7]-N9[1][1])/2,  // Negative 1st deriv with respect to y
++                -(N9[2][4]-N9[0][4])/2); // Negative 1st deriv with respect to s
++
++        Matx33f A(
++                N9[1][3]-2*N9[1][4]+N9[1][5],            // 2nd deriv x, x
++                (N9[1][8]-N9[1][6]-N9[1][2]+N9[1][0])/4, // 2nd deriv x, y
++                (N9[2][5]-N9[2][3]-N9[0][5]+N9[0][3])/4, // 2nd deriv x, s
++                (N9[1][8]-N9[1][6]-N9[1][2]+N9[1][0])/4, // 2nd deriv x, y
++                N9[1][1]-2*N9[1][4]+N9[1][7],            // 2nd deriv y, y
++                (N9[2][7]-N9[2][1]-N9[0][7]+N9[0][1])/4, // 2nd deriv y, s
++                (N9[2][5]-N9[2][3]-N9[0][5]+N9[0][3])/4, // 2nd deriv x, s
++                (N9[2][7]-N9[2][1]-N9[0][7]+N9[0][1])/4, // 2nd deriv y, s
++                N9[0][4]-2*N9[1][4]+N9[2][4]);           // 2nd deriv s, s
++
++        Vec3f x = A.solve(b, DECOMP_LU);
++
++        bool ok = (x[0] != 0 || x[1] != 0 || x[2] != 0) &&
++                  std::abs(x[0]) <= 1 && std::abs(x[1]) <= 1 && std::abs(x[2]) <= 1;
++
++        if( ok )
++        {
++            kpt.pt.x += x[0]*dx;
++            kpt.pt.y += x[1]*dy;
++            kpt.size = (float)cvRound( kpt.size + x[2]*ds );
++        }
++        return ok;
++    }
++
++// Multi-threaded construction of the scale-space pyramid
++    struct SURFBuildInvoker : ParallelLoopBody
++    {
++        SURFBuildInvoker( const Mat& _sum, const std::vector<int>& _sizes,
++                          const std::vector<int>& _sampleSteps,
++                          std::vector<Mat>& _dets, std::vector<Mat>& _traces )
++        {
++            sum = &_sum;
++            sizes = &_sizes;
++            sampleSteps = &_sampleSteps;
++            dets = &_dets;
++            traces = &_traces;
++        }
++
++        void operator()(const Range& range) const CV_OVERRIDE
++        {
++            for( int i=range.start; i<range.end; i++ )
++                calcLayerDetAndTrace( *sum, (*sizes)[i], (*sampleSteps)[i], (*dets)[i], (*traces)[i] );
++        }
++
++        const Mat *sum;
++        const std::vector<int> *sizes;
++        const std::vector<int> *sampleSteps;
++        std::vector<Mat>* dets;
++        std::vector<Mat>* traces;
++    };
++
++// Multi-threaded search of the scale-space pyramid for keypoints
++    struct SURFFindInvoker : ParallelLoopBody
++    {
++        SURFFindInvoker( const Mat& _sum, const Mat& _mask_sum,
++                         const std::vector<Mat>& _dets, const std::vector<Mat>& _traces,
++                         const std::vector<int>& _sizes, const std::vector<int>& _sampleSteps,
++                         const std::vector<int>& _middleIndices, std::vector<KeyPoint>& _keypoints,
++                         int _nOctaveLayers, float _hessianThreshold )
++        {
++            sum = &_sum;
++            mask_sum = &_mask_sum;
++            dets = &_dets;
++            traces = &_traces;
++            sizes = &_sizes;
++            sampleSteps = &_sampleSteps;
++            middleIndices = &_middleIndices;
++            keypoints = &_keypoints;
++            nOctaveLayers = _nOctaveLayers;
++            hessianThreshold = _hessianThreshold;
++        }
++
++        static void findMaximaInLayer( const Mat& sum, const Mat& mask_sum,
++                                       const std::vector<Mat>& dets, const std::vector<Mat>& traces,
++                                       const std::vector<int>& sizes, std::vector<KeyPoint>& keypoints,
++                                       int octave, int layer, float hessianThreshold, int sampleStep );
++
++        void operator()(const Range& range) const CV_OVERRIDE
++        {
++            for( int i=range.start; i<range.end; i++ )
++            {
++                int layer = (*middleIndices)[i];
++                int octave = i / nOctaveLayers;
++                findMaximaInLayer( *sum, *mask_sum, *dets, *traces, *sizes,
++                                   *keypoints, octave, layer, hessianThreshold,
++                                   (*sampleSteps)[layer] );
++            }
++        }
++
++        const Mat *sum;
++        const Mat *mask_sum;
++        const std::vector<Mat>* dets;
++        const std::vector<Mat>* traces;
++        const std::vector<int>* sizes;
++        const std::vector<int>* sampleSteps;
++        const std::vector<int>* middleIndices;
++        std::vector<KeyPoint>* keypoints;
++        int nOctaveLayers;
++        float hessianThreshold;
++
++        static Mutex findMaximaInLayer_m;
++    };
++
++    Mutex SURFFindInvoker::findMaximaInLayer_m;
++
++
++/*
++ * Find the maxima in the determinant of the Hessian in a layer of the
++ * scale-space pyramid
++ */
++    void SURFFindInvoker::findMaximaInLayer( const Mat& sum, const Mat& mask_sum,
++                                             const std::vector<Mat>& dets, const std::vector<Mat>& traces,
++                                             const std::vector<int>& sizes, std::vector<KeyPoint>& keypoints,
++                                             int octave, int layer, float hessianThreshold, int sampleStep )
++    {
++        // Wavelet Data
++        const int NM=1;
++        const int dm[NM][5] = { {0, 0, 9, 9, 1} };
++        SurfHF Dm;
++
++        int size = sizes[layer];
++
++        // The integral image 'sum' is one pixel bigger than the source image
++        int layer_rows = (sum.rows-1)/sampleStep;
++        int layer_cols = (sum.cols-1)/sampleStep;
++
++        // Ignore pixels without a 3x3x3 neighbourhood in the layer above
++        int margin = (sizes[layer+1]/2)/sampleStep+1;
++
++        if( !mask_sum.empty() )
++            resizeHaarPattern( dm, &Dm, NM, 9, size, mask_sum.cols );
++
++        int step = (int)(dets[layer].step/dets[layer].elemSize());
++
++        for( int i = margin; i < layer_rows - margin; i++ )
++        {
++            const float* det_ptr = dets[layer].ptr<float>(i);
++            const float* trace_ptr = traces[layer].ptr<float>(i);
++            for( int j = margin; j < layer_cols-margin; j++ )
++            {
++                float val0 = det_ptr[j];
++                if( val0 > hessianThreshold )
++                {
++                    /* Coordinates for the start of the wavelet in the sum image. There
++                       is some integer division involved, so don't try to simplify this
++                       (cancel out sampleStep) without checking the result is the same */
++                    int sum_i = sampleStep*(i-(size/2)/sampleStep);
++                    int sum_j = sampleStep*(j-(size/2)/sampleStep);
++
++                    /* The 3x3x3 neighbouring samples around the maxima.
++                       The maxima is included at N9[1][4] */
++
++                    const float *det1 = &dets[layer-1].at<float>(i, j);
++                    const float *det2 = &dets[layer].at<float>(i, j);
++                    const float *det3 = &dets[layer+1].at<float>(i, j);
++                    float N9[3][9] = { { det1[-step-1], det1[-step], det1[-step+1],
++                                               det1[-1]  , det1[0] , det1[1],
++                                               det1[step-1] , det1[step] , det1[step+1]  },
++                                       { det2[-step-1], det2[-step], det2[-step+1],
++                                               det2[-1]  , det2[0] , det2[1],
++                                               det2[step-1] , det2[step] , det2[step+1]  },
++                                       { det3[-step-1], det3[-step], det3[-step+1],
++                                               det3[-1]  , det3[0] , det3[1],
++                                               det3[step-1] , det3[step] , det3[step+1]  } };
++
++                    /* Check the mask - why not just check the mask at the center of the wavelet? */
++                    if( !mask_sum.empty() )
++                    {
++                        const int* mask_ptr = &mask_sum.at<int>(sum_i, sum_j);
++                        float mval = calcHaarPattern( mask_ptr, &Dm, 1 );
++                        if( mval < 0.5 )
++                            continue;
++                    }
++
++                    /* Non-maxima suppression. val0 is at N9[1][4]*/
++                    if( val0 > N9[0][0] && val0 > N9[0][1] && val0 > N9[0][2] &&
++                        val0 > N9[0][3] && val0 > N9[0][4] && val0 > N9[0][5] &&
++                        val0 > N9[0][6] && val0 > N9[0][7] && val0 > N9[0][8] &&
++                        val0 > N9[1][0] && val0 > N9[1][1] && val0 > N9[1][2] &&
++                        val0 > N9[1][3]                    && val0 > N9[1][5] &&
++                        val0 > N9[1][6] && val0 > N9[1][7] && val0 > N9[1][8] &&
++                        val0 > N9[2][0] && val0 > N9[2][1] && val0 > N9[2][2] &&
++                        val0 > N9[2][3] && val0 > N9[2][4] && val0 > N9[2][5] &&
++                        val0 > N9[2][6] && val0 > N9[2][7] && val0 > N9[2][8] )
++                    {
++                        /* Calculate the wavelet center coordinates for the maxima */
++                        float center_i = sum_i + (size-1)*0.5f;
++                        float center_j = sum_j + (size-1)*0.5f;
++
++                        KeyPoint kpt( center_j, center_i, (float)sizes[layer],
++                                      -1, val0, octave, (trace_ptr[j] > 0) - (trace_ptr[j] < 0) );
++
++                        /* Interpolate maxima location within the 3x3x3 neighbourhood  */
++                        int ds = size - sizes[layer-1];
++                        int interp_ok = interpolateKeypoint( N9, sampleStep, sampleStep, ds, kpt );
++
++                        /* Sometimes the interpolation step gives a negative size etc. */
++                        if( interp_ok  )
++                        {
++                            /*printf( "KeyPoint %f %f %d\n", point.pt.x, point.pt.y, point.size );*/
++                            cv::AutoLock lock(findMaximaInLayer_m);
++                            keypoints.push_back(kpt);
++                        }
++                    }
++                }
++            }
++        }
++    }
++
++    struct KeypointGreater
++    {
++        inline bool operator()(const KeyPoint& kp1, const KeyPoint& kp2) const
++        {
++            if(kp1.response > kp2.response) return true;
++            if(kp1.response < kp2.response) return false;
++            if(kp1.size > kp2.size) return true;
++            if(kp1.size < kp2.size) return false;
++            if(kp1.octave > kp2.octave) return true;
++            if(kp1.octave < kp2.octave) return false;
++            if(kp1.pt.y < kp2.pt.y) return false;
++            if(kp1.pt.y > kp2.pt.y) return true;
++            return kp1.pt.x < kp2.pt.x;
++        }
++    };
++
++
++    static void fastHessianDetector( const Mat& sum, const Mat& mask_sum, std::vector<KeyPoint>& keypoints,
++                                     int nOctaves, int nOctaveLayers, float hessianThreshold )
++    {
++        /* Sampling step along image x and y axes at first octave. This is doubled
++           for each additional octave. WARNING: Increasing this improves speed,
++           however keypoint extraction becomes unreliable. */
++        const int SAMPLE_STEP0 = 1;
++
++        int nTotalLayers = (nOctaveLayers+2)*nOctaves;
++        int nMiddleLayers = nOctaveLayers*nOctaves;
++
++        std::vector<Mat> dets(nTotalLayers);
++        std::vector<Mat> traces(nTotalLayers);
++        std::vector<int> sizes(nTotalLayers);
++        std::vector<int> sampleSteps(nTotalLayers);
++        std::vector<int> middleIndices(nMiddleLayers);
++
++        keypoints.clear();
++
++        // Allocate space and calculate properties of each layer
++        int index = 0, middleIndex = 0, step = SAMPLE_STEP0;
++
++        for( int octave = 0; octave < nOctaves; octave++ )
++        {
++            for( int layer = 0; layer < nOctaveLayers+2; layer++ )
++            {
++                /* The integral image sum is one pixel bigger than the source image*/
++                dets[index].create( (sum.rows-1)/step, (sum.cols-1)/step, CV_32F );
++                traces[index].create( (sum.rows-1)/step, (sum.cols-1)/step, CV_32F );
++                sizes[index] = (SURF_HAAR_SIZE0 + SURF_HAAR_SIZE_INC*layer) << octave;
++                sampleSteps[index] = step;
++
++                if( 0 < layer && layer <= nOctaveLayers )
++                    middleIndices[middleIndex++] = index;
++                index++;
++            }
++            step *= 2;
++        }
++
++        // Calculate hessian determinant and trace samples in each layer
++        parallel_for_( Range(0, nTotalLayers),
++                       SURFBuildInvoker(sum, sizes, sampleSteps, dets, traces) );
++
++        // Find maxima in the determinant of the hessian
++        parallel_for_( Range(0, nMiddleLayers),
++                       SURFFindInvoker(sum, mask_sum, dets, traces, sizes,
++                                       sampleSteps, middleIndices, keypoints,
++                                       nOctaveLayers, hessianThreshold) );
++
++        std::sort(keypoints.begin(), keypoints.end(), KeypointGreater());
++    }
++
++
++    struct SURFInvoker : ParallelLoopBody
++    {
++        enum { ORI_RADIUS = 6, ORI_WIN = 60, PATCH_SZ = 20 };
++
++        SURFInvoker( const Mat& _img, const Mat& _sum,
++                     std::vector<KeyPoint>& _keypoints, Mat& _descriptors,
++                     bool _extended, bool _upright )
++        {
++            keypoints = &_keypoints;
++            descriptors = &_descriptors;
++            img = &_img;
++            sum = &_sum;
++            extended = _extended;
++            upright = _upright;
++
++            // Simple bound for number of grid points in circle of radius ORI_RADIUS
++            const int nOriSampleBound = (2*ORI_RADIUS+1)*(2*ORI_RADIUS+1);
++
++            // Allocate arrays
++            apt.resize(nOriSampleBound);
++            aptw.resize(nOriSampleBound);
++            DW.resize(PATCH_SZ*PATCH_SZ);
++
++            /* Coordinates and weights of samples used to calculate orientation */
++            Mat G_ori = getGaussianKernel( 2*ORI_RADIUS+1, SURF_ORI_SIGMA, CV_32F );
++            nOriSamples = 0;
++            for( int i = -ORI_RADIUS; i <= ORI_RADIUS; i++ )
++            {
++                for( int j = -ORI_RADIUS; j <= ORI_RADIUS; j++ )
++                {
++                    if( i*i + j*j <= ORI_RADIUS*ORI_RADIUS )
++                    {
++                        apt[nOriSamples] = Point(i,j);
++                        aptw[nOriSamples++] = G_ori.at<float>(i+ORI_RADIUS,0) * G_ori.at<float>(j+ORI_RADIUS,0);
++                    }
++                }
++            }
++            CV_Assert( nOriSamples <= nOriSampleBound );
++
++            /* Gaussian used to weight descriptor samples */
++            Mat G_desc = getGaussianKernel( PATCH_SZ, SURF_DESC_SIGMA, CV_32F );
++            for( int i = 0; i < PATCH_SZ; i++ )
++            {
++                for( int j = 0; j < PATCH_SZ; j++ )
++                    DW[i*PATCH_SZ+j] = G_desc.at<float>(i,0) * G_desc.at<float>(j,0);
++            }
++        }
++
++        void operator()(const Range& range) const CV_OVERRIDE
++        {
++            /* X and Y gradient wavelet data */
++            const int NX=2, NY=2;
++            const int dx_s[NX][5] = {{0, 0, 2, 4, -1}, {2, 0, 4, 4, 1}};
++            const int dy_s[NY][5] = {{0, 0, 4, 2, 1}, {0, 2, 4, 4, -1}};
++
++            // Optimisation is better using nOriSampleBound than nOriSamples for
++            // array lengths.  Maybe because it is a constant known at compile time
++            const int nOriSampleBound =(2*ORI_RADIUS+1)*(2*ORI_RADIUS+1);
++
++            float X[nOriSampleBound], Y[nOriSampleBound], angle[nOriSampleBound];
++            uchar PATCH[PATCH_SZ+1][PATCH_SZ+1];
++            float DX[PATCH_SZ][PATCH_SZ], DY[PATCH_SZ][PATCH_SZ];
++            Mat _patch(PATCH_SZ+1, PATCH_SZ+1, CV_8U, PATCH);
++
++            int dsize = extended ? 128 : 64;
++
++            int k, k1 = range.start, k2 = range.end;
++            float maxSize = 0;
++            for( k = k1; k < k2; k++ )
++            {
++                maxSize = std::max(maxSize, (*keypoints)[k].size);
++            }
++            int imaxSize = std::max(cvCeil((PATCH_SZ+1)*maxSize*1.2f/9.0f), 1);
++            cv::AutoBuffer<uchar> winbuf(imaxSize*imaxSize);
++
++            for( k = k1; k < k2; k++ )
++            {
++                int i, j, kk, nangle;
++                float* vec;
++                SurfHF dx_t[NX], dy_t[NY];
++                KeyPoint& kp = (*keypoints)[k];
++                float size = kp.size;
++                Point2f center = kp.pt;
++                /* The sampling intervals and wavelet sized for selecting an orientation
++                 and building the keypoint descriptor are defined relative to 's' */
++                float s = size*1.2f/9.0f;
++                /* To find the dominant orientation, the gradients in x and y are
++                 sampled in a circle of radius 6s using wavelets of size 4s.
++                 We ensure the gradient wavelet size is even to ensure the
++                 wavelet pattern is balanced and symmetric around its center */
++                int grad_wav_size = 2*cvRound( 2*s );
++                if( sum->rows < grad_wav_size || sum->cols < grad_wav_size )
++                {
++                    /* when grad_wav_size is too big,
++                     * the sampling of gradient will be meaningless
++                     * mark keypoint for deletion. */
++                    kp.size = -1;
++                    continue;
++                }
++
++                float descriptor_dir = 360.f - 90.f;
++                if (upright == 0)
++                {
++                    resizeHaarPattern( dx_s, dx_t, NX, 4, grad_wav_size, sum->cols );
++                    resizeHaarPattern( dy_s, dy_t, NY, 4, grad_wav_size, sum->cols );
++                    for( kk = 0, nangle = 0; kk < nOriSamples; kk++ )
++                    {
++                        int x = cvRound( center.x + apt[kk].x*s - (float)(grad_wav_size-1)/2 );
++                        int y = cvRound( center.y + apt[kk].y*s - (float)(grad_wav_size-1)/2 );
++                        if( y < 0 || y >= sum->rows - grad_wav_size ||
++                            x < 0 || x >= sum->cols - grad_wav_size )
++                            continue;
++                        const int* ptr = &sum->at<int>(y, x);
++                        float vx = calcHaarPattern( ptr, dx_t, 2 );
++                        float vy = calcHaarPattern( ptr, dy_t, 2 );
++                        X[nangle] = vx*aptw[kk];
++                        Y[nangle] = vy*aptw[kk];
++                        nangle++;
++                    }
++                    if( nangle == 0 )
++                    {
++                        // No gradient could be sampled because the keypoint is too
++                        // near too one or more of the sides of the image. As we
++                        // therefore cannot find a dominant direction, we skip this
++                        // keypoint and mark it for later deletion from the sequence.
++                        kp.size = -1;
++                        continue;
++                    }
++
++                    phase( Mat(1, nangle, CV_32F, X), Mat(1, nangle, CV_32F, Y), Mat(1, nangle, CV_32F, angle), true );
++
++                    float bestx = 0, besty = 0, descriptor_mod = 0;
++                    for( i = 0; i < 360; i += SURF_ORI_SEARCH_INC )
++                    {
++                        float sumx = 0, sumy = 0, temp_mod;
++                        for( j = 0; j < nangle; j++ )
++                        {
++                            int d = std::abs(cvRound(angle[j]) - i);
++                            if( d < ORI_WIN/2 || d > 360-ORI_WIN/2 )
++                            {
++                                sumx += X[j];
++                                sumy += Y[j];
++                            }
++                        }
++                        temp_mod = sumx*sumx + sumy*sumy;
++                        if( temp_mod > descriptor_mod )
++                        {
++                            descriptor_mod = temp_mod;
++                            bestx = sumx;
++                            besty = sumy;
++                        }
++                    }
++                    descriptor_dir = fastAtan2( -besty, bestx );
++                }
++                kp.angle = descriptor_dir;
++                if( !descriptors || !descriptors->data )
++                    continue;
++
++                /* Extract a window of pixels around the keypoint of size 20s */
++                int win_size = (int)((PATCH_SZ+1)*s);
++                CV_Assert( imaxSize >= win_size );
++                Mat win(win_size, win_size, CV_8U, winbuf.data());
++
++                if( !upright )
++                {
++                    descriptor_dir *= (float)(CV_PI/180);
++                    float sin_dir = -std::sin(descriptor_dir);
++                    float cos_dir =  std::cos(descriptor_dir);
++
++                    /* Subpixel interpolation version (slower). Subpixel not required since
++                    the pixels will all get averaged when we scale down to 20 pixels */
++                    /*
++                    float w[] = { cos_dir, sin_dir, center.x,
++                    -sin_dir, cos_dir , center.y };
++                    CvMat W = cvMat(2, 3, CV_32F, w);
++                    cvGetQuadrangleSubPix( img, &win, &W );
++                    */
++
++                    float win_offset = -(float)(win_size-1)/2;
++                    float start_x = center.x + win_offset*cos_dir + win_offset*sin_dir;
++                    float start_y = center.y - win_offset*sin_dir + win_offset*cos_dir;
++                    uchar* WIN = win.data;
++#if 0
++                    // Nearest neighbour version (faster)
++                for( i = 0; i < win_size; i++, start_x += sin_dir, start_y += cos_dir )
++                {
++                    float pixel_x = start_x;
++                    float pixel_y = start_y;
++                    for( j = 0; j < win_size; j++, pixel_x += cos_dir, pixel_y -= sin_dir )
++                    {
++                        int x = std::min(std::max(cvRound(pixel_x), 0), img->cols-1);
++                        int y = std::min(std::max(cvRound(pixel_y), 0), img->rows-1);
++                        WIN[i*win_size + j] = img->at<uchar>(y, x);
++                    }
++                }
++#else
++                    int ncols1 = img->cols-1, nrows1 = img->rows-1;
++                    size_t imgstep = img->step;
++                    for( i = 0; i < win_size; i++, start_x += sin_dir, start_y += cos_dir )
++                    {
++                        double pixel_x = start_x;
++                        double pixel_y = start_y;
++                        for( j = 0; j < win_size; j++, pixel_x += cos_dir, pixel_y -= sin_dir )
++                        {
++                            int ix = cvFloor(pixel_x), iy = cvFloor(pixel_y);
++                            if( (unsigned)ix < (unsigned)ncols1 &&
++                                (unsigned)iy < (unsigned)nrows1 )
++                            {
++                                float a = (float)(pixel_x - ix), b = (float)(pixel_y - iy);
++                                const uchar* imgptr = &img->at<uchar>(iy, ix);
++                                WIN[i*win_size + j] = (uchar)
++                                        cvRound(imgptr[0]*(1.f - a)*(1.f - b) +
++                                                imgptr[1]*a*(1.f - b) +
++                                                imgptr[imgstep]*(1.f - a)*b +
++                                                imgptr[imgstep+1]*a*b);
++                            }
++                            else
++                            {
++                                int x = std::min(std::max(cvRound(pixel_x), 0), ncols1);
++                                int y = std::min(std::max(cvRound(pixel_y), 0), nrows1);
++                                WIN[i*win_size + j] = img->at<uchar>(y, x);
++                            }
++                        }
++                    }
++#endif
++                }
++                else
++                {
++                    // extract rect - slightly optimized version of the code above
++                    // TODO: find faster code, as this is simply an extract rect operation,
++                    //       e.g. by using cvGetSubRect, problem is the border processing
++                    // descriptor_dir == 90 grad
++                    // sin_dir == 1
++                    // cos_dir == 0
++
++                    float win_offset = -(float)(win_size-1)/2;
++                    int start_x = cvRound(center.x + win_offset);
++                    int start_y = cvRound(center.y - win_offset);
++                    uchar* WIN = win.data;
++                    for( i = 0; i < win_size; i++, start_x++ )
++                    {
++                        int pixel_x = start_x;
++                        int pixel_y = start_y;
++                        for( j = 0; j < win_size; j++, pixel_y-- )
++                        {
++                            int x = MAX( pixel_x, 0 );
++                            int y = MAX( pixel_y, 0 );
++                            x = MIN( x, img->cols-1 );
++                            y = MIN( y, img->rows-1 );
++                            WIN[i*win_size + j] = img->at<uchar>(y, x);
++                        }
++                    }
++                }
++                // Scale the window to size PATCH_SZ so each pixel's size is s. This
++                // makes calculating the gradients with wavelets of size 2s easy
++                resize(win, _patch, _patch.size(), 0, 0, INTER_AREA);
++
++                // Calculate gradients in x and y with wavelets of size 2s
++                for( i = 0; i < PATCH_SZ; i++ )
++                    for( j = 0; j < PATCH_SZ; j++ )
++                    {
++                        float dw = DW[i*PATCH_SZ + j];
++                        float vx = (PATCH[i][j+1] - PATCH[i][j] + PATCH[i+1][j+1] - PATCH[i+1][j])*dw;
++                        float vy = (PATCH[i+1][j] - PATCH[i][j] + PATCH[i+1][j+1] - PATCH[i][j+1])*dw;
++                        DX[i][j] = vx;
++                        DY[i][j] = vy;
++                    }
++
++                // Construct the descriptor
++                vec = descriptors->ptr<float>(k);
++                for( kk = 0; kk < dsize; kk++ )
++                    vec[kk] = 0;
++                double square_mag = 0;
++                if( extended )
++                {
++                    // 128-bin descriptor
++                    for( i = 0; i < 4; i++ )
++                        for( j = 0; j < 4; j++ )
++                        {
++                            for(int y = i*5; y < i*5+5; y++ )
++                            {
++                                for(int x = j*5; x < j*5+5; x++ )
++                                {
++                                    float tx = DX[y][x], ty = DY[y][x];
++                                    if( ty >= 0 )
++                                    {
++                                        vec[0] += tx;
++                                        vec[1] += (float)fabs(tx);
++                                    } else {
++                                        vec[2] += tx;
++                                        vec[3] += (float)fabs(tx);
++                                    }
++                                    if ( tx >= 0 )
++                                    {
++                                        vec[4] += ty;
++                                        vec[5] += (float)fabs(ty);
++                                    } else {
++                                        vec[6] += ty;
++                                        vec[7] += (float)fabs(ty);
++                                    }
++                                }
++                            }
++                            for( kk = 0; kk < 8; kk++ )
++                                square_mag += vec[kk]*vec[kk];
++                            vec += 8;
++                        }
++                }
++                else
++                {
++                    // 64-bin descriptor
++                    for( i = 0; i < 4; i++ )
++                        for( j = 0; j < 4; j++ )
++                        {
++                            for(int y = i*5; y < i*5+5; y++ )
++                            {
++                                for(int x = j*5; x < j*5+5; x++ )
++                                {
++                                    float tx = DX[y][x], ty = DY[y][x];
++                                    vec[0] += tx; vec[1] += ty;
++                                    vec[2] += (float)fabs(tx); vec[3] += (float)fabs(ty);
++                                }
++                            }
++                            for( kk = 0; kk < 4; kk++ )
++                                square_mag += vec[kk]*vec[kk];
++                            vec+=4;
++                        }
++                }
++
++                // unit vector is essential for contrast invariance
++                vec = descriptors->ptr<float>(k);
++                float scale = (float)(1./(std::sqrt(square_mag) + FLT_EPSILON));
++                for( kk = 0; kk < dsize; kk++ )
++                    vec[kk] *= scale;
++            }
++        }
++
++        // Parameters
++        const Mat* img;
++        const Mat* sum;
++        std::vector<KeyPoint>* keypoints;
++        Mat* descriptors;
++        bool extended;
++        bool upright;
++
++        // Pre-calculated values
++        int nOriSamples;
++        std::vector<Point> apt;
++        std::vector<float> aptw;
++        std::vector<float> DW;
++    };
++
++
++    SURF_Impl::SURF_Impl(double _threshold, int _nOctaves, int _nOctaveLayers, bool _extended, bool _upright)
++    {
++        hessianThreshold = _threshold;
++        extended = _extended;
++        upright = _upright;
++        nOctaves = _nOctaves;
++        nOctaveLayers = _nOctaveLayers;
++    }
++
++    int SURF_Impl::descriptorSize() const { return extended ? 128 : 64; }
++    int SURF_Impl::descriptorType() const { return CV_32F; }
++    int SURF_Impl::defaultNorm() const { return NORM_L2; }
++
++
++    void SURF_Impl::detectAndCompute(InputArray _img, InputArray _mask,
++                                     CV_OUT std::vector<KeyPoint>& keypoints,
++                                     OutputArray _descriptors,
++                                     bool useProvidedKeypoints)
++    {
++        int imgtype = _img.type(), imgcn = CV_MAT_CN(imgtype);
++        bool doDescriptors = _descriptors.needed();
++
++        CV_Assert(!_img.empty() && CV_MAT_DEPTH(imgtype) == CV_8U && (imgcn == 1 || imgcn == 3 || imgcn == 4));
++        CV_Assert(_descriptors.needed() || !useProvidedKeypoints);
++
++        Mat img = _img.getMat(), mask = _mask.getMat(), mask1, sum, msum;
++
++        if( imgcn > 1 )
++            cvtColor(img, img, COLOR_BGR2GRAY);
++
++        CV_Assert(mask.empty() || (mask.type() == CV_8U && mask.size() == img.size()));
++        CV_Assert(hessianThreshold >= 0);
++        CV_Assert(nOctaves > 0);
++        CV_Assert(nOctaveLayers > 0);
++
++        integral(img, sum, CV_32S);
++
++        // Compute keypoints only if we are not asked for evaluating the descriptors are some given locations:
++        if( !useProvidedKeypoints )
++        {
++            if( !mask.empty() )
++            {
++                cv::min(mask, 1, mask1);
++                integral(mask1, msum, CV_32S);
++            }
++            fastHessianDetector( sum, msum, keypoints, nOctaves, nOctaveLayers, (float)hessianThreshold );
++            if (!mask.empty())
++            {
++                for (size_t i = 0; i < keypoints.size(); )
++                {
++                    Point pt(keypoints[i].pt);
++                    if (mask.at<uchar>(pt.y, pt.x) == 0)
++                    {
++                        keypoints.erase(keypoints.begin() + i);
++                        continue; // keep "i"
++                    }
++                    i++;
++                }
++            }
++        }
++
++        int i, j, N = (int)keypoints.size();
++        if( N > 0 )
++        {
++            Mat descriptors;
++            bool _1d = false;
++            int dcols = extended ? 128 : 64;
++            size_t dsize = dcols*sizeof(float);
++
++            if( doDescriptors )
++            {
++                _1d = _descriptors.kind() == _InputArray::STD_VECTOR && _descriptors.type() == CV_32F;
++                if( _1d )
++                {
++                    _descriptors.create(N*dcols, 1, CV_32F);
++                    descriptors = _descriptors.getMat().reshape(1, N);
++                }
++                else
++                {
++                    _descriptors.create(N, dcols, CV_32F);
++                    descriptors = _descriptors.getMat();
++                }
++            }
++
++            // we call SURFInvoker in any case, even if we do not need descriptors,
++            // since it computes orientation of each feature.
++            parallel_for_(Range(0, N), SURFInvoker(img, sum, keypoints, descriptors, extended, upright) );
++
++            // remove keypoints that were marked for deletion
++            for( i = j = 0; i < N; i++ )
++            {
++                if( keypoints[i].size > 0 )
++                {
++                    if( i > j )
++                    {
++                        keypoints[j] = keypoints[i];
++                        if( doDescriptors )
++                            memcpy( descriptors.ptr(j), descriptors.ptr(i), dsize);
++                    }
++                    j++;
++                }
++            }
++            if( N > j )
++            {
++                N = j;
++                keypoints.resize(N);
++                if( doDescriptors )
++                {
++                    Mat d = descriptors.rowRange(0, N);
++                    if( _1d )
++                        d = d.reshape(1, N*dcols);
++                    d.copyTo(_descriptors);
++                }
++            }
++        }
++    }
++
++    Ptr<SURF> SURF::create(double _threshold, int _nOctaves, int _nOctaveLayers, bool _extended, bool _upright)
++    {
++        return makePtr<SURF_Impl>(_threshold, _nOctaves, _nOctaveLayers, _extended, _upright);
++    }
++
++
++
++
+ }
+\ No newline at end of file
+diff --git a/modules/js/src/core_bindings.cpp b/modules/js/src/core_bindings.cpp
+index 64707c9da..67480cd97 100644
+--- a/modules/js/src/core_bindings.cpp
++++ b/modules/js/src/core_bindings.cpp
+@@ -507,8 +507,10 @@ EMSCRIPTEN_BINDINGS(binding_utils)
+     emscripten::value_object<cv::Token>("Token")
+         .field("bbox", &cv::Token::bbox)
+         .field("color", &cv::Token::color)
++        .field("colorRgb", &cv::Token::colorRgb)
+         .field("bottomPoint", &cv::Token::bottomPoint);
+ 
++
+     emscripten::value_array<cv::Scalar_<double>> ("Scalar")
+         .element(index<0>())
+         .element(index<1>())
+diff --git a/modules/js/src/embindgen.py b/modules/js/src/embindgen.py
+index bd1c5f8e6..9e9d360a5 100644
+--- a/modules/js/src/embindgen.py
++++ b/modules/js/src/embindgen.py
+@@ -131,10 +131,11 @@ dnn = {'dnn_Net': ['setInput', 'forward'],
+ features2d = {'Feature2D': ['detect', 'compute', 'detectAndCompute', 'descriptorSize', 'descriptorType', 'defaultNorm', 'empty', 'getDefaultName'],
+               'BRISK': ['create', 'getDefaultName'],
+               'ORB': ['create', 'setMaxFeatures', 'setScaleFactor', 'setNLevels', 'setEdgeThreshold', 'setFirstLevel', 'setWTA_K', 'setScoreType', 'setPatchSize', 'getFastThreshold', 'getDefaultName'],
++              'SURF': ['create'],
+ 
+               'DiceHelper': ['create', 'getDiceValues', 'drawDiceDebug', 'getNearestNeighbour', 'getExampleDiceValues'],
+               'TokenHelper': ['create', 'getTokensSlow', 'drawTokens', 'drawTokensOnSyntheticImg', 'getExampleTokenVector'],
+-              'WorldHelper': ['create', 'getWorldHomography', 'clipTokensInWorld', 'drawWorldRect'],
++              'WorldHelper': ['create', 'getWorldHomography', 'clipTokensInWorld', 'drawWorldRect', 'perspectiveTransformRect', 'drawRect', 'printMatrix'],
+ 
+               'MSER': ['create', 'detectRegions', 'setDelta', 'getDelta', 'setMinArea', 'getMinArea', 'setMaxArea', 'getMaxArea', 'setPass2Only', 'getPass2Only', 'getDefaultName'],
+               'FastFeatureDetector': ['create', 'setThreshold', 'getThreshold', 'setNonmaxSuppression', 'getNonmaxSuppression', 'setType', 'getType', 'getDefaultName'],
+diff --git a/modules/js/src/helpers.js b/modules/js/src/helpers.js
+index 7e4bc79a8..6d4b39632 100644
+--- a/modules/js/src/helpers.js
++++ b/modules/js/src/helpers.js
+@@ -254,13 +254,15 @@ function Token() {
+             this.bbox = undefined;
+             this.color = undefined;
+             this.bottomPoint = undefined;
++            this.colorRgb = undefined
+             break;
+         }
+-        case 3: {
++        case 4: {
+             // new cv.Token(point color, size)
+             this.bbox = arguments[0];
+             this.color = arguments[1];
+-            this.bottomPoint = arguments[2];
++            this.colorRgb = arguments[2];
++            this.bottomPoint = arguments[3];
+             break;
+         }
+         default: {
+-- 
+2.18.0
+
+From 660d9e865ce2f2b80773b00fc247e7089530b4f8 Mon Sep 17 00:00:00 2001
+From: janisdd <janisdd5566@googlemail.com>
+Date: Wed, 6 Feb 2019 22:22:26 +0100
+Subject: [PATCH] - removed examples
+
+---
+ JS_OUT/bin/index.html      | 52 ---------------------
+ JS_OUT/bin/indexWorld.html | 40 -----------------
+ JS_OUT/bin/indexWorld.js   | 92 --------------------------------------
+ 3 files changed, 184 deletions(-)
+ delete mode 100644 JS_OUT/bin/index.html
+ delete mode 100644 JS_OUT/bin/indexWorld.html
+ delete mode 100644 JS_OUT/bin/indexWorld.js
+
+diff --git a/JS_OUT/bin/index.html b/JS_OUT/bin/index.html
+deleted file mode 100644
+index 1eff7ade5..000000000
+--- a/JS_OUT/bin/index.html
++++ /dev/null
+@@ -1,52 +0,0 @@
+-
+-<!DOCTYPE html>
+-<html>
+-<head>
+-<meta charset="utf-8">
+-<title>Hello OpenCV.js</title>
+-</head>
+-<body style="background-color: #333333">
+-<h2>Hello OpenCV.js</h2>
+-<p id="status">OpenCV.js is loading...</p>
+-<div>
+-  <div class="inputoutput">
+-    <img id="imageSrc" alt="No Image" />
+-    <div class="caption">imageSrc <input type="file" id="fileInput" name="file" /></div>
+-  </div>
+-  <div class="inputoutput">
+-    <canvas id="canvasOutput" ></canvas>
+-    <div class="caption">canvasOutput</div>
+-  </div>
+-</div>
+-<script type="text/javascript">
+-let imgElement = document.getElementById('imageSrc');
+-let inputElement = document.getElementById('fileInput');
+-inputElement.addEventListener('change', (e) => {
+-  imgElement.src = URL.createObjectURL(e.target.files[0]);
+-}, false);
+-imgElement.onload = function() {
+-  let mat = cv.imread(imgElement);
+-
+-  let diceHelper = new cv.DiceHelper()
+-
+-    console.time('dice');
+-
+-  let dices = diceHelper.getDiceValues(mat);
+-
+-  console.log('dbg');
+-  diceHelper.drawDiceDebug(dices, mat)
+-
+-  console.timeEnd('dice')
+-
+-  console.log(dices)
+-
+-  cv.imshow('canvasOutput', mat);
+-  mat.delete();
+-};
+-function onOpenCvReady() {
+-  document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
+-}
+-</script>
+-<script async src="opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+-</body>
+-</html>
+\ No newline at end of file
+diff --git a/JS_OUT/bin/indexWorld.html b/JS_OUT/bin/indexWorld.html
+deleted file mode 100644
+index 93131f735..000000000
+--- a/JS_OUT/bin/indexWorld.html
++++ /dev/null
+@@ -1,40 +0,0 @@
+-<!DOCTYPE html>
+-
+-<html>
+-<head>
+-    <meta charset="utf-8">
+-    <title>Hello OpenCV.js</title>
+-</head>
+-<body style="background-color: #333333">
+-<h2>Hello OpenCV.js</h2>
+-<p id="status">OpenCV.js is loading...</p>
+-<div>
+-    <div class="inputoutput">
+-        <img id="imageSrc" alt="No Image"/>
+-        <div class="caption">imageSrc <input type="file" id="fileInput" name="file"/></div>
+-
+-        <img id="imageSyn" alt="No Image"/>
+-        <div class="caption">syn img <input type="file" id="fileInput2" name="file"/></div>
+-    </div>
+-    <div class="inputoutput">
+-        <canvas id="canvasOutput"></canvas>
+-        <div class="caption">canvasOutput</div>
+-
+-        <canvas id="canvasOutput2"></canvas>
+-    </div>
+-
+-    <button onclick="go()">START</button>
+-</div>
+-<script type="text/javascript">
+-
+-    function onOpenCvReady() {
+-        document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
+-    }
+-</script>
+-
+-
+-<script src="indexWorld.js"></script>
+-<script async src="opencv.js" onload="onOpenCvReady();"></script>
+-
+-</body>
+-</html>
+\ No newline at end of file
+diff --git a/JS_OUT/bin/indexWorld.js b/JS_OUT/bin/indexWorld.js
+deleted file mode 100644
+index 64ee27a1b..000000000
+--- a/JS_OUT/bin/indexWorld.js
++++ /dev/null
+@@ -1,92 +0,0 @@
+-//suppress UnterminatedStatementJS
+-let imgElement = document.getElementById('imageSrc');
+-let imgSyn = document.getElementById('imageSyn');
+-
+-let inputElement = document.getElementById('fileInput');
+-let inputEl2 = document.getElementById('fileInput2');
+-
+-inputElement.addEventListener('change', (e) => {
+-    imgElement.src = URL.createObjectURL(e.target.files[0]);
+-}, false);
+-
+-inputEl2.addEventListener('change', (e) => {
+-    imgSyn.src = URL.createObjectURL(e.target.files[0]);
+-}, false);
+-
+-
+-imgElement.onload = function () {
+-    console.log('start0')
+-}
+-
+-imgSyn.onload = function () {
+-    go()
+-};
+-
+-
+-function go() {
+-    let _worldImg = cv.imread(imgElement);
+-    let _syntheticWorldImg = cv.imread(imgSyn);
+-    // let worldImg = cv.imread(imgElement);
+-    // let syntheticWorldImg = cv.imread(imgSyn);
+-
+-    console.log('start')
+-
+-    let hsv = new cv.Mat();
+-
+-    let homography_real_to_synth = new cv.Mat()
+-    let homography_synth_to_real = new cv.Mat()
+-
+-    let worldImg = new cv.Mat()
+-    let syntheticWorldImg = new cv.Mat()
+-
+-    cv.cvtColor (_worldImg, worldImg, cv.COLOR_BGRA2BGR);
+-    cv.cvtColor (_syntheticWorldImg, syntheticWorldImg, cv.COLOR_BGRA2BGR);
+-    
+-    
+-    cv.cvtColor(worldImg, hsv, cv.COLOR_BGR2HSV);
+-
+-    let tokenHelper = new cv.TokenHelper()
+-    let worldHelper = new cv.WorldHelper()
+-
+-    console.time('dice');
+-
+-    let binaryOutImg = new cv.Mat()
+-
+-    let tokens = tokenHelper.getTokensSlow(hsv, binaryOutImg);
+-
+-    // console.log(tokens)
+-
+-    console.timeEnd('dice')
+-
+-
+-    let homography_synth_to_real2 = worldHelper.getWorldHomography(syntheticWorldImg, worldImg, homography_real_to_synth, homography_synth_to_real);
+-
+-
+-    // worldHelper.clipTokensInWorld(syntheticWorldImg, worldImg, homography_synth_to_real, tokens);
+-
+-
+-    let copy = tokenHelper.drawTokens(worldImg, tokens);
+-    //
+-    // let synCopy = tokenHelper.drawTokensOnSyntheticImg(syntheticWorldImg, homography_real_to_synth, tokens);
+-
+-
+-    // copy = worldHelper.drawWorldRect(syntheticWorldImg, copy, homography_synth_to_real);
+-
+-    let worldCorners = worldHelper.drawWorldRect(syntheticWorldImg, copy, homography_synth_to_real);
+-
+-    // let worldCorners = worldHelper.drawWorldRect(worldImg, syntheticWorldImg, homography_real_to_synth);
+-
+-    // console.log(worldCorners)
+-
+-    cv.imshow('canvasOutput', copy);
+-    cv.imshow('canvasOutput2', homography_synth_to_real2);
+-
+-    // worldImg.delete();
+-    // hsv.delete()
+-    // syntheticWorldImg.delete()
+-    // homography_real_to_synth.delete()
+-    // homography_synth_to_real.delete()
+-    // copy.delete()
+-    // synCopy.delete()
+-    // oout.delete()
+-}
+\ No newline at end of file
+-- 
+2.18.0
+

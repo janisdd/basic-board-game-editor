@@ -4,7 +4,7 @@
 - include laddergame.world
 - include example.world
 
-- include path file for opencv
+- include patch file for opencv
 
 - master branch 
   - extend bbge to print Ypx borders (as option?) immer 5 px?? beim drucken
@@ -15,7 +15,7 @@
 - update readme
 - steps to use
 - what is not implemented /limits
-  - var indicators
+  - player var indicators
 - clarify SURF is patendetd
 
 
