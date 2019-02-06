@@ -1,4 +1,9 @@
-import {DefinitionTable, PlayerObj} from "../simulation/machine/machineState";
+import {
+  DefinitionTable,
+  DefinitionTableBoolEntry,
+  DefinitionTableIntEntry,
+  PlayerObj
+} from "../simulation/machine/machineState";
 import {Tile} from "../src/types/world";
 
 
@@ -85,6 +90,18 @@ export interface TokenPosition {
   fieldText: string
 }
 
+export interface VarIndicatorTokenPosition {
+  playerId: number | null
+  tokenId: number
+
+
+  /**
+   * the clockwise index of the field with the given angle
+   * where index 0 is the first field (right)!
+   */
+  index: number
+  value: number
+}
 
 
 export interface CvRealMachineState {
@@ -124,7 +141,21 @@ export interface HomographyTuple {
   realToSynMat: any
   tile: Tile
   syntheticImgMat: any
+  /**
+   * the real world pos
+   */
   tileRect: CvRect
+}
+
+export interface HomographyVarIndicatorTuple {
+  synToRealMat: any
+  realToSynMat: any
+  entry: DefinitionTableBoolEntry | DefinitionTableIntEntry
+  syntheticImgMat: any
+  /**
+   * the real world pos
+   */
+  indicatorRect: CvRect
 }
 
 export interface SyntheticImgTuple {
@@ -132,4 +163,8 @@ export interface SyntheticImgTuple {
   tile: Tile
 }
 
+export interface SyntheticVarTuple {
+  canvas: HTMLCanvasElement
+  entry: DefinitionTableBoolEntry | DefinitionTableIntEntry
+}
 

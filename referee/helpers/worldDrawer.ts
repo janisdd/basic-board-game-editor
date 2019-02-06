@@ -1,18 +1,28 @@
 import {WorldTilesHelper} from "../../src/helpers/worldTilesHelper";
 import * as graphics from "../../graphics/graphicsCore";
-import {exportPngImagesBgColor, worldSelectedTileBorderColor, worldTileBorderColor} from "../../src/constants";
+import {
+  defaultVariableIndicatorInnerCircleDiameterInPx,
+  defaultVariableIndicatorOuterCircleDiameterInPx,
+  exportPngImagesBgColor, printVariableIndicatorStrokeThickness,
+  worldSelectedTileBorderColor,
+  worldTileBorderColor
+} from "../../src/constants";
 import {FieldShape} from "../../src/types/drawing";
 import {ExportWorld} from "../../src/types/world";
 import {ZIndexCache} from "../../src/types/ui";
 import MouseEvent = createjs.MouseEvent
-import {MachineState} from "../../simulation/machine/machineState";
+import {isBoolVar, isIntVar, MachineState} from "../../simulation/machine/machineState";
 import {PrintHelper} from "../../src/helpers/printHelper";
-import {SyntheticImgTuple} from "../types";
+import {SyntheticImgTuple, SyntheticVarTuple} from "../types";
+import {Simulator} from "../../simulation/simulator";
+import {Referee} from "../Referee";
+import {VariableIndicatorDrawer} from "../../graphics/variableIndicatorDrawer";
 
 
 export class WorldDrawer {
 
-  public constructor() {}
+  public constructor() {
+  }
 
   renderStage: createjs.Stage = null
   canvas: HTMLCanvasElement
@@ -294,12 +304,14 @@ export class WorldDrawer {
     this.renderStage.update()
   }
 
-  drawSyntheticImgs(wrapperDiv: HTMLDivElement, synImgCanvases: HTMLCanvasElement[]) {
+  drawSyntheticImgs(wrapperDiv: HTMLDivElement, synImgCanvases: HTMLCanvasElement[], synGlobalVarIndicatorImgCanvases: HTMLCanvasElement[] = []) {
 
     wrapperDiv.innerHTML = ""
-
     synImgCanvases.forEach(p => wrapperDiv.appendChild(p))
+    synGlobalVarIndicatorImgCanvases.forEach(p => wrapperDiv.appendChild(p))
   }
+
+
 
   /**
    * returns all tiles drawn on canvas elements
@@ -311,7 +323,7 @@ export class WorldDrawer {
 
     const usedTiles = exportWorld.allTiles.filter(p => exportWorld.worldTiles.some(surr => surr.tileGuid === p.guid))
 
-    for(const tile of usedTiles) {
+    for (const tile of usedTiles) {
 
       let canvas = document.createElement('canvas')
       canvas.classList.add('syn-img')
@@ -343,6 +355,72 @@ export class WorldDrawer {
     }
 
     return synImgCanvases
+  }
+
+  async getGlobalVarIndicators(exportWorld: ExportWorld, referee: Referee): Promise<SyntheticVarTuple[]> {
+
+    const res: SyntheticVarTuple[] = []
+    let tempMachineState = Simulator.initNew(referee.startPos, true, referee.world.worldSettings.worldCmdText)
+
+    for (const key in tempMachineState.globalDefTable) {
+
+      const entry = tempMachineState.globalDefTable[key]
+
+      const stageWidth = defaultVariableIndicatorOuterCircleDiameterInPx
+      const stageHeight = defaultVariableIndicatorOuterCircleDiameterInPx
+
+      const canvas = document.createElement('canvas') as HTMLCanvasElement
+
+      canvas.classList.add('syn-img')
+
+      canvas.width = stageWidth
+      canvas.height = stageHeight
+
+      const stage = new createjs.Stage(canvas)
+
+      if (isBoolVar(entry)) {
+
+        await VariableIndicatorDrawer.drawVariableIndicator(stage,
+          stageWidth, stageHeight,
+          defaultVariableIndicatorOuterCircleDiameterInPx,
+          defaultVariableIndicatorInnerCircleDiameterInPx, 2,
+          key,
+          true,
+          18,
+          'Arial',
+          printVariableIndicatorStrokeThickness,
+          'white',
+          true
+        )
+
+      } else if (isIntVar(entry)) {
+
+        await VariableIndicatorDrawer.drawVariableIndicator(stage,
+          stageWidth, stageHeight,
+          defaultVariableIndicatorOuterCircleDiameterInPx,
+          defaultVariableIndicatorInnerCircleDiameterInPx, entry.maxVal * 2 + 1,
+          key,
+          false,
+          18,
+          'Arial',
+          printVariableIndicatorStrokeThickness,
+          'white',
+          true
+        )
+
+      } else {
+        throw new Error(`unknown global var type for var ident (${key})`)
+      }
+
+      stage.update()
+
+      res.push({
+        canvas,
+        entry
+      })
+    }
+
+    return res
 
   }
 

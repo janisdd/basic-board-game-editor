@@ -1,4 +1,12 @@
-import {CvPoint, CvRealMachineState, CvRect, CvScalar, CvToken, TokenPosition} from "../types";
+import {
+  CvPoint,
+  CvRealMachineState,
+  CvRect,
+  CvScalar,
+  CvToken,
+  TokenPosition,
+  VarIndicatorTokenPosition
+} from "../types";
 import {Tile} from "../../src/types/world";
 import {isBoolVar, isIntVar, MachineState} from "../../simulation/machine/machineState";
 import {PlainPoint, Rect} from "../../src/types/drawing";
@@ -25,17 +33,18 @@ export class RefereeHelper {
 
 
   h_tolerance_getPlayerIdFromColor = 20
-  s_tolerance_getPlayerIdFromColorPercenage = 10
+  s_tolerance_getPlayerIdFromColorPercenage = 20
   v_tolerance_getPlayerIdFromColorPercentage = 20
 
   playerColorMap: PlayerColorMap = {}
 
-  isTokenInTile(token: CvToken, tileRect: CvRect, maxDiffInPx: number = 0): boolean {
-    return this.intersectPoint(tileRect, token.bottomPoint)
+  isTokenInRect(token: CvToken, rect: CvRect, maxDiffInPx: number = 0): boolean {
+    return this.intersectPoint(rect, token.bottomPoint)
   }
 
   /**
-   * try to clip the given tokens to the fields in the tile
+   * tries to get the token position as field in the tile
+   * we transform the field pos into the real img and then check agains the token pos
    *
    * ASSUMES every play has only one token
    *  AND every token is on only one field (the first intersecting one is taken)
@@ -43,12 +52,12 @@ export class RefereeHelper {
    * @param tileRect the react (coords) in the real img, use this as offset
    * @param tile
    * @param playerColorMap
-   * @param homographyMat
+   * @param homographySynToRealMat
    * @param worldHelper
    * @param throwOnNotFoundPlayerColor true: throw if we cannot map the token color to a player color, false: will be null
    * @param maxDiffInPx this is added on the size of the field (each direction)
    */
-  getTokenPositionsFromTile(tokens: CvToken[], tileRect: CvRect, tile: Tile, playerColorMap: PlayerColorMap, homographyMat: any, worldHelper: any, throwOnNotFoundPlayerColor: boolean, maxDiffInPx: number = 0): TokenPosition[] {
+  getTokenPositionsFromTile(tokens: CvToken[], tileRect: CvRect, tile: Tile, playerColorMap: PlayerColorMap, homographySynToRealMat: any, worldHelper: any, throwOnNotFoundPlayerColor: boolean, maxDiffInPx: number = 0): TokenPosition[] {
 
 
     //if we use a maxDiffInPx then the token could be on two fields...
@@ -57,9 +66,9 @@ export class RefereeHelper {
 
     for (const token of tokens) {
 
-      for (const fieldShape of tile.fieldShapes) {
+      if (this.isTokenInRect(token, tileRect, maxDiffInPx) === false) continue
 
-        if (this.isTokenInTile(token, tileRect, maxDiffInPx) === false) continue
+      for (const fieldShape of tile.fieldShapes) {
 
         const fieldRect: CvRect = {
           x: fieldShape.x,
@@ -68,7 +77,7 @@ export class RefereeHelper {
           height: fieldShape.height
         }
 
-        const fieldPos: CvRect = worldHelper.perspectiveTransformRect(fieldRect, homographyMat)
+        const fieldPos: CvRect = worldHelper.perspectiveTransformRect(fieldRect, homographySynToRealMat)
 
         const rect: CvRect = {
           x: fieldPos.x - maxDiffInPx,
@@ -162,8 +171,77 @@ export class RefereeHelper {
   }
 
 
-  getVarValuesFromIndicator() {
-    //TODO create DefinitionTable from img
+  //TODO we could check to distance from center point to token and this should have at least X px...??
+  //we could transform the token into real img... but for now we transform token pos to syn img pos (but result should be equal...)
+  getVarValuesFromIndicator(tokens: CvToken[], varIdent: string, numFieldsForVar: number, indicatorSynRect: CvRect, indicatorRealRect: CvRect, playerColorMap: PlayerColorMap, homographyRealToSynMat: any, worldHelper: any, throwOnNotFoundPlayerColor: boolean, maxDiffInPx: number = 0): VarIndicatorTokenPosition | null {
+
+    let positions: VarIndicatorTokenPosition[] = []
+
+    const indicatorCenter: CvPoint = {
+      x: indicatorSynRect.x + indicatorSynRect.width / 2,
+      y: indicatorSynRect.y + indicatorSynRect.height / 2
+    }
+    const indicatorTopCenterPoint: CvPoint = {
+      x: indicatorCenter.x,
+      y: indicatorSynRect.y
+    }
+
+    for (const token of tokens) {
+      if (this.isTokenInRect(token, indicatorRealRect, maxDiffInPx) === false) continue
+
+      const tempRect: CvRect = {
+        x: token.bottomPoint.x,
+        y: token.bottomPoint.y,
+        width: 10,
+        height: 10
+      }
+
+      const tokenSynPos: CvRect = worldHelper.perspectiveTransformRect(tempRect, homographyRealToSynMat)
+      const transformedTokenBottomPoint: CvPoint = {
+        x: tokenSynPos.x,
+        y: tokenSynPos.y
+      }
+
+      // const angle = angleBetweenLines(indicatorTopCenterPoint, indicatorCenter, token.bottomPoint)
+      // console.log(`token angle normal: ${angle} (0 deg is top)`)
+
+      const angleSyn = angleBetweenLines(indicatorTopCenterPoint, indicatorCenter, transformedTokenBottomPoint)
+      console.log(`token angle syn: ${angleSyn} (0 deg is top)`)
+
+      // const bucket = getFieldIndexFromAngle(numFieldsForVar, angle)
+      // console.log(`token index: ${bucket}`)
+
+      const bucket = getFieldIndexFromAngle(numFieldsForVar, angleSyn)
+      console.log(`token index (syn): ${bucket}`)
+
+      const fieldValue = getFieldValueFromFieldIndex(numFieldsForVar, bucket)
+
+
+      //for global vars the token color is not important... because valid for all players
+      // const playerId = this.getPlayerIdFromColor(token.color, playerColorMap)
+      //
+      // if (throwOnNotFoundPlayerColor && playerId === null) {
+      //   throw new Error(`could not get player id from color (${this.colorToString(token.color)})`)
+      // }
+
+      positions.push({
+        playerId: null,
+        tokenId: -1,
+        index: bucket,
+        value: fieldValue
+      })
+    }
+
+    if (positions.length > 1) {
+      positions = [positions[0]]
+      console.warn(`found multiple tokens (values) for global var (${varIdent}, using first found (val: ${positions[0].value})`)
+    }
+    else if (positions.length === 0) {
+      console.warn(`found no token for global var (${varIdent}`)
+      return null
+    }
+
+    return positions[0]
   }
 
   /**
@@ -301,4 +379,90 @@ export class RefereeHelper {
       point.y < rect1.y)
 
   }
+}
+
+
+//------ variable indicator helpers
+
+/**
+ * returns the clockwise index of the field with the given angle
+ * where index 0 is the first field (right)!
+ *
+ * @param numFields
+ * @param angle
+ */
+function getFieldIndexFromAngle(numFields: number, angle: number) {
+
+  let totalAnglePerField = 360 / numFields
+
+  // 0deg + 30 is the first field (-1)
+  const bucket = Math.floor(angle / totalAnglePerField)
+  return bucket
+}
+
+/**
+ *
+ * @param numFields
+ * @param fieldIndex 0 is the (first field right of 0) or normally -1
+ */
+function getFieldValueFromFieldIndex(numFields: number, fieldIndex: number) {
+
+  const _index = fieldIndex + 1
+
+  if (numFields % 2 === 0) { //e.g. 12 --> we have 0-5 and -1 to -6.... so one more negative
+
+    const maxVal = numFields / 2 //e.g. 12 --> 6 so -6
+
+    if (_index <= maxVal) {
+      return -_index
+    }
+
+    //e.g. 12 - 7 (where 7 th should be the 5)
+    return (numFields - _index)
+  }
+
+  //e.g. 11 we have 0-5 and -1 to -5
+
+  const maxVal = (numFields - 1) / 2 // e.g. 5
+
+  if (_index <= maxVal) {
+    return -_index
+  }
+
+  return (numFields - _index)
+}
+
+function angleBetweenLines(topPoint: CvPoint, centerPoint: CvPoint, TokenPoint: CvPoint) {
+
+  let source = {
+    x: topPoint.x - centerPoint.x,
+    y: topPoint.y - centerPoint.y
+  }
+
+  let compare = {
+    x: TokenPoint.x - centerPoint.x,
+    y: TokenPoint.y - centerPoint.y
+  }
+  var a2 = Math.atan2(source.y, source.x);
+  var a1 = Math.atan2(compare.y, compare.x);
+  var sign = a1 > a2 ? 1 : -1;
+  var angle = a1 - a2;
+  var K = -sign * Math.PI * 2;
+
+  var angle2 = (Math.abs(K + angle) < Math.abs(angle)) ? K + angle : angle;
+
+
+  let aaaa = Math.abs(Math.round(360 * angle2 / (Math.PI * 2)))
+  if (angle2 > 0) {
+    //ok
+  }
+  else {
+    let acp = aaaa
+    aaaa = 180 + (180 - aaaa)
+  }
+
+
+  // console.log("angleeee ")
+
+  return aaaa
 }

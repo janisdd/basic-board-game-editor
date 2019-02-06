@@ -21,6 +21,7 @@
 <body>
 
 
+
 <!-- style="display: none" -->
 <video  autoplay="true" id="realImgSrc" width="300" height="300">
 </video>
@@ -29,6 +30,8 @@
 
 <button onclick="bbge.onInitReferee()">init</button>
 <input type="file" accept=".world" onchange="bbge.onWorldInputChanged(event)">
+
+<input id="track-global-vars-cb" type="checkbox" checked> track global vars
 
 <canvas id="canvasSnaptshot" width="1900" height="1080"></canvas>
 
@@ -44,6 +47,7 @@
 </div>
 
 <button onclick="bbge.onGetHomography()">get homography</button>
+<button onclick="bbge.onGetGLobalVarIndicatorHomographies()">get homography global vars</button>
 
 <button onclick="bbge.onGetDice()">get dice</button>
 <button onclick="bbge.onNextRound()">next round</button>
@@ -65,26 +69,31 @@
     <h3>real (synthetic) state</h3>
     <canvas id="world-real-canvas" width="1000" height="1000"></canvas>
 
-
-</div>
-
+    <div id="variables-table-real" style="float: right">
 
 
-<!-- alle synthetic imgs from the world-->
-<h3>debug syn imgs (used for keypoint detection/homography)</h3>
-<div id="debug-syn-imgs-wrapper">
-
-</div>
-
-<h3>debug syn imgs with rects</h3>
-<div id="debug-syn-homographies">
-
-</div>
+    </div>
 
 
 
+    <!-- alle synthetic imgs from the world-->
+    <h3>debug syn imgs (used for keypoint detection/homography)</h3>
+    <div id="debug-syn-imgs-wrapper">
 
-<script src="easeljs-0.8.2.combined.js"></script>
+    </div>
+
+    <h3>debug syn imgs with rects</h3>
+    <div id="debug-syn-homographies">
+    </div>
+
+    <h3>debug syn imgs with rects (global vars)</h3>
+    <div id="debug-syn-homographies-global-vars">
+    </div>
+
+
+
+
+    <script src="easeljs-0.8.2.combined.js"></script>
 
 <!-- just to init cam stream -->
 <script src="init.js"></script>

@@ -1,5 +1,5 @@
 import {PlayerColorMap, RefereeHelper} from "./helpers/RefereeHelper";
-import {CvDice, CvScalar, CvToken} from "./types";
+import {CvDice, CvRealMachineState, CvScalar, CvToken} from "./types";
 import {Cvt} from "./helpers/Cvt";
 import {IoHelper} from "../src/helpers/ioHelper";
 import {ExportWorld, Tile} from "../src/types/world";
@@ -165,13 +165,12 @@ export class Referee {
 
   }
 
-  updateVariablesTable(wrapperDiv: HTMLDivElement) {
+  updateVariablesTable(wrapperDiv: HTMLDivElement, definitionTable: DefinitionTable) {
 
-
-    if (!this.simulationMachineState) {
-      wrapperDiv.innerHTML = ""
-      return
-    }
+    // if (!this.simulationMachineState) {
+    //   wrapperDiv.innerHTML = ""
+    //   return
+    // }
 
     let html = ''
 
@@ -181,39 +180,38 @@ export class Referee {
       `<h3>global variables</h3>
 `;
 
-    const state = this.simulationMachineState
+    // const state = machineState
 
-    html += this._getVarTableHtml(state.globalDefTable)
+    html += this._getVarTableHtml(definitionTable)
 
+    //NOT SUPPORTED / IMPLEMENTED
     //--- player variables
 
-    html += `
-    <h3>player local variables </h3>
-    `
-
-    for (const player of state.players) {
-      html += `
-        <h4>player ${player.id} TOOD color</h4>
-        
-      `
-      html += this._getVarTableHtml(player.defTable)
-
-
-      for(let i = 0; i < player.localDefTables.length;i++) {
-        const defTable = player.localDefTables[i]
-
-        html += `
-          <h4>player local vars in scope level ${i}</h4>
-        `
-
-        html += this._getVarTableHtml(defTable.defTable)
-      }
-
-    }
+    // html += `
+    // <h3>player local variables </h3>
+    // `
+    //
+    // for (const player of state.players) {
+    //   html += `
+    //     <h4>player ${player.id} TOOD color</h4>
+    //
+    //   `
+    //   html += this._getVarTableHtml(player.defTable)
+    //
+    //
+    //   for(let i = 0; i < player.localDefTables.length;i++) {
+    //     const defTable = player.localDefTables[i]
+    //
+    //     html += `
+    //       <h4>player local vars in scope level ${i}</h4>
+    //     `
+    //
+    //     html += this._getVarTableHtml(defTable.defTable)
+    //   }
+    //
+    // }
 
     wrapperDiv.innerHTML = html
-
-    console.log('print vars')
 
 
 

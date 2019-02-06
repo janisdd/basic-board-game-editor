@@ -3,10 +3,24 @@ import {Referee} from "./Referee";
 import {ExportWorld} from "../src/types/world";
 import {MigrationHelper} from "../src/helpers/MigrationHelpers";
 import {WorldDrawer} from "./helpers/worldDrawer";
-import {CvRealMachineState, CvRect, CvScalar, HomographyTuple, SyntheticImgTuple, TokenPosition} from "./types";
+import {
+  CvRealMachineState,
+  CvRect,
+  CvScalar, CvToken,
+  HomographyTuple,
+  HomographyVarIndicatorTuple,
+  SyntheticImgTuple, SyntheticVarTuple,
+  TokenPosition
+} from "./types";
 import {Cvt} from "./helpers/Cvt";
 import {Simulator} from "../simulation/simulator";
-import {MachineState} from "../simulation/machine/machineState";
+import {
+  DefinitionTableBoolEntry,
+  DefinitionTableIntEntry,
+  isBoolVar,
+  isIntVar,
+  MachineState
+} from "../simulation/machine/machineState";
 
 declare var cv: any
 
@@ -16,6 +30,9 @@ declare var cv: any
 declare var videoStarted: boolean
 declare var video: HTMLVideoElement
 
+const trackGlobalVarsCb = document.getElementById('track-global-vars-cb') as HTMLInputElement
+let trackGlobalVars = true
+
 let canvasSnapshot = document.getElementById("canvasSnaptshot") as HTMLCanvasElement
 let ctxSnapshot = canvasSnapshot.getContext('2d');
 
@@ -24,17 +41,26 @@ let referee: Referee = new Referee()
 let worldDrawer: WorldDrawer = new WorldDrawer()
 let variablesTableWrapperDiv = document.getElementById('variables-table') as HTMLDivElement
 
+let variablesTableRealWrapperDiv = document.getElementById('variables-table-real') as HTMLDivElement
+
 let playerColorMappingTableWrapper = document.getElementById('player-color-mapping-table-wrapper') as HTMLDivElement
 
 let debugSynImgsWrapper = document.getElementById('debug-syn-imgs-wrapper') as HTMLDivElement
 
 //a read img with the rect of the synthetic img we found
 const debugSynHomographiessWrapper = document.getElementById('debug-syn-homographies') as HTMLDivElement
+const debugSynHomographyGlobalVarssWrapper = document.getElementById('debug-syn-homographies-global-vars') as HTMLDivElement
+
 
 const worldRealCanvas = document.getElementById('world-real-canvas') as HTMLCanvasElement
 
 let synImgCanvases: SyntheticImgTuple[] = [] //one for every tile in the world
 let homographies: HomographyTuple[] = [] //one for every img in synImgCanvases --> one for every tile
+
+
+let synGlobalVarIndicatorImgCanvases: SyntheticVarTuple[] = [] //one for every global var in the world
+let homographyGlobalVarIndicators: HomographyVarIndicatorTuple[] = [] //one for every in synVarIndicatorImgCanvases
+
 
 let realSimulationState: MachineState = null
 let realSimulationStateCv: CvRealMachineState =  null
@@ -220,12 +246,12 @@ export function onNextRound() {
   referee.simulateNextRound(lastDiceValue)
   worldDrawer.drawWorld(worldCanvas,referee.world, referee.simulationMachineState)
 
-  referee.updateVariablesTable(variablesTableWrapperDiv)
+  referee.updateVariablesTable(variablesTableWrapperDiv, referee.simulationMachineState.globalDefTable)
 
 }
 
 
-export function onWorldInputChanged(e: any) {
+export async function onWorldInputChanged(e: any) {
 
   const files = e.currentTarget.files
   if (!files) return
@@ -238,7 +264,7 @@ export function onWorldInputChanged(e: any) {
     console.log(ev.loaded + '/' + ev.total)
   }
 
-  fileReader.onload = ev => {
+  fileReader.onload = async (ev) => {
     const json = fileReader.result as string
 
     let exportedWorld: ExportWorld | null = JSON.parse(json)
@@ -255,10 +281,23 @@ export function onWorldInputChanged(e: any) {
     referee.startNewSimulation()
 
     worldDrawer.drawWorld(worldCanvas,exportedWorld, referee.simulationMachineState)
-    referee.updateVariablesTable(variablesTableWrapperDiv)
+    referee.updateVariablesTable(variablesTableWrapperDiv, referee.simulationMachineState.globalDefTable)
 
+    //get the synthetic imgs
     synImgCanvases = worldDrawer.getWorldSyntheticImgs(exportedWorld)
-    worldDrawer.drawSyntheticImgs(debugSynImgsWrapper, synImgCanvases.map(p => p.canvas))
+
+    synGlobalVarIndicatorImgCanvases = []
+    if (trackGlobalVars) {
+      synGlobalVarIndicatorImgCanvases = await worldDrawer.getGlobalVarIndicators(exportedWorld, referee)
+    }
+
+
+    //append to document
+    worldDrawer.drawSyntheticImgs(debugSynImgsWrapper,
+      synImgCanvases.map(p => p.canvas),
+      synGlobalVarIndicatorImgCanvases.map(p => p.canvas)
+    )
+
 
   }
 
@@ -273,6 +312,8 @@ export function onWorldInputChanged(e: any) {
 export function onInitReferee() {
   referee.init()
 
+  trackGlobalVars = trackGlobalVarsCb.checked
+  console.log(`track global vars ? ${trackGlobalVars}`)
 
   const test = getSnapshot()
 
@@ -284,6 +325,7 @@ export function onInitReferee() {
 
 export function onGetHomography() {
 
+  console.log('started get homography')
   console.time('get homography')
   const snapshotWorld = getSnapshot()
 
@@ -342,6 +384,73 @@ export function onGetHomography() {
 }
 
 
+export function onGetGLobalVarIndicatorHomographies() {
+
+  if (!trackGlobalVars) return
+
+  console.log('started get homography for global vars')
+
+  console.time('get homography global vars')
+  const snapshotWorld = getSnapshot()
+
+  let synImgMats = synGlobalVarIndicatorImgCanvases.map(p => cv.imread(p.canvas))
+
+  homographyGlobalVarIndicators.forEach(p => {
+    p.synToRealMat.delete()
+    p.realToSynMat.delete()
+    p.syntheticImgMat.delete()
+  })
+
+  homographyGlobalVarIndicators = []
+  debugSynHomographyGlobalVarssWrapper.innerHTML = ""
+
+  for (let i = 0; i < synImgMats.length; i++) {
+
+    const synImgMat = synImgMats[i]
+    const tuple = synGlobalVarIndicatorImgCanvases[i]
+
+    let homography_real_to_synth = new cv.Mat()
+    let homography_synth_to_real = new cv.Mat()
+
+    //
+    let debugImg = referee.worldHelper.getWorldHomography(synImgMat, snapshotWorld, homography_real_to_synth, homography_synth_to_real);
+
+    debugImg.delete()
+
+    //the qr code is actually not really (the information from it) needed because keypoint detectr finds the right var indicator...
+    //but the qr code makes a unique (mostly) pattern (for that var) so maybe this is good for keypoint detection?
+    //TODO read qr code to get var information (e.g. needed when we have multiple?)
+
+    let copy = snapshotWorld.clone()
+
+    const _color: CvScalar = [255,0,0,255] //red, for some reason we need alpha
+    let worldCorners = referee.worldHelper.drawWorldRect(synImgMat, copy, homography_synth_to_real, _color);
+    console.log(worldCorners)
+
+    homographyGlobalVarIndicators.push({
+      realToSynMat: homography_real_to_synth,
+      synToRealMat: homography_synth_to_real,
+      entry: tuple.entry,
+      syntheticImgMat: synImgMat,
+      indicatorRect: Cvt.convertRect(worldCorners)
+    })
+
+
+    const canvas = document.createElement('canvas')
+
+    debugSynHomographyGlobalVarssWrapper.appendChild(canvas)
+
+    cv.imshow(canvas, copy)
+
+    copy.delete()
+
+  }
+
+
+  snapshotWorld.delete()
+  console.timeEnd('get homography global vars')
+}
+
 export function drawRealWorldPlain() {
 
   worldDrawer.drawWorld(worldRealCanvas, referee.world, referee.simulationMachineState)
@@ -372,7 +481,7 @@ export function drawTileFieldsOnRealImg(tuple: HomographyTuple, targetMat: any, 
 //we assume homographies are already set here
 //get the tokens, clip them on the tiles (outside of tiles is not drawn?), draw tokens on debug synthetic real field
 //does not refreshs the dice value
-export function onGetRealState()  {
+export async function onGetRealState()  {
 
   //clear
   drawRealWorldPlain()
@@ -385,8 +494,6 @@ export function onGetRealState()  {
   //if we don't do this we get wrong colors when we draw tokens?
   cv.cvtColor(snapshot, snapshot, cv.COLOR_BGRA2BGR);
 
-  const snapshotCopy = snapshot.clone()
-
   const tuple = referee.getTokens(snapshot)
   const tokens = tuple[0]
   const debugImgMat = tuple[1]
@@ -397,14 +504,27 @@ export function onGetRealState()  {
 
   //refresh single synthetic imgs
   debugSynImgsWrapper.innerHTML = ""
+
   synImgCanvases = worldDrawer.getWorldSyntheticImgs(referee.world)
-  worldDrawer.drawSyntheticImgs(debugSynImgsWrapper, synImgCanvases.map(p => p.canvas))
+
+  synGlobalVarIndicatorImgCanvases = []
+  if (trackGlobalVars) {
+    synGlobalVarIndicatorImgCanvases = await worldDrawer.getGlobalVarIndicators(referee.world, referee)
+  }
+
+  worldDrawer.drawSyntheticImgs(debugSynImgsWrapper,
+    synImgCanvases.map(p => p.canvas),
+    synGlobalVarIndicatorImgCanvases.map(p => p.canvas)
+  )
+
+  const _color: CvScalar = [200,100,10,255] //orange
 
   for(let i = 0; i < homographies.length;i++) {
     const homography = homographies[i]
 
-    const _color: CvScalar = [200,100,10,255] //orange
     let worldCornersVec = referee.worldHelper.drawWorldRect(homography.syntheticImgMat, debugImgMat, homography.synToRealMat, _color);
+    console.log(worldCornersVec)
+
     // const tileRect = Cvt.convertRect(worldCornersVec)
 
     drawTileFieldsOnRealImg(homography, debugImgMat, maxDiffInPx)
@@ -414,10 +534,10 @@ export function onGetRealState()  {
     const synImgCanvas = synImgCanvases[i]
     const synImgMat = cv.imread(synImgCanvas.canvas)
 
-    //then draw tokens on this tile
+    //then draw tokens on this tile (on the synthetic img)
 
     for(const token of tokens) {
-      if (refereeHelper.isTokenInTile(token, homography.tileRect, maxDiffInPx) === false) continue
+      if (refereeHelper.isTokenInRect(token, homography.tileRect, maxDiffInPx) === false) continue
       const tokenPos: CvRect = referee.worldHelper.perspectiveTransformRect(token.bbox, homography.realToSynMat)
       const _color: CvScalar = [255,0,0,255] //red for some reason we need alpha
       referee.worldHelper.drawRect(tokenPos, synImgMat, _color)
@@ -498,6 +618,11 @@ export function onGetRealState()  {
     })
   }
 
+  if (trackGlobalVars) {
+    tempMachineState = _getGlobalVarIndicators(snapshot, tokens, debugImgMat, maxDiffInPx, tempMachineState)
+  }
+  
+
   realSimulationState = tempMachineState
 
   realSimulationStateCv = {
@@ -505,15 +630,98 @@ export function onGetRealState()  {
     tokenPositions: tokenPositions,
     players: tempMachineState.players,
     rolledDiceValue: lastDiceValue
-
   }
+
+  referee.updateVariablesTable(variablesTableRealWrapperDiv, realSimulationStateCv.globalDefTable)
+
+  console.log(realSimulationStateCv)
 
   worldDrawer.drawWorld(worldRealCanvas, referee.world, tempMachineState)
 
-  snapshotCopy.delete()
   debugImgMat.delete()
   snapshot.delete()
 
+}
+
+//returns [new state, debugImgMat]
+function _getGlobalVarIndicators(snapshotMat: any, tokens: CvToken[], debugImgMat: any, maxDiffInPx: number, machineState: MachineState): MachineState {
+
+  const _color2: CvScalar = [200,100,10,255] //orange
+
+  for(let i = 0; i < homographyGlobalVarIndicators.length;i++) {
+    const homography = homographyGlobalVarIndicators[i]
+
+    let worldCornersVec = referee.worldHelper.drawWorldRect(homography.syntheticImgMat, debugImgMat, homography.synToRealMat, _color);
+    cv.imshow(canvasSnapshot, debugImgMat)
+
+    let numFields = 1
+    let entry = homography.entry
+
+    if (isBoolVar(homography.entry)) {
+        numFields = 2
+    } else if (isIntVar(homography.entry)) {
+      numFields = homography.entry.maxVal*2+1
+    }
+
+    const indicatorSynRect: CvRect = {
+      x: 0,
+      y: 0,
+      width: homography.syntheticImgMat.cols,
+      height: homography.syntheticImgMat.rows
+    }
+
+
+    const position = refereeHelper.getVarValuesFromIndicator(tokens, entry.ident, numFields, indicatorSynRect, homography.indicatorRect, referee.playerColorMap, homography.realToSynMat, referee.worldHelper, false, maxDiffInPx)
+
+    if (position === null) continue
+
+    //draw positions on indicator
+    const synGlobalVarIndicatorImgCanvas = synGlobalVarIndicatorImgCanvases[i]
+
+
+    const synImgMat = cv.imread(synGlobalVarIndicatorImgCanvas.canvas)
+    const _color: CvScalar = [255,0,0,255] //red for some reason we need alpha
+
+
+    for(const token of tokens) {
+      if (refereeHelper.isTokenInRect(token, homography.indicatorRect, maxDiffInPx) === false) continue
+
+      const tokenPos: CvRect = referee.worldHelper.perspectiveTransformRect(token.bbox, homography.realToSynMat)
+
+      referee.worldHelper.drawRect(tokenPos, synImgMat, _color)
+
+      cv.imshow(synGlobalVarIndicatorImgCanvas.canvas, synImgMat)
+    }
+
+    if (isBoolVar(entry)) {
+      machineState = {
+        ...machineState,
+        globalDefTable: {
+          ...machineState.globalDefTable,
+          [entry.ident]: {
+            ...entry,
+            boolVal: position.value === 0 ? false : true
+          } as DefinitionTableBoolEntry
+        }
+      }
+    }
+    else if (isIntVar(entry)) {
+      machineState = {
+        ...machineState,
+        globalDefTable: {
+          ...machineState.globalDefTable,
+          [entry.ident]: {
+            ...entry,
+            val: position.value //TOOD maybe make sure we are in the bounds of maxVal??
+          } as DefinitionTableIntEntry
+        }
+      }
+    }
+
+    synImgMat.delete()
+  }
+
+  return machineState
 }
 
 
@@ -527,7 +735,7 @@ export function onCompareStatesClicked()  {
     console.log(`get the real state first`)
   }
 
-  const checkGlobalVars = false
+  const checkGlobalVars = trackGlobalVars
   const checkPlayerVars = false
 
   const res = refereeHelper.compareStates(referee.simulationMachineState, realSimulationStateCv, checkGlobalVars, checkPlayerVars)
