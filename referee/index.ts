@@ -621,7 +621,7 @@ export async function onGetRealState()  {
   if (trackGlobalVars) {
     tempMachineState = _getGlobalVarIndicators(snapshot, tokens, debugImgMat, maxDiffInPx, tempMachineState)
   }
-  
+
 
   realSimulationState = tempMachineState
 
@@ -651,7 +651,7 @@ function _getGlobalVarIndicators(snapshotMat: any, tokens: CvToken[], debugImgMa
   for(let i = 0; i < homographyGlobalVarIndicators.length;i++) {
     const homography = homographyGlobalVarIndicators[i]
 
-    let worldCornersVec = referee.worldHelper.drawWorldRect(homography.syntheticImgMat, debugImgMat, homography.synToRealMat, _color);
+    let worldCornersVec = referee.worldHelper.drawWorldRect(homography.syntheticImgMat, debugImgMat, homography.synToRealMat, _color2);
     cv.imshow(canvasSnapshot, debugImgMat)
 
     let numFields = 1
