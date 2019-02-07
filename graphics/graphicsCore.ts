@@ -36,15 +36,67 @@ import {Logger} from "../src/helpers/logger";
 const Bezier = require("bezier-js") //used to calculate the arrow head/tail degree
 
 
-export enum DragHandlePos {
-  topLeft,
-  topCenter,
-  topRight,
-  botLeft,
-  botCenter,
-  botRight,
-  centerLeft,
-  centerRight
+/**
+ *
+ * @param stage
+ * @param width
+ * @param height
+ * @param xOffset
+ * @param yOffset
+ * @param whichBorders css like border bools indicating which border(s) to draw: [0] top border, [1] right, [2] bottom, [3] left
+ * @param borderWidths
+ */
+export function drawBorder(stage: Stage, width: number, height: number, gridStrokeColor: string, xOffset: number, yOffset: number,
+                           whichBorders: [boolean, boolean, boolean, boolean], borderWidths: [number, number, number, number],
+                           offsetAdjusts: [number, number, number, number]): void {
+
+  if (whichBorders[0]) {
+    let topLine = new createjs.Shape()
+    topLine.graphics
+      .setStrokeStyle(borderWidths[0])
+      .beginStroke(gridStrokeColor)
+      .moveTo(0 + xOffset, 0 + yOffset - offsetAdjusts[0])
+      .lineTo(width + xOffset, 0 + yOffset - offsetAdjusts[0])
+    topLine.mouseEnabled = false
+    stage.addChild(topLine)
+  }
+
+
+  if (whichBorders[1]) {
+    let rightLine = new createjs.Shape()
+    rightLine.graphics
+      .setStrokeStyle(borderWidths[1])
+      .beginStroke(gridStrokeColor)
+      .moveTo(width + xOffset + offsetAdjusts[1], 0 + yOffset)
+      .lineTo(width + xOffset + offsetAdjusts[1], height + yOffset)
+    rightLine.mouseEnabled = false
+    stage.addChild(rightLine)
+  }
+
+  if (whichBorders[2]) {
+    let botLine = new createjs.Shape()
+    botLine.graphics
+      .setStrokeStyle(borderWidths[2])
+      .beginStroke(gridStrokeColor)
+      .moveTo(0 + xOffset, height + yOffset + offsetAdjusts[2])
+      .lineTo(width + xOffset, height + yOffset + offsetAdjusts[2])
+    botLine.mouseEnabled = false
+    stage.addChild(botLine)
+  }
+
+
+  if (whichBorders[3]) {
+    let leftLine = new createjs.Shape()
+    leftLine.graphics
+      .setStrokeStyle(borderWidths[3])
+      .beginStroke(gridStrokeColor)
+      .moveTo(0 + xOffset - offsetAdjusts[3], 0 + yOffset)
+      .lineTo(0 + xOffset - offsetAdjusts[3], height + yOffset)
+    leftLine.mouseEnabled = false
+    stage.addChild(leftLine)
+  }
+
+
 }
 
 export function drawGrid(stage: Stage, width: number, height: number, gridSizeInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string, onlyBorder: boolean, xOffset: number, yOffset: number): void {
@@ -815,7 +867,7 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
           tStart = 0.5
         }
 
-        if (symbolForShape !== null  && symbolForShape.overwriteHasEndArrow ? symbolForShape.hasEndArrow : pathLine.hasEndArrow) {
+        if (symbolForShape !== null && symbolForShape.overwriteHasEndArrow ? symbolForShape.hasEndArrow : pathLine.hasEndArrow) {
           tEnd = 0.5
         }
 
@@ -855,7 +907,7 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
   let endPoint: PlainPoint = pathLine.points[pathLine.points.length - 1]
 
   //start arrow
-  if ((symbolForShape !== null  && symbolForShape.overwriteHasStartArrow ? symbolForShape.hasStartArrow : pathLine.hasStartArrow)) {
+  if ((symbolForShape !== null && symbolForShape.overwriteHasStartArrow ? symbolForShape.hasStartArrow : pathLine.hasStartArrow)) {
 
     //too lazy... https://gist.github.com/conorbuck/2606166
     const p1 = pathLine.startPoint
@@ -870,8 +922,8 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
     const p0 = pathLine.points[0]
     const b = new Bezier(p1.x, p1.y, p0.cp1.x, p0.cp1.y, p0.cp2.x, p0.cp2.y, p0.x, p0.y)
 
-    const arrowWidth = ( symbolForShape !== null && symbolForShape.overwriteArrowWidth ? symbolForShape.arrowWidth : pathLine.arrowWidth)
-    const arrowHeight = ( symbolForShape !== null && symbolForShape.overwriteArrowHeight ? symbolForShape.arrowHeight : pathLine.arrowHeight)
+    const arrowWidth = (symbolForShape !== null && symbolForShape.overwriteArrowWidth ? symbolForShape.arrowWidth : pathLine.arrowWidth)
+    const arrowHeight = (symbolForShape !== null && symbolForShape.overwriteArrowHeight ? symbolForShape.arrowHeight : pathLine.arrowHeight)
 
     const arrowLength = arrowHeight / 2
     const percentageArrowLength = arrowLength / b.length()
@@ -893,8 +945,8 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
 
 
     lineShape.graphics
-      .beginFill(symbolForShape !== null  && symbolForShape.overwriteColor ? symbolForShape.color : pathLine.color)
-      .setStrokeStyle(symbolForShape !== null  && symbolForShape.overwriteThicknessInPx ? symbolForShape.lineThicknessInPx : pathLine.lineThicknessInPx)
+      .beginFill(symbolForShape !== null && symbolForShape.overwriteColor ? symbolForShape.color : pathLine.color)
+      .setStrokeStyle(symbolForShape !== null && symbolForShape.overwriteThicknessInPx ? symbolForShape.lineThicknessInPx : pathLine.lineThicknessInPx)
       .moveTo(p1.x + xOffset, p1.y + yOffset)
       .lineTo(rotatedRightArrowHeadPoint.x + xOffset, rotatedRightArrowHeadPoint.y + yOffset)
       .lineTo(rotatedLeftArrowHeadPoint.x + xOffset, rotatedLeftArrowHeadPoint.y + yOffset)
@@ -906,7 +958,7 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
   }
 
   //end arrow
-  if ((symbolForShape !== null  && symbolForShape.overwriteHasEndArrow ? symbolForShape.hasEndArrow : pathLine.hasEndArrow)) {
+  if ((symbolForShape !== null && symbolForShape.overwriteHasEndArrow ? symbolForShape.hasEndArrow : pathLine.hasEndArrow)) {
 
     //too lazy... https://gist.github.com/conorbuck/2606166
     const p2 = pathLine.points[pathLine.points.length - 1].cp2 //point before end
@@ -923,8 +975,8 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
 
     const b = new Bezier(p0.x, p0.y, p1.cp1.x, p1.cp1.y, p1.cp2.x, p1.cp2.y, p1.x, p1.y)
 
-    const arrowWidth = ( symbolForShape !== null && symbolForShape.overwriteArrowWidth ? symbolForShape.arrowWidth : pathLine.arrowWidth)
-    const arrowHeight = ( symbolForShape !== null && symbolForShape.overwriteArrowHeight ? symbolForShape.arrowHeight : pathLine.arrowHeight)
+    const arrowWidth = (symbolForShape !== null && symbolForShape.overwriteArrowWidth ? symbolForShape.arrowWidth : pathLine.arrowWidth)
+    const arrowHeight = (symbolForShape !== null && symbolForShape.overwriteArrowHeight ? symbolForShape.arrowHeight : pathLine.arrowHeight)
 
     const arrowLength = arrowHeight / 2
     const percentageArrowLength = arrowLength / b.length()
@@ -948,8 +1000,8 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
 
 
     lineShape.graphics
-      .beginFill(symbolForShape !== null  && symbolForShape.overwriteColor ? symbolForShape.color : pathLine.color)
-      .setStrokeStyle(symbolForShape !== null  && symbolForShape.overwriteThicknessInPx ? symbolForShape.lineThicknessInPx : pathLine.lineThicknessInPx)
+      .beginFill(symbolForShape !== null && symbolForShape.overwriteColor ? symbolForShape.color : pathLine.color)
+      .setStrokeStyle(symbolForShape !== null && symbolForShape.overwriteThicknessInPx ? symbolForShape.lineThicknessInPx : pathLine.lineThicknessInPx)
       .moveTo(p1.x + xOffset, p1.y + yOffset)
       .lineTo(rotatedRightArrowHeadPoint.x + xOffset, rotatedRightArrowHeadPoint.y + yOffset)
       .lineTo(rotatedLeftArrowHeadPoint.x + xOffset, rotatedLeftArrowHeadPoint.y + yOffset)
@@ -966,9 +1018,9 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
 
 
   lineShape.graphics
-    .beginStroke(symbolForShape !== null  && symbolForShape.overwriteColor ? symbolForShape.color : pathLine.color)
-    .setStrokeStyle(symbolForShape !== null  && symbolForShape.overwriteThicknessInPx ? symbolForShape.lineThicknessInPx : pathLine.lineThicknessInPx)
-    .setStrokeDash((symbolForShape !== null  && symbolForShape.overwriteGapsInPx ? symbolForShape.dashArray : pathLine.dashArray) as number[])
+    .beginStroke(symbolForShape !== null && symbolForShape.overwriteColor ? symbolForShape.color : pathLine.color)
+    .setStrokeStyle(symbolForShape !== null && symbolForShape.overwriteThicknessInPx ? symbolForShape.lineThicknessInPx : pathLine.lineThicknessInPx)
+    .setStrokeDash((symbolForShape !== null && symbolForShape.overwriteGapsInPx ? symbolForShape.dashArray : pathLine.dashArray) as number[])
     .moveTo(startPoint.x + xOffset, startPoint.y + yOffset)
 
 
@@ -1190,8 +1242,8 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
   let container = new createjs.Container()
   const img = ImgStorage.getImgFromGuid(symbolForShape !== null && symbolForShape.overwriteImage ? symbolForShape.imgGuid : imgShape.imgGuid)
 
-  let imgWidth = (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width)
-  let imgHeight = (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
+  let imgWidth = (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width)
+  let imgHeight = (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
 
   //--start
   let bitmap: Bitmap
@@ -1209,14 +1261,14 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     border.graphics.drawRect(
       0 - imgNotFoundStrokeThickness,
       0 - imgNotFoundStrokeThickness,
-      (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) + imgNotFoundStrokeThickness * 2,
-      (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + imgNotFoundStrokeThickness * 2
+      (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) + imgNotFoundStrokeThickness * 2,
+      (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + imgNotFoundStrokeThickness * 2
     )
 
     border.setBounds(0 - imgNotFoundStrokeThickness,
       0 - imgNotFoundStrokeThickness,
-      (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) + imgNotFoundStrokeThickness * 2,
-      (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + imgNotFoundStrokeThickness * 2
+      (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) + imgNotFoundStrokeThickness * 2,
+      (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + imgNotFoundStrokeThickness * 2
     )
 
     let lineXLeft = new createjs.Shape()
@@ -1254,8 +1306,8 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     bitmap.setBounds(
       imgShape.x + xOffset,
       imgShape.y + yOffset,
-      (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width),
-      (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
+      (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width),
+      (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
     )
 
     //this was old without setting the scale
@@ -1292,13 +1344,13 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     container.addChild(bitmap)
   }
 
-  container.x = imgShape.x + xOffset + (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) / 2
-  container.y = imgShape.y + yOffset + (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) / 2
-  container.regX = (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) / 2
-  container.regY = (symbolForShape !== null   && symbolForShape.overwriteHeight? symbolForShape.height : imgShape.height) / 2
+  container.x = imgShape.x + xOffset + (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) / 2
+  container.y = imgShape.y + yOffset + (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) / 2
+  container.regX = (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) / 2
+  container.regY = (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) / 2
 
-  container.skewX = (symbolForShape !== null  && symbolForShape.overwriteSkewX ? symbolForShape.skewX : imgShape.skewX)
-  container.skewY = (symbolForShape !== null   && symbolForShape.overwriteSkewY? symbolForShape.skewY : imgShape.skewY)
+  container.skewX = (symbolForShape !== null && symbolForShape.overwriteSkewX ? symbolForShape.skewX : imgShape.skewX)
+  container.skewY = (symbolForShape !== null && symbolForShape.overwriteSkewY ? symbolForShape.skewY : imgShape.skewY)
 
 
   //when we use an svg with width="100%" height="100%" viewBox="0 0 41 103" then the hit test is always wrong
@@ -1315,8 +1367,8 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     .drawRect(
       0,
       0,
-      (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width),
-      (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
+      (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width),
+      (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
     )
   container.hitArea = hitTestShape
 
@@ -1331,8 +1383,8 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     border.graphics.drawRect(
       xOffset - borderThickness,
       yOffset - borderThickness,
-      (symbolForShape !== null  && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) + borderThickness * 2,
-      (symbolForShape !== null  && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + borderThickness * 2
+      (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) + borderThickness * 2,
+      (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + borderThickness * 2
     )
 
     // border.regX = imgShape.width / 2
@@ -1344,7 +1396,7 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
 
   // container.regX = imgShape.width / 2
   // container.regY = imgShape.height / 2
-  container.rotation = (symbolForShape !== null  && symbolForShape.overwriteRotationInDeg ? symbolForShape.rotationInDegree : imgShape.rotationInDegree)
+  container.rotation = (symbolForShape !== null && symbolForShape.overwriteRotationInDeg ? symbolForShape.rotationInDegree : imgShape.rotationInDegree)
 
   if (symbolForShape !== null && drawBasedOnSymbolIndicator) {
     //draw a symbol so that the user knows that this shape is connected to a symbol
@@ -1384,7 +1436,7 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
 
   stage.addChild(container)
 
-  if (symbolForShape !== null  && symbolForShape.overwriteIsDisabledForMouseSelection ? symbolForShape.isMouseSelectionDisabled : imgShape.isMouseSelectionDisabled) {
+  if (symbolForShape !== null && symbolForShape.overwriteIsDisabledForMouseSelection ? symbolForShape.isMouseSelectionDisabled : imgShape.isMouseSelectionDisabled) {
     container.mouseEnabled = false
     container.alpha = 0.5
   }

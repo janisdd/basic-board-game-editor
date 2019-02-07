@@ -1,6 +1,6 @@
 {
   "name": "basic-board-game-editor",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "a basic editor for board games",
   "scripts": {
     "dev": "node node_modules/.bin/webpack-dev-server --host 0.0.0.0",

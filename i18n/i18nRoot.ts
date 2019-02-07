@@ -64,6 +64,8 @@ export interface LangObj {
   "Tile height": string
   "Print scale": string
   "The images will be scaled by this factor. If it is less than 1 then the images will be larger, if is more than 1 the images will be smaller": string
+  "Additional border width": string
+  "Every export or print image will include a black border with this width (might be better for cutting). Note that the real width will be only half that width because the other half is clipped because of the image dimension.": string
   "Game setup code": string
   "Click to validate the code": string
   //---- world settings simulation times
