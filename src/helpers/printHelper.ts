@@ -45,8 +45,7 @@ export class PrintHelper {
     drawQrCode: boolean,
     format: 'svg' | 'png'
     //no scale here because one can change the size manually... also these are already optimized for A4 (one per page)
-  )
-  {
+  ) {
 
     let canvas = document.createElement('canvas')
 
@@ -126,6 +125,7 @@ export class PrintHelper {
    * @param fillBackgroundColor null for transparent or the color for the background
    * @param format
    * @param printScale the scale e.g. to print one tile on A4 (default should be 1)
+   * @param additionalBorderWidthInPx
    */
   public static exportTileAsLargeImg(
     tile: Tile,
@@ -136,7 +136,8 @@ export class PrintHelper {
     worldSettings: WorldSettings,
     fillBackgroundColor: string | null,
     format: 'svg' | 'png',
-    printScale: number
+    printScale: number,
+    additionalBorderWidthInPx: number
   ) {
 
     let canvas = document.createElement('canvas')
@@ -157,7 +158,8 @@ export class PrintHelper {
       gridStrokeColor,
       worldSettings,
       fillBackgroundColor,
-      printScale
+      printScale,
+      additionalBorderWidthInPx
     )
 
     if (format === 'svg') {
@@ -204,6 +206,7 @@ export class PrintHelper {
    * @param fillBackgroundColor null for transparent or the color for the background
    * @param format
    * @param printScale the scale e.g. to print one tile on A4 (default should be 1) (not for svg)
+   * @param additionalBorderWidthInPx
    */
   public static exportWorldAsLargeImage(
     tileSurrogates: ReadonlyArray<WorldTileSurrogate>,
@@ -216,11 +219,14 @@ export class PrintHelper {
     worldSettings: WorldSettings,
     fillBackgroundColor: string | null,
     format: 'svg' | 'png',
-    printScale: number
+    printScale: number,
+    additionalBorderWidthInPx: number
   ) {
 
     //reset for svg
     printScale = format === 'svg' ? 1 : printScale
+
+    const shouldPrintBorder = additionalBorderWidthInPx > 0
 
     const tilesWidth = tilesToPrint[0].tileSettings.width
     const tilesHeight = tilesToPrint[0].tileSettings.height
@@ -268,6 +274,72 @@ export class PrintHelper {
           i * tilesWidth,
           j * tilesHeight
         )
+
+        if (shouldPrintBorder) {
+          //only tiles on the sides needs borders...
+
+          //for quadratic games this is enough but we could have holes..
+          // let hasTopBorder = j === 0
+          // let hasRightBorder = i === widthInTiles - 1
+          // let hasBottomBorder = j === heightInTiles - 1
+          // let hasLeftBorder = i === 0
+
+          //so overwrite
+
+          const neighbors = this.hasNeighbors(i, j, tileSurrogates)
+
+          //only draw border if we have no neighbor in the direction
+          let hasTopBorder = neighbors[0] === false
+          let hasRightBorder = neighbors[1] === false
+          let hasBottomBorder = neighbors[2] === false
+          let hasLeftBorder = neighbors[3] === false
+
+          //note that borders are drawn from the middle of the coordinates
+          //so for tiles on the sides we get only additionalPrintBorderWidthInPx / 2 widths...
+          //make sure all widths are additionalPrintBorderWidthInPx / 2
+
+          //some side tiles some borders can use the full width because they will be clipped to / 2 width
+          let topWidth = j === 0 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
+          let rightWidth = i === widthInTiles - 1 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
+          let botWidth = j === heightInTiles - 1 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
+          let leftWidth = i === 0 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
+
+          //when the size was 5 we made all borders to be 2.5 px
+          //but for the changed width borders we use 2.5px which would draw:  1.75 | 1.75 px
+          //so we need to move the starting position a bit so we get: | 2.5 px where | is the border start
+          //so we move by 2.5 / 2 --> additionalPrintBorderWidthInPx / 4
+          let topAdjust = j === 0 ? 0 : additionalBorderWidthInPx / 4
+          let rightAdjust = i === widthInTiles - 1 ? 0 : additionalBorderWidthInPx / 4
+          let botAdjust = j === heightInTiles - 1 ? 0 : additionalBorderWidthInPx / 4
+          let leftAdjust = i === 0 ? 0 : additionalBorderWidthInPx / 4
+
+          graphics.drawBorder(
+            stage,
+            tilesWidth,
+            tilesHeight,
+            'black',
+            i * tilesWidth,
+            j * tilesHeight,
+            [
+              hasTopBorder,
+              hasRightBorder,
+              hasBottomBorder,
+              hasLeftBorder
+            ],
+            [
+              topWidth,
+              rightWidth,
+              botWidth,
+              leftWidth
+            ],
+            [
+              topAdjust,
+              rightAdjust,
+              botAdjust,
+              leftAdjust,
+            ]
+          )
+        }
 
         const tile = allTiles.find(p => p.guid === tileSurrogate.tileGuid)
 
@@ -344,7 +416,7 @@ export class PrintHelper {
       }
     }
 
-    for(const bgRect of bgRects) {
+    for (const bgRect of bgRects) {
       stage.setChildIndex(bgRect, 0)
     }
 
@@ -399,6 +471,7 @@ export class PrintHelper {
    *
    * @param fillBackgroundColor null for transparent or the color for the background
    * @param printScale the scale e.g. to print one tile on A4 (default should be 1)
+   * @param additionalBorderWidthInPx the additional border (black) to print, <= 0 for none
    */
   public static printLargeTile(tile: Tile,
                                fieldSymbols: ReadonlyArray<FieldSymbol>,
@@ -413,7 +486,8 @@ export class PrintHelper {
                                splitLargeTileForPrint: boolean,
                                langId: KnownLangs,
                                fillBackgroundColor: string | null,
-                               printScale: number
+                               printScale: number,
+                               additionalBorderWidthInPx: number
   ) {
 
     //allow any print tile size
@@ -451,7 +525,7 @@ export class PrintHelper {
     }
 
     const stage = this.printFullTile(tile, fieldSymbols, imgSymbols, lineSymbols, canvas, drawGrid, gridSizeInPx,
-      gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor, printScale)
+      gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor, printScale, additionalBorderWidthInPx)
 
     stage.scaleX = stage.scaleY = scaleFactor
     stage.update()
@@ -539,14 +613,13 @@ export class PrintHelper {
 
 
   public static printFullTile(tile: Tile,
-                               fieldSymbols: ReadonlyArray<FieldSymbol>,
-                               imgSymbols: ReadonlyArray<ImgSymbol>,
-                               lineSymbols: ReadonlyArray<LineSymbol>,
-                               canvas: HTMLCanvasElement, drawGrid: boolean, gridSizeInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string, worldSettings: WorldSettings,
-                               fillBackgroundColor: string | null,
-                               printScale: number,
-                               printBlackBorderForDetector: boolean = false,
-                               printBorderWidth: number = 5
+                              fieldSymbols: ReadonlyArray<FieldSymbol>,
+                              imgSymbols: ReadonlyArray<ImgSymbol>,
+                              lineSymbols: ReadonlyArray<LineSymbol>,
+                              canvas: HTMLCanvasElement, drawGrid: boolean, gridSizeInPx: number, gridStrokeThicknessInPx: number, gridStrokeColor: string, worldSettings: WorldSettings,
+                              fillBackgroundColor: string | null,
+                              printScale: number,
+                              additionalPrintBorderWidthInPx: number
   ): createjs.Stage {
 
     const zIndexCache: ZIndexCache = {}
@@ -563,15 +636,28 @@ export class PrintHelper {
     // const width = canvas.width
     // const height = canvas.height
 
-
-
     //canvas size is larger for printing (scaled) so use the tile size
-    if (printBlackBorderForDetector) {
-      graphics.drawGrid(stage, tile.tileSettings.width, tile.tileSettings.height, gridSizeInPx, printBorderWidth, 'black', true,
+
+    const shouldPrintBorder = additionalPrintBorderWidthInPx > 0
+
+
+    if (drawGrid && shouldPrintBorder === false) {
+      graphics.drawGrid(stage, tile.tileSettings.width, tile.tileSettings.height, gridSizeInPx, gridStrokeThicknessInPx, gridStrokeColor, false,
         0, 0)
-    }
-    else {
-      graphics.drawGrid(stage, tile.tileSettings.width, tile.tileSettings.height, gridSizeInPx, gridStrokeThicknessInPx, gridStrokeColor, !drawGrid,
+    } else if (drawGrid && shouldPrintBorder) {
+
+      graphics.drawGrid(stage, tile.tileSettings.width, tile.tileSettings.height, gridSizeInPx, gridStrokeThicknessInPx, gridStrokeColor, false,
+        0, 0)
+
+      graphics.drawGrid(stage, tile.tileSettings.width, tile.tileSettings.height, gridSizeInPx, additionalPrintBorderWidthInPx, 'black', true,
+        0, 0)
+    } else if (!drawGrid && shouldPrintBorder) {
+      graphics.drawGrid(stage, tile.tileSettings.width, tile.tileSettings.height, gridSizeInPx, additionalPrintBorderWidthInPx, 'black', true,
+        0, 0)
+    } else {
+      //no grid, no border --> only draw grid color as border
+
+      graphics.drawGrid(stage, tile.tileSettings.width, tile.tileSettings.height, gridSizeInPx, gridStrokeThicknessInPx, gridStrokeColor, true,
         0, 0)
     }
 
@@ -787,6 +873,7 @@ export class PrintHelper {
    * @param drawQrCode
    * @param fillBackgroundColor null for transparent or the color for the background
    * @param printScale the scale e.g. to print one tile on A4 (default should be 1)
+   * @param additionalBorderWidthInPx the black border to add to the printed images
    */
   public static async printWorld(
     tileSurrogates: ReadonlyArray<WorldTileSurrogate>,
@@ -809,7 +896,8 @@ export class PrintHelper {
     variableIndicatorStrokeThickness: number,
     drawQrCode: boolean,
     fillBackgroundColor: string | null,
-    printScale: number
+    printScale: number,
+    additionalBorderWidthInPx: number
   ): Promise<void> {
 
 
@@ -828,6 +916,7 @@ export class PrintHelper {
     scaleFactor = scaleFactor * printScale
 
     let printTileCount = 0
+    const shouldPrintBorder = additionalBorderWidthInPx > 0
 
     if (onlyWholeWorld) {
 
@@ -863,8 +952,8 @@ export class PrintHelper {
 
       const bgRects: Shape[] = []
 
-      for (let i = 0; i < widthInTiles; i++) {
-        for (let j = 0; j < heightInTiles; j++) {
+      for (let i = 0; i < widthInTiles; i++) { // 0 ... width
+        for (let j = 0; j < heightInTiles; j++) { // 0 ... height
 
           const tileSurrogate = WorldTilesHelper.getTileFromPos(i, j, tileSurrogates)
 
@@ -881,6 +970,72 @@ export class PrintHelper {
             i * tilesWidth,
             j * tilesHeight
           )
+
+          if (shouldPrintBorder) {
+            //only tiles on the sides needs borders...
+
+            //for quadratic games this is enough but we could have holes..
+            // let hasTopBorder = j === 0
+            // let hasRightBorder = i === widthInTiles - 1
+            // let hasBottomBorder = j === heightInTiles - 1
+            // let hasLeftBorder = i === 0
+
+            //so overwrite
+
+            const neighbors = this.hasNeighbors(i, j, tileSurrogates)
+
+            //only draw border if we have no neighbor in the direction
+            let hasTopBorder = neighbors[0] === false
+            let hasRightBorder = neighbors[1] === false
+            let hasBottomBorder = neighbors[2] === false
+            let hasLeftBorder = neighbors[3] === false
+
+            //note that borders are drawn from the middle of the coordinates
+            //so for tiles on the sides we get only additionalPrintBorderWidthInPx / 2 widths...
+            //make sure all widths are additionalPrintBorderWidthInPx / 2
+
+            //some side tiles some borders can use the full width because they will be clipped to / 2 width
+            let topWidth = j === 0 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
+            let rightWidth = i === widthInTiles - 1 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
+            let botWidth = j === heightInTiles - 1 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
+            let leftWidth = i === 0 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
+
+            //when the size was 5 we made all borders to be 2.5 px
+            //but for the changed width borders we use 2.5px which would draw:  1.75 | 1.75 px
+            //so we need to move the starting position a bit so we get: | 2.5 px where | is the border start
+            //so we move by 2.5 / 2 --> additionalPrintBorderWidthInPx / 4
+            let topAdjust = j === 0 ? 0 : additionalBorderWidthInPx / 4
+            let rightAdjust = i === widthInTiles - 1 ? 0 : additionalBorderWidthInPx / 4
+            let botAdjust = j === heightInTiles - 1 ? 0 : additionalBorderWidthInPx / 4
+            let leftAdjust = i === 0 ? 0 : additionalBorderWidthInPx / 4
+
+            graphics.drawBorder(
+              stage,
+              tilesWidth,
+              tilesHeight,
+              'black',
+              i * tilesWidth,
+              j * tilesHeight,
+              [
+                hasTopBorder,
+                hasRightBorder,
+                hasBottomBorder,
+                hasLeftBorder
+              ],
+              [
+                topWidth,
+                rightWidth,
+                botWidth,
+                leftWidth
+              ],
+              [
+                topAdjust,
+                rightAdjust,
+                botAdjust,
+                leftAdjust,
+              ]
+            )
+          }
 
           const tile = allTiles.find(p => p.guid === tileSurrogate.tileGuid)
 
@@ -957,17 +1112,16 @@ export class PrintHelper {
         }
       }
 
-     for(const bgRect of bgRects) {
-       stage.setChildIndex(bgRect, 0)
-     }
+      for (const bgRect of bgRects) {
+        stage.setChildIndex(bgRect, 0)
+      }
 
       stage.scaleX = stage.scaleY = scaleFactor
       stage.update()
 
       printWindow.document.body.appendChild(fullGameCanvas)
 
-    }
-    else {
+    } else {
       //print all tiles
       for (let i = 0; i < tilesToPrint.length; i++) {
         const printTile = tilesToPrint[i]
@@ -1008,7 +1162,7 @@ export class PrintHelper {
 
         const stage = this.printFullTile(printTile, fieldSymbols, imgSymbols, lineSymbols, canvas, drawGrid,
           gridSizeInPx,
-          gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor, printScale,true)
+          gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor, printScale, additionalBorderWidthInPx)
 
         stage.scaleX = stage.scaleY = scaleFactor
         stage.update()
@@ -1031,8 +1185,7 @@ export class PrintHelper {
 
         if (uniqueTiles.find(p => p.guid === tile.guid)) {
           //we have a tile >1 tiles... we only need 1 var tile for this
-        }
-        else {
+        } else {
           uniqueTiles.push(tile)
         }
       }
@@ -1201,9 +1354,7 @@ export class PrintHelper {
         fillBackgroundColor,
         drawQrCode
       )
-    }
-
-    else if (isBoolVar(entry)) {
+    } else if (isBoolVar(entry)) {
       await VariableIndicatorDrawer.drawVariableIndicator(stage,
         width, height,
         outerCircleDiameterInPx,
@@ -1243,8 +1394,7 @@ export class PrintHelper {
       idCheckboxDataAttributeKey: string
       idCheckboxDataSetKey: string,
       fullCanvasClass: string
-    }
-    {
+    } {
 
     const checkAllCheckboxesString = getI18n(langId, "Check all")
     const uncheckAllCheckboxesString = getI18n(langId, "Uncheck all")
@@ -1367,6 +1517,30 @@ export class PrintHelper {
       idCheckboxDataSetKey,
       fullCanvasClass
     }
+  }
+
+  /**
+   * returns an array (css order, [0] top, [1] right, [2] bottom, [3] left) indicating if the tile has an neighbor in this direction
+   * @param posInTilesX
+   * @param posInTilesY
+   * @param tileSurrogates
+   */
+  static hasNeighbors(posInTilesX: number, posInTilesY: number, tileSurrogates: ReadonlyArray<WorldTileSurrogate>): [boolean, boolean, boolean, boolean] {
+
+    const topNeighbor = WorldTilesHelper.getTileFromPos(posInTilesX, posInTilesY - 1, tileSurrogates)
+
+    const rightNeighbor = WorldTilesHelper.getTileFromPos(posInTilesX + 1, posInTilesY, tileSurrogates)
+
+    const botNeighbor = WorldTilesHelper.getTileFromPos(posInTilesX, posInTilesY + 1, tileSurrogates)
+
+    const leftNeighbor = WorldTilesHelper.getTileFromPos(posInTilesX - 1, posInTilesY, tileSurrogates)
+
+    return [
+      topNeighbor != null,
+      rightNeighbor != null,
+      botNeighbor != null,
+      leftNeighbor != null,
+    ]
   }
 
 }

@@ -62,6 +62,8 @@ export const lang_en: LangObj = {
   "Tile height": "Tile height",
   "Print scale": "Print scale",
   "The images will be scaled by this factor. If it is less than 1 then the images will be larger, if is more than 1 the images will be smaller": "The images will be scaled by this factor. If it is less than 1 then the images will be larger, if is more than 1 the images will be smaller",
+  "Additional border width" : "Additional border width",
+  "Every export or print image will include a black border with this width (might be better for cutting). Note that the real width will be only half that width because the other half is clipped because of the image dimension." : "Every export or print image will include a black border with this width (might be better for cutting). Note that the real width will be only half that width because the other half is clipped because of the image dimension.",
   "Game setup code": "Game setup code",
   "Click to validate the code": "Click to validate the code",
   //---- world settings simulation times

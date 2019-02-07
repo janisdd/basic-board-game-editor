@@ -80,6 +80,12 @@ export interface WorldSettings {
    */
   readonly printScale: number
 
+  /**
+   * the width of the additional black border (e.g. for printing/exporting)
+   * can be set to <= 0 to not use the additional border
+   */
+  readonly additionalBorderWidthInPx: number
+
 
   readonly timeInS_rollDice: number
   readonly timeInS_choose_bool_func: number
@@ -144,6 +150,7 @@ export const initial: State = {
   worldCmdText: defaultGameInitCode,
   printGameAsOneImage: false,
   printScale: 1.0,
+  additionalBorderWidthInPx: 5,
 
 
   timeInS_rollDice: SimulationTimes.timeInS_rollDice_default,
@@ -212,6 +219,7 @@ export enum ActionType {
   SET_world_worldCmdText = 'worldSettingsReducer_SET_world_worldCmdText',
   SET_world_printGameAsOneImage = 'worldSettingsReducer_SET_world_printGameAsOneImage',
   SET_world_printScale = 'worldSettingsReducer_SET_world_printScale',
+  SET_world_additionalBorderWidthInPx = 'worldSettingsReducer_SET_world_additionalBorderWidthInPx',
 
 
   SET_world_timeInS_rollDice = 'worldSettingsReducer_SET_timeInS_rollDice',
@@ -399,7 +407,14 @@ export interface SET_world_printScaleAction extends ActionBase {
   readonly printScale: number
 }
 
+export interface SET_world_additionalBorderWidthInPxAction extends ActionBase {
+  readonly type: ActionType.SET_world_additionalBorderWidthInPx
+  readonly additionalBorderWidthInPx: number
+}
+
+
 //--- times for simulation
+
 export interface SET_world_timeInS_rollDiceAction extends ActionBase {
   readonly type: ActionType.SET_world_timeInS_rollDice
   readonly timeInS_rollDice: number
@@ -530,6 +545,7 @@ export type AllActions =
   | SET_world_worldCmdTextAction
   | SET_world_printGameAsOneImageAction
   | SET_world_printScaleAction
+  | SET_world_additionalBorderWidthInPxAction
 
   | SET_world_timeInS_rollDiceAction
   | SET_world_timeInS_choose_bool_funcAction
@@ -728,6 +744,12 @@ export function reducer(state: State = initial, action: AllActions): State {
         ...state,
         printScale: action.printScale
       }
+    case ActionType.SET_world_additionalBorderWidthInPx:
+      return {
+        ...state,
+        additionalBorderWidthInPx: action.additionalBorderWidthInPx
+      }
+
 
     case ActionType.SET_world_timeInS_rollDice:
 

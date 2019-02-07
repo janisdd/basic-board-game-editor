@@ -259,6 +259,7 @@ class Migration_1_0_3__to__1_1_0 implements MigrationClass {
         worldCmdText: defaultGameInitCode,
         printGameAsOneImage: false,
         printScale: 1,
+        additionalBorderWidthInPx: 5,
 
         timeInS_rollDice: 2,
         timeInS_choose_bool_func: 2,
@@ -502,6 +503,31 @@ class Migration_1_2_0__to__1_2_1 implements MigrationClass {
   }
 }
 
+class Migration_1_2_2__to__1_2_3 implements MigrationClass {
+  oldVersion = '1.2.2'
+  newVersion = '1.2.3'
+
+  public migrateTile(exportTile: ExportTile): ExportTile {
+    return {
+      ...exportTile,
+      editorVersion: this.newVersion
+    }
+  }
+
+  migrateWorld(exportWorld: ExportWorld): ExportWorld {
+   return {
+     ...exportWorld,
+     editorVersion: this.newVersion,
+     worldSettings: {
+       ...exportWorld.worldSettings,
+       additionalBorderWidthInPx: 5
+     }
+   }
+  }
+
+}
+
+
 /**
  * a helper to create a shallow migration (no field/img/line props are changed, model) only ui stuff
  * @param {string} oldVersion
@@ -547,6 +573,7 @@ export class MigrationHelper {
     createVersionShallowMigration('1.1.1', '1.2.0'), //we added var export & fixed some simulation lang issues
     new Migration_1_2_0__to__1_2_1(),
     createVersionShallowMigration('1.2.1', '1.2.2'),
+    new Migration_1_2_2__to__1_2_3(),
   ]
 
   /**

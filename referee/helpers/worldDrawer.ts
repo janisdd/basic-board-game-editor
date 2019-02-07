@@ -344,7 +344,7 @@ export class WorldDrawer {
         exportWorld.worldSettings,
         exportPngImagesBgColor,
         1,
-        true,
+        5,
       )
 
       synImgCanvases.push({

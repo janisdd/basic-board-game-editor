@@ -46,7 +46,11 @@ import {
   SET_world_timeInS_expr_relationAction,
   SET_world_timeInS_expr_sumAction,
   SET_world_timeInS_expr_termAction,
-  SET_world_timeInS_expr_factorAction, WorldSettings, replace_worldSettingsAction, SET_world_printScaleAction
+  SET_world_timeInS_expr_factorAction,
+  WorldSettings,
+  replace_worldSettingsAction,
+  SET_world_printScaleAction,
+  SET_world_additionalBorderWidthInPxAction
 } from "./worldSettingsReducer";
 
 
@@ -259,6 +263,14 @@ export function set_world_printScale(printScale: number): SET_world_printScaleAc
     printScale
   }
 }
+
+export function set_world_additionalBorderWidthInPx(additionalBorderWidthInPx: number): SET_world_additionalBorderWidthInPxAction {
+  return {
+    type: ActionType.SET_world_additionalBorderWidthInPx,
+    additionalBorderWidthInPx
+  }
+}
+
 
 //--- times for simulation
 

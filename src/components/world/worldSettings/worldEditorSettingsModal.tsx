@@ -30,7 +30,7 @@ import {
   set_world_timeInS_expr_sumAction,
   set_world_timeInS_expr_termAction,
   set_world_timeInS_expr_factorAction,
-  set_world_printScale
+  set_world_printScale, set_world_additionalBorderWidthInPx
 
 } from "../../../state/reducers/world/worldSettings/actions";
 import {
@@ -75,6 +75,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_world_worldCmdTextAction,
   set_world_printGameAsOneImageAction,
   set_world_printScale,
+  set_world_additionalBorderWidthInPx,
 
   set_world_timeInS_rollDiceAction,
   set_world_timeInS_choose_bool_funcAction,
@@ -218,6 +219,26 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                    }}
                             />
                           </Form.Field>
+
+                          <Form.Field>
+                            <label>{getI18n(this.props.langId, "Additional border width")}
+                              <IconToolTip
+                                message={getI18n(this.props.langId,
+                                  "Every export or print image will include a black border with this width (might be better for cutting). Note that the real width will be only half that width because the other half is clipped because of the image dimension.")}
+                              />
+                            </label>
+
+                            <Input type="number" placeholder='1' value={this.props.worldSettings.additionalBorderWidthInPx}
+                                   step='0.1'
+                                   style={{width: '100px'}}
+                                   onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+                                     const val = parseFloat(e.currentTarget.value)
+                                     if (isNaN(val) || val < 0) return
+                                     this.props.set_world_additionalBorderWidthInPx(val)
+                                   }}
+                            />
+                          </Form.Field>
+
                         </Form.Group>
 
                         <Form.Field>

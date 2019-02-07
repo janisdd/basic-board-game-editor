@@ -445,7 +445,8 @@ class tileEditor extends React.Component<Props, any> {
       this.props.worldSettings,
       exportPngImagesBgColor,
       format,
-      this.props.worldSettings.printScale
+      this.props.worldSettings.printScale,
+      this.props.worldSettings.additionalBorderWidthInPx
     )
 
   }
