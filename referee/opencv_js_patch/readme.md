@@ -44,3 +44,10 @@ python <opencv_src_dir>/platforms/js/build_js.py <build_dir>
 
 the resulting js file should be equal to 
 `referee/libs/opencv.js`
+
+
+## Questions
+
+Why are the changes are all in one file / why not create new files?
+
+Simple answer is that i have no idea about the build system and (probably you need to add the new files in some cmake file or something...) the easiest way to get around this was to add the code to an existing file

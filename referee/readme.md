@@ -8,7 +8,7 @@
 - a finished game (.world  file) (design + code for every field) from the editor
 - printed game tiles (see [What is missing](./##%20What%20is%20missing))
   - there is an option to exclude global var detection so these might not be needed
-- one token for every player, a dice (, a token for every global var)
+- one token for every player, a dice (white with black pips) (, a token for every global var)
   - make sure the token colors are bright
 
 
@@ -132,8 +132,14 @@ npm run build2
 - expose constants to ui (e.g. to better detect darker token colors)
   - actually all constants for the methods (e.g. to find tokens) are optional and can be passed via js   
 
+- maybe allow dices with e.g. white pips?
+  - solved with invert img??
 
 ## Important
 
 - we now use SURF as keypoint detector which is non-free!! (copied from opencv contrib) 
 
+
+## Misc
+
+in `referee/opencv_js_patch/lessons.md` are som lessons on how to extend opencv js with e.g. new classes & new types
