@@ -768,9 +768,10 @@ function connectPointsWithLine(startFieldX: number, startFieldY: number, startFi
  * @param {Point} startPoint
  * @param {Point} endPoint
  * @param majorLineDirection
+ * @param ensureCoordsAreIntegers ensures that the points are integers (floor)
  * @returns {BezierPoint}
  */
-export function getNiceBezierCurveBetween(startPoint: PlainPoint, endPoint: PlainPoint, majorLineDirection: MajorLineDirection): BezierPoint {
+export function getNiceBezierCurveBetween(startPoint: PlainPoint, endPoint: PlainPoint, majorLineDirection: MajorLineDirection, ensureCoordsAreIntegers = true): BezierPoint {
 
   const deltaX = endPoint.x - startPoint.x
   const deltaY = endPoint.y - startPoint.y
@@ -816,17 +817,17 @@ export function getNiceBezierCurveBetween(startPoint: PlainPoint, endPoint: Plai
 
   return {
     id: getNextShapeId(), //getNextLinePointId(),
-    x: endPoint.x,
-    y: endPoint.y,
+    x: Math.floor(endPoint.x),
+    y: Math.floor(endPoint.y),
     cp1: {
       id: getNextShapeId(),
-      x: cp1X,
-      y: cp1Y
+      x: Math.floor(cp1X),
+      y: Math.floor(cp1Y)
     },
     cp2: {
       id: getNextShapeId(),
-      x: cp2X,
-      y: cp2Y
+      x: Math.floor(cp2X),
+      y: Math.floor(cp2Y)
     },
     curveMode: CurveMode.smooth
   }

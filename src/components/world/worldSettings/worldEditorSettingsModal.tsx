@@ -261,7 +261,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                 try {
                                   unit = Simulator.compiler.parse(editor.getValue())
                                 } catch (err) {
-                                  Logger.fatal(`game init code has parse errors: ${err}`)
+                                  Logger.fatalSyntaxError(`game init code has parse errors: ${err}`)
                                   return
                                 }
 

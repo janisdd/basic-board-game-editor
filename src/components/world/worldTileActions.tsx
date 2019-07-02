@@ -15,6 +15,7 @@ import {getI18n} from "../../../i18n/i18nRoot";
 import {Logger} from "../../helpers/logger";
 import {set_world_tiles} from "../../state/reducers/world/tileSurrogates/actions";
 import {AvailableAppTabs} from "../../state/reducers/appReducer";
+import {Tile} from "../../types/world";
 
 
 //const css = require('./styles.styl');
@@ -65,6 +66,13 @@ class worldTileActions extends React.Component<Props, any> {
         p.y === this.props.selectedTilePos.y
         )
 
+    let tile: Tile | undefined = undefined
+
+    if (tileSurrogate) {
+      tile = this.props.allTiles.find(p => p.guid === tileSurrogate.tileGuid)
+    }
+
+
     return (
       <div
         className={this.props.simulationState.simulationStatus !== null || this.props.simulationState.machineState !== null ? 'div-disabled' : ''}
@@ -89,7 +97,6 @@ class worldTileActions extends React.Component<Props, any> {
               <Button icon disabled={this.props.isTileEditorDisplayed}
                       onClick={() => {
 
-                        const tile = this.props.allTiles.find(p => p.guid === tileSurrogate.tileGuid)
 
                         if (!tile) {
                           Logger.fatal(`cannot find tile from surrogate, guid: ${tileSurrogate.tileGuid}`)
@@ -123,6 +130,28 @@ class worldTileActions extends React.Component<Props, any> {
                 <Icon name="x"/>
               </Button>
             </ToolTip>
+          }
+
+          {
+            tileSurrogate !== undefined && tile !== undefined &&
+            <div className="mar-left-2x flexed" style={{alignItems: 'center'}}>
+              <span>
+                {
+                  `${getI18n(this.props.langId, "Selected tile")}:`
+                }
+              </span>
+              <span className="mar-left-2x">
+                {
+                  tile.tileSettings.displayName
+                }
+              </span>
+              <span className="mar-left-2x">
+                {
+                  `(guid: ${tileSurrogate.tileGuid})`
+                }
+              </span>
+            </div>
+
           }
 
         </div>

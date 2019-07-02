@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2'
+import {escapeHtml} from "./stringHelper";
 
 export class Logger {
 
@@ -29,6 +30,15 @@ export class Logger {
 
   public static fatal(message: string, title?: string): never {
     Swal(title || 'Error', message, "error")
+    throw new Error(message)
+  }
+
+  public static fatalSyntaxError(message: string, title?: string): never {
+    Swal({
+      titleText: title || 'Error',
+      html: `<pre style="white-space: pre-wrap">${escapeHtml(message)}</pre>`,
+      width: '90%'
+    })
     throw new Error(message)
   }
 

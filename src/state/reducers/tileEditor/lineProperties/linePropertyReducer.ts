@@ -323,6 +323,13 @@ function _reducer(state: State = initial, action: AllActions): State {
 }
 
 
+/**
+ * this also applies smooth curve mode (always 180 degree to the other next control point)
+ * @param line
+ * @param oldPointId
+ * @param newPointPos
+ * @param moveControlPointWhenPointIsMoved
+ */
 function replacePointInLineCanBeBezierPoint(line: LineShape, oldPointId: number, newPointPos: PlainPoint, moveControlPointWhenPointIsMoved: boolean): LineShape {
 
   if (line.startPoint.id === oldPointId) {

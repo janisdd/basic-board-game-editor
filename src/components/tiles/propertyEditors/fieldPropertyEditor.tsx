@@ -359,7 +359,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                     try {
                       unit = Simulator.compiler.parse(editor.getValue())
                     } catch (err) {
-                      Logger.fatal(`field statements has errors: ${err}`)
+                      Logger.fatalSyntaxError(`field statements has errors: ${err}`)
                       return
                     }
 

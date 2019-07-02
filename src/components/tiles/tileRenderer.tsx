@@ -210,6 +210,9 @@ class tileRenderer extends React.Component<Props, any> {
 
   canvas: HTMLCanvasElement = null
 
+  /**
+   * because we used z index the order of stage.addChild does not matter
+   */
   zIndexCache: ZIndexCache = {}
 
   renderStage: createjs.Stage = null
@@ -825,11 +828,25 @@ class tileRenderer extends React.Component<Props, any> {
     this.renderStage.enableMouseOver(1)
 
 
+    //because we used z index the order of stage.addChild does not matter
     //set zindex
     for (const zIndex in this.zIndexCache) {
       const list = this.zIndexCache[zIndex]
 
-      for (const child of list) {
+      // for(let i = 0; i < list.length;i++) {
+      //   const child = list[i]
+      //
+      //   this.renderStage.setChildIndex(child, parseInt(zIndex))
+      // }
+
+      //setChildIndex e.g. will place the child at index 0
+      //next also insert at 0 --> last has now index 1
+      //--> index 0 is drawn first so we need to revert the order to preserve the order when drawing)
+
+      //this is only important for tile editor because other (e.g. world) we have only one shape per z-index
+      for(let i = list.length-1; i >= 0;i--) {
+        const child = list[i]
+
         this.renderStage.setChildIndex(child, parseInt(zIndex))
       }
     }

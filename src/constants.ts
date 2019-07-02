@@ -81,6 +81,9 @@ export const defaultAddImgWidth = 100
 export const globalZoomStep = 0.25
 export const globalMinimalZoom = 0.25
 
+export const defaultBezierControlPoint1UiColor = 'green'
+export const defaultBezierControlPoint2UiColor = 'blue'
+
 /**
  * larger than 500 and we cannot get 2 tiles on one din a4
  * removed... the user can specify this... if it makes no sense then the user is to be blamed

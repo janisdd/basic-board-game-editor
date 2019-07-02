@@ -77,7 +77,7 @@ export class LangHelper {
     try {
       game = this.compiler.parse(gameInitCode)
     } catch (err) {
-      Logger.fatal(`game init code has parse errors: ${err}`)
+      Logger.fatalSyntaxError(`game init code has parse errors: ${err}`)
       return
     }
 
@@ -122,7 +122,7 @@ export class LangHelper {
         try {
           unit = this.compiler.parse(fieldShape.cmdText)
         } catch (err) {
-          Logger.fatal(`field ${fieldShape.id} on tile ${tile.guid} has parse errors: ${err}`)
+          Logger.fatalSyntaxError(`field ${fieldShape.id} on tile ${tile.guid} has parse errors: ${err}`)
           return
         }
 

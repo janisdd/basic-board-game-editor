@@ -47,6 +47,33 @@ export function _addLineShape(lineShape: LineShape): ADD_LineShapeAction {
 export function addLineShape(lineShape: LineShape): MultiActions {
   return (dispatch, getState) => {
 
+    //make sur integer coords...nah
+    // lineShape = {
+    //   ...lineShape,
+    //   points: lineShape.points.map(p => {
+    //     return {
+    //       ...p,
+    //       x: Math.floor(p.x),
+    //       y: Math.floor(p.y),
+    //       cp1: {
+    //         ...p.cp1,
+    //         x: Math.floor(p.cp1.x),
+    //         y: Math.floor(p.cp1.y),
+    //       },
+    //       cp2: {
+    //         ...p.cp2,
+    //         x: Math.floor(p.cp2.x),
+    //         y: Math.floor(p.cp2.y),
+    //       }
+    //     }
+    //   }),
+    //   startPoint: {
+    //     ...lineShape.startPoint,
+    //     x: Math.floor(lineShape.startPoint.x),
+    //     y: Math.floor(lineShape.startPoint.y),
+    //   }
+    // }
+
     dispatch(_addLineShape(lineShape))
 
     const fields = getState().tileEditorFieldShapesState.present

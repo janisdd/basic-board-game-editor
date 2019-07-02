@@ -146,63 +146,6 @@ class tileRightActionBar extends React.Component<Props, any> {
           </Button>
         </ToolTip>
 
-
-        <Button icon onClick={() => {
-
-          const tile: Tile = {
-            guid: getGuid(),
-            imgShapes: this.props.imgShapes,
-            fieldShapes: this.props.fieldShapes,
-            lineShapes: this.props.lineShapes,
-            topBorderPoints: this.props.tileProps.topBorderPoints,
-            botBorderPoints: this.props.tileProps.botBorderPoints,
-            leftBorderPoints: this.props.tileProps.leftBorderPoints,
-            rightBorderPoint: this.props.tileProps.rightBorderPoint,
-            simulationStartFieldIds: [],
-            simulationEndFieldIds: [],
-            tileSettings: {
-              displayName: this.props.tileProps.tileSettings.displayName,
-              width: this.props.tileProps.tileSettings.width,
-              height: this.props.tileProps.tileSettings.height,
-              majorLineDirection: this.props.tileProps.tileSettings.majorLineDirection,
-              gridSizeInPx: this.props.tileProps.tileSettings.gridSizeInPx,
-              showGrid: this.props.tileProps.tileSettings.showGrid,
-              snapToGrid: this.props.tileProps.tileSettings.snapToGrid,
-              showSequenceIds: this.props.tileProps.tileSettings.showSequenceIds,
-              moveBezierControlPointsWhenLineIsMoved: this.props.tileProps.tileSettings.moveBezierControlPointsWhenLineIsMoved,
-              arePrintGuidesDisplayed: this.props.tileProps.tileSettings.arePrintGuidesDisplayed,
-              autoIncrementFieldTextNumbersOnDuplicate: this.props.tileProps.tileSettings.autoIncrementFieldTextNumbersOnDuplicate,
-              printLargeTilePreferredWidthInPx: this.props.tileProps.tileSettings.printLargeTilePreferredWidthInPx,
-              printLargeTilePreferredHeightInPx: this.props.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
-              splitLargeTileForPrint: this.props.tileProps.tileSettings.splitLargeTileForPrint,
-              insertLinesEvenIfFieldsIntersect: this.props.tileProps.tileSettings.insertLinesEvenIfFieldsIntersect
-            }
-          }
-
-          PrintHelper.printLargeTile(tile,
-            this.props.fieldSymbols,
-            this.props.imgSymbols,
-            this.props.lineSymbols,
-            false,
-            this.props.settings.tileProps.tileSettings.gridSizeInPx,
-            this.props.worldSettings.gridStrokeThicknessInPx,
-            this.props.worldSettings.gridStrokeColor,
-            this.props.worldSettings,
-            this.props.settings.tileProps.tileSettings.width,
-            this.props.settings.tileProps.tileSettings.height,
-            this.props.settings.tileProps.tileSettings.printLargeTilePreferredWidthInPx,
-            this.props.settings.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
-            this.props.settings.tileProps.tileSettings.splitLargeTileForPrint,
-            this.props.langId,
-            null,
-            this.props.worldSettings.printScale,
-            this.props.worldSettings.additionalBorderWidthInPx
-          )
-        }}>
-          <Icon name="print"/>
-        </Button>
-
-
         <ToolTip
           message={getI18n(this.props.langId, "Clear all commands from all field")}
         >

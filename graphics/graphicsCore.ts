@@ -526,7 +526,7 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
   if ((symbolForShape !== null && symbolForShape.overwriteText ? symbolForShape.text : field.text) !== null) {
 
     let textShape = new createjs.Text();
-    textShape.text = (symbolForShape !== null && symbolForShape.overwriteText ? symbolForShape.text : field.text) || ''
+
 
     let fontSizeInPx = (symbolForShape !== null && symbolForShape.overwriteFontSizeInPx ? symbolForShape.fontSizeInPx : field.fontSizeInPx)
     let fontName = (symbolForShape !== null && symbolForShape.overwriteFontName ? symbolForShape.fontName : field.fontName)
@@ -554,17 +554,38 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
       textShape.x = x + (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width) - (symbolForShape !== null ? symbolForShape.padding.right : field.padding.right) - borderSize
     }
 
+    textShape.text = 'test'
+
+    let singleLineHeight = textShape.getMeasuredHeight()
+
+    textShape.text = (symbolForShape !== null && symbolForShape.overwriteText ? symbolForShape.text : field.text) || ''
+
     //vertical text align
     if ((symbolForShape !== null && symbolForShape.overwriteVerticalTextAlign ? symbolForShape.verticalTextAlign : field.verticalTextAlign) === VerticalAlign.center) {
+
       textShape.textBaseline = 'middle'
+      //with middle the text is drawn (single line) equal height top and bottom around the y point
       textShape.y = y + (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height) / 2
+
+      //for multi line we need to get the center y point of the total text height
+      //but then we need to subtract the first (single line) height / 2
+      //  because for middle the middle is only for the first text line (canvas natively does not support multi line texts)
+      let textYCenter = (textShape.getMeasuredHeight() / 2) - (singleLineHeight / 2)
+
+      textShape.y = textShape.y - textYCenter
+
     } else if ((symbolForShape !== null && symbolForShape.overwriteVerticalTextAlign ? symbolForShape.verticalTextAlign : field.verticalTextAlign) === VerticalAlign.top) {
       textShape.textBaseline = 'top'
       textShape.y = y + (symbolForShape !== null && symbolForShape.overwritePadding ? symbolForShape.padding.top : field.padding.top) + borderSize
     } else if ((symbolForShape !== null && symbolForShape.overwriteVerticalTextAlign ? symbolForShape.verticalTextAlign : field.verticalTextAlign) === VerticalAlign.bottom) {
+
       textShape.textBaseline = 'bottom'
       textShape.y = y + (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height) -
         (symbolForShape !== null && symbolForShape.overwritePadding ? symbolForShape.padding.bottom : field.padding.bottom) - borderSize
+
+      let textHeight = textShape.getMeasuredHeight()
+
+      textShape.y = textShape.y - textHeight + singleLineHeight
     }
 
     container.addChild(textShape)
@@ -1038,6 +1059,7 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
   }
 
   stage.addChild(lineShape)
+  zIndexCache[pathLine.zIndex].push(lineShape)
 
   if (isSelected) {
 
@@ -1049,9 +1071,6 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
     startPointShape.setBounds(pathLine.startPoint.x + xOffset - (worldSettings.linePointsUiDiameter / 2), pathLine.startPoint.y + yOffset - (worldSettings.linePointsUiDiameter / 2),
       worldSettings.linePointsUiDiameter, worldSettings.linePointsUiDiameter)
 
-    stage.addChild(startPointShape)
-    zIndexCache[pathLine.zIndex].push(startPointShape)
-
     if (onMouseDownHandler) {
       startPointShape.on('mousedown', eventObj => {
         onMouseDownHandler(pathLine, pathLine.startPoint.id, false, false, startPointShape, eventObj as MouseEvent)
@@ -1060,11 +1079,16 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
 
     let lastPoint = pathLine.startPoint
 
-    for (const point of pathLine.points) {
+    //when we draw points later they will be behind the other points??
+    const laterPoints: createjs.Shape[] = []
 
+    for (const point of pathLine.points) {
 
       //next point
       let pointShape = new createjs.Shape()
+
+      // laterPoints.push(pointShape)
+
       pointShape.graphics.beginFill(worldSettings.linePointsUiColor)
         .drawCircle(point.x + xOffset, point.y + yOffset, worldSettings.linePointsUiDiameter)
       pointShape.setBounds(point.x + xOffset - (worldSettings.linePointsUiDiameter / 2), point.y + yOffset - (worldSettings.linePointsUiDiameter / 2),
@@ -1078,6 +1102,9 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
 
       //control point 1
       let cp1Shape = new createjs.Shape()
+
+      laterPoints.push(cp1Shape)
+
       cp1Shape.graphics.beginFill(worldSettings.lineBezierControlPoint1UiColor)
         .drawCircle(point.cp1.x + xOffset, point.cp1.y + yOffset, worldSettings.lineBezierControlPoint1UiDiameter)
       cp1Shape.setBounds(point.cp1.x + xOffset - (worldSettings.lineBezierControlPoint1UiDiameter / 2), point.cp1.y + yOffset - (worldSettings.lineBezierControlPoint1UiDiameter / 2),
@@ -1090,12 +1117,18 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
       }
 
       let cp1LineShape = new createjs.Shape()
+
+      // laterPoints.push(cp1LineShape)
+
       cp1LineShape.graphics.beginStroke(worldSettings.lineBezierControlPoint1UiColor)
         .moveTo(point.cp1.x + xOffset, point.cp1.y + yOffset)
         .lineTo(lastPoint.x + xOffset, lastPoint.y + yOffset)
 
       //control point 2
       let cp2Shape = new createjs.Shape()
+
+      laterPoints.push(cp2Shape)
+
       cp2Shape.graphics.beginFill(worldSettings.lineBezierControlPoint2UiColor)
         .drawCircle(point.cp2.x + xOffset, point.cp2.y + yOffset, worldSettings.lineBezierControlPoint2UiDiameter)
       cp2Shape.setBounds(point.cp2.x + xOffset - (worldSettings.lineBezierControlPoint2UiDiameter / 2), point.cp2.y + yOffset - (worldSettings.lineBezierControlPoint2UiDiameter / 2),
@@ -1108,6 +1141,9 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
       }
 
       let cp2LineShape = new createjs.Shape()
+
+      // laterPoints.push(cp2LineShape)
+
       cp2LineShape.graphics.beginStroke(worldSettings.lineBezierControlPoint2UiColor)
         .moveTo(point.cp2.x + xOffset, point.cp2.y + yOffset)
         .lineTo(point.x + xOffset, point.y + yOffset)
@@ -1126,17 +1162,28 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
         stage.addChild(cp2LineShape)
         zIndexCache[pathLine.zIndex].push(cp2LineShape)
 
-
-        stage.addChild(cp1Shape)
-        zIndexCache[pathLine.zIndex].push(cp1Shape)
-
-        stage.addChild(cp2Shape)
-        zIndexCache[pathLine.zIndex].push(cp2Shape)
+        // stage.addChild(cp1Shape)
+        // zIndexCache[pathLine.zIndex].push(cp1Shape)
+        //
+        // stage.addChild(cp2Shape)
+        // zIndexCache[pathLine.zIndex].push(cp2Shape)
       }
 
 
       stage.addChild(pointShape)
       zIndexCache[pathLine.zIndex].push(pointShape)
+    }
+
+    //draw the start point after the control point lines
+    stage.addChild(startPointShape)
+    zIndexCache[pathLine.zIndex].push(startPointShape)
+
+    //we want the control points above the line end points (else it's hard to move the control points)
+    //  because we only can move click line end point and would need to go to the properties editor and change the value there
+    for(const controlPoint of laterPoints) {
+      stage.addChild(controlPoint)
+      zIndexCache[pathLine.zIndex].push(controlPoint)
+
     }
 
   }
@@ -1147,7 +1194,6 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
     })
   }
 
-  zIndexCache[pathLine.zIndex].push(lineShape)
 
   if (symbolForShape !== null && drawBasedOnSymbolIndicator) {
     //draw a symbol so that the user knows that this shape is connected to a symbol

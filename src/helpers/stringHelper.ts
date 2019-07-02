@@ -23,3 +23,13 @@ export class StringHelper {
 
   }
 }
+
+//from marked
+export function escapeHtml(html: string, encode?: boolean): string {
+  return html
+    .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}

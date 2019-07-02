@@ -1,6 +1,10 @@
 import {Action} from "redux";
 import {notExhaustive} from "../../_notExhausiveHelper";
-import {defaultGameInitCode} from "../../../../constants";
+import {
+  defaultBezierControlPoint1UiColor,
+  defaultBezierControlPoint2UiColor,
+  defaultGameInitCode
+} from "../../../../constants";
 import {SimulationTimes} from "../../../../../simulation/machine/AbstractMachine";
 
 
@@ -123,9 +127,9 @@ export const initial: State = {
   tileMidPointsUiColor: '#f1b213',
   tileMidPointsDiameter: 3,
   lineBezierControlPoint1UiDiameter: 3,
-  lineBezierControlPoint1UiColor: 'green',
+  lineBezierControlPoint1UiColor: defaultBezierControlPoint1UiColor,
   lineBezierControlPoint2UiDiameter: 3,
-  lineBezierControlPoint2UiColor: 'blue',
+  lineBezierControlPoint2UiColor: defaultBezierControlPoint2UiColor,
   fieldSequenceBoxColor: 'black',
   fieldSequenceFont: 'Arial',
   fieldSequenceFontColor: 'black',

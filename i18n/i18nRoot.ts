@@ -24,6 +24,7 @@ export interface LangObj {
   "World editor": string
   "Undo the last tile placement": string
   "Redo the last tile placement": string
+  "Selected tile": string
   "Tile": string
   "Tile library": string
   "Start step by step simulation": string
@@ -49,6 +50,7 @@ export interface LangObj {
   "Export as svg (experimental)": string
   "Export as png (experimental)": string
   "Export as png (experimental), the world tile size is used": string
+  "Print tile": string
   "Clone tile": string
   "Delete tile": string
   "Are you sure you want to delete the tile and all instances in the world (if any)?": string

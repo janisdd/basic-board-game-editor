@@ -131,8 +131,6 @@ class tileActionsBar extends React.Component<Props, any> {
                           ? CoordHelper.toSnapGridCoords(pos, this.props.tileProps.tileSettings.gridSizeInPx)
                           : pos
 
-                        console.log('aaaaaaaaaaaaaaaa')
-
                         //make a deep copy
                         const field: FieldShape = {
                           ...defaultFieldShape,

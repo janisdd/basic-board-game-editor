@@ -27,18 +27,18 @@ export class VariableIndicatorDrawer {
    * @param drawQrCode
    */
   public static async drawVariableIndicator(stage: createjs.Stage,
-                                      stageWidth: number,
-                                      stageHeight: number,
-                                      outerCircleDiameterInPx: number,
-                                      innerCircleDiameterInPx: number,
-                                      numOfFields: number,
-                                      innerText: string,
-                                      isBoolVar: boolean,
-                                      fontSizeInPx: number,
-                                      fontName: string,
-                                      strokeThickness: number,
-                                      fillBackgroundColor: string | null,
-                                      drawQrCode: boolean
+                                            stageWidth: number,
+                                            stageHeight: number,
+                                            outerCircleDiameterInPx: number,
+                                            innerCircleDiameterInPx: number,
+                                            numOfFields: number,
+                                            innerText: string,
+                                            isBoolVar: boolean,
+                                            fontSizeInPx: number,
+                                            fontName: string,
+                                            strokeThickness: number,
+                                            fillBackgroundColor: string | null,
+                                            drawQrCode: boolean
   ): Promise<void> {
 
     const color = 'black'
@@ -53,7 +53,7 @@ export class VariableIndicatorDrawer {
     if (fillBackgroundColor) {
       let bgShape = new createjs.Shape()
       bgShape.graphics.beginFill(fillBackgroundColor)
-        .drawCircle(centerPoint.x, centerPoint.y, outerCircleDiameterInPx / 2 - (strokeThickness/2))
+        .drawCircle(centerPoint.x, centerPoint.y, outerCircleDiameterInPx / 2 - (strokeThickness / 2))
         .endFill()
 
       stage.addChild(bgShape)
@@ -63,7 +63,7 @@ export class VariableIndicatorDrawer {
     outerCircle.graphics
       .beginStroke(color)
       .setStrokeStyle(strokeThickness)
-      .drawCircle(centerPoint.x, centerPoint.y, outerCircleDiameterInPx / 2 - (strokeThickness/2))
+      .drawCircle(centerPoint.x, centerPoint.y, outerCircleDiameterInPx / 2 - (strokeThickness / 2))
 
 
     if (isBoolVar) {
@@ -71,14 +71,15 @@ export class VariableIndicatorDrawer {
     }
 
     const fieldDegree = 360 / numOfFields
-    let count = -(Math.ceil((numOfFields - 1) / 2)) //because 0
+    const maxMinField = -(Math.ceil((numOfFields - 1) / 2)) //12 --> -6 is the max min value
+    let count = -1 //because 0
 
     for (let i = 0; i < numOfFields; i++) {
 
       let line = new createjs.Shape()
 
       const degree = fieldDegree * i
-      const lineEndPoint = rotatePointBy(centerPoint.x, centerPoint.y, stageWidth / 2, 0, degree)
+      const lineEndPoint = rotatePointBy(centerPoint.x, centerPoint.y, stageWidth / 2, 0, degree) //12 o'clock, then rotate
       const lineStartPoint = rotatePointBy(centerPoint.x,
         centerPoint.y, stageWidth / 2, stageHeight / 2 - innerCircleRadius, degree)
 
@@ -102,27 +103,23 @@ export class VariableIndicatorDrawer {
       if (isBoolVar) {
         if (i === 0) {
           text.text = 'true'
-        }
-        else {
+        } else {
           text.text = 'false'
         }
 
-      }
-      else {
-        if (i < numOfFields / 2) {
-          text.text = i.toString()
-        }
-        else {
+      } else {
+        if (count < maxMinField) {
+          text.text = (numOfFields - 1 - i).toString()
+        } else {
           text.text = count.toString()
-          count++
+          count--
         }
       }
 
 
       const textWidth = text.getMeasuredWidth()
       const textHeight = text.getMeasuredHeight()
-      const textPoint = rotatePointBy(centerPoint.x,
-        centerPoint.y, stageWidth / 2, yText, textDegree)
+      const textPoint = rotatePointBy(centerPoint.x, centerPoint.y, stageWidth / 2, yText, textDegree)
       text.x = textPoint.x - textWidth / 2
       text.y = textPoint.y - textHeight / 2
 
@@ -132,10 +129,10 @@ export class VariableIndicatorDrawer {
 
     let innerCircle = new createjs.Shape()
     innerCircle.graphics
-      //.beginFill('transparent')
+    //.beginFill('transparent')
       .beginStroke(color)
       .setStrokeStyle(strokeThickness)
-      .drawCircle(centerPoint.x, centerPoint.y, innerCircleRadius - (strokeThickness/2))
+      .drawCircle(centerPoint.x, centerPoint.y, innerCircleRadius - (strokeThickness / 2))
 
 
     let qrCodeData: VariableIndicatorQrCodeData = {
@@ -158,13 +155,10 @@ export class VariableIndicatorDrawer {
     const innerTextShapeHeight = innerTextShape.getMeasuredHeight()
 
 
-
-
     const innerCircleContentSize = innerTextShapeHeight + (drawQrCode ? qrCodeSizeInPx : 0)
     const centerYTop = stageHeight / 2 - (innerCircleContentSize / 2)
 
     if (drawQrCode) {
-
 
 
       try {
@@ -196,16 +190,15 @@ export class VariableIndicatorDrawer {
 
         stage.addChild(container)
 
-      } catch(err) {
+      } catch (err) {
         throw err
       }
     }
 
     innerTextShape.x = stageWidth / 2
     // innerTextShape.y = stageHeight / 2 - innerTextShapeHeight / 2
-    innerTextShape.y = centerYTop + + (drawQrCode ? qrCodeSizeInPx : 0)
+    innerTextShape.y = centerYTop + +(drawQrCode ? qrCodeSizeInPx : 0)
     innerTextShape.textAlign = 'center'
-
 
 
     stage.addChild(innerTextShape)

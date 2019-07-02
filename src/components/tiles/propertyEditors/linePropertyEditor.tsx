@@ -18,6 +18,7 @@ import ToolTip from '../../helpers/ToolTip'
 import IconToolTip, {horizontalIconPopupOffsetInPx} from "../../helpers/IconToolTip";
 import {ChromePicker} from "react-color";
 import {MajorLineDirection} from "../../../types/world";
+import {defaultBezierControlPoint1UiColor, defaultBezierControlPoint2UiColor} from "../../../constants";
 
 //const css = require('./styles.styl');
 
@@ -116,8 +117,6 @@ class linePropertyEditor extends React.Component<Props, any> {
         lineSymbol = temp
       }
     }
-
-    console.log('render')
 
     const actionsButtonsContent = (
       <Form.Field>
@@ -607,7 +606,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                       //control point 1
                     }
                     <Form.Field>
-                      <label>{getI18n(this.props.langId, "Control point")} 1 x</label>
+                      <label style={{color: defaultBezierControlPoint1UiColor}}>{getI18n(this.props.langId, "Control point")} 1 x</label>
                       <input type="number"
                              value={p.cp1.x}
                              onChange={(e) => this.props.setLinePointNewPos(p.cp1.id,
@@ -617,7 +616,7 @@ class linePropertyEditor extends React.Component<Props, any> {
 
                     </Form.Field>
                     <Form.Field>
-                      <label>{getI18n(this.props.langId, "Control point")} 1 x</label>
+                      <label style={{color: defaultBezierControlPoint1UiColor}}>{getI18n(this.props.langId, "Control point")} 1 y</label>
                       <input type="number"
                              value={p.cp1.y}
                              onChange={(e) => this.props.setLinePointNewPos(p.cp1.id,
@@ -630,7 +629,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                       //control point 2
                     }
                     <Form.Field>
-                      <label>{getI18n(this.props.langId, "Control point")} 2 x</label>
+                      <label style={{color: defaultBezierControlPoint2UiColor}}>{getI18n(this.props.langId, "Control point")} 2 x</label>
                       <input type="number"
                              value={p.cp2.x}
                              onChange={(e) => this.props.setLinePointNewPos(p.cp2.id,
@@ -640,7 +639,7 @@ class linePropertyEditor extends React.Component<Props, any> {
 
                     </Form.Field>
                     <Form.Field>
-                      <label>{getI18n(this.props.langId, "Control point")} 2 x</label>
+                      <label style={{color: defaultBezierControlPoint2UiColor}}>{getI18n(this.props.langId, "Control point")} 2 y</label>
                       <input type="number"
                              value={p.cp2.y}
                              onChange={(e) => this.props.setLinePointNewPos(p.cp2.id,
