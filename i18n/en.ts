@@ -251,6 +251,7 @@ export const lang_en: LangObj = {
   "Linear": "Linear",
   "Duplicate this shape": "Duplicate this shape",
   "Control point": "Control point",
+  "Add point to line" : "Add point to line",
   //--- properties //--- propertie,
   "Rotation in degree": "Rotation in degree",
   "Skew x": "Skew x",

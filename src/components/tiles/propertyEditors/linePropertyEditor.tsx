@@ -658,7 +658,7 @@ class linePropertyEditor extends React.Component<Props, any> {
 
           {
             isSingleLine &&
-            <Button icon
+            <Button icon labelPosition="left"
                     onClick={() => {
                       const beforePoint = singleLine.points[singleLine.points.length - 1]
                       const point = getNiceBezierCurveBetween(beforePoint,
@@ -670,6 +670,7 @@ class linePropertyEditor extends React.Component<Props, any> {
                     }}
             >
               <Icon name="add"/>
+              <span>{getI18n(this.props.langId, "Add point to line")}</span>
             </Button>
           }
 

@@ -1317,7 +1317,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
                                       }}
                               >
-                                <Icon name="trash"/>
+                                <Icon name="x"/>
                               </Button>
 
                             </List.Content>

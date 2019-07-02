@@ -1061,6 +1061,8 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
   stage.addChild(lineShape)
   zIndexCache[pathLine.zIndex].push(lineShape)
 
+  let cpPointsToIgnoreMap: { [pointId: number]: true } = {}
+
   if (isSelected) {
 
     let startPointShape = new createjs.Shape()
@@ -1103,7 +1105,9 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
       //control point 1
       let cp1Shape = new createjs.Shape()
 
-      laterPoints.push(cp1Shape)
+      if (point.curveMode !== CurveMode.linear) {
+        laterPoints.push(cp1Shape)
+      }
 
       cp1Shape.graphics.beginFill(worldSettings.lineBezierControlPoint1UiColor)
         .drawCircle(point.cp1.x + xOffset, point.cp1.y + yOffset, worldSettings.lineBezierControlPoint1UiDiameter)
@@ -1127,7 +1131,9 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
       //control point 2
       let cp2Shape = new createjs.Shape()
 
-      laterPoints.push(cp2Shape)
+      if (point.curveMode !== CurveMode.linear) {
+        laterPoints.push(cp2Shape)
+      }
 
       cp2Shape.graphics.beginFill(worldSettings.lineBezierControlPoint2UiColor)
         .drawCircle(point.cp2.x + xOffset, point.cp2.y + yOffset, worldSettings.lineBezierControlPoint2UiDiameter)
@@ -1180,7 +1186,7 @@ export function drawLineShape(stage: Stage, pathLine: LineShape | LineSymbol, se
 
     //we want the control points above the line end points (else it's hard to move the control points)
     //  because we only can move click line end point and would need to go to the properties editor and change the value there
-    for(const controlPoint of laterPoints) {
+    for (const controlPoint of laterPoints) {
       stage.addChild(controlPoint)
       zIndexCache[pathLine.zIndex].push(controlPoint)
 

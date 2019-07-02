@@ -253,6 +253,7 @@ export interface LangObj {
   "Linear": string
   "Duplicate this shape": string
   "Control point": string
+  "Add point to line": string
   //--- properties image
   "Rotation in degree": string
   "Skew x": string

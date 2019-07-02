@@ -600,7 +600,7 @@ function createBorderPointConnectedLinesList(langId: KnownLangs, borderPoint: Bo
 
                             }}
                     >
-                      <Icon name="trash"/>
+                      <Icon name="x"/>
                     </Button>
 
                   </List.Content>
