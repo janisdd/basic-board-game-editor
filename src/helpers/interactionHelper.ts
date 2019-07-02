@@ -1044,9 +1044,6 @@ export function isFieldAndLineConnectedThroughAnchorPoints(field: FieldShape, fi
  */
 export function isFieldAndLinePointConnectedThroughAnchorPoints(field: FieldShape, fieldSymbols: ReadonlyArray<FieldSymbol>, lineId: number, linePoint: Point, anchorPointSnapToleranceRadiusInPx: number = 0): IsFieldAndLineConnectedResult | null {
 
-  let connectedPointsIds: IsFieldAndLineConnectedResult[] = []
-
-
   //use field anchor point definitions
   let fieldAnchorPoints: ReadonlyArray<AnchorPoint> = field.anchorPoints
   let symbol: FieldSymbol | null = null
@@ -1095,39 +1092,100 @@ export function isFieldAndLinePointConnectedThroughAnchorPoints(field: FieldShap
   return null
 }
 
-export function checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap(tile: TileProps, line: LineShape, anchorPointSnapToleranceRadiusInPx: number = 0): void {
 
+export function checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap(tile: TileProps, lineId: number, oldPoint: Point, newPoint: PlainPoint,
+                                                                        setBorderPointFunc: (borderPoint: BorderPoint, direction: "top" | "bottom" | "left" | "right", tileWidth: number, tileHeight: number) => void,
+                                                                        __setLinePointNewPos: (lineId: number, oldPointId: number, newPointPos: PlainPoint) => void,
+                                                                        anchorPointSnapToleranceRadiusInPx: number = 0): void {
+
+
+  let func = (borderPoint: BorderPoint, borderPointPos: PlainPoint, distance: number, direction: "top" | "bottom" | "left" | "right") => {
+
+    if (distance <= anchorPointSnapToleranceRadiusInPx) {
+
+      if (oldPoint.x === borderPointPos.x && oldPoint.y === borderPointPos.y &&
+        (newPoint.x !== borderPointPos.x || newPoint.y !== borderPointPos.y)) {
+
+        //old pos was on anchor point
+        //new not... user wants to remove connection
+
+        setBorderPointFunc({
+          ...borderPoint,
+          connectedLineTuples: borderPoint.connectedLineTuples
+            .filter(k => k.pointId !== oldPoint.id) //clear old
+        }, direction, tile.tileSettings.width, tile.tileSettings.height)
+
+      } else {
+
+        //add or renew connection
+
+        setBorderPointFunc({
+          ...borderPoint,
+          connectedLineTuples: borderPoint.connectedLineTuples
+            .filter(k => k.pointId !== oldPoint.id)
+            .concat({
+              lineId,
+              pointId: oldPoint.id
+            })
+        }, direction, tile.tileSettings.width, tile.tileSettings.height)
+
+        __setLinePointNewPos(lineId, oldPoint.id, borderPointPos)
+
+      }
+    } else {
+
+      //disconnect if connected
+
+      if (!(borderPoint.connectedLineTuples.some(p => p.pointId === oldPoint.id))) return
+
+      //remove
+      setBorderPointFunc({
+        ...borderPoint,
+        connectedLineTuples: borderPoint.connectedLineTuples
+          .filter(k => k.pointId !== oldPoint.id)  //clear old
+      }, direction, tile.tileSettings.width, tile.tileSettings.height)
+
+
+    }
+
+  }
 
   //--- top border points
 
-  const allBorderPoints = tile.topBorderPoints.map<PlainPoint>(p => {
-    return {x: p.val, y: 0}
-  })
-    .concat(tile.botBorderPoints.map<PlainPoint>(p => {
-      return {x: p.val, y: tile.tileSettings.height}
-    }))
-    .concat(tile.leftBorderPoints.map<PlainPoint>(p => {
-      return {x: 0, y: p.val}
-    }))
-    .concat(tile.rightBorderPoint.map<PlainPoint>(p => {
-      return {x: tile.tileSettings.width, y: p.val}
-    }))
+  for (let i = 0; i < tile.topBorderPoints.length; i++) {
+    const borderPoint = tile.topBorderPoints[i];
+    const point: PlainPoint = {x: borderPoint.val, y: 0}
 
-  for (const anchorPoint of allBorderPoints) {
-    const distance = getPointDistance(line.startPoint, anchorPoint)
-    if (distance <= anchorPointSnapToleranceRadiusInPx) {
+    const distance = getPointDistance(newPoint, point)
 
-      // globalState.dispatch(set_selectedLinePointNewPosAction(line.id, line.startPoint.id, anchorPoint, false))
-    }
+    func(borderPoint, point, distance, "top")
+  }
 
-    for (const intermediatePointsInLine of line.points) {
-      const distance = getPointDistance(intermediatePointsInLine, anchorPoint)
+  for (let i = 0; i < tile.botBorderPoints.length; i++) {
+    const borderPoint = tile.botBorderPoints[i];
+    const point: PlainPoint = {x: borderPoint.val, y: tile.tileSettings.height}
 
-      if (distance <= anchorPointSnapToleranceRadiusInPx) {
-        // globalState.dispatch(
-        // set_selectedLinePointNewPosAction(line.id, intermediatePointsInLine.id, anchorPoint, false))
-      }
-    }
+    const distance = getPointDistance(newPoint, point)
+
+    func(borderPoint, point, distance, "bottom")
+  }
+
+  for (let i = 0; i < tile.leftBorderPoints.length; i++) {
+    const borderPoint = tile.leftBorderPoints[i];
+    const point: PlainPoint = {x: 0, y: borderPoint.val}
+
+    const distance = getPointDistance(newPoint, point)
+
+    func(borderPoint, point, distance, "left")
+  }
+
+  for (let i = 0; i < tile.rightBorderPoint.length; i++) {
+    const borderPoint = tile.rightBorderPoint[i];
+    const point: PlainPoint = {x: tile.tileSettings.width, y: borderPoint.val}
+
+    const distance = getPointDistance(newPoint, point)
+
+    func(borderPoint, point, distance, "right")
   }
 
 }

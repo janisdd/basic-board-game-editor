@@ -35,16 +35,17 @@ import {
   SET_tileAction
 } from "./tileEditorReducer";
 import {MajorLineDirection, Tile} from "../../../types/world";
-import {BorderPoint, FieldShape, LineShape, LineSymbol} from "../../../types/drawing";
+import {BorderPoint, FieldShape, LineShape, LineSymbol, PlainPoint} from "../../../types/drawing";
 import {MultiActions} from "../../../types/ui";
 import {setPropertyEditor_imgShapes} from "./imgProperties/actions";
 import {setPropertyEditor_fieldsShapes} from "./fieldProperties/actions";
-import {setPropertyEditor_lineShapes} from "./lineProperties/actions";
+import {_setLinePointNewPos, setPropertyEditor_lineShapes} from "./lineProperties/actions";
 import {set_simulation_simulationStatus} from "../simulation/actions";
 import {__setNextShapeId} from "./fieldProperties/fieldPropertyReducer";
 import {clearHistory_shapeEditor, reset_shapeEditor} from "./shapesReducer/actions";
 import {getDefaultNewTile} from "../../../constants";
 import {renewAllZIndicesInTile} from "../../../helpers/someIndexHelper";
+import {adjustLinesFromAnchorPoints} from "../../../helpers/interactionHelper";
 
 //only used for import currently...
 export function setEditorTile(tile: Tile): SET_tileAction {
@@ -306,33 +307,111 @@ export function setEditor_tileDisplayName(tileDisplayName: string): SET_editor_t
   }
 }
 
-export function set_editor_topBorderPoints(topBorderPoints: ReadonlyArray<BorderPoint>): SET_editor_topBorderPointsAction {
+export function _set_editor_topBorderPoints(topBorderPoints: ReadonlyArray<BorderPoint>): SET_editor_topBorderPointsAction {
   return {
     type: ActionType.SET_editor_topBorderPoints,
     topBorderPoints
   }
 }
 
-export function set_editor_botBorderPoints(botBorderPoints: ReadonlyArray<BorderPoint>): SET_editor_botBorderPointsAction {
+export function set_editor_topBorderPoints(topBorderPoints: ReadonlyArray<BorderPoint>): MultiActions {
+  return (dispatch, getState) => {
+
+    dispatch(_set_editor_topBorderPoints(topBorderPoints))
+
+    for (let i = 0; i < topBorderPoints.length; i++) {
+      const topBorderPoint = topBorderPoints[i];
+      const point: PlainPoint = {x: topBorderPoint.val, y: 0}
+
+      for (let j = 0; j < topBorderPoint.connectedLineTuples.length; j++) {
+        const tuple = topBorderPoint.connectedLineTuples[j];
+
+        dispatch(_setLinePointNewPos(tuple.lineId, tuple.pointId, point))
+      }
+    }
+  }
+}
+
+
+
+export function _set_editor_botBorderPoints(botBorderPoints: ReadonlyArray<BorderPoint>): SET_editor_botBorderPointsAction {
   return {
     type: ActionType.SET_editor_botBorderPoints,
     botBorderPoints
   }
 }
 
-export function set_editor_leftBorderPoints(leftBorderPoints: ReadonlyArray<BorderPoint>): SET_editor_leftBorderPointsAction {
+export function set_editor_botBorderPoints(botBorderPoints: ReadonlyArray<BorderPoint>, tileHeight: number): MultiActions {
+  return (dispatch, getState) => {
+
+    dispatch(_set_editor_botBorderPoints(botBorderPoints))
+
+    for (let i = 0; i < botBorderPoints.length; i++) {
+      const topBorderPoint = botBorderPoints[i];
+      const point: PlainPoint = {x: topBorderPoint.val, y: tileHeight}
+
+      for (let j = 0; j < topBorderPoint.connectedLineTuples.length; j++) {
+        const tuple = topBorderPoint.connectedLineTuples[j];
+
+        dispatch(_setLinePointNewPos(tuple.lineId, tuple.pointId, point))
+      }
+    }
+
+  }
+}
+
+export function _set_editor_leftBorderPoints(leftBorderPoints: ReadonlyArray<BorderPoint>): SET_editor_leftBorderPointsAction {
   return {
     type: ActionType.SET_editor_leftBorderPoints,
     leftBorderPoints
   }
 }
 
-export function set_editor_rightBorderPoint(rightBorderPoint: ReadonlyArray<BorderPoint>): SET_editor_rightBorderPointAction {
+export function set_editor_leftBorderPoints(leftBorderPoints: ReadonlyArray<BorderPoint>): MultiActions {
+  return (dispatch, getState) => {
+
+    dispatch(_set_editor_leftBorderPoints(leftBorderPoints))
+
+    for (let i = 0; i < leftBorderPoints.length; i++) {
+      const topBorderPoint = leftBorderPoints[i];
+      const point: PlainPoint = {x: 0, y: topBorderPoint.val}
+
+      for (let j = 0; j < topBorderPoint.connectedLineTuples.length; j++) {
+        const tuple = topBorderPoint.connectedLineTuples[j];
+
+        dispatch(_setLinePointNewPos(tuple.lineId, tuple.pointId, point))
+      }
+    }
+
+  }
+}
+
+export function _set_editor_rightBorderPoint(rightBorderPoint: ReadonlyArray<BorderPoint>): SET_editor_rightBorderPointAction {
   return {
     type: ActionType.SET_editor_rightBorderPoint,
     rightBorderPoint
   }
 }
+
+export function set_editor_rightBorderPoint(rightBorderPoint: ReadonlyArray<BorderPoint>, tileWidth: number): MultiActions {
+  return (dispatch, getState) => {
+
+    dispatch(_set_editor_rightBorderPoint(rightBorderPoint))
+
+    for (let i = 0; i < rightBorderPoint.length; i++) {
+      const topBorderPoint = rightBorderPoint[i];
+      const point: PlainPoint = {x: tileWidth, y: topBorderPoint.val}
+
+      for (let j = 0; j < topBorderPoint.connectedLineTuples.length; j++) {
+        const tuple = topBorderPoint.connectedLineTuples[j];
+
+        dispatch(_setLinePointNewPos(tuple.lineId, tuple.pointId, point))
+      }
+    }
+
+  }
+}
+
 
 export function set_editor_simulationStartFieldIds(simulationStartFieldIds: ReadonlyArray<number>): SET_editor_simulationStartFieldIdsAction {
   return {

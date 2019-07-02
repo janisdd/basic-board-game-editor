@@ -1,37 +1,41 @@
+import {BezierPoint, CurveMode, LineShape, PlainPoint, Point} from "../../../../types/drawing";
 import {
-  BezierPoint, ConnectedLineTuple,
-  CurveMode,
-  FieldShape, FieldSymbol,
-  ImgShape,
-  LineBase,
-  LineShape,
-  PlainPoint,
-  Point
-} from "../../../../types/drawing";
-import {
-  ActionBase,
   ActionType,
   ADD_LineShapeAction,
-  ADD_PointToLineShapeAction, Edit_lineRedo, Edit_lineUndo,
+  ADD_PointToLineShapeAction,
+  Edit_lineRedo,
+  Edit_lineUndo,
   REMOVE_LineShapeAction,
-  REMOVE_PointFromLineShapeAction, SET_hasEndArrowAction, SET_hasStartArrowAction,
-  SET_lineArrayAction, SET_lineArrowHeightAction, SET_lineArrowWidthAction,
-  SET_lineColorAction, SET_lineCreatedFromSymbolIdAction,
-  SET_lineDashArrayAction, SET_linePointCurveModeAction,
-  SET_lineThicknessInPxAction, SET_lineZIndexAction,
-  SET_selectedLinePointNewPosAction, UndoType
+  REMOVE_PointFromLineShapeAction,
+  SET_hasEndArrowAction,
+  SET_hasStartArrowAction,
+  SET_lineArrayAction,
+  SET_lineArrowHeightAction,
+  SET_lineArrowWidthAction,
+  SET_lineColorAction,
+  SET_lineCreatedFromSymbolIdAction,
+  SET_lineDashArrayAction,
+  SET_linePointCurveModeAction,
+  SET_lineThicknessInPxAction,
+  SET_lineZIndexAction,
+  SET_selectedLinePointNewPosAction,
+  UndoType
 } from "./linePropertyReducer";
 import {MultiActions} from "../../../../types/ui";
-import {
-  _setPropertyEditor_FieldAnchorPoints,
-  setPropertyEditor_FieldAnchorPoints,
-} from "../fieldProperties/actions";
+import {_setPropertyEditor_FieldAnchorPoints,} from "../fieldProperties/actions";
 import {
   calcAnchorPoint,
-  calcSingleAnchorPoint,
   checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap,
-  isFieldAndLineConnectedThroughAnchorPoints, isFieldAndLinePointConnectedThroughAnchorPoints
+  isFieldAndLineConnectedThroughAnchorPoints,
+  isFieldAndLinePointConnectedThroughAnchorPoints
 } from "../../../../helpers/interactionHelper";
+import {
+  set_editor_botBorderPoints,
+  set_editor_leftBorderPoints,
+  set_editor_rightBorderPoint,
+  set_editor_topBorderPoints
+} from "../actions";
+import {Logger} from "../../../../helpers/logger";
 
 
 export function setPropertyEditor_lineShapes(lines: ReadonlyArray<LineShape>): SET_lineArrayAction {
@@ -221,6 +225,8 @@ export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: nu
       return
     }
 
+    let posSet = false
+
     for (const field of fields) {
 
       const connectedLineTuple = isFieldAndLinePointConnectedThroughAnchorPoints(field, fieldSymbols, lineId, targetPoint, anchorPointSnapToleranceRadiusInPx)
@@ -229,6 +235,7 @@ export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: nu
         //try to remove connected
 
         dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+        posSet = true
 
         //if no anchor point is connected to this point don't dispatch
 
@@ -241,7 +248,6 @@ export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: nu
           }
         })))
 
-        return
 
       } else {
 
@@ -256,6 +262,7 @@ export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: nu
           //new not... user wants to remove connection
 
           dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+          posSet = true
 
           //remove connection
           dispatch(_setPropertyEditor_FieldAnchorPoints(field.id, field.anchorPoints.map((p, index) => {
@@ -266,6 +273,8 @@ export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: nu
           })))
 
         } else {
+
+          //add or renew connection
 
           dispatch(_setPropertyEditor_FieldAnchorPoints(field.id, field.anchorPoints.map((p, index) => {
             return index !== connectedLineTuple.anchorPointIndex
@@ -283,21 +292,70 @@ export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: nu
 
 
           dispatch(_setLinePointNewPos(lineId, oldPointId, anchorPointPos))
+          posSet = true
 
         }
-
-        return
 
       }
 
     }
 
-    //TODO tile border points
+
+    if (!posSet) {
+
+      //border points could overwrite this... but that's ok for now
+      dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+    }
 
     //--- check if the line points snaps to a tile border point
-    // checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap(getState().tileEditorState.tileProps, newLine,
-    //   anchorPointSnapToleranceRadiusInPx)
 
+    const __setLinePointNewPos = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+
+    checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap(getState().tileEditorState.tileProps, lineId, targetPoint, newPointPos,
+      (borderPoint, direction, tileWidth, tileHeight) => {
+
+        switch (direction) {
+          case "top": {
+            const topBorderPoints = getState().tileEditorState.tileProps.topBorderPoints
+
+            dispatch(set_editor_topBorderPoints(topBorderPoints.map(p => p.id !== borderPoint.id
+              ? p
+              : borderPoint)))
+
+            break;
+          }
+          case "bottom": {
+            const botBorderPoints = getState().tileEditorState.tileProps.botBorderPoints
+
+            dispatch(set_editor_botBorderPoints(botBorderPoints.map(p => p.id !== borderPoint.id
+              ? p
+              : borderPoint), tileHeight))
+            break;
+          }
+
+          case "left": {
+            const leftBorderPoints = getState().tileEditorState.tileProps.leftBorderPoints
+
+            dispatch(set_editor_leftBorderPoints(leftBorderPoints.map(p => p.id !== borderPoint.id
+              ? p
+              : borderPoint)))
+            break;
+          }
+
+          case "right": {
+            const rightBorderPoint = getState().tileEditorState.tileProps.rightBorderPoint
+
+            dispatch(set_editor_rightBorderPoint(rightBorderPoint.map(p => p.id !== borderPoint.id
+              ? p
+              : borderPoint), tileWidth))
+            break;
+          }
+          default:
+            Logger.fatal('not implemented')
+        }
+      },
+      __setLinePointNewPos,
+      anchorPointSnapToleranceRadiusInPx)
 
   }
 }

@@ -454,18 +454,11 @@ export function setPropertyEditor_FieldAnchorPoints(fieldId: number, anchorPoint
 
     if (!adjustLinePointPositions) return
 
-
     const allLines = getState().tileEditorLineShapeState.present
 
     const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
     adjustLinesFromAnchorPoints(fieldAfter, allLines, afterFieldSymbol, setLinePoint)
 
-    // const fieldAfter = getState().tileEditorFieldShapesState.find(p => p.id === fieldId)
-    // const afterFieldSymbol = fieldAfter.createdFromSymbolGuid === null
-    //   ? null
-    //   : getState().fieldSymbolState.find(p => p.guid === fieldAfter.createdFromSymbolGuid)
-    //
-    // adjustLinesFromAnchorPoints(fieldBefore, fieldAfter, beforeFieldSymbol, afterFieldSymbol)
   }
 }
 
