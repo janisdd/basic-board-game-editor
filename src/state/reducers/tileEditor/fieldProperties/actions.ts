@@ -11,9 +11,8 @@ import {
   ActionType,
   ADD_fieldShapeAction, CLEAR_fieldShape_connectedLinesAction,
   Edit_fieldShapeRedo,
-  Edit_fieldShapeUndo,
+  Edit_fieldShapeUndo, getNextShapeId,
   REMOVE_fieldShapeAction,
-  SET_connectedLinesThroughAnchorsAction,
   SET_field_isFontBoldAction,
   SET_field_isFontItalicAction,
   SET_field_rotationInDegreeAction,
@@ -42,7 +41,7 @@ import {
 import {MultiActions} from "../../../../types/ui";
 import {adjustLinesFromAnchorPoints} from "../../../../helpers/interactionHelper";
 import {Logger} from "../../../../helpers/logger";
-import {set_selectedLinePointNewPosAction} from "../lineProperties/actions";
+import {_setLinePointNewPos, set_selectedLinePointNewPosAction} from "../lineProperties/actions";
 import {set_LinePointNewPosAction} from "../../world/tileLibrary/actions";
 
 
@@ -109,21 +108,6 @@ export function _setPropertyEditor_FieldX(fieldId: number, x: number): SET_field
 export function setPropertyEditor_FieldX(fieldId: number, x: number): MultiActions {
   return (dispatch, getState) => {
 
-    const fieldBefore = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
-
-    if (fieldBefore === undefined) {
-      Logger.fatal('[internal] could not find the fieldBefore')
-      return
-    }
-
-    const beforeFieldSymbol = fieldBefore.createdFromSymbolGuid === null
-      ? null
-      : getState().fieldSymbolState.present.find(p => p.guid === fieldBefore.createdFromSymbolGuid)
-
-    if (beforeFieldSymbol === undefined) {
-      Logger.fatal('[internal] could not find the beforeFieldSymbol')
-      return
-    }
 
     dispatch(_setPropertyEditor_FieldX(fieldId, x))
 
@@ -144,8 +128,10 @@ export function setPropertyEditor_FieldX(fieldId: number, x: number): MultiActio
     }
 
     const allLines = getState().tileEditorLineShapeState.present
-    const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => dispatch(set_selectedLinePointNewPosAction(lineId, oldPointId, newPointPos, canSetFieldAnchorPoints))
-    adjustLinesFromAnchorPoints(fieldBefore, fieldAfter, allLines, beforeFieldSymbol, afterFieldSymbol, setLinePoint)
+
+    const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+
+    adjustLinesFromAnchorPoints(fieldAfter, allLines, afterFieldSymbol, setLinePoint)
   }
 }
 
@@ -159,22 +145,6 @@ export function _setPropertyEditor_FieldY(fieldId: number, y: number): SET_field
 
 export function setPropertyEditor_FieldY(fieldId: number, y: number): MultiActions {
   return (dispatch, getState) => {
-
-    const fieldBefore = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
-
-    if (fieldBefore === undefined) {
-      Logger.fatal('[internal] could not find the fieldBefore')
-      return
-    }
-
-    const beforeFieldSymbol = fieldBefore.createdFromSymbolGuid === null
-      ? null
-      : getState().fieldSymbolState.present.find(p => p.guid === fieldBefore.createdFromSymbolGuid)
-
-    if (beforeFieldSymbol === undefined) {
-      Logger.fatal('[internal] could not find the beforeFieldSymbol')
-      return
-    }
 
     dispatch(_setPropertyEditor_FieldY(fieldId, y))
 
@@ -195,8 +165,8 @@ export function setPropertyEditor_FieldY(fieldId: number, y: number): MultiActio
     }
 
     const allLines = getState().tileEditorLineShapeState.present
-    const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => dispatch(set_selectedLinePointNewPosAction(lineId, oldPointId, newPointPos, canSetFieldAnchorPoints))
-    adjustLinesFromAnchorPoints(fieldBefore, fieldAfter, allLines, beforeFieldSymbol, afterFieldSymbol, setLinePoint)
+    const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+    adjustLinesFromAnchorPoints(fieldAfter, allLines, afterFieldSymbol, setLinePoint)
   }
 }
 
@@ -211,21 +181,6 @@ export function _setPropertyEditor_FieldWidth(fieldId: number, width: number): S
 export function setPropertyEditor_FieldWidth(fieldId: number, width: number): MultiActions {
   return (dispatch, getState) => {
 
-    const fieldBefore = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
-
-    if (fieldBefore === undefined) {
-      Logger.fatal('[internal] could not find the beforeField')
-      return
-    }
-
-    const beforeFieldSymbol = fieldBefore.createdFromSymbolGuid === null
-      ? null
-      : getState().fieldSymbolState.present.find(p => p.guid === fieldBefore.createdFromSymbolGuid)
-
-    if (beforeFieldSymbol === undefined) {
-      Logger.fatal('[internal] could not find the beforeFieldSymbol')
-      return
-    }
 
     dispatch(_setPropertyEditor_FieldWidth(fieldId, width))
 
@@ -246,8 +201,8 @@ export function setPropertyEditor_FieldWidth(fieldId: number, width: number): Mu
     }
 
     const allLines = getState().tileEditorLineShapeState.present
-    const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => dispatch(set_selectedLinePointNewPosAction(lineId, oldPointId, newPointPos, canSetFieldAnchorPoints))
-    adjustLinesFromAnchorPoints(fieldBefore, fieldAfter, allLines, beforeFieldSymbol, afterFieldSymbol, setLinePoint)
+    const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+    adjustLinesFromAnchorPoints(fieldAfter, allLines, afterFieldSymbol, setLinePoint)
   }
 }
 
@@ -261,22 +216,6 @@ export function _setPropertyEditor_FieldHeight(fieldId: number, height: number):
 
 export function setPropertyEditor_FieldHeight(fieldId: number, height: number): MultiActions {
   return (dispatch, getState) => {
-
-    const fieldBefore = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
-
-    if (fieldBefore === undefined) {
-      Logger.fatal('[internal] could not find the fieldBefore')
-      return
-    }
-
-    const beforeFieldSymbol = fieldBefore.createdFromSymbolGuid === null
-      ? null
-      : getState().fieldSymbolState.present.find(p => p.guid === fieldBefore.createdFromSymbolGuid)
-
-    if (beforeFieldSymbol === undefined) {
-      Logger.fatal('[internal] could not find the beforeFieldSymbol')
-      return
-    }
 
     dispatch(_setPropertyEditor_FieldHeight(fieldId, height))
 
@@ -297,8 +236,8 @@ export function setPropertyEditor_FieldHeight(fieldId: number, height: number): 
     }
 
     const allLines = getState().tileEditorLineShapeState.present
-    const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => dispatch(set_selectedLinePointNewPosAction(lineId, oldPointId, newPointPos, canSetFieldAnchorPoints))
-    adjustLinesFromAnchorPoints(fieldBefore, fieldAfter, allLines, beforeFieldSymbol, afterFieldSymbol, setLinePoint)
+    const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+    adjustLinesFromAnchorPoints(fieldAfter, allLines, afterFieldSymbol, setLinePoint)
   }
 }
 
@@ -312,22 +251,6 @@ export function _setPropertyEditor_field_rotationInDegree(fieldId: number, rotat
 
 export function setPropertyEditor_field_rotationInDegree(fieldId: number, rotationInDegree: number): MultiActions {
   return (dispatch, getState) => {
-
-    const fieldBefore = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
-
-    if (fieldBefore === undefined) {
-      Logger.fatal('[internal] could not find the fieldBefore')
-      return
-    }
-
-    const beforeFieldSymbol = fieldBefore.createdFromSymbolGuid === null
-      ? null
-      : getState().fieldSymbolState.present.find(p => p.guid === fieldBefore.createdFromSymbolGuid)
-
-    if (beforeFieldSymbol === undefined) {
-      Logger.fatal('[internal] could not find the beforeFieldSymbol')
-      return
-    }
 
     dispatch(_setPropertyEditor_field_rotationInDegree(fieldId, rotationInDegree))
 
@@ -348,8 +271,8 @@ export function setPropertyEditor_field_rotationInDegree(fieldId: number, rotati
     }
 
     const allLines = getState().tileEditorLineShapeState.present
-    const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => dispatch(set_selectedLinePointNewPosAction(lineId, oldPointId, newPointPos, canSetFieldAnchorPoints))
-    adjustLinesFromAnchorPoints(fieldBefore, fieldAfter, allLines, beforeFieldSymbol, afterFieldSymbol, setLinePoint)
+    const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+    adjustLinesFromAnchorPoints(fieldAfter, allLines, afterFieldSymbol, setLinePoint)
 
   }
 }
@@ -411,28 +334,78 @@ export function setPropertyEditor_FieldAbsoluteZIndex(fieldId: number, zIndex: n
   }
 }
 
-
-/**
- *
- * @param {number} fieldId
- * @param {number} lineId
- * @param {ReadonlyArray<number>} connectedLinesThroughAnchors null or empty list will delete the connection
- * @returns {SET_connectedLinesThroughAnchorsAction}
- */
-export function setPropertyEditor_FieldConnectedLinesThroughAnchors(fieldId: number, lineId: number, connectedLinesThroughAnchors: ReadonlyArray<number> | null): SET_connectedLinesThroughAnchorsAction {
-  return {
-    type: ActionType.SET_connectedLinesThroughAnchors,
-    lineId,
-    connectedLinesThroughAnchors,
-    fieldId
-  }
-}
-
-export function setPropertyEditor_FieldCreatedFromSymbolId(fieldId: number, createdFromSymbolGuid: string | null): SET_fieldCreatedFromSymbolIdAction {
+export function _setPropertyEditor_FieldCreatedFromSymbolId(fieldId: number, createdFromSymbolGuid: string | null): SET_fieldCreatedFromSymbolIdAction {
   return {
     type: ActionType.SET_fieldCreatedFromSymbolId,
     createdFromSymbolGuid,
     fieldId
+  }
+}
+
+export function setPropertyEditor_FieldCreatedFromSymbolId(fieldId: number, createdFromSymbolGuid: string | null): MultiActions {
+  return (dispatch, getState) => {
+
+
+    //but we also need to sync the anchor points!
+    //else lines would snap to the old anchor points and not the symbol anchor points...
+
+    const field = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (field === undefined) {
+      Logger.fatal('[internal] could not find the fieldBefore')
+      return
+    }
+
+    const fieldSymbol = createdFromSymbolGuid === null
+      ? null
+      : getState().fieldSymbolState.present.find(p => p.guid === createdFromSymbolGuid)
+
+    if (fieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the beforeFieldSymbol')
+      return
+    }
+
+
+    if (fieldSymbol) {
+
+      const anchorPointsCopy = fieldSymbol.anchorPoints.map<AnchorPoint>(p => {
+
+        //check if we find anchor points with same coords... and use them as connection to lines
+
+        const fieldAnchorPoints = field.anchorPoints.find(k => k.percentX === p.percentX && k.percentY === p.percentY)
+
+        //symbol anchor point has new pos
+        if (!fieldAnchorPoints) return p
+
+        return {
+          ...p,
+          //it will be the same as symbol field, this is ok because the values should be equal (except for connectedLineTuples)
+          //we found an old anchor point by position... take the connected lines
+          connectedLineTuples: fieldAnchorPoints.connectedLineTuples
+        }
+      })
+
+      dispatch(_setPropertyEditor_FieldAnchorPoints(fieldId, anchorPointsCopy))
+    } else {
+      //disconnect, make new anchor point ids to make id unique in tile
+      //field.anchorPoints is in sync with the symbol anchor points so only make a copy of field.anchorPoints here with new unique ids
+
+      const anchorPointsCopy = field.anchorPoints.map<AnchorPoint>(p => {
+        return {
+          ...p,
+          id: getNextShapeId(),
+          // connectedLineTuples: p.connectedLineTuples.map(k => k) //connectedLineTuples is not tracked in symbol so it's ok
+        }
+      })
+
+      dispatch(_setPropertyEditor_FieldAnchorPoints(fieldId, anchorPointsCopy))
+
+    }
+
+
+    dispatch(_setPropertyEditor_FieldCreatedFromSymbolId(fieldId, createdFromSymbolGuid))
+
+
   }
 }
 
@@ -455,17 +428,37 @@ export function _setPropertyEditor_FieldAnchorPoints(fieldId: number, anchorPoin
   }
 }
 
-export function setPropertyEditor_FieldAnchorPoints(fieldId: number, anchorPoints: ReadonlyArray<AnchorPoint>): MultiActions {
+export function setPropertyEditor_FieldAnchorPoints(fieldId: number, anchorPoints: ReadonlyArray<AnchorPoint>, adjustLinePointPositions: boolean): MultiActions {
   return (dispatch, getState) => {
 
 
-    // const fieldBefore = getState().tileEditorFieldShapesState.find(p => p.id === fieldId)
-    // const beforeFieldSymbol = fieldBefore.createdFromSymbolGuid === null
-    //   ? null
-    //   : getState().fieldSymbolState.find(p => p.guid === fieldBefore.createdFromSymbolGuid)
-
-
     dispatch(_setPropertyEditor_FieldAnchorPoints(fieldId, anchorPoints))
+
+    const fieldAfter = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
+
+    if (fieldAfter === undefined) {
+      Logger.fatal('[internal] could not find the fieldBefore')
+      return
+    }
+
+
+    const afterFieldSymbol = fieldAfter.createdFromSymbolGuid === null
+      ? null
+      : getState().fieldSymbolState.present.find(p => p.guid === fieldAfter.createdFromSymbolGuid)
+
+    if (afterFieldSymbol === undefined) {
+      Logger.fatal('[internal] could not find the beforeFieldSymbol')
+      return
+    }
+
+
+    if (!adjustLinePointPositions) return
+
+
+    const allLines = getState().tileEditorLineShapeState.present
+
+    const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+    adjustLinesFromAnchorPoints(fieldAfter, allLines, afterFieldSymbol, setLinePoint)
 
     // const fieldAfter = getState().tileEditorFieldShapesState.find(p => p.id === fieldId)
     // const afterFieldSymbol = fieldAfter.createdFromSymbolGuid === null
@@ -557,15 +550,9 @@ export function edit_fieldShapeRedo(): Edit_fieldShapeRedo {
  * @param newSymbolWidth
  * @param tileGuide
  */
-export function adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth(fieldShape: FieldShape, fieldSymbol: FieldSymbol, allLines: ReadonlyArray<LineShape> | null, tileGuide: string | null, oldSymbolWidth: number, newSymbolWidth: number): MultiActions {
+export function adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth(fieldShape: FieldShape, fieldSymbol: FieldSymbol,
+                                                                       allLines: ReadonlyArray<LineShape> | null, tileGuide: string | null, newSymbolWidth: number): MultiActions {
   return (dispatch, getState) => {
-
-    const beforeFieldSymbol: FieldSymbol = {
-      ...fieldSymbol,
-      width: oldSymbolWidth
-    }
-
-    const afterField = fieldShape
 
     const afterFieldSymbol: FieldSymbol = {
       ...fieldSymbol,
@@ -576,12 +563,11 @@ export function adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth(fieldShap
 
     if (tileGuide !== null) {
       //update tile that we might now editing right now...
-      const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => dispatch(set_LinePointNewPosAction(tileGuide, lineId, oldPointId, newPointPos))
-      adjustLinesFromAnchorPoints(fieldShape, afterField, allLines, beforeFieldSymbol, afterFieldSymbol, setLinePoint)
-    }
-    else {
-      const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => dispatch(set_selectedLinePointNewPosAction(lineId, oldPointId, newPointPos, canSetFieldAnchorPoints))
-      adjustLinesFromAnchorPoints(fieldShape, afterField, allLines, beforeFieldSymbol, afterFieldSymbol, setLinePoint)
+      const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(set_LinePointNewPosAction(tileGuide, lineId, oldPointId, newPointPos))
+      adjustLinesFromAnchorPoints(fieldShape, allLines, afterFieldSymbol, setLinePoint)
+    } else {
+      const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+      adjustLinesFromAnchorPoints(fieldShape, allLines, afterFieldSymbol, setLinePoint)
     }
 
   }
@@ -596,31 +582,9 @@ export function adjustLinesFromAnchorPointsFromFieldSymbolChangedWidth(fieldShap
  * @param oldSymbolHeight
  * @param newSymbolHeight
  */
-export function adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight(fieldShape: FieldShape, fieldSymbol: FieldSymbol, allLines: ReadonlyArray<LineShape> | null, tileGuide: string | null, oldSymbolHeight: number, newSymbolHeight: number): MultiActions {
+export function adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight(fieldShape: FieldShape, fieldSymbol: FieldSymbol, allLines: ReadonlyArray<LineShape> | null, tileGuide: string | null, newSymbolHeight: number): MultiActions {
   return (dispatch, getState) => {
 
-    // const beforeField = getState().tileEditorFieldShapesState.present.find(p => p.id === fieldId)
-    //
-    // if (beforeField === undefined) {
-    //   Logger.fatal('[internal] could not find the field')
-    //   return
-    // }
-    //
-    // const _fieldSymbol = beforeField.createdFromSymbolGuid === null
-    //   ? null
-    //   : getState().fieldSymbolState.present.find(p => p.guid === beforeField.createdFromSymbolGuid)
-    //
-    // if (_fieldSymbol === undefined) {
-    //   Logger.fatal('[internal] could not find the fieldSymbol')
-    //   return
-    // }
-
-    const beforeFieldSymbol: FieldSymbol = {
-      ...fieldSymbol,
-      height: oldSymbolHeight,
-    }
-
-    const afterField = fieldShape
 
     const afterFieldSymbol: FieldSymbol = {
       ...fieldSymbol,
@@ -631,12 +595,11 @@ export function adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight(fieldSha
 
     if (tileGuide !== null) {
       //update tile that we might now editing right now...
-      const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => dispatch(set_LinePointNewPosAction(tileGuide, lineId, oldPointId, newPointPos))
-      adjustLinesFromAnchorPoints(fieldShape, afterField, allLines, beforeFieldSymbol, afterFieldSymbol, setLinePoint)
-    }
-    else {
-      const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => dispatch(set_selectedLinePointNewPosAction(lineId, oldPointId, newPointPos, canSetFieldAnchorPoints))
-      adjustLinesFromAnchorPoints(fieldShape, afterField, allLines, beforeFieldSymbol, afterFieldSymbol, setLinePoint)
+      const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(set_LinePointNewPosAction(tileGuide, lineId, oldPointId, newPointPos))
+      adjustLinesFromAnchorPoints(fieldShape, allLines, afterFieldSymbol, setLinePoint)
+    } else {
+      const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+      adjustLinesFromAnchorPoints(fieldShape, allLines, afterFieldSymbol, setLinePoint)
     }
 
 
@@ -652,16 +615,9 @@ export function adjustLinesFromAnchorPointsFromFieldSymbolChangedHeight(fieldSha
  * @param oldSymbolRotation
  * @param newSymbolRotation
  */
-export function adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation(fieldShape: FieldShape, fieldSymbol: FieldSymbol, allLines: ReadonlyArray<LineShape> | null, tileGuide: string | null, oldSymbolRotation: number, newSymbolRotation: number): MultiActions {
+export function adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation(fieldShape: FieldShape, fieldSymbol: FieldSymbol, allLines: ReadonlyArray<LineShape> | null, tileGuide: string | null, newSymbolRotation: number): MultiActions {
   return (dispatch, getState) => {
 
-
-    const beforeFieldSymbol: FieldSymbol = {
-      ...fieldSymbol,
-      rotationInDegree: oldSymbolRotation
-    }
-
-    const afterField = fieldShape
 
     const afterFieldSymbol: FieldSymbol = {
       ...fieldSymbol,
@@ -672,12 +628,12 @@ export function adjustLinesFromAnchorPointsFromFieldSymbolChangedRotation(fieldS
 
     if (tileGuide !== null) {
       //update tile that we might now editing right now...
-      const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => dispatch(set_LinePointNewPosAction(tileGuide,lineId, oldPointId, newPointPos))
-      adjustLinesFromAnchorPoints(fieldShape, afterField, allLines, beforeFieldSymbol, afterFieldSymbol, setLinePoint)
+      const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(set_LinePointNewPosAction(tileGuide, lineId, oldPointId, newPointPos))
+      adjustLinesFromAnchorPoints(fieldShape, allLines, afterFieldSymbol, setLinePoint)
 
     } else {
-      const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => dispatch(set_selectedLinePointNewPosAction(lineId, oldPointId, newPointPos, canSetFieldAnchorPoints))
-      adjustLinesFromAnchorPoints(fieldShape, afterField, allLines, beforeFieldSymbol, afterFieldSymbol, setLinePoint)
+      const setLinePoint = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+      adjustLinesFromAnchorPoints(fieldShape, allLines, afterFieldSymbol, setLinePoint)
     }
 
   }

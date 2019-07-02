@@ -110,26 +110,34 @@ export const undoShapeLimit = 50
 //so we use the default action type
 export const clearTileEditorEditShapesType = ActionTypes.CLEAR_HISTORY
 
-export const defaultAnchorPoints: ReadonlyArray<AnchorPoint> = [
+export const defaultAnchorPoints: () => ReadonlyArray<AnchorPoint> = () => [
   //top
   {
+    id: getNextShapeId(),
     percentX: 50,
-    percentY: 0
+    percentY: 0,
+    connectedLineTuples: [],
   },
   //bot
   {
+    id: getNextShapeId(),
     percentX: 50,
-    percentY: 100
+    percentY: 100,
+    connectedLineTuples: [],
   },
   //left
   {
+    id: getNextShapeId(),
     percentX: 0,
-    percentY: 50
+    percentY: 50,
+    connectedLineTuples: [],
   },
   //right
   {
+    id: getNextShapeId(),
     percentX: 100,
-    percentY: 50
+    percentY: 50,
+    connectedLineTuples: [],
   }
 ]
 
@@ -145,8 +153,7 @@ function createField(x: number, y: number, fieldId: number, text: string, cmdTex
   return {
     kind: "field",
     id: fieldId,
-    connectedLinesThroughAnchorPoints: [],
-    anchorPoints: defaultAnchorPoints,
+    anchorPoints: defaultAnchorPoints(),
     height: 30,
     width: 100,
     x: x,
@@ -212,22 +219,26 @@ export function getDefaultNewTile(): Tile {
     topBorderPoints: [{
       id: getNextShapeId(),
       val: defaultTileWidth / 2,
-      nextFieldId: null
+      nextFieldId: null,
+      connectedLineTuples: [],
     }],
     botBorderPoints: [{
       id: getNextShapeId(),
       val: defaultTileWidth / 2,
-      nextFieldId: null
+      nextFieldId: null,
+      connectedLineTuples: [],
     }],
     leftBorderPoints: [{
       id: getNextShapeId(),
       val: defaultTileHeight / 2,
-      nextFieldId: null
+      nextFieldId: null,
+      connectedLineTuples: [],
     }],
     rightBorderPoint: [{
       id: getNextShapeId(),
       val: defaultTileHeight / 2,
-      nextFieldId: null
+      nextFieldId: null,
+      connectedLineTuples: [],
     }],
     guid: getGuid(),
     fieldShapes: newTileFields(),
@@ -257,12 +268,11 @@ export function getDefaultNewTile(): Tile {
 }
 
 
-export const defaultFieldShape: FieldShape = {
+export const defaultFieldShape: () => FieldShape = () => ({
   kind: "field",
   isSymbol: false,
   createdFromSymbolGuid: null,
-  connectedLinesThroughAnchorPoints: {},
-  anchorPoints: defaultAnchorPoints,
+  anchorPoints: defaultAnchorPoints(),
   id: -1, //will be set when added
   cornerRadiusInPx: 0,
   bgColor: '#dddddd',
@@ -286,7 +296,7 @@ export const defaultFieldShape: FieldShape = {
   isFontBold: false,
   rotationInDegree: 0,
   backgroundImgGuid: null
-}
+})
 
 export const defaultLineShape: LineShape = {
   kind: 'line',

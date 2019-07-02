@@ -6,7 +6,7 @@ import {
   ConnectedLinesThroughAnchorPointsMap,
   CurveMode,
   FieldShape,
-  FieldSymbol,
+  FieldSymbol, IsFieldAndLineConnectedResult,
   LineShape,
   PlainPoint,
   Point,
@@ -185,7 +185,7 @@ export function getAngleInDeg(anchorX: number, anchorY: number, x: number, y: nu
 }
 
 
-export function calcAnchorPoints(fieldX: number, fieldY: number, fieldWidth: number, fieldHeight: number, anchorPoints: ReadonlyArray<AnchorPoint>, xOffset: number, yOffset: number, rotationInDegree: number): ReadonlyArray<PlainPoint> {
+export function calcAnchorPointsRaw(fieldX: number, fieldY: number, fieldWidth: number, fieldHeight: number, anchorPoints: ReadonlyArray<AnchorPoint>, xOffset: number, yOffset: number, rotationInDegree: number): ReadonlyArray<PlainPoint> {
   const points: PlainPoint[] = []
 
   for (const anchorPoint of anchorPoints) {
@@ -199,6 +199,77 @@ export function calcAnchorPoints(fieldX: number, fieldY: number, fieldWidth: num
     points.push({x: rotatedPoint.x, y: rotatedPoint.y})
   }
   return points
+}
+
+export function calcAnchorPoints(field: FieldShape, fieldSymbols: ReadonlyArray<FieldSymbol>, anchorPoints: ReadonlyArray<AnchorPoint>): ReadonlyArray<PlainPoint> {
+
+  //use field anchor point definitions
+  let symbol: FieldSymbol | null = null
+  if (field.createdFromSymbolGuid !== null) {
+    symbol = fieldSymbols.find(p => p.guid === field.createdFromSymbolGuid)
+
+    if (!symbol) {
+      const msg = `could not find field symbol for guid ${field.createdFromSymbolGuid}`
+      Logger.fatal(msg)
+      throw new Error(msg)
+    }
+  }
+
+  const anchorPointPos = calcAnchorPointsRaw(
+    field.x,
+    field.y,
+    field.createdFromSymbolGuid !== null && symbol.overwriteWidth ? symbol.width : field.width,
+    field.createdFromSymbolGuid !== null && symbol.overwriteHeight ? symbol.height : field.height,
+    anchorPoints,
+    0,
+    0,
+    field.createdFromSymbolGuid !== null && symbol.overwriteRotationInDeg ? symbol.rotationInDegree : field.rotationInDegree,
+  )
+
+  return anchorPointPos
+}
+
+export function calcAnchorPoint(field: FieldShape, fieldSymbols: ReadonlyArray<FieldSymbol>, anchorPoint: AnchorPoint): PlainPoint {
+
+  //use field anchor point definitions
+  let symbol: FieldSymbol | null = null
+  if (field.createdFromSymbolGuid !== null) {
+    symbol = fieldSymbols.find(p => p.guid === field.createdFromSymbolGuid)
+
+    if (!symbol) {
+      const msg = `could not find field symbol for guid ${field.createdFromSymbolGuid}`
+      Logger.fatal(msg)
+      throw new Error(msg)
+    }
+  }
+
+  const anchorPointPos = calcSingleAnchorPoint(
+    field.x,
+    field.y,
+    field.createdFromSymbolGuid !== null && symbol.overwriteWidth ? symbol.width : field.width,
+    field.createdFromSymbolGuid !== null && symbol.overwriteHeight ? symbol.height : field.height,
+    anchorPoint,
+    0,
+    0,
+    field.createdFromSymbolGuid !== null && symbol.overwriteRotationInDeg ? symbol.rotationInDegree : field.rotationInDegree,
+  )
+
+  return anchorPointPos
+}
+
+export function calcSingleAnchorPoint(fieldX: number, fieldY: number, fieldWidth: number, fieldHeight: number, anchorPoint: AnchorPoint, xOffset: number, yOffset: number, rotationInDegree: number): PlainPoint {
+
+  const x = (anchorPoint.percentX / 100) * fieldWidth + fieldX + xOffset
+  const y = (anchorPoint.percentY / 100) * fieldHeight + fieldY + yOffset
+
+  const rotatedPoint = rotatePointBy(fieldX + fieldWidth / 2 + xOffset, fieldY + fieldHeight / 2 + yOffset, x, y,
+    -rotationInDegree)
+
+
+  return {
+    x: rotatedPoint.x,
+    y: rotatedPoint.y
+  }
 }
 
 
@@ -238,13 +309,14 @@ export function autoConnectFieldsWithLinesByCmdText(
   if (fields.length === 0) return
 
   const allBorderPoints: ReadonlyArray<BorderPointWithPos> =
-    topBorderPoints.map(p => {
+    topBorderPoints.map<BorderPointWithPos>(p => {
       return {
         id: p.id,
         nextFieldId: p.nextFieldId,
         x: p.val,
         y: 0,
-        val: p.val
+        val: p.val,
+        connectedLineTuples: []
       }
     })
       .concat(
@@ -254,7 +326,8 @@ export function autoConnectFieldsWithLinesByCmdText(
             nextFieldId: p.nextFieldId,
             x: p.val,
             y: tileHeight,
-            val: p.val
+            val: p.val,
+            connectedLineTuples: []
           }
         })
       )
@@ -265,7 +338,8 @@ export function autoConnectFieldsWithLinesByCmdText(
             nextFieldId: p.nextFieldId,
             x: 0,
             y: p.val,
-            val: p.val
+            val: p.val,
+            connectedLineTuples: []
           }
         })
       )
@@ -276,7 +350,8 @@ export function autoConnectFieldsWithLinesByCmdText(
             nextFieldId: p.nextFieldId,
             x: tileWidth,
             y: p.val,
-            val: p.val
+            val: p.val,
+            connectedLineTuples: []
           }
         })
       )
@@ -321,28 +396,29 @@ export function autoConnectFieldsWithLinesByCmdText(
       }
     }
 
-    //some lines might already exit
-    let connectedLinesThroughAnchorPoints = getConnectedLinesThroughAnchorPointsForBorderPoint(borderPoint, lineShapes)
-
-    const borderPointConnectedLinesIds = Object.keys(connectedLinesThroughAnchorPoints)
-
-    //if the fields are already connected do nothing
-    const nextFieldConnectedLinesIds = Object.keys(nextField.connectedLinesThroughAnchorPoints)
-
-    let alreadyConnected = false
-
-    for (const lineIdString of borderPointConnectedLinesIds) {
-      if (nextFieldConnectedLinesIds.some(idString => idString === lineIdString)) {
-
-        //already connected
-        alreadyConnected = true
-        break
-      }
-    }
-
-    if (alreadyConnected) {
-      continue
-    }
+    //TOOD line
+    // //some lines might already exit
+    // let connectedLinesThroughAnchorPoints = getConnectedLinesThroughAnchorPointsForBorderPoint(borderPoint, lineShapes)
+    //
+    // const borderPointConnectedLinesIds = Object.keys(connectedLinesThroughAnchorPoints)
+    //
+    // //if the fields are already connected do nothing
+    // const nextFieldConnectedLinesIds = Object.keys(nextField.connectedLinesThroughAnchorPoints)
+    //
+    // let alreadyConnected = false
+    //
+    // for (const lineIdString of borderPointConnectedLinesIds) {
+    //   if (nextFieldConnectedLinesIds.some(idString => idString === lineIdString)) {
+    //
+    //     //already connected
+    //     alreadyConnected = true
+    //     break
+    //   }
+    // }
+    //
+    // if (alreadyConnected) {
+    //   continue
+    // }
 
     connectPointsWithLine(
       borderPoint.x,
@@ -359,6 +435,7 @@ export function autoConnectFieldsWithLinesByCmdText(
       majorLineDirection,
       true
     )
+
     lastZIndex++
   }
 
@@ -412,7 +489,7 @@ function connectFieldsFromRootFieldByCmdText(
     }
   }
 
-  const rootFieldConnectedLines = Object.keys(rootField.connectedLinesThroughAnchorPoints)
+  // const rootFieldConnectedLines = Object.keys(rootField.connectedLinesThroughAnchorPoints)
   let nextFieldIsBorderPoint = false
 
   for (const statement of game.statements) {
@@ -425,7 +502,7 @@ function connectFieldsFromRootFieldByCmdText(
         fields,
         fieldSymbols,
         nextFieldIsBorderPoint,
-        rootFieldConnectedLines,
+        // rootFieldConnectedLines,
         majorLineDirection,
         allBorderPoints,
         borderPointsDiameterInPx,
@@ -443,7 +520,7 @@ function connectFieldsFromRootFieldByCmdText(
         fields,
         fieldSymbols,
         nextFieldIsBorderPoint,
-        rootFieldConnectedLines,
+        // rootFieldConnectedLines,
         majorLineDirection,
         allBorderPoints,
         borderPointsDiameterInPx,
@@ -459,7 +536,7 @@ function connectFieldsFromRootFieldByCmdText(
         fields,
         fieldSymbols,
         nextFieldIsBorderPoint,
-        rootFieldConnectedLines,
+        // rootFieldConnectedLines,
         majorLineDirection,
         allBorderPoints,
         borderPointsDiameterInPx,
@@ -500,7 +577,7 @@ function connectFields(rootField: FieldShape,
                        fieldShapes: ReadonlyArray<FieldShape>,
                        fieldSymbols: ReadonlyArray<FieldSymbol>,
                        nextFieldIsBorderPoint: boolean,
-                       rootFieldConnectedLines: string[],
+                       // rootFieldConnectedLines: string[],
                        majorLineDirection: MajorLineDirection,
                        allBorderPoints: ReadonlyArray<BorderPointWithPos>,
                        borderPointsDiameterInPx: number,
@@ -540,7 +617,6 @@ function connectFields(rootField: FieldShape,
     //too lazy to restructure method...
     nextField = {
       ...rootField,
-      connectedLinesThroughAnchorPoints,
       id: targetBorderPoint.id,
       x: targetBorderPoint.x,
       y: targetBorderPoint.y,
@@ -574,15 +650,16 @@ function connectFields(rootField: FieldShape,
     }
   }
 
-  //if the fields are already connected do nothing
-  const nextFieldConnectedLinesIds = Object.keys(nextField.connectedLinesThroughAnchorPoints)
-
-  for (const lineIdString of rootFieldConnectedLines) {
-    if (nextFieldConnectedLinesIds.some(idString => idString === lineIdString)) {
-      fieldsAreAlreadyConnected = true
-      break
-    }
-  }
+  //TOOD line
+  // //if the fields are already connected do nothing
+  // const nextFieldConnectedLinesIds = Object.keys(nextField.connectedLinesThroughAnchorPoints)
+  //
+  // for (const lineIdString of rootFieldConnectedLines) {
+  //   if (nextFieldConnectedLinesIds.some(idString => idString === lineIdString)) {
+  //     fieldsAreAlreadyConnected = true
+  //     break
+  //   }
+  // }
 
   if (fieldsAreAlreadyConnected) {
     return zIndex
@@ -838,81 +915,28 @@ export function getNiceBezierCurveBetween(startPoint: PlainPoint, endPoint: Plai
 /**
  * call this if a field is moved and we need to check
  * if a line point is connected to an anchor point and thus we need to move the line too
- * @param fieldBefore
- * @param fieldAfter
+ * @param field
  * @param allLines all possible lines to search
- * @param fieldSymbolBefore the symbol for the before field or null
- * @param fieldSymbolAfter the symbol for the after field (can be the updated symbol)
+ * @param fieldSymbol
  * @param set_selectedLinePointNewPosAction
  */
-export function adjustLinesFromAnchorPoints(fieldBefore: FieldShape, fieldAfter: FieldShape,
-                                            allLines: ReadonlyArray<LineShape>, fieldSymbolBefore: FieldSymbol | null, fieldSymbolAfter: FieldSymbol | null,
-                                            set_selectedLinePointNewPosAction: (lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => any
+export function adjustLinesFromAnchorPoints(field: FieldShape,
+                                            allLines: ReadonlyArray<LineShape>, fieldSymbol: FieldSymbol | null,
+                                            set_selectedLinePointNewPosAction: (lineId: number, oldPointId: number, newPointPos: PlainPoint) => any
 ): void {
 
-  //TODO MAYBE maybe we can make this faster??
+  const newAnchorPointPoss = calcAnchorPoints(field, [fieldSymbol], field.anchorPoints)
 
-  // const allLines = globalState.getState().tileEditorLineShapeState.present
+  //just move all line points if they have different coords
 
-  for (const key in fieldBefore.connectedLinesThroughAnchorPoints) {
-    const lineId = parseInt(key)
-    if (isNaN(lineId)) {
-      console.error('line id cannot be nan')
-      continue
+  for (let i = 0; i < newAnchorPointPoss.length; i++) {
+    const anchorPointPos = newAnchorPointPoss[i]
+    const anchorPoint = field.anchorPoints[i]
+
+    for (const tuple of anchorPoint.connectedLineTuples) {
+
+      set_selectedLinePointNewPosAction(tuple.lineId, tuple.pointId, anchorPointPos)
     }
-
-    const connectedLinePointIds = fieldBefore.connectedLinesThroughAnchorPoints[key]
-
-    const line = allLines.find(p => p.id === lineId)
-    if (!line) continue
-
-    let someBefore = fieldBefore.createdFromSymbolGuid === null ? fieldBefore : fieldSymbolBefore
-    let someAfter = fieldAfter.createdFromSymbolGuid === null ? fieldAfter : fieldSymbolAfter
-
-    const anchorPoints = calcAnchorPoints(
-      fieldBefore.x,
-      fieldBefore.y,
-      someBefore.width,
-      someBefore.height,
-      someBefore.anchorPoints,
-      0,
-      0,
-      someBefore.rotationInDegree
-    )
-    const newAnchorPoints = calcAnchorPoints(
-      fieldAfter.x,
-      fieldAfter.y,
-      someAfter.width,
-      someAfter.height,
-      someAfter.anchorPoints,
-      0,
-      0,
-      someAfter.rotationInDegree
-    )
-
-    for (let i = 0; i < anchorPoints.length; i++) {
-      const anchorPoint = anchorPoints[i]
-      const newAnchorPoint = newAnchorPoints[i]
-
-      //the start line is connected to the field && is on an anchor point
-      if (connectedLinePointIds.indexOf(line.startPoint.id) !== -1 &&
-        line.startPoint.x === anchorPoint.x && line.startPoint.y === anchorPoint.y) {
-        //move the line point to the new anchor point pos
-        // globalState.dispatch(set_selectedLinePointNewPosAction(line.id, line.startPoint.id, newAnchorPoint, false))
-        set_selectedLinePointNewPosAction(line.id, line.startPoint.id, newAnchorPoint, false)
-      }
-
-      for (const intermediatePointsInLine of line.points) {
-        //the intermediate point is connected to the field
-        if (connectedLinePointIds.indexOf(intermediatePointsInLine.id) !== -1 &&
-          intermediatePointsInLine.x === anchorPoint.x && intermediatePointsInLine.y === anchorPoint.y) {
-          //move the line point to the new anchor point pos
-          // globalState.dispatch(set_selectedLinePointNewPosAction(line.id, intermediatePointsInLine.id, newAnchorPoint, false))
-          set_selectedLinePointNewPosAction(line.id, intermediatePointsInLine.id, newAnchorPoint, false)
-        }
-      }
-    }
-
   }
 
 }
@@ -923,15 +947,104 @@ export function adjustLinesFromAnchorPoints(fieldBefore: FieldShape, fieldAfter:
  * if yes it forces the line point to be placed on the anchor point (starts a new event)
  * this is also the reason we need canSetFieldAnchorPoints in setLinePointNewPos
  * because this calls this function again --> would be infinite loop
+ *
+ * one point could be connected to multiple anchor points... but we only take the first connected!
  * @param {FieldShape} field
  * @param {ReadonlyArray<FieldSymbol>} fieldSymbols
  * @param {LineShape} line
  * @param {number} anchorPointSnapToleranceRadiusInPx
  * @returns {ReadonlyArray<number>}
  */
-export function isFieldAndLineConnectedThroughAnchorPoints(field: FieldShape, fieldSymbols: ReadonlyArray<FieldSymbol>, line: LineShape, anchorPointSnapToleranceRadiusInPx: number = 0): ReadonlyArray<number> {
+export function isFieldAndLineConnectedThroughAnchorPoints(field: FieldShape, fieldSymbols: ReadonlyArray<FieldSymbol>, line: LineShape, anchorPointSnapToleranceRadiusInPx: number = 0): ReadonlyArray<IsFieldAndLineConnectedResult> {
 
-  let connectedPointsIds: number[] = []
+  let connectedPointsIds: IsFieldAndLineConnectedResult[] = []
+
+
+  //use field anchor point definitions
+  let fieldAnchorPoints: ReadonlyArray<AnchorPoint> = field.anchorPoints
+  let symbol: FieldSymbol | null = null
+  if (field.createdFromSymbolGuid !== null) {
+    symbol = fieldSymbols.find(p => p.guid === field.createdFromSymbolGuid)
+    fieldAnchorPoints = symbol.anchorPoints
+
+    if (!symbol) {
+      const msg = `could not find field symbol for guid ${field.createdFromSymbolGuid}`
+      Logger.fatal(msg)
+      throw new Error(msg)
+    }
+  }
+
+  const anchorPoints = calcAnchorPointsRaw(
+    field.x,
+    field.y,
+    field.createdFromSymbolGuid !== null && symbol.overwriteWidth ? symbol.width : field.width,
+    field.createdFromSymbolGuid !== null && symbol.overwriteHeight ? symbol.height : field.height,
+    fieldAnchorPoints,
+    0,
+    0,
+    field.createdFromSymbolGuid !== null && symbol.overwriteRotationInDeg ? symbol.rotationInDegree : field.rotationInDegree,
+  )
+
+  const alreadyConnected: { [pointId: number]: boolean } = {}
+
+  for (let i = 0; i < anchorPoints.length; i++) {
+    const anchorPoint = anchorPoints[i]
+
+    const distance = getPointDistance(line.startPoint, anchorPoint)
+
+    if (distance <= anchorPointSnapToleranceRadiusInPx) {
+
+      //point is already connected to an anchor point?
+      if (alreadyConnected[line.startPoint.id]) continue
+
+      connectedPointsIds.push({
+        anchorPointIndex: i,
+        lineId: line.id,
+        pointId: line.startPoint.id
+      })
+
+      alreadyConnected[line.startPoint.id] = true
+    }
+
+    for (const intermediatePointsInLine of line.points) {
+      const distance = getPointDistance(intermediatePointsInLine, anchorPoint)
+
+      if (distance <= anchorPointSnapToleranceRadiusInPx) {
+
+        //point is already connected to an anchor point?
+        if (alreadyConnected[intermediatePointsInLine.id]) continue
+
+        connectedPointsIds.push({
+          anchorPointIndex: i,
+          lineId: line.id,
+          pointId: intermediatePointsInLine.id
+        })
+
+        alreadyConnected[intermediatePointsInLine.id] = true
+
+      }
+    }
+  }
+
+  return connectedPointsIds
+}
+
+
+/**
+ * same as
+ * @see isFieldAndLineConnectedThroughAnchorPoints
+ * but with a single line point
+ *
+ * one point could be connected to multiple anchor points... but we only take the first connected!
+ * @param field
+ * @param fieldSymbols
+ * @param lineId
+ * @param linePoint
+ * @param anchorPointSnapToleranceRadiusInPx
+ */
+export function isFieldAndLinePointConnectedThroughAnchorPoints(field: FieldShape, fieldSymbols: ReadonlyArray<FieldSymbol>, lineId: number, linePoint: Point, anchorPointSnapToleranceRadiusInPx: number = 0): IsFieldAndLineConnectedResult | null {
+
+  let connectedPointsIds: IsFieldAndLineConnectedResult[] = []
 
 
   //use field anchor point definitions
@@ -949,8 +1062,7 @@ export function isFieldAndLineConnectedThroughAnchorPoints(field: FieldShape, fi
   }
 
 
-
-  const anchorPoints = calcAnchorPoints(
+  const anchorPoints = calcAnchorPointsRaw(
     field.x,
     field.y,
     field.createdFromSymbolGuid !== null && symbol.overwriteWidth ? symbol.width : field.width,
@@ -961,32 +1073,27 @@ export function isFieldAndLineConnectedThroughAnchorPoints(field: FieldShape, fi
     field.createdFromSymbolGuid !== null && symbol.overwriteRotationInDeg ? symbol.rotationInDegree : field.rotationInDegree,
   )
 
-  for (const anchorPoint of anchorPoints) {
-    const distance = getPointDistance(line.startPoint, anchorPoint)
-    if (line.startPoint.x === anchorPoint.x && line.startPoint.y === anchorPoint.y) {
-      connectedPointsIds.push(line.startPoint.id)
-    } else if (distance <= anchorPointSnapToleranceRadiusInPx) {
+  for (let i = 0; i < anchorPoints.length; i++) {
+    const anchorPoint = anchorPoints[i]
 
-      connectedPointsIds.push(line.startPoint.id)
-      globalState.dispatch(set_selectedLinePointNewPosAction(line.id, line.startPoint.id, anchorPoint, false))
-    }
+    const distance = getPointDistance(linePoint, anchorPoint)
 
-    for (const intermediatePointsInLine of line.points) {
-      const distance = getPointDistance(intermediatePointsInLine, anchorPoint)
+    if (distance <= anchorPointSnapToleranceRadiusInPx) {
 
-      if (intermediatePointsInLine.x === anchorPoint.x && intermediatePointsInLine.y === anchorPoint.y) {
-        connectedPointsIds.push(intermediatePointsInLine.id)
-      } else if (distance <= anchorPointSnapToleranceRadiusInPx) {
-        connectedPointsIds.push(intermediatePointsInLine.id)
-        globalState.dispatch(
-          set_selectedLinePointNewPosAction(line.id, intermediatePointsInLine.id, anchorPoint, false))
+      const conn = {
+        anchorPointIndex: i,
+        lineId,
+        pointId: linePoint.id
       }
+
+      return conn
+      // connectedPointsIds.push(conn)
     }
   }
 
-  return connectedPointsIds
-}
 
+  return null
+}
 
 export function checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap(tile: TileProps, line: LineShape, anchorPointSnapToleranceRadiusInPx: number = 0): void {
 
@@ -1009,15 +1116,16 @@ export function checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap(tile: Ti
   for (const anchorPoint of allBorderPoints) {
     const distance = getPointDistance(line.startPoint, anchorPoint)
     if (distance <= anchorPointSnapToleranceRadiusInPx) {
-      globalState.dispatch(set_selectedLinePointNewPosAction(line.id, line.startPoint.id, anchorPoint, false))
+
+      // globalState.dispatch(set_selectedLinePointNewPosAction(line.id, line.startPoint.id, anchorPoint, false))
     }
 
     for (const intermediatePointsInLine of line.points) {
       const distance = getPointDistance(intermediatePointsInLine, anchorPoint)
 
       if (distance <= anchorPointSnapToleranceRadiusInPx) {
-        globalState.dispatch(
-          set_selectedLinePointNewPosAction(line.id, intermediatePointsInLine.id, anchorPoint, false))
+        // globalState.dispatch(
+        // set_selectedLinePointNewPosAction(line.id, intermediatePointsInLine.id, anchorPoint, false))
       }
     }
   }

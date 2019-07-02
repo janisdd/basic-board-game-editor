@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../../state";
-import {Form, Button, Icon, Input, Divider, Popup} from 'semantic-ui-react'
+import {Form, Button, Icon, Input, Divider, Popup, List} from 'semantic-ui-react'
 import {AnchorPoint, FieldShape, FieldSymbol, HorizontalAlign, VerticalAlign} from "../../../types/drawing";
 import {swapZIndexInTile} from "../../../helpers/someIndexHelper";
 import {DuplicateHelper} from "../../../helpers/duplicateHelper";
@@ -17,6 +17,7 @@ import {Simulator} from "../../../../simulation/simulator";
 import {GameUnit} from "../../../../simulation/model/executionUnit";
 import {Logger} from "../../../helpers/logger";
 import SymbolLibrary from "../symbolModalLibrary/symbolLibrary";
+import {getNextShapeId} from "../../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
 
 
 export interface MyProps {
@@ -64,14 +65,14 @@ export interface MyProps {
     oldBackgroundImgGuid: string, newBackgroundImgGuid: string) => void
   readonly setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed: (isDisplayed: boolean) => void
 
-  readonly setPropertyEditor_FieldConnectedLinesThroughAnchors: (
-    lineId: number, connectedLinesThroughAnchors: ReadonlyArray<number> | null) => void
 
-  readonly setPropertyEditor_FieldAnchorPoints: (anchorPoints: ReadonlyArray<AnchorPoint>) => void
+  readonly setPropertyEditor_FieldAnchorPoints: (anchorPoints: ReadonlyArray<AnchorPoint>, adjustLinePointPositions: boolean) => void
   readonly setPropertyEditor_removeFieldShape: () => void
   readonly onAddFieldSymbol: () => void
 
   readonly setPropertyEditor_FieldIsBasedOnSymbol: (oldSymbolGuid: string | null, symbolGuid: string | null) => void
+
+  readonly onSelectConnectedLine: (lineId: number, pointId: number) => void
 
   /**
    * called when a shape is duplicated, the newly added shape (props are already set)
@@ -157,17 +158,6 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
     const isSomeFieldBasedOnSymbol = isSingleField && singleField !== null && singleField.createdFromSymbolGuid !== null || areFieldShapes && this.props.fieldShape.some(
       p => p.createdFromSymbolGuid !== null)
-
-    let connectedPointsList = ''
-
-    if (isSingleField) {
-      let points: number[] = []
-      for (const key in singleField.connectedLinesThroughAnchorPoints) {
-        const list = singleField.connectedLinesThroughAnchorPoints[key]
-        points = points.concat(list)
-      }
-      connectedPointsList = points.join(', ')
-    }
 
     const isBasedOnSymbol = isSingleField && isSomeFieldBasedOnSymbol
 
@@ -387,7 +377,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
                 {
                   isBasedOnSymbol && fieldSymbol.overwriteCmdText &&
-                  <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+                  <IconToolTip icon="arrow down"
+                               message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                               onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
                 }
               </label>
               <EditorWrapper
@@ -456,7 +448,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Height")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteHeight &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteHeight}
@@ -476,7 +470,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Width")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteWidth &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteWidth}
@@ -502,7 +498,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               )}/>
               {
                 isBasedOnSymbol && fieldSymbol.overwriteColor &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             {/*<input type="color"*/}
@@ -549,7 +547,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               )}/>
               {
                 isBasedOnSymbol && fieldSymbol.overwriteBgColor &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
 
@@ -606,7 +606,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               )}/>
               {
                 isBasedOnSymbol && fieldSymbol.overwriteBorderColor &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <Popup
@@ -638,7 +640,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Border size in px")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteBorderSizeInPx &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteBorderSizeInPx}
@@ -663,7 +667,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Font name")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteFontName &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <input type="text" disabled={isBasedOnSymbol && fieldSymbol.overwriteFontName}
@@ -683,7 +689,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Font size in px")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteFontSizeInPx &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteFontSizeInPx}
@@ -707,7 +715,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           <label>{getI18n(this.props.langId, "Text decoration")}
             {
               isBasedOnSymbol && fieldSymbol.overwriteFontDecoration &&
-              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+              <IconToolTip icon="arrow down"
+                           message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                           onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
             }
           </label>
           <Button.Group>
@@ -770,7 +780,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Text")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteText &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <textarea rows={2} disabled={isBasedOnSymbol && fieldSymbol.overwriteText}
@@ -792,7 +804,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Horizontal text align")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteHorizontalTextAlign &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <Button.Group>
@@ -835,7 +849,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Vertical text align")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteVerticalTextAlign &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <Button.Group>
@@ -880,7 +896,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           <label>{getI18n(this.props.langId, "padding (for text align)")}
             {
               isBasedOnSymbol && fieldSymbol.overwritePadding &&
-              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+              <IconToolTip icon="arrow down"
+                           message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                           onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
             }
           </label>
 
@@ -1009,7 +1027,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             <label>{getI18n(this.props.langId, "Corner radius in px")}
               {
                 isBasedOnSymbol && fieldSymbol.overwriteCornerRadius &&
-                <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+                <IconToolTip icon="arrow down"
+                             message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                             onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
               }
             </label>
             <input type="number" disabled={isBasedOnSymbol && fieldSymbol.overwriteCornerRadius}
@@ -1077,7 +1097,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           <label>{getI18n(this.props.langId, "Rotation in degree")}
             {
               isBasedOnSymbol && fieldSymbol.overwriteRotationInDeg &&
-              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+              <IconToolTip icon="arrow down"
+                           message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                           onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
             }
           </label>
           <Input disabled={isBasedOnSymbol && fieldSymbol.overwriteRotationInDeg}
@@ -1107,7 +1129,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           <label>{getI18n(this.props.langId, "Image")}
             {
               isBasedOnSymbol && fieldSymbol.overwriteBackgroundImage &&
-              <IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")} onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
+              <IconToolTip icon="arrow down"
+                           message={getI18n(this.props.langId, "Overwritten by symbol, click to select symbol")}
+                           onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
             }
           </label>
 
@@ -1147,77 +1171,99 @@ class fieldPropertyEditor extends React.Component<Props, any> {
         </Form.Field>
 
 
-        { //anchor points are always overwritten by symbols
-          isSomeFieldBasedOnSymbol === false && (isSingleField) && <div>
-            {(isBasedOnSymbol
-              ? fieldSymbol
-              : singleField).anchorPoints.map((anchorPoint, index) => {
-              return (<div key={index}>
+        {
+          isSingleField &&
+          <label>{getI18n(this.props.langId, "Field Anchor point sync")}
+            {
+              <IconToolTip wide icon="question circle"
+                           message={getI18n(this.props.langId, "Field anchor points are always synced with the connected symbol because of connected lines. When connecting to symbols, lines will only stay connected if the symbol anchor point is on the same position as the field anchor point")}/>
+            }
+          </label>
+        }
+
+        {
+          //we need to keep the anchor points in sync with fields and symbols because (amount and positions, not connected lines)
+          //when we use symbol anchor points and we connect field with line and the anchor point was added only to the symbol
+          //we cannot track this...
+          //we also don't want the symbol to keep track of all connected lines...
+          //connected lines should only be tracked in the field
+          isSingleField && <div>
+            {(isBasedOnSymbol ?
+              fieldSymbol
+              : singleField).anchorPoints.map((syncedAnchorPoint, fieldAnchorPointIndex) => {
+
+              const singleFieldAnchorPoint = singleField.anchorPoints.find(p => p.id === syncedAnchorPoint.id)
+
+              return (<div key={syncedAnchorPoint.id}>
 
                 <Divider/>
                 <Form.Group>
                   <Form.Field>
-                    <label>{getI18n(this.props.langId, "Anchor point")} {index + 1} x in %
+                    <label>{getI18n(this.props.langId, "Anchor point")} {fieldAnchorPointIndex + 1} x in %
                       <IconToolTip message={getI18n(
                         this.props.langId,
                         "Anchor points are used to snap lines to fields. When they are snapped then they are connected"
                       )}/>
                     </label>
-                    <input type="number"
-                           value={anchorPoint.percentX}
+
+                    <input type="number" disabled={isBasedOnSymbol}
+                           value={syncedAnchorPoint.percentX}
                            onChange={(e) => {
 
                              const newPercentageX = parseInt(e.currentTarget.value)
                              const newList = (isBasedOnSymbol
                                ? fieldSymbol
                                : singleField).anchorPoints.map((p, i) => {
-                               return i !== index
+                               return i !== fieldAnchorPointIndex
                                  ? p
                                  : {
                                    ...p,
                                    percentX: newPercentageX
                                  }
                              })
-                             this.props.setPropertyEditor_FieldAnchorPoints(newList)
+                             this.props.setPropertyEditor_FieldAnchorPoints(newList, true)
                            }}
                     />
 
+
                   </Form.Field>
                   <Form.Field>
-                    <label>{getI18n(this.props.langId, "Anchor point")} {index + 1} y in %
+                    <label>{getI18n(this.props.langId, "Anchor point")} {fieldAnchorPointIndex + 1} y in %
                       <IconToolTip message={getI18n(
                         this.props.langId,
                         "Anchor points are used to snap lines to fields. When they are snapped then they are connected"
                       )}/>
                     </label>
-                    <input type="number"
-                           value={anchorPoint.percentY}
+
+                    <input type="number" disabled={isBasedOnSymbol}
+                           value={syncedAnchorPoint.percentY}
                            onChange={(e) => {
 
                              const newPercentageY = parseInt(e.currentTarget.value)
                              const newList = (isBasedOnSymbol
                                ? fieldSymbol
                                : singleField).anchorPoints.map((p, i) => {
-                               return i !== index
+                               return i !== fieldAnchorPointIndex
                                  ? p
                                  : {
                                    ...p,
                                    percentY: newPercentageY
                                  }
                              })
-                             this.props.setPropertyEditor_FieldAnchorPoints(newList)
+                             this.props.setPropertyEditor_FieldAnchorPoints(newList, true)
 
                            }}
                     />
+
                   </Form.Field>
 
                   <Form.Field>
-                    <Button color="red" icon
+                    <Button color="red" icon disabled={isBasedOnSymbol}
                             onClick={() => {
                               this.props.setPropertyEditor_FieldAnchorPoints((isBasedOnSymbol
                                 ? fieldSymbol
                                 : singleField).anchorPoints.filter(
-                                ((p, i) => i !== index)))
+                                ((p, i) => i !== fieldAnchorPointIndex)), true)
                             }}
                     >
                       <Icon name="x"/>
@@ -1226,49 +1272,88 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
                 </Form.Group>
 
+                <label>{getI18n(this.props.langId, "Connected lines")}
+                  <IconToolTip message={getI18n(this.props.langId, "The connected lines via this anchor points")}/>
+                </label>
+
+                {
+                  singleFieldAnchorPoint !== undefined &&
+                  <List divided verticalAlign='middle'>
+                    {
+                      singleFieldAnchorPoint.connectedLineTuples.map((value, _index) => {
+                        return (
+                          <List.Item key={_index}>
+
+                            <List.Content>
+                              <ToolTip
+                                message={getI18n(this.props.langId, "Select shape in tile")}
+                              >
+                                <Button icon labelPosition='left' size='mini'
+                                        onClick={() => {
+                                          this.props.onSelectConnectedLine(value.lineId, value.pointId)
+                                        }}
+                                >
+                                  <Icon name='mouse pointer'/>
+                                  {getI18n(this.props.langId, "Line, Points")} id: {value.lineId} (via point
+                                  id: {value.pointId})
+                                </Button>
+                              </ToolTip>
+
+                              <Button className="mar-left-half" color="red" icon size='mini'
+                                      onClick={() => {
+
+                                        const fieldAnchorPoints = singleField.anchorPoints
+
+                                        const anchorPointsDisconnectedLine = fieldAnchorPoints.map((faPoint, index1) => {
+                                          return index1 !== fieldAnchorPointIndex
+                                            ? faPoint
+                                            : {
+                                              ...faPoint,
+                                              connectedLineTuples: faPoint.connectedLineTuples.filter(p => p.lineId !== value.lineId || p.pointId !== value.pointId)
+                                            }
+                                        })
+
+                                        this.props.setPropertyEditor_FieldAnchorPoints(anchorPointsDisconnectedLine, false)
+
+                                      }}
+                              >
+                                <Icon name="trash"/>
+                              </Button>
+
+                            </List.Content>
+
+
+                          </List.Item>
+                        )
+                      })
+                    }
+                  </List>
+                }
+
               </div>)
             })}
 
+            <Divider/>
 
-            <Button icon
+            <Button icon labelPosition='left'
                     onClick={() => {
 
                       const newPoint: AnchorPoint = {
+                        id: getNextShapeId(),
                         percentX: 50,
-                        percentY: 50
+                        percentY: 50,
+                        connectedLineTuples: []
                       }
 
                       this.props.setPropertyEditor_FieldAnchorPoints((isBasedOnSymbol
                         ? fieldSymbol
-                        : singleField).anchorPoints.concat(newPoint))
+                        : singleField).anchorPoints.concat(newPoint), true)
                     }}
             >
               <Icon name="add"/>
+              <span>{getI18n(this.props.langId, "Add anchor point")}</span>
             </Button>
-            <Divider/>
           </div>}
-
-
-        {isSingleField && <Form.Field>
-          <label>{getI18n(this.props.langId, "Connected lines")}
-            <IconToolTip message={getI18n(this.props.langId, "The connected lines via anchor points")}/>
-          </label>
-          <Input
-            value={connectedPointsList} readOnly
-            label={<Button icon onClick={() => {
-
-              const linesIds = Object.keys(singleField.connectedLinesThroughAnchorPoints).map(p => Number(p))
-
-              for (const lineId of linesIds) {
-                this.props.setPropertyEditor_FieldConnectedLinesThroughAnchors(lineId, null)
-              }
-
-            }}>
-              <Icon name="trash"/>
-            </Button>}
-            labelPosition='right'
-          />
-        </Form.Field>}
 
 
       </Form>

@@ -226,9 +226,13 @@ export const lang_en: LangObj = {
   "Corner radius in px": "Corner radius in px",
   "Z-index": "Z-index",
   "Anchor point": "Anchor point",
+  "Field Anchor point sync" : "Field Anchor point sync",
+  "Field anchor points are always synced with the connected symbol because of connected lines. When connecting to symbols, lines will only stay connected if the symbol anchor point is on the same position as the field anchor point" : "Field anchor points are always synced with the connected symbol because of connected lines. When connecting to symbols, lines will only stay connected if the symbol anchor point is on the same position as the field anchor point",
   "Anchor points are used to snap lines to fields. When they are snapped then they are connected": "Anchor points are used to snap lines to fields. When they are snapped then they are connected",
   "Connected lines": "Connected lines",
   "The connected lines via anchor points": "The connected lines via anchor points",
+  "The connected lines via this anchor points" : "The connected lines via this anchor points",
+  "Add anchor point" : "Add anchor point",
   //--- properties
   "Thickness in px": "Thickness in px",
   "Gaps in px": "Gaps in px",

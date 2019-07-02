@@ -45,6 +45,7 @@ import {
 import {AnchorPoint, FieldSymbol, HorizontalAlign, VerticalAlign} from "../../../../../types/drawing";
 import {MultiActions} from "../../../../../types/ui";
 import {
+  setPropertyEditor_FieldAnchorPoints,
   setPropertyEditor_FieldCreatedFromSymbolId
 } from "../../fieldProperties/actions";
 import {swapDisplayIndexWithGuid} from "../../../../../helpers/someIndexHelper";
@@ -212,18 +213,33 @@ export function set_fieldSymbol_anchorPoints(fieldSymbolGuid: string, anchorPoin
   return (dispatch, getState) => {
 
 
-    // const beforeFieldSymbol = getState().fieldSymbolState.find(p => p.guid === fieldSymbolGuid)
-    //
-    // const dependentFields = getState().tileEditorFieldShapesState.filter(
-    //   p => p.createdFromSymbolGuid === fieldSymbolGuid)
-
     dispatch(_set_fieldSymbol_anchorPoints(fieldSymbolGuid, anchorPoints))
 
-    // const afterFieldSymbol = getState().fieldSymbolState.find(p => p.guid === fieldSymbolGuid)
-    //
-    // for (const dependentField of dependentFields) {
-    //   adjustLinesFromAnchorPoints(dependentField, dependentField, beforeFieldSymbol, afterFieldSymbol)
-    // }
+    //we need to keep symbol and fields anchor points in sync else the connected lines don't work properly...
+
+    const allFields = getState().tileEditorFieldShapesState.present
+
+    for (let i = 0; i < allFields.length; i++) {
+      const field = allFields[i]
+
+      if (field.createdFromSymbolGuid !== fieldSymbolGuid) continue
+
+      //copy the anchor points from symbol to field but keep connected lines
+      const newAnchorPoints = anchorPoints.map(p => {
+
+        const fieldAnchorPoint = field.anchorPoints.find(k => k.id === p.id)
+
+        if (!fieldAnchorPoint) return p
+
+        return {
+          ...p,
+          connectedLineTuples: fieldAnchorPoint.connectedLineTuples
+        }
+      })
+
+      dispatch(setPropertyEditor_FieldAnchorPoints(field.id, newAnchorPoints, true))
+
+    }
 
   }
 }

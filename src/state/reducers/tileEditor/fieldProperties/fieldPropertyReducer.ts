@@ -58,8 +58,6 @@ export enum ActionType {
 
   SET_fieldAnchorPoints = 'fieldPropertyReducer_SET_fieldAnchorPoints',
 
-  SET_connectedLinesThroughAnchors = 'fieldPropertyReducer_SET_connectedLinesThroughAnchors',
-
   SET_fieldCreatedFromSymbolId = 'fieldPropertyReducer_SET_fieldCreatedFromSymbolId',
   SET_fieldPadding = 'fieldPropertyReducer_SET_fieldPadding',
 
@@ -184,12 +182,6 @@ export interface SET_fieldZIndexAction extends ActionBase {
 }
 
 
-export interface SET_connectedLinesThroughAnchorsAction extends ActionBase {
-  readonly type: ActionType.SET_connectedLinesThroughAnchors
-  readonly fieldId: number
-  readonly lineId: number
-  readonly connectedLinesThroughAnchors: ReadonlyArray<number> | null
-}
 
 export interface SET_fieldCreatedFromSymbolIdAction extends ActionBase {
   readonly type: ActionType.SET_fieldCreatedFromSymbolId
@@ -272,7 +264,6 @@ export type AllActions =
   | SET_fieldCmdTextAction
   | SET_fieldCornerRadiusAction
   | SET_fieldZIndexAction
-  | SET_connectedLinesThroughAnchorsAction
   | SET_fieldCreatedFromSymbolIdAction
   | SET_fieldPaddingAction
   | SET_fieldBorderColorAction
@@ -414,39 +405,6 @@ function _reducer(state: State = initial, action: AllActions): State {
       return res
     }
 
-
-    case ActionType.SET_connectedLinesThroughAnchors: {
-      const res = replaceProperty<FieldShape>(state, action.fieldId, p => {
-
-        //this is working but for proper undo we should not mutate... | ...p copies only 1 level
-        const copy: FieldShape = {
-          ...p,
-          connectedLinesThroughAnchorPoints: {
-            ...p.connectedLinesThroughAnchorPoints
-          }
-        }
-
-        if (action.connectedLinesThroughAnchors === null || action.connectedLinesThroughAnchors.length === 0) {
-          delete copy.connectedLinesThroughAnchorPoints[action.lineId]
-        }
-        else {
-          copy.connectedLinesThroughAnchorPoints[action.lineId] = action.connectedLinesThroughAnchors
-        }
-
-        //this is not working because if we set to undefined we still have the key
-        // const copy: FieldShape = {
-        //   ...p,
-        //   connectedLinesThroughAnchorPoints: {
-        //     ...p.connectedLinesThroughAnchorPoints,
-        //     [action.lineId]: action.connectedLinesThroughAnchors === null ? undefined : action.connectedLinesThroughAnchors
-        //   }
-        // }
-
-        return copy
-      })
-
-      return res
-    }
     case ActionType.SET_fieldCreatedFromSymbolId: {
       const res = replaceProperty(state, action.fieldId, p => {
         return {...p, createdFromSymbolGuid: action.createdFromSymbolGuid}
@@ -580,7 +538,6 @@ export const reducer = undoable(_reducer, {
       || action.type === ActionType.SET_field_isFontBold
       || action.type === ActionType.SET_fieldHorizontalTextAlign
       || action.type === ActionType.SET_fieldVerticalTextAlign
-      || action.type === ActionType.SET_connectedLinesThroughAnchors
     ) {
       return null
     }

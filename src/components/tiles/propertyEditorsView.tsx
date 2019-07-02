@@ -21,7 +21,6 @@ import {
   setPropertyEditor_fieldBorderSizeInPx,
   setPropertyEditor_FieldCmdText,
   setPropertyEditor_FieldColor,
-  setPropertyEditor_FieldConnectedLinesThroughAnchors,
   setPropertyEditor_FieldCornerRadiusInPx,
   setPropertyEditor_FieldCreatedFromSymbolId,
   setPropertyEditor_fieldFontName,
@@ -162,7 +161,6 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   setPropertyEditor_fieldFontSizeInPx,
   setPropertyEditor_field_isFontBold,
   setPropertyEditor_field_isFontItalic,
-  setPropertyEditor_FieldConnectedLinesThroughAnchors,
   setPropertyEditor_field_rotationInDegree,
   setPropertyEditor_field_backgroundImgGuid,
   removeFieldShape,
@@ -302,6 +300,14 @@ class propertyEditorsView extends React.Component<Props, any> {
               fieldShape={selectedFieldShapes}
               fieldSymbols={this.props.fieldSymbols}
 
+              onSelectConnectedLine={(lineId: number, pointId: number) => {
+
+                this.props.setSelectedFieldShapeIds([])
+                this.props.setSelectedImageShapeIds([])
+                this.props.setSelectedLineShapeIds([lineId])
+                //props tab is already opened
+              }}
+
               set_isSymbolLibraryModalDisplayed={() => {
                 this.props.set_editor_isSymbolLibraryModalDisplayed(true)
               }}
@@ -335,12 +341,6 @@ class propertyEditorsView extends React.Component<Props, any> {
                 }
               }}
 
-              setPropertyEditor_FieldConnectedLinesThroughAnchors={(lineId, connectedLinesThroughAnchors) => {
-                if (selectedFieldShapes.length === 1) {
-                  this.props.setPropertyEditor_FieldConnectedLinesThroughAnchors(selectedFieldShapes[0].id, lineId,
-                    connectedLinesThroughAnchors)
-                }
-              }}
 
               setTileEditorSelectingNextField={(isSelectingNextField, sourceForSelectingNextField) => {
                 this.props.set_editor_isSelectingNextField(isSelectingNextField, sourceForSelectingNextField)
@@ -508,9 +508,9 @@ class propertyEditorsView extends React.Component<Props, any> {
                 }
               }}
 
-              setPropertyEditor_FieldAnchorPoints={anchorPoints => {
+              setPropertyEditor_FieldAnchorPoints={(anchorPoints, adjustLinePointPositions) => {
                 if (selectedFieldShapes.length === 1) {
-                  this.props.setPropertyEditor_FieldAnchorPoints(selectedFieldShapes[0].id, anchorPoints)
+                  this.props.setPropertyEditor_FieldAnchorPoints(selectedFieldShapes[0].id, anchorPoints, adjustLinePointPositions)
                 }
               }}
             />
@@ -720,8 +720,7 @@ class propertyEditorsView extends React.Component<Props, any> {
 
                                 setLinePointNewPos={(oldPointId, newPointPos, canSetFieldAnchorPoints) => {
                                   if (selectedLineShapes.length === 1) {
-                                    this.props.set_selectedLinePointNewPosAction(selectedLineShapes[0].id, oldPointId, newPointPos,
-                                      canSetFieldAnchorPoints)
+                                    this.props.set_selectedLinePointNewPosAction(selectedLineShapes[0].id, oldPointId, newPointPos)
                                   }
                                 }}
 
@@ -836,7 +835,6 @@ function createFieldSymbolFromFieldShape(fieldShape: FieldShape, displayIndex: n
     x: symbolPreviewStageXOffset,
     y: symbolPreviewStageYOffset,
     cmdText: fieldShape.cmdText,
-    connectedLinesThroughAnchorPoints: [],
     displayName: 'field symbol',
     borderColor: fieldShape.borderColor,
     borderSizeInPx: fieldShape.borderSizeInPx,

@@ -122,6 +122,8 @@ export interface FieldBase extends ShapeBase {
    * the order of the anchor points must not change!
    * because we need to know which anchor point was move to adjust the line point pos
    *
+   * this also tracks the connected lines to the anchor points
+   *
    * top
    * bot
    * left
@@ -130,14 +132,6 @@ export interface FieldBase extends ShapeBase {
    * @see adjustLinesFromAnchorPoints
    */
   readonly anchorPoints: ReadonlyArray<AnchorPoint>
-
-  /**
-   * for every connected line an key: value are the connected points of that line
-   *
-   * this can not always be trusted... undo not properly working you can recalculate this with
-   * @see isFieldAndLineConnectedThroughAnchorPoints
-   */
-  readonly connectedLinesThroughAnchorPoints: ConnectedLinesThroughAnchorPointsMap
 
   /**
    * a background image for the field...
@@ -270,12 +264,28 @@ export interface BorderPoint {
    * we need to know which is the next field
    */
   readonly nextFieldId: number | null
+
+  /**
+   * all connected lines to this anchor point
+   */
+  readonly connectedLineTuples: ReadonlyArray<ConnectedLineTuple>
 }
 
 export interface BorderPointWithPos extends BorderPoint{
 
   readonly x: number
   readonly y: number
+}
+
+export interface ConnectedLineTuple {
+  readonly lineId: number
+  readonly pointId: number
+}
+
+export interface IsFieldAndLineConnectedResult {
+  readonly anchorPointIndex: number
+  readonly lineId: number
+  readonly pointId: number
 }
 
 export enum BorderPointOrientation {
@@ -290,7 +300,16 @@ export interface PlainPoint {
   readonly y: number
 }
 
+/**
+ * this has no real line id because not a real shape & not needed for now
+ * we can identify the anchor point by the index in the field
+ * @see FieldBase.anchorPoints
+ */
 export interface AnchorPoint {
+  /**
+   * a tile unique id
+   */
+  readonly id: number
   /**
    * the percentage for x (from top left)
    */
@@ -299,6 +318,11 @@ export interface AnchorPoint {
    * the percentage for y (from top left)
    */
   readonly percentY: number
+
+  /**
+   * all connected lines to this anchor point
+   */
+  readonly connectedLineTuples: ReadonlyArray<ConnectedLineTuple>
 }
 
 export interface BezierPoint extends Point {

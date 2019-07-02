@@ -117,6 +117,8 @@ class tileContentOutline extends React.Component<Props, any> {
                               this.props.set_editor_rightTabActiveIndex(this.props.lastRightTabActiveIndex)
                             }
 
+                            this.props.setSelectedImageShapeIds([])
+                            this.props.setSelectedLineShapeIds([])
                             //select null else the property editor would try to display the undefined obj
                             this.props.setSelectedFieldShapeIds([])
 
@@ -139,6 +141,8 @@ class tileContentOutline extends React.Component<Props, any> {
                   >
                     <Icon style={{marginLeft: '1em'}} name="mouse pointer" className="clickable"
                           onClick={() => {
+                            this.props.setSelectedImageShapeIds([])
+                            this.props.setSelectedLineShapeIds([])
                             this.props.setSelectedFieldShapeIds(this.props.fieldShapes.map(p => p.id))
                           }}
                     />
@@ -167,6 +171,8 @@ class tileContentOutline extends React.Component<Props, any> {
                             >
                               <Button icon labelPosition='left' size='mini'
                                       onClick={() => {
+                                        this.props.setSelectedImageShapeIds([])
+                                        this.props.setSelectedLineShapeIds([])
                                         this.props.setSelectedFieldShapeIds([p.id])
                                         this.openPropertyEditorTabIfNecessary()
                                       }}
@@ -182,6 +188,8 @@ class tileContentOutline extends React.Component<Props, any> {
                         <List.Content floated='right'>
                           <Button color="red" icon size='mini'
                                   onClick={() => {
+                                    this.props.setSelectedImageShapeIds([])
+                                    this.props.setSelectedLineShapeIds([])
                                     this.props.setSelectedFieldShapeIds([])
                                     this.props.removeFieldShape(p.id)
 
@@ -222,6 +230,8 @@ class tileContentOutline extends React.Component<Props, any> {
                               this.props.set_editor_rightTabActiveIndex(this.props.lastRightTabActiveIndex)
                             }
 
+                            this.props.setSelectedImageShapeIds([])
+                            this.props.setSelectedFieldShapeIds([])
                             //select null else the property editor would try to display the undefined obj
                             this.props.setSelectedLineShapeIds([])
 
@@ -247,6 +257,8 @@ class tileContentOutline extends React.Component<Props, any> {
                   >
                     <Icon style={{marginLeft: '1em'}} name="mouse pointer" className="clickable"
                           onClick={() => {
+                            this.props.setSelectedImageShapeIds([])
+                            this.props.setSelectedFieldShapeIds([])
                             this.props.setSelectedLineShapeIds(this.props.lineShapes.map(p => p.id))
                           }}
                     />
@@ -275,6 +287,8 @@ class tileContentOutline extends React.Component<Props, any> {
                             >
                               <Button icon labelPosition='left' size='mini'
                                       onClick={() => {
+                                        this.props.setSelectedImageShapeIds([])
+                                        this.props.setSelectedFieldShapeIds([])
                                         this.props.setSelectedLineShapeIds([p.id])
                                         this.openPropertyEditorTabIfNecessary()
                                       }}
@@ -289,6 +303,8 @@ class tileContentOutline extends React.Component<Props, any> {
                         <List.Content floated='right'>
                           <Button color="red" icon size='mini'
                                   onClick={() => {
+                                    this.props.setSelectedImageShapeIds([])
+                                    this.props.setSelectedFieldShapeIds([])
                                     this.props.setSelectedLineShapeIds([])
                                     this.props.removeLineShape(p.id)
 
@@ -331,6 +347,8 @@ class tileContentOutline extends React.Component<Props, any> {
                               this.props.set_editor_rightTabActiveIndex(this.props.lastRightTabActiveIndex)
                             }
 
+                            this.props.setSelectedLineShapeIds([])
+                            this.props.setSelectedFieldShapeIds([])
                             //select null else the property editor would try to display the undefined obj
                             this.props.setSelectedImageShapeIds([])
                             //too slow
@@ -350,6 +368,7 @@ class tileContentOutline extends React.Component<Props, any> {
                   >
                     <Icon style={{marginLeft: '1em'}} name="mouse pointer" className="clickable"
                           onClick={() => {
+                            this.props.setSelectedLineShapeIds([])
                             this.props.setSelectedImageShapeIds(this.props.imgShapes.map(p => p.id))
                           }}
                     />
@@ -378,6 +397,7 @@ class tileContentOutline extends React.Component<Props, any> {
                             >
                               <Button icon labelPosition='left' size='mini'
                                       onClick={() => {
+                                        this.props.setSelectedLineShapeIds([])
                                         this.props.setSelectedImageShapeIds([p.id])
                                         this.openPropertyEditorTabIfNecessary()
                                       }}
@@ -408,6 +428,7 @@ class tileContentOutline extends React.Component<Props, any> {
 
                           <Button color="red" icon size='mini'
                                   onClick={() => {
+                                    this.props.setSelectedLineShapeIds([])
                                     this.props.setSelectedImageShapeIds([])
                                     this.props.removeImageShape(p.id)
 

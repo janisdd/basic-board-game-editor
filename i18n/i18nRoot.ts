@@ -228,9 +228,13 @@ export interface LangObj {
   "Corner radius in px": string
   "Z-index": string
   "Anchor point": string
+  "Field Anchor point sync": string
+  "Field anchor points are always synced with the connected symbol because of connected lines. When connecting to symbols, lines will only stay connected if the symbol anchor point is on the same position as the field anchor point": string
   "Anchor points are used to snap lines to fields. When they are snapped then they are connected": string
   "Connected lines": string
   "The connected lines via anchor points": string
+  "The connected lines via this anchor points": string
+  "Add anchor point": string
   //--- properties line
   "Thickness in px": string
   "Gaps in px": string

@@ -1,7 +1,7 @@
 import {
-  BezierPoint,
+  BezierPoint, ConnectedLineTuple,
   CurveMode,
-  FieldShape,
+  FieldShape, FieldSymbol,
   ImgShape,
   LineBase,
   LineShape,
@@ -22,12 +22,16 @@ import {
   SET_selectedLinePointNewPosAction, UndoType
 } from "./linePropertyReducer";
 import {MultiActions} from "../../../../types/ui";
-import {setPropertyEditor_FieldConnectedLinesThroughAnchors} from "../fieldProperties/actions";
 import {
+  _setPropertyEditor_FieldAnchorPoints,
+  setPropertyEditor_FieldAnchorPoints,
+} from "../fieldProperties/actions";
+import {
+  calcAnchorPoint,
+  calcSingleAnchorPoint,
   checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap,
-  isFieldAndLineConnectedThroughAnchorPoints
+  isFieldAndLineConnectedThroughAnchorPoints, isFieldAndLinePointConnectedThroughAnchorPoints
 } from "../../../../helpers/interactionHelper";
-import _ = require("lodash");
 
 
 export function setPropertyEditor_lineShapes(lines: ReadonlyArray<LineShape>): SET_lineArrayAction {
@@ -47,34 +51,10 @@ export function _addLineShape(lineShape: LineShape): ADD_LineShapeAction {
 export function addLineShape(lineShape: LineShape): MultiActions {
   return (dispatch, getState) => {
 
-    //make sur integer coords...nah
-    // lineShape = {
-    //   ...lineShape,
-    //   points: lineShape.points.map(p => {
-    //     return {
-    //       ...p,
-    //       x: Math.floor(p.x),
-    //       y: Math.floor(p.y),
-    //       cp1: {
-    //         ...p.cp1,
-    //         x: Math.floor(p.cp1.x),
-    //         y: Math.floor(p.cp1.y),
-    //       },
-    //       cp2: {
-    //         ...p.cp2,
-    //         x: Math.floor(p.cp2.x),
-    //         y: Math.floor(p.cp2.y),
-    //       }
-    //     }
-    //   }),
-    //   startPoint: {
-    //     ...lineShape.startPoint,
-    //     x: Math.floor(lineShape.startPoint.x),
-    //     y: Math.floor(lineShape.startPoint.y),
-    //   }
-    // }
 
     dispatch(_addLineShape(lineShape))
+
+    //new added line could already connect to fields
 
     const fields = getState().tileEditorFieldShapesState.present
     const fieldSymbols = getState().fieldSymbolState.present
@@ -84,10 +64,27 @@ export function addLineShape(lineShape: LineShape): MultiActions {
       const connectedPointIds = isFieldAndLineConnectedThroughAnchorPoints(field, fieldSymbols, lineShape, 0)
       if (connectedPointIds.length > 0) {
 
-        dispatch(setPropertyEditor_FieldConnectedLinesThroughAnchors(field.id, lineShape.id,
-          connectedPointIds))
+        dispatch(_setPropertyEditor_FieldAnchorPoints(field.id, field.anchorPoints.map((p, index) => {
+          return {
+            ...p,
+            //only take the connected points that are connected to the current anchor point
+            connectedLineTuples: p.connectedLineTuples.concat(
+              connectedPointIds
+                .filter(p => p.anchorPointIndex === index)
+                .map(k => {
+                  return {
+                    lineId: k.lineId,
+                    pointId: k.pointId
+                  }
+                })
+            )
+          }
+        })))
+
       }
     }
+
+    //TODO tile border points
 
   }
 }
@@ -110,12 +107,25 @@ export function removeLineShape(lineShapeId: number): MultiActions {
 
     for (const field of fields) {
 
-      const connectedPointsList = field.connectedLinesThroughAnchorPoints[lineShapeId]
+      for (let i = 0; i < field.anchorPoints.length; i++) {
+        const anchorPoint = field.anchorPoints[i]
 
-      if (connectedPointsList !== undefined) {
-        dispatch(setPropertyEditor_FieldConnectedLinesThroughAnchors(field.id, lineShapeId, null))
+        const isAtLeastOneLineConnected = anchorPoint.connectedLineTuples.some(p => p.lineId === lineShapeId)
+
+        if (!isAtLeastOneLineConnected) continue
+
+        dispatch(_setPropertyEditor_FieldAnchorPoints(field.id, field.anchorPoints.map(p => {
+          return {
+            ...p,
+            connectedLineTuples: p.connectedLineTuples.filter(k => k.lineId !== lineShapeId)
+          }
+        })))
+
       }
+
     }
+
+    //TODO tile border points
 
   }
 }
@@ -133,26 +143,33 @@ export function removePointFromLineShape(lineId: number, pointId: number): Multi
   return (dispatch, getState) => {
 
     dispatch(_removePointFromLineShape(lineId, pointId))
+
     const newLine = getState().tileEditorLineShapeState.present.find(p => p.id === lineId)
 
     //also check if we need to change the connected fields
     const fields = getState().tileEditorFieldShapesState.present
-    const fieldSymbols = getState().fieldSymbolState.present
 
     for (const field of fields) {
 
-      const connectedPointsList = field.connectedLinesThroughAnchorPoints[lineId]
 
-      if (connectedPointsList !== undefined) {
-        //no longer connected??
+      for (let i = 0; i < field.anchorPoints.length; i++) {
+        const anchorPoint = field.anchorPoints[i]
 
-        const connectedPointIds = isFieldAndLineConnectedThroughAnchorPoints(field, fieldSymbols, newLine, 0)
+        const isAtLeastOnePointConnected = anchorPoint.connectedLineTuples.some(p => p.pointId === pointId)
 
-        if (connectedPointIds.length === 0) {
-          dispatch(setPropertyEditor_FieldConnectedLinesThroughAnchors(field.id, lineId, null))
-        }
+        if (!isAtLeastOnePointConnected) continue
+
+        dispatch(_setPropertyEditor_FieldAnchorPoints(field.id, field.anchorPoints.map(p => {
+          return {
+            ...p,
+            connectedLineTuples: p.connectedLineTuples.filter(k => k.pointId !== pointId)
+          }
+        })))
+
       }
     }
+
+    //TODO tile border points
 
   }
 }
@@ -167,93 +184,119 @@ export function _setLinePointNewPos(lineId: number, oldPointId: number, newPoint
   }
 }
 
+
 /**
- *
- * @param {number} lineId
- * @param {number} oldPointId
- * @param {PlainPoint} newPointPos
- * @param {boolean} canSetFieldAnchorPoints when we move the line because of an anchor point we definitively won't change the connected lines of the connected field (from which the anchor point made us move the line point)
- * @returns {MultiActions}
+ * this will attach or detach the line from fields
+ * @param lineId
+ * @param oldPointId
+ * @param newPointPos
+ * @param canSetFieldAnchorPoints
  */
-export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: number, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean): MultiActions {
+export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: number, newPointPos: PlainPoint): MultiActions {
   return (dispatch, getState) => {
 
-    dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
 
     //also check if we need to change the connected fields e.g. when moving the line because it's connected
     //to a field that is moved we can end here
-    if (!canSetFieldAnchorPoints) {
+
+    const anchorPointSnapToleranceRadiusInPx = getState().worldSettingsState.anchorPointSnapToleranceRadiusInPx
+
+    const fields = getState().tileEditorFieldShapesState.present
+    const fieldSymbols = getState().fieldSymbolState.present
+
+    const lines = getState().tileEditorLineShapeState.present
+
+    const line = lines.find(p => p.id === lineId)
+
+    if (!line) return
+
+    const targetPoint: Point = line.startPoint.id === oldPointId
+      ? line.startPoint
+      : line.points.find(p => p.id === oldPointId)
+
+
+    //undefined then probably a control point... nothing to do here
+    if (targetPoint === undefined) {
+      dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
       return
     }
 
-    //TODO maybe not use lodash --> smaller bundle size?
-    const fields = _.orderBy(getState().tileEditorFieldShapesState.present, (p: FieldShape) => p.zIndex, 'desc')
+    for (const field of fields) {
 
-    const newLine = getState().tileEditorLineShapeState.present.find(p => p.id === lineId)
+      const connectedLineTuple = isFieldAndLinePointConnectedThroughAnchorPoints(field, fieldSymbols, lineId, targetPoint, anchorPointSnapToleranceRadiusInPx)
 
-    const anchorPointSnapToleranceRadiusInPx = getState().worldSettingsState.anchorPointSnapToleranceRadiusInPx
-    const fieldSymbols = getState().fieldSymbolState.present
+      if (connectedLineTuple === null) {
+        //try to remove connected
 
+        dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
 
-    const connectedMap = {}
+        //if no anchor point is connected to this point don't dispatch
 
-    for (let i = 0; i < fields.length; i++) {
-      const field = fields[i]
-      const connectedPointsList = field.connectedLinesThroughAnchorPoints[lineId]
+        if (!(field.anchorPoints.some(p => p.connectedLineTuples.some(k => k.pointId === oldPointId)))) continue
 
-      //not already connected?
-      if (connectedPointsList === undefined) {
-
-        //this makes the line point snap to the anchor point if wanted
-        const connectedPointIds = isFieldAndLineConnectedThroughAnchorPoints(field, fieldSymbols, newLine,
-          anchorPointSnapToleranceRadiusInPx)
-
-        if (connectedPointIds.length > 0) {
-
-          if (connectedMap[oldPointId] !== undefined) { //check for undefined ...if the id is 0...
-            //a have already a field connected to this point (in the line)
-            continue
+        dispatch(_setPropertyEditor_FieldAnchorPoints(field.id, field.anchorPoints.map((p, index) => {
+          return {
+            ...p,
+            connectedLineTuples: p.connectedLineTuples.filter(k => k.pointId !== oldPointId)
           }
+        })))
 
-          dispatch(setPropertyEditor_FieldConnectedLinesThroughAnchors(field.id, lineId, connectedPointIds));
-          //not need to update the map here because break
-          break //because we can only have 1 field connected to the point we can break here
+        return
+
+      } else {
+
+        //try to snap to the anchor point
+
+        //the old anchor point but coords have not changed...
+        const anchorPointPos = calcAnchorPoint(field, fieldSymbols, field.anchorPoints[connectedLineTuple.anchorPointIndex])
+
+        if (targetPoint.x === anchorPointPos.x && targetPoint.y === anchorPointPos.y &&
+          (newPointPos.x !== anchorPointPos.x || newPointPos.y !== anchorPointPos.y)) {
+          //old pos was on anchor point
+          //new not... user wants to remove connection
+
+          dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+
+          //remove connection
+          dispatch(_setPropertyEditor_FieldAnchorPoints(field.id, field.anchorPoints.map((p, index) => {
+            return {
+              ...p,
+              connectedLineTuples: p.connectedLineTuples.filter(k => k.pointId !== oldPointId)
+            }
+          })))
+
+        } else {
+
+          dispatch(_setPropertyEditor_FieldAnchorPoints(field.id, field.anchorPoints.map((p, index) => {
+            return index !== connectedLineTuple.anchorPointIndex
+              ? p
+              : {
+                ...p,
+                connectedLineTuples: p.connectedLineTuples
+                  .filter(k => k.pointId !== oldPointId) //if we have two anchor points at the same coords... disconnect the other
+                  .concat({
+                    pointId: connectedLineTuple.pointId,
+                    lineId: connectedLineTuple.lineId
+                  })
+              }
+          })))
+
+
+          dispatch(_setLinePointNewPos(lineId, oldPointId, anchorPointPos))
+
         }
+
+        return
+
       }
-      else {
 
-        //already connected but we could want to disconnect/or add a new connected point
-        const connectedPointIds = isFieldAndLineConnectedThroughAnchorPoints(field, fieldSymbols, newLine,
-          anchorPointSnapToleranceRadiusInPx)
-
-        if (connectedMap[oldPointId] !== undefined) { //check for undefined ...if the id is 0...
-          //a have already a field connected to this point (in the line)
-          continue
-        }
-
-        if (connectedPointIds.length > 0) {
-          //we add the point to update the map
-          connectedMap[oldPointId] = field.id
-        }
-
-        //if undo it's better to only dispatch if we really changed something...
-
-        if (connectedPointsList.length === connectedPointsList.length && connectedPointsList.every(
-          (value, index) => value === connectedPointIds[index])) {
-          //do nothing already connected
-        }
-        else {
-          dispatch(setPropertyEditor_FieldConnectedLinesThroughAnchors(field.id, lineId,
-            connectedPointIds.length === 0 ? null : connectedPointIds));
-
-          break //because we can only have 1 field connected to the point we can break here
-        }
-      }
     }
 
+    //TODO tile border points
+
     //--- check if the line points snaps to a tile border point
-    checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap(getState().tileEditorState.tileProps, newLine,
-      anchorPointSnapToleranceRadiusInPx)
+    // checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap(getState().tileEditorState.tileProps, newLine,
+    //   anchorPointSnapToleranceRadiusInPx)
 
 
   }
@@ -286,13 +329,67 @@ export function setPropertyEditor_LineDashArray(lineId: number, dashArray: Reado
   }
 }
 
-export function setPropertyEditor_addPointToLineShape(lineId: number, bezierPoint: BezierPoint): ADD_PointToLineShapeAction {
+export function _setPropertyEditor_addPointToLineShape(lineId: number, bezierPoint: BezierPoint): ADD_PointToLineShapeAction {
   return {
     type: ActionType.ADD_PointToLineShape,
     bezierPoint,
     lineId,
   }
 }
+
+export function setPropertyEditor_addPointToLineShape(lineId: number, bezierPoint: BezierPoint): MultiActions {
+
+  return (dispatch, getState) => {
+
+    dispatch(_setPropertyEditor_addPointToLineShape(lineId, bezierPoint))
+
+    //a new point could be connected (coords) to a field anchor point
+
+    const fields = getState().tileEditorFieldShapesState.present
+    const fieldSymbols = getState().fieldSymbolState.present
+
+    const lines = getState().tileEditorLineShapeState.present
+
+    const lineShape = lines.find(p => p.id === lineId)
+
+    if (!lineShape) return
+
+    const targetPoint: Point = lineShape.startPoint.id === bezierPoint.id
+      ? lineShape.startPoint
+      : lineShape.points.find(p => p.id === bezierPoint.id)
+
+    for (const field of fields) {
+
+      const connectedPointIds = isFieldAndLinePointConnectedThroughAnchorPoints(field, fieldSymbols, lineShape.id, targetPoint, 0)
+      if (connectedPointIds !== null) {
+
+        // .filter(p => p.lineId === lineId).concat(connectedTuples)
+        //TOOD line
+        console.log('CHECK!!!!!!!!!')
+
+        dispatch(_setPropertyEditor_FieldAnchorPoints(field.id, field.anchorPoints.map((p, index) => {
+            return index !== connectedPointIds.anchorPointIndex
+              ? p
+              : {
+                ...p,
+                //remove all connected tuples from this line
+                //because they are re added
+                connectedLineTuples: p.connectedLineTuples.concat({
+                  pointId: connectedPointIds.pointId,
+                  lineId: connectedPointIds.lineId
+                })
+              }
+          }
+        )))
+
+      }
+    }
+
+    //TODO tile border points
+
+  }
+}
+
 
 export function setPropertyEditor_LineHasStartArrow(lineId: number, hasStartArrow: boolean): SET_hasStartArrowAction {
   return {
@@ -357,12 +454,12 @@ export function setPropertyEditor_linePointCurveMode(lineId: number, linePointId
     dispatch(_setPropertyEditor_linePointCurveMode(lineId, linePointId, curveMode))
 
     //after setting the mode adjust the control points...
-    //set it to the old pos ... this should do the all for us
+    //set it to the old pos ... this should do all for us
 
     const line = getState().tileEditorLineShapeState.present.find(p => p.id === lineId)
     const bezierPoint = line.points.find(p => p.id == linePointId)
 
-    dispatch(set_selectedLinePointNewPosAction(lineId, linePointId, bezierPoint, false))
+    dispatch(set_selectedLinePointNewPosAction(lineId, linePointId, bezierPoint))
 
   }
 }

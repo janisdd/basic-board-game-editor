@@ -113,9 +113,11 @@ class tileActionsBar extends React.Component<Props, any> {
               <Button icon
                       onClick={() => {
 
+                        const newDefaultShape = defaultFieldShape()
+
                         const newPoint: PlainPoint = {
-                          x: defaultFieldShape.x,
-                          y: defaultFieldShape.y
+                          x: newDefaultShape.x,
+                          y: newDefaultShape.y
                         }
 
                         const pos: PlainPoint = CoordHelper.toAbsolutePos(newPoint,
@@ -133,21 +135,16 @@ class tileActionsBar extends React.Component<Props, any> {
 
                         //make a deep copy
                         const field: FieldShape = {
-                          ...defaultFieldShape,
+                          ...newDefaultShape,
                           id: getNextShapeId(),
                           zIndex: this.props.amountOfShapesInTile,
                           text: 'field: ' + this.props.amountOfFieldsInTile,
                           x: shiftedPos.x,
                           y: shiftedPos.y,
                           padding: { //copy
-                            ...defaultFieldShape.padding
+                            ...newDefaultShape.padding
                           },
-                          anchorPoints: defaultFieldShape.anchorPoints.map(p => {
-                            return {
-                              ...p
-                            }
-                          }),
-                          connectedLinesThroughAnchorPoints: {}
+                          anchorPoints: newDefaultShape.anchorPoints,
                         }
 
                         this.props.addFieldShape(field)

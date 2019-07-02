@@ -961,7 +961,7 @@ class tileEditor extends React.Component<Props, any> {
               }}
 
               setLinePointNewPos={(lineId, oldPointId, oldPointPos, newPointPos, canSetFieldAnchorPoints) => {
-                this.props.setLinePointNewPos(lineId, oldPointId, newPointPos, canSetFieldAnchorPoints)
+                this.props.setLinePointNewPos(lineId, oldPointId, newPointPos)
               }}
               setSelectedFieldShapeIds={(ids) => {
                 this.onSelectFieldShapes(ids)

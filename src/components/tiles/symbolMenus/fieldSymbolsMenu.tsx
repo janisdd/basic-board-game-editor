@@ -300,7 +300,6 @@ function createNewFieldShapeFromSymbol(symbol: FieldSymbol, zIndex: number, link
     kind: "field",
     isSymbol: false,
     createdFromSymbolGuid: linkToSymbol ? symbol.guid : null,
-    connectedLinesThroughAnchorPoints: {},
     anchorPoints: symbol.anchorPoints,
     id: getNextShapeId(),
     cornerRadiusInPx: symbol.cornerRadiusInPx,

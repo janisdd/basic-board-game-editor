@@ -143,7 +143,7 @@ class tileBorderPointsView extends React.Component<Props, any> {
                         const newPoint: BorderPoint = {
                           id: getNextShapeId(),
                           val: 100,
-                          nextFieldId: null
+                          nextFieldId: null,
                         }
                         this.props.set_editor_topBorderPoints(
                           this.props.tileProps.topBorderPoints.concat(newPoint))
@@ -239,7 +239,7 @@ class tileBorderPointsView extends React.Component<Props, any> {
                         const newPoint: BorderPoint = {
                           id: getNextShapeId(),
                           val: 100,
-                          nextFieldId: null
+                          nextFieldId: null,
                         }
                         this.props.set_editor_botBorderPoints(
                           this.props.tileProps.botBorderPoints.concat(newPoint))
@@ -335,7 +335,7 @@ class tileBorderPointsView extends React.Component<Props, any> {
                         const newPoint: BorderPoint = {
                           id: getNextShapeId(),
                           val: 100,
-                          nextFieldId: null
+                          nextFieldId: null,
                         }
                         this.props.set_editor_leftBorderPoints(
                           this.props.tileProps.leftBorderPoints.concat(newPoint))

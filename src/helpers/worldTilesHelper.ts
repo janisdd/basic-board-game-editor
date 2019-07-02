@@ -206,41 +206,6 @@ export class WorldTilesHelper {
 
         for (const fieldShape of tile.fieldShapes) {
 
-          const connectedLinesThroughAnchorPoints: ConnectedLinesThroughAnchorPointsMap = {}
-
-          const lineIds = Object.keys(fieldShape.connectedLinesThroughAnchorPoints).map(p => parseInt(p))
-
-          for (let k = 0; k < lineIds.length; k++) {
-            const lineId = lineIds[k]
-            const entry = changedLineMapping[lineId]
-            const newLineId = entry.newLineId
-
-            const oldConnectedLineIds = fieldShape.connectedLinesThroughAnchorPoints[lineId]
-
-            if (oldConnectedLineIds === undefined) {
-              connectedLinesThroughAnchorPoints[newLineId] = undefined
-              continue
-            }
-
-
-            const newConnectedLinePointIds: number[] = []
-
-            for (let l = 0; l < oldConnectedLineIds.length; l++) {
-              const oldConnectedLineId = oldConnectedLineIds[l]
-
-              const mapping = entry.changedLinePoints.find(p => p[0] === oldConnectedLineId)
-
-              if (!mapping) {
-                Logger.fatal(`could not find old line point for connected lines, tile guid: ${tile.guid}, field id: ${fieldShape.id}, line id : ${lineId}, old connected line point id: ${oldConnectedLineId}`)
-              }
-
-              const newConnectedLineId = mapping[1]
-              newConnectedLinePointIds.push(newConnectedLineId)
-            }
-
-            connectedLinesThroughAnchorPoints[newLineId] = newConnectedLinePointIds
-          }
-
           const copy: FieldShape = {
             ...fieldShape,
             id: currentId++,
@@ -254,7 +219,6 @@ export class WorldTilesHelper {
             padding: {
               ...fieldShape.padding
             },
-            connectedLinesThroughAnchorPoints,
             zIndex: currentZIndex++,
           }
 

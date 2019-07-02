@@ -79,7 +79,6 @@ export class DuplicateHelper {
         x: fieldShape.x + copyPastDiffXInPx,
         y: fieldShape.y + copyPastDiffYInPx,
         zIndex: nextZIndex + count,
-        connectedLinesThroughAnchorPoints: {},
         text
       }
       count++

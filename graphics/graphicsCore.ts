@@ -9,7 +9,7 @@ import {ImgStorage} from "../src/externalStorage/imgStorage";
 import {ZIndexCache} from "../src/types/ui";
 import Bitmap = createjs.Bitmap;
 import {
-  calcAnchorPoints,
+  calcAnchorPointsRaw,
   getAngleInDeg,
   getPointDistance,
   interpolate2DPoint,
@@ -652,7 +652,7 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
   if (drawAnchorPoints || isSelected) {
 
 
-    const anchorPoints = calcAnchorPoints(
+    const anchorPoints = calcAnchorPointsRaw(
       0,
       0,
       symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width,

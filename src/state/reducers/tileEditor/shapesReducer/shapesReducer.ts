@@ -206,7 +206,6 @@ export function _reducer(state: State = initial, action: AllActions): State {
     case FieldShapedActionTypes.SET_fieldHorizontalTextAlign:
     case FieldShapedActionTypes.SET_fieldCornerRadius:
     case FieldShapedActionTypes.SET_fieldZIndex:
-    case FieldShapedActionTypes.SET_connectedLinesThroughAnchors:
     case FieldShapedActionTypes.SET_fieldCreatedFromSymbolId:
     case FieldShapedActionTypes.SET_fieldPadding:
     case FieldShapedActionTypes.SET_fieldBorderColor:
@@ -318,7 +317,6 @@ export const reducer = undoable(_reducer, {
       || action.type === FieldShapedActionTypes.SET_field_isFontBold
       || action.type === FieldShapedActionTypes.SET_fieldHorizontalTextAlign
       || action.type === FieldShapedActionTypes.SET_fieldVerticalTextAlign
-      || action.type === FieldShapedActionTypes.SET_connectedLinesThroughAnchors
     ) {
       return null
     }

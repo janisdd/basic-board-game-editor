@@ -17,6 +17,7 @@ import {Simulator} from "../../../../simulation/simulator";
 import {GameUnit} from "../../../../simulation/model/executionUnit";
 import {Logger} from "../../../helpers/logger";
 import {CheckboxData} from "../../../types/ui";
+import {getNextShapeId} from "../../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
 
 
 export interface MyProps {
@@ -805,18 +806,21 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
             })}
 
 
-            <Button icon
+            <Button icon labelPosition='left'
                     onClick={() => {
 
                       const newPoint: AnchorPoint = {
+                        id: getNextShapeId(),
                         percentX: 50,
-                        percentY: 50
+                        percentY: 50,
+                        connectedLineTuples: [],
                       }
 
                       this.props.setPropertyEditor_FieldAnchorPoints(fieldSymbol.anchorPoints.concat(newPoint))
                     }}
             >
               <Icon name="add"/>
+              <span>{getI18n(this.props.langId, "Add anchor point")}</span>
             </Button>
             <Divider/>
           </div>}
