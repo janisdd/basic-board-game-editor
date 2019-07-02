@@ -65,6 +65,7 @@ import {AvailableAppTabs} from "../../state/reducers/appReducer";
 import {renewAllZIndicesInTile} from "../../helpers/someIndexHelper";
 import {set_editorSelection_rect} from "../../state/reducers/tileEditorSelection/tileEditorSelectionReducer";
 import {exportPngImagesBgColor} from "../../constants";
+import {IoHelper} from "../../helpers/ioHelper";
 
 
 export interface MyProps {
@@ -834,6 +835,48 @@ class tileEditor extends React.Component<Props, any> {
                   <Icon name="print"/>
                 </Button>
 
+              </ToolTip>
+
+              <ToolTip
+                message={getI18n(this.props.langId, "Export the current state of the tile. It will also export the used symbols & the used images")}
+              >
+                <Button icon onClick={() => {
+
+                  const tile: Tile = {
+                    guid: getGuid(),
+                    imgShapes: this.props.imgShapes,
+                    fieldShapes: this.props.fieldShapes,
+                    lineShapes: this.props.lineShapes,
+                    topBorderPoints: this.props.tileProps.topBorderPoints,
+                    botBorderPoints: this.props.tileProps.botBorderPoints,
+                    leftBorderPoints: this.props.tileProps.leftBorderPoints,
+                    rightBorderPoint: this.props.tileProps.rightBorderPoint,
+                    simulationStartFieldIds: [],
+                    simulationEndFieldIds: [],
+                    tileSettings: {
+                      displayName: this.props.tileProps.tileSettings.displayName,
+                      width: this.props.tileProps.tileSettings.width,
+                      height: this.props.tileProps.tileSettings.height,
+                      majorLineDirection: this.props.tileProps.tileSettings.majorLineDirection,
+                      gridSizeInPx: this.props.tileProps.tileSettings.gridSizeInPx,
+                      showGrid: this.props.tileProps.tileSettings.showGrid,
+                      snapToGrid: this.props.tileProps.tileSettings.snapToGrid,
+                      showSequenceIds: this.props.tileProps.tileSettings.showSequenceIds,
+                      moveBezierControlPointsWhenLineIsMoved: this.props.tileProps.tileSettings.moveBezierControlPointsWhenLineIsMoved,
+                      arePrintGuidesDisplayed: this.props.tileProps.tileSettings.arePrintGuidesDisplayed,
+                      autoIncrementFieldTextNumbersOnDuplicate: this.props.tileProps.tileSettings.autoIncrementFieldTextNumbersOnDuplicate,
+                      printLargeTilePreferredWidthInPx: this.props.tileProps.tileSettings.printLargeTilePreferredWidthInPx,
+                      printLargeTilePreferredHeightInPx: this.props.tileProps.tileSettings.printLargeTilePreferredHeightInPx,
+                      splitLargeTileForPrint: this.props.tileProps.tileSettings.splitLargeTileForPrint,
+                      insertLinesEvenIfFieldsIntersect: this.props.tileProps.tileSettings.insertLinesEvenIfFieldsIntersect
+                    }
+                  }
+
+                  IoHelper.exportTile(tile)
+
+                }}>
+                  <Icon name="upload"/>
+                </Button>
               </ToolTip>
 
             </div>

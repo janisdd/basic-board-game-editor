@@ -940,17 +940,25 @@ export function isFieldAndLineConnectedThroughAnchorPoints(field: FieldShape, fi
   if (field.createdFromSymbolGuid !== null) {
     symbol = fieldSymbols.find(p => p.guid === field.createdFromSymbolGuid)
     fieldAnchorPoints = symbol.anchorPoints
+
+    if (!symbol) {
+      const msg = `could not find field symbol for guid ${field.createdFromSymbolGuid}`
+      Logger.fatal(msg)
+      throw new Error(msg)
+    }
   }
+
+
 
   const anchorPoints = calcAnchorPoints(
     field.x,
     field.y,
-    field.createdFromSymbolGuid !== null ? symbol.width : field.width,
-    field.createdFromSymbolGuid !== null ? symbol.height : field.height,
+    field.createdFromSymbolGuid !== null && symbol.overwriteWidth ? symbol.width : field.width,
+    field.createdFromSymbolGuid !== null && symbol.overwriteHeight ? symbol.height : field.height,
     fieldAnchorPoints,
     0,
     0,
-    field.createdFromSymbolGuid !== null ? symbol.rotationInDegree : field.rotationInDegree,
+    field.createdFromSymbolGuid !== null && symbol.overwriteRotationInDeg ? symbol.rotationInDegree : field.rotationInDegree,
   )
 
   for (const anchorPoint of anchorPoints) {

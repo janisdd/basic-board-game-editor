@@ -45,6 +45,7 @@ export const lang_en: LangObj = {
   "Add tile to world": "Add tile to world",
   "Edit tile. This will also change all instances of this the in the map. If you want to change only 1 instance then create a clone first and exchange the tile with the clone": "Edit tile. This will also change all instances of this the in the map. If you want to change only 1 instance then create a clone first and exchange the tile with the clone",
   "Export single tile. This will export the tile, only the symbols & only the used images": "Export single tile. This will export the tile, only the symbols & only the used images",
+  "Export the current state of the tile. It will also export the used symbols & the used images" : "Export the current state of the tile. It will also export the used symbols & the used images",
   "Export as svg (experimental)": "Export as svg (experimental)",
   "Export as png (experimental)": "Export as png (experimental)",
   "Export as png (experimental), the world tile size is used" : "Export as png (experimental), the world tile size is used",

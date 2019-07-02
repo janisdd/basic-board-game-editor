@@ -49,9 +49,24 @@ export class IoHelper {
     const fieldShapeWithSymbol = tile.fieldShapes.filter(p => p.createdFromSymbolGuid !== null)
 
     const usedFieldSymbols: FieldSymbol[] = []
-    for (const symbol of allFieldSymbols) {
-      if (fieldShapeWithSymbol.some(p => p.createdFromSymbolGuid === symbol.guid)) {
-        usedFieldSymbols.push(symbol)
+
+    for (const fieldWithSymbol of fieldShapeWithSymbol) {
+
+      let found = false
+
+      for (const symbol of allFieldSymbols) {
+        if (fieldWithSymbol.createdFromSymbolGuid === symbol.guid) {
+
+          found = true
+          usedFieldSymbols.push(symbol)
+          break
+        }
+
+        if (!found) {
+          const msg = `could not find field symbol with guid: ${fieldWithSymbol.createdFromSymbolGuid}`
+          Logger.fatal(msg)
+          throw new Error(msg)
+        }
       }
     }
 
@@ -59,19 +74,49 @@ export class IoHelper {
     const imgShapeWithSymbol = tile.imgShapes.filter(p => p.createdFromSymbolGuid !== null)
 
     const usedImgSymbols: ImgSymbol[] = []
-    for (const symbol of allImgSymbols) {
-      if (imgShapeWithSymbol.some(p => p.createdFromSymbolGuid === symbol.guid)) {
-        usedImgSymbols.push(symbol)
+
+    for (const imgWithSymbol of imgShapeWithSymbol) {
+      for (const symbol of allImgSymbols) {
+
+        let found = false
+
+        if (imgWithSymbol.createdFromSymbolGuid === symbol.guid) {
+
+          found = true
+          usedImgSymbols.push(symbol)
+          break
+        }
+
+        if (!found) {
+          const msg = `could not find img symbol with guid: ${imgWithSymbol.createdFromSymbolGuid}`
+          Logger.fatal(msg)
+          throw new Error(msg)
+        }
       }
     }
 
     const allLineSymbols = globalState.getState().lineSymbolState.present
-    const LineShapeWithSymbol = tile.lineShapes.filter(p => p.createdFromSymbolGuid !== null)
+    const lineShapeWithSymbol = tile.lineShapes.filter(p => p.createdFromSymbolGuid !== null)
 
     const usedLineSymbols: LineSymbol[] = []
-    for (const symbol of allLineSymbols) {
-      if (LineShapeWithSymbol.some(p => p.createdFromSymbolGuid === symbol.guid)) {
-        usedLineSymbols.push(symbol)
+
+    for (const lineWithSymbol of lineShapeWithSymbol) {
+      for (const symbol of allLineSymbols) {
+
+        let found = false
+
+        if (lineWithSymbol.createdFromSymbolGuid === symbol.guid) {
+
+          found = true
+          usedLineSymbols.push(symbol)
+          break
+        }
+
+        if (!found) {
+          const msg = `could not find img symbol with guid: ${lineWithSymbol.createdFromSymbolGuid}`
+          Logger.fatal(msg)
+          throw new Error(msg)
+        }
       }
     }
 
@@ -331,7 +376,7 @@ export function overwriteWorldSettings(currentWorldSettings: WorldSettings, load
   const keys = Object.keys(currentWorldSettings)
   const copy = {...currentWorldSettings} //remember this does only a shallow copy
 
-  for(const key of keys) {
+  for (const key of keys) {
 
     if (loadedWorldSettings[key] === undefined) {
       continue

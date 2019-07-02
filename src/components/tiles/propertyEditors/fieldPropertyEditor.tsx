@@ -1026,7 +1026,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
             />
           </Form.Field>
 
-          {isBasedOnSymbol === false && isSingleField && <Form.Field>
+          {isSingleField && <Form.Field>
             <label>{getI18n(this.props.langId, "Z-index")}({singleField.zIndex})</label>
             <Button.Group icon>
               <Button onClick={() => {
@@ -1249,7 +1249,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           </div>}
 
 
-        {isBasedOnSymbol === false && isSingleField && <Form.Field>
+        {isSingleField && <Form.Field>
           <label>{getI18n(this.props.langId, "Connected lines")}
             <IconToolTip message={getI18n(this.props.langId, "The connected lines via anchor points")}/>
           </label>
