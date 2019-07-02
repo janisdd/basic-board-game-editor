@@ -238,7 +238,13 @@ they are always executed!
 - control goto
 
 `force` is used to indicate that all following statements need to be executed no matter if the player token just moves over the field
+
 `force` must be the first statement in a field command text
+
+`control goto` / `control if` is executed when we leave the field to search for the next field
+  - because when we stop on e.g. a `control if` field we don't immediately move the token (because we stopped there) and want to evaluate the `control` statement on the next round
+  - else we would gift the user a free step (we would move the token to the next field)
+  - also we would need to add `force` to normal fields because when `control` statements are immediately executed the normal code would never be executed
 
 `control goto [NUMBER]` will set the player token to the field with the given `NUMBER`
 

@@ -15,7 +15,7 @@ Form the visual perspective almost all board games
 
 *there is a lack of default shapes (and custom shapes) but this could be done via images*
 
-actually any other svg editor is better probably
+actually any other svg editor is probably better
 
 That being said you can easily print out your game in the browser and it's automatically split into smaller pieces (not part of many/any? svg editors)
 
