@@ -382,6 +382,9 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                                onClick={() => this.props.onGotoSymbol(fieldSymbol)}/>
                 }
               </label>
+              {
+                //componentWillReceiveProps also handles some updates
+              }
               <EditorWrapper
                 id={fieldCmdTextEditorId}
                 readony={isBasedOnSymbol && fieldSymbol.overwriteCmdText}

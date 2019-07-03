@@ -230,6 +230,9 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                 />
 
               </label>
+              {
+                //componentWillReceiveProps also handles some updates
+              }
               <EditorWrapper
                 id={fieldSymbolCmdTextEditorId}
                 readony={false}

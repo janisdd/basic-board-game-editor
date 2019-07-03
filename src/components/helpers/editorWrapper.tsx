@@ -33,11 +33,12 @@ export default class EditorWrapper extends React.Component<MyProps, any> {
     const editSession = ace.createEditSession(this.props.value, 'ace/mode/bbgel' as any)
     this.editor.setSession(editSession)
 
-    if (this.props.readony) {
-      this.editor.setReadOnly(true)
-    }
+    this.editor.setReadOnly(this.props.readony)
 
     editorInstancesMap[this.props.id] = this.editor
+
+    const row = this.editor.session.getLength() - 1
+    this.editor.gotoLine(row+1, Infinity, false)
 
     let self = this
     this.editor.on('change', e => {
@@ -51,20 +52,19 @@ export default class EditorWrapper extends React.Component<MyProps, any> {
 
   componentDidUpdate() {
 
-    //TODO when we focs field1 and then focus field 2 changes are not commited --> no lost focus
+    //when we focus field1 and then focus field 2 changes are not committed --> no lost focus
+    //in fieldPropertyEditor und fieldSymbolPropertyEditor we handle it via componentWillReceiveProps...
     if (this.props.value !== this.editor.getValue()) {
       this.editor.setValue(this.props.value)
 
-      if (this.props.readony) {
-        this.editor.setReadOnly(true)
-      }
-
-      this.editor.selection.moveCursorTo(0, 0, false)
-      // this.editor.moveCursorTo(0, 0, false)
-      // this.editor.gotoLine(1, 0, false)
+      // this.editor.selection.moveCursorTo(0, 0, false)
+      const row = this.editor.session.getLength() - 1
+      this.editor.gotoLine(row+1, Infinity, false)
 
       this.editor.getSession().getUndoManager().reset()
     }
+
+    this.editor.setReadOnly(this.props.readony)
   }
 
   componentWillUnmount() {
