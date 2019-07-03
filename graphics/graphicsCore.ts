@@ -227,6 +227,10 @@ export function drawPrintGuides(stage: Stage, actualWidthInPx: number, actualHei
  * @param xOffset
  * @param yOffset
  * @param showIds
+ * @param zIndexCache
+ * @param onBorderPointMouseDown
+ * @param zIndexCache
+ * @param onBorderPointMouseDown
  */
 export function drawTileBorderPoints(stage: Stage,
                                      tileWidth: number,
@@ -239,11 +243,14 @@ export function drawTileBorderPoints(stage: Stage,
                                      xOffset: number,
                                      yOffset: number,
                                      showIds: boolean,
+                                     zIndexCache: ZIndexCache,
                                      onBorderPointMouseDown: (borderPoint: BorderPoint, orientation: BorderPointOrientation, shape: createjs.Shape, e: MouseEvent) => void
 ): void {
 
 
   const pointIdOffsetInPx = 12
+  const borderPointZIndex = 0
+  zIndexCache[borderPointZIndex] = []
 
   for (const point of topBorderPoints) {
     let pointShape = new createjs.Shape()
@@ -267,6 +274,7 @@ export function drawTileBorderPoints(stage: Stage,
     }
 
     stage.addChild(pointShape)
+    zIndexCache[borderPointZIndex].push(pointShape)
   }
 
   for (const point of botBorderPoints) {
@@ -290,6 +298,7 @@ export function drawTileBorderPoints(stage: Stage,
     }
 
     stage.addChild(pointShape)
+    zIndexCache[borderPointZIndex].push(pointShape)
   }
 
   for (const point of leftBorderPoints) {
@@ -313,6 +322,7 @@ export function drawTileBorderPoints(stage: Stage,
     }
 
     stage.addChild(pointShape)
+    zIndexCache[borderPointZIndex].push(pointShape)
   }
 
   for (const point of rightBorderPoint) {
@@ -336,6 +346,7 @@ export function drawTileBorderPoints(stage: Stage,
     }
 
     stage.addChild(pointShape)
+    zIndexCache[borderPointZIndex].push(pointShape)
   }
 
 }

@@ -205,6 +205,8 @@ export enum ActionType {
 
   SET_editor_isSymbolLibraryModalDisplayed = 'tileEditorReducer_SET_editor_isSymbolLibraryModalDisplayed',
 
+  CLEAR_allBorderPoints_connectedLines = 'tileEditorReducer_CLEAR_allBorderPoints_connectedLines',
+
   RESET = 'tileEditorReducer_RESET',
 }
 
@@ -426,6 +428,10 @@ export interface SET_editor_simulationEndFieldIdsAction extends ActionBase {
   readonly simulationEndFieldIds: ReadonlyArray<number>
 }
 
+export interface CLEAR_allBorderPoints_connectedLinesAction extends ActionBase {
+  readonly type: ActionType.CLEAR_allBorderPoints_connectedLines
+}
+
 
 export interface ResetAction extends ActionBase {
   readonly type: ActionType.RESET
@@ -477,6 +483,7 @@ export type AllActions =
   | SET_editor_insertLinesEvenIfFieldsIntersectAction
   | SET_editor_majorLineDirectionAction
   | SET_editor_arePrintGuidesDisplayedAction
+| CLEAR_allBorderPoints_connectedLinesAction
 
 
 export function reducer(state: State = initial, action: AllActions): State {
@@ -487,6 +494,19 @@ export function reducer(state: State = initial, action: AllActions): State {
       return {
         ...initial, //full reset
         tileProps: action.tile
+      }
+
+
+    case ActionType.CLEAR_allBorderPoints_connectedLines:
+      return {
+        ...state,
+        tileProps: {
+          ...state.tileProps,
+          topBorderPoints: state.tileProps.topBorderPoints.map(p => ({...p,connectedLineTuples: []})),
+          botBorderPoints: state.tileProps.botBorderPoints.map(p => ({...p,connectedLineTuples: []})),
+          leftBorderPoints: state.tileProps.leftBorderPoints.map(p => ({...p,connectedLineTuples: []})),
+          rightBorderPoint: state.tileProps.rightBorderPoint.map(p => ({...p,connectedLineTuples: []})),
+        }
       }
 
     case ActionType.SET_editor_isCreatingNewTile:

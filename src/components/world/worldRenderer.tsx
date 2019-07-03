@@ -255,6 +255,7 @@ class worldRenderer extends React.Component<Props, any> {
           i * defaultTileWidth,
           j * defaultTileHeight,
           false,
+          this.zIndexCache,
           null
         )
 

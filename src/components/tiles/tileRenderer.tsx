@@ -455,43 +455,6 @@ class tileRenderer extends React.Component<Props, any> {
       )
     }
 
-    graphics.drawTileBorderPoints(this.renderStage,
-      this.props.tileWidth,
-      this.props.tileHeight,
-      this.props.topBorderPoints,
-      this.props.botBorderPoints,
-      this.props.leftBorderPoints,
-      this.props.rightBorderPoint,
-      this.props.worldSettings,
-      0,
-      0,
-      this.props.drawFieldIds,
-      (borderPoint, orientation1, shape, e) => {
-
-        if (this.props.isSelectingNextField) {
-          let cmdText = `control goto ${borderPoint.id}`
-
-          if (this.props.sourceForSelectingNextField.cmdText !== null && this.props.sourceForSelectingNextField.cmdText.trim() !== '') {
-
-            if (this.props.sourceForSelectingNextField.cmdText.endsWith('\n')) {
-              cmdText = `${this.props.sourceForSelectingNextField.cmdText}${cmdText}`
-            }
-            else {
-              cmdText = `${this.props.sourceForSelectingNextField.cmdText}\n${cmdText}`
-            }
-          }
-
-          this.props.setPropertyEditor_FieldCmdText(this.props.sourceForSelectingNextField.id, cmdText)
-          this.props.setTileEditorSelectingNextField(false, null)
-
-          //let the current field selected else we don't know if we just cancelled the next field selection
-          //or if we clicked the border point (we cannot select the border point)
-          return
-        }
-
-      }
-    )
-
     graphics.drawFieldsOnTile(this.renderStage, this.props.fieldShapes,
       this.props.selectedFieldShapeIds,
       [this.props.selectedFieldSymbolGuid],
@@ -844,6 +807,56 @@ class tileRenderer extends React.Component<Props, any> {
       //--> index 0 is drawn first so we need to revert the order to preserve the order when drawing)
 
       //this is only important for tile editor because other (e.g. world) we have only one shape per z-index
+      for(let i = list.length-1; i >= 0;i--) {
+        const child = list[i]
+
+        this.renderStage.setChildIndex(child, parseInt(zIndex))
+      }
+    }
+
+    //draw border points behind all
+    this.zIndexCache = {}
+
+    graphics.drawTileBorderPoints(this.renderStage,
+      this.props.tileWidth,
+      this.props.tileHeight,
+      this.props.topBorderPoints,
+      this.props.botBorderPoints,
+      this.props.leftBorderPoints,
+      this.props.rightBorderPoint,
+      this.props.worldSettings,
+      0,
+      0,
+      this.props.drawFieldIds,
+      this.zIndexCache,
+      (borderPoint, orientation1, shape, e) => {
+
+        if (this.props.isSelectingNextField) {
+          let cmdText = `control goto ${borderPoint.id}`
+
+          if (this.props.sourceForSelectingNextField.cmdText !== null && this.props.sourceForSelectingNextField.cmdText.trim() !== '') {
+
+            if (this.props.sourceForSelectingNextField.cmdText.endsWith('\n')) {
+              cmdText = `${this.props.sourceForSelectingNextField.cmdText}${cmdText}`
+            }
+            else {
+              cmdText = `${this.props.sourceForSelectingNextField.cmdText}\n${cmdText}`
+            }
+          }
+
+          this.props.setPropertyEditor_FieldCmdText(this.props.sourceForSelectingNextField.id, cmdText)
+          this.props.setTileEditorSelectingNextField(false, null)
+
+          //let the current field selected else we don't know if we just cancelled the next field selection
+          //or if we clicked the border point (we cannot select the border point)
+          return
+        }
+
+      }
+    )
+
+    for (const zIndex in this.zIndexCache) {
+      const list = this.zIndexCache[zIndex]
       for(let i = list.length-1; i >= 0;i--) {
         const child = list[i]
 

@@ -262,6 +262,7 @@ export interface BorderPoint {
   /**
    * when we come from another tile and we get to this border point
    * we need to know which is the next field
+   * can also be another border point id!
    */
   readonly nextFieldId: number | null
 

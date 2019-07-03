@@ -1,5 +1,5 @@
 import {
-  ActionType,
+  ActionType, CLEAR_allBorderPoints_connectedLinesAction,
   LeftTileEditorTabs,
   RightTileEditorTabs, SET_editor_arePrintGuidesDisplayedAction,
   SET_editor_autoIncrementFieldTextNumbersOnDuplicateAction,
@@ -528,3 +528,10 @@ export function set_editor_isSymbolLibraryModalDisplayed(isSymbolLibraryModalDis
     isSymbolLibraryModalDisplayed
   }
 }
+
+export function clearAllBorderPoints_connectedLines(): CLEAR_allBorderPoints_connectedLinesAction {
+  return {
+    type: ActionType.CLEAR_allBorderPoints_connectedLines,
+  }
+}
+

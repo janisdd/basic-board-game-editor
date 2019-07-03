@@ -3,8 +3,9 @@ import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
-import {List, Icon, Button} from 'semantic-ui-react'
+import {Button, Icon, List} from 'semantic-ui-react'
 import {
+  clearAllBorderPoints_connectedLines,
   set_editor_rightTabActiveIndex,
   setSelectedFieldShapeIds,
   setSelectedImageShapeIds,
@@ -61,6 +62,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   setPropertyEditor_fieldsShapes,
   setPropertyEditor_lineShapes,
   clearAllConnectedLinesFromAllFields,
+  clearAllBorderPoints_connectedLines,
   setPropertyEditor_imgShapes,
 
   removeFieldShape,
@@ -244,6 +246,7 @@ class tileContentOutline extends React.Component<Props, any> {
                             //because we removed all
                             this.props.setPropertyEditor_lineShapes([])
                             this.props.clearAllConnectedLinesFromAllFields()
+                            this.props.clearAllBorderPoints_connectedLines()
 
                             renewAllZIndicesInTile()
                           }}

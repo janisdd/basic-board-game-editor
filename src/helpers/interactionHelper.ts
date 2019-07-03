@@ -316,7 +316,7 @@ export function autoConnectFieldsWithLinesByCmdText(
         x: p.val,
         y: 0,
         val: p.val,
-        connectedLineTuples: []
+        connectedLineTuples: p.connectedLineTuples
       }
     })
       .concat(
@@ -327,7 +327,7 @@ export function autoConnectFieldsWithLinesByCmdText(
             x: p.val,
             y: tileHeight,
             val: p.val,
-            connectedLineTuples: []
+            connectedLineTuples: p.connectedLineTuples
           }
         })
       )
@@ -339,7 +339,7 @@ export function autoConnectFieldsWithLinesByCmdText(
             x: 0,
             y: p.val,
             val: p.val,
-            connectedLineTuples: []
+            connectedLineTuples: p.connectedLineTuples
           }
         })
       )
@@ -351,7 +351,7 @@ export function autoConnectFieldsWithLinesByCmdText(
             x: tileWidth,
             y: p.val,
             val: p.val,
-            connectedLineTuples: []
+            connectedLineTuples: p.connectedLineTuples
           }
         })
       )
@@ -372,7 +372,62 @@ export function autoConnectFieldsWithLinesByCmdText(
     const nextField = fields.find(p => p.id === borderPoint.nextFieldId)
 
     if (!nextField) {
-      throw new Error(`cannot find target field ${borderPoint.nextFieldId} of border point with id ${borderPoint.id}`)
+
+
+      //could be another border point...
+      const otherBorderPoint = allBorderPoints.find(p => p.id === borderPoint.nextFieldId)
+
+      if (!otherBorderPoint) {
+        throw new Error(`cannot find target field id or other border point id: ${borderPoint.nextFieldId}, to connect to the border point with id ${borderPoint.id}`)
+      }
+
+      const rootBorderPointRect: Rect = {
+        x: borderPoint.x,
+        y: borderPoint.y,
+        height: borderPointsDiameterInPx,
+        width: borderPointsDiameterInPx
+      }
+
+      if (insertLinesEvenIfFieldsIntersect === false) {
+        if (intersectPoint(rootBorderPointRect, otherBorderPoint)) {
+          continue
+        }
+      }
+
+      //are already connected?
+      let alreadyConnected = false
+
+      for (let i = 0; i < borderPoint.connectedLineTuples.length; i++) {
+        const borderPointTuple = borderPoint.connectedLineTuples[i];
+
+
+        if (otherBorderPoint.connectedLineTuples.some(p => p.lineId === borderPointTuple.lineId)) {
+          alreadyConnected = true
+        }
+      }
+
+      if (alreadyConnected) {
+        continue
+      }
+
+
+      connectPointsWithLine(
+        borderPoint.x,
+        borderPoint.y,
+        borderPointsDiameterInPx,
+        borderPointsDiameterInPx,
+        true,
+        otherBorderPoint.x,
+        otherBorderPoint.y,
+        borderPointsDiameterInPx,
+        borderPointsDiameterInPx,
+        true,
+        lastZIndex++,
+        majorLineDirection,
+        true
+      )
+
+      continue
     }
 
     let nextFieldSymbol: FieldSymbol | null = null
@@ -382,12 +437,11 @@ export function autoConnectFieldsWithLinesByCmdText(
 
       if (symbol) {
         nextFieldSymbol = symbol
+      } else {
+        throw new Error(`next field symbol not found, guid: ${nextField.createdFromSymbolGuid}, from border point: ${borderPoint.id}`)
       }
     }
 
-    if (!nextField) {
-      throw new Error(`next field not found! from border point: ${borderPoint.id}`)
-    }
 
     if (insertLinesEvenIfFieldsIntersect === false) {
       //check if they intersect
@@ -396,29 +450,20 @@ export function autoConnectFieldsWithLinesByCmdText(
       }
     }
 
-    //TOOD line
-    // //some lines might already exit
-    // let connectedLinesThroughAnchorPoints = getConnectedLinesThroughAnchorPointsForBorderPoint(borderPoint, lineShapes)
-    //
-    // const borderPointConnectedLinesIds = Object.keys(connectedLinesThroughAnchorPoints)
-    //
-    // //if the fields are already connected do nothing
-    // const nextFieldConnectedLinesIds = Object.keys(nextField.connectedLinesThroughAnchorPoints)
-    //
-    // let alreadyConnected = false
-    //
-    // for (const lineIdString of borderPointConnectedLinesIds) {
-    //   if (nextFieldConnectedLinesIds.some(idString => idString === lineIdString)) {
-    //
-    //     //already connected
-    //     alreadyConnected = true
-    //     break
-    //   }
-    // }
-    //
-    // if (alreadyConnected) {
-    //   continue
-    // }
+    let alreadyConnected = false
+
+    for (let i = 0; i < borderPoint.connectedLineTuples.length; i++) {
+      const borderPointTuple = borderPoint.connectedLineTuples[i];
+
+
+      if (nextField.anchorPoints.some(p => p.connectedLineTuples.some(k => k.lineId === borderPointTuple.lineId))) {
+        alreadyConnected = true
+      }
+    }
+
+    if (alreadyConnected) {
+      continue
+    }
 
     connectPointsWithLine(
       borderPoint.x,
@@ -428,15 +473,13 @@ export function autoConnectFieldsWithLinesByCmdText(
       true,
       nextField.x,
       nextField.y,
-      (nextFieldSymbol !== null ? nextFieldSymbol.width : nextField.width),
-      (nextFieldSymbol !== null ? nextFieldSymbol.height : nextField.height),
+      (nextFieldSymbol !== null && nextFieldSymbol.overwriteWidth ? nextFieldSymbol.width : nextField.width),
+      (nextFieldSymbol !== null && nextFieldSymbol.overwriteHeight ? nextFieldSymbol.height : nextField.height),
       false,
-      lastZIndex,
+      lastZIndex++,
       majorLineDirection,
       true
     )
-
-    lastZIndex++
   }
 
 }
@@ -489,7 +532,6 @@ function connectFieldsFromRootFieldByCmdText(
     }
   }
 
-  // const rootFieldConnectedLines = Object.keys(rootField.connectedLinesThroughAnchorPoints)
   let nextFieldIsBorderPoint = false
 
   for (const statement of game.statements) {
@@ -502,7 +544,6 @@ function connectFieldsFromRootFieldByCmdText(
         fields,
         fieldSymbols,
         nextFieldIsBorderPoint,
-        // rootFieldConnectedLines,
         majorLineDirection,
         allBorderPoints,
         borderPointsDiameterInPx,
@@ -520,7 +561,6 @@ function connectFieldsFromRootFieldByCmdText(
         fields,
         fieldSymbols,
         nextFieldIsBorderPoint,
-        // rootFieldConnectedLines,
         majorLineDirection,
         allBorderPoints,
         borderPointsDiameterInPx,
@@ -536,7 +576,6 @@ function connectFieldsFromRootFieldByCmdText(
         fields,
         fieldSymbols,
         nextFieldIsBorderPoint,
-        // rootFieldConnectedLines,
         majorLineDirection,
         allBorderPoints,
         borderPointsDiameterInPx,
@@ -561,7 +600,6 @@ function connectFieldsFromRootFieldByCmdText(
  * @param fieldShapes
  * @param {ReadonlyArray<FieldSymbol>} fieldSymbols
  * @param {boolean} nextFieldIsBorderPoint
- * @param {string[]} rootFieldConnectedLines
  * @param {MajorLineDirection} majorLineDirection
  * @param allBorderPoints
  * @param borderPointsDiameterInPx
@@ -577,7 +615,6 @@ function connectFields(rootField: FieldShape,
                        fieldShapes: ReadonlyArray<FieldShape>,
                        fieldSymbols: ReadonlyArray<FieldSymbol>,
                        nextFieldIsBorderPoint: boolean,
-                       // rootFieldConnectedLines: string[],
                        majorLineDirection: MajorLineDirection,
                        allBorderPoints: ReadonlyArray<BorderPointWithPos>,
                        borderPointsDiameterInPx: number,
@@ -592,6 +629,8 @@ function connectFields(rootField: FieldShape,
 
   let nextField = fieldShapes.find(p => p.id === nextFieldId)
 
+  let nextFieldConnectedLineIds: ReadonlyArray<number> = []
+
   if (!nextField) {
 
     //could be a border point
@@ -599,7 +638,7 @@ function connectFields(rootField: FieldShape,
     const targetBorderPoint = allBorderPoints.find(p => p.id === nextFieldId)
 
     if (!targetBorderPoint) {
-      Logger.fatal(`next field/border point not found id: ${nextFieldId}! from field: ${rootField.id}`)
+      Logger.fatal(`next field/border point not found id: ${nextFieldId}, from field: ${rootField.id}`)
       return
     }
 
@@ -609,12 +648,9 @@ function connectFields(rootField: FieldShape,
       }
     }
 
-    //the connected lines could be calculated inside autoConnectFieldsWithLinesByCmdText for all lines...
-    //TODO??
-    let connectedLinesThroughAnchorPoints = getConnectedLinesThroughAnchorPointsForBorderPoint(targetBorderPoint,
-      lineShapes)
+    nextFieldConnectedLineIds = targetBorderPoint.connectedLineTuples.map(p => p.lineId)
 
-    //too lazy to restructure method...
+    //too lazy to restructure method...just create a temp next field
     nextField = {
       ...rootField,
       id: targetBorderPoint.id,
@@ -625,6 +661,13 @@ function connectFields(rootField: FieldShape,
       createdFromSymbolGuid: null
     }
     nextFieldIsBorderPoint = true
+  } else {
+
+    nextFieldConnectedLineIds = nextField.anchorPoints
+      .reduce<number[]>((previousValue, currentValue) =>
+          previousValue.concat(currentValue.connectedLineTuples.map(p => p.lineId)),
+        [])
+
   }
 
 
@@ -641,8 +684,8 @@ function connectFields(rootField: FieldShape,
     const targetRect: Rect = {
       x: nextField.x,
       y: nextField.y,
-      width: (nextFieldSymbol !== null ? nextFieldSymbol.width : nextField.width),
-      height: (nextFieldSymbol !== null ? nextFieldSymbol.height : nextField.height),
+      width: (nextFieldSymbol !== null && nextFieldSymbol.overwriteWidth ? nextFieldSymbol.width : nextField.width),
+      height: (nextFieldSymbol !== null && nextFieldSymbol.overwriteHeight ? nextFieldSymbol.height : nextField.height),
     }
 
     if (intersectRect(rootField, targetRect)) {
@@ -650,16 +693,19 @@ function connectFields(rootField: FieldShape,
     }
   }
 
-  //TOOD line
-  // //if the fields are already connected do nothing
-  // const nextFieldConnectedLinesIds = Object.keys(nextField.connectedLinesThroughAnchorPoints)
-  //
-  // for (const lineIdString of rootFieldConnectedLines) {
-  //   if (nextFieldConnectedLinesIds.some(idString => idString === lineIdString)) {
-  //     fieldsAreAlreadyConnected = true
-  //     break
-  //   }
-  // }
+  //if the fields are already connected do nothing
+
+  for (let j = 0; j < rootField.anchorPoints.length; j++) {
+    const rootAnchorPoint = rootField.anchorPoints[j];
+
+    //if we find a line in anchorPoint and rootAnchorPoint with the same id
+    //  then fields are already connected
+
+    if (nextFieldConnectedLineIds.some(lineId => rootAnchorPoint.connectedLineTuples.some(k => k.lineId === lineId))) {
+      fieldsAreAlreadyConnected = true
+    }
+  }
+
 
   if (fieldsAreAlreadyConnected) {
     return zIndex
@@ -668,13 +714,13 @@ function connectFields(rootField: FieldShape,
   connectPointsWithLine(
     rootField.x,
     rootField.y,
-    (rootFieldSymbol !== null ? rootFieldSymbol.width : rootField.width),
-    (rootFieldSymbol !== null ? rootFieldSymbol.height : rootField.height),
+    (rootFieldSymbol !== null && rootFieldSymbol.overwriteWidth ? rootFieldSymbol.width : rootField.width),
+    (rootFieldSymbol !== null && rootFieldSymbol.overwriteHeight ? rootFieldSymbol.height : rootField.height),
     false,
     nextField.x,
     nextField.y,
-    (nextFieldSymbol !== null ? nextFieldSymbol.width : nextField.width),
-    (nextFieldSymbol !== null ? nextFieldSymbol.height : nextField.height),
+    (nextFieldSymbol !== null && nextFieldSymbol.overwriteWidth ? nextFieldSymbol.width : nextField.width),
+    (nextFieldSymbol !== null && nextFieldSymbol.overwriteHeight ? nextFieldSymbol.height : nextField.height),
     nextFieldIsBorderPoint,
     zIndex,
     majorLineDirection,
@@ -685,35 +731,6 @@ function connectFields(rootField: FieldShape,
   return zIndex
 }
 
-
-/**
- * returns a map representing which lines are already exist
- * @param targetBorderPoint
- * @param lineShapes
- */
-function getConnectedLinesThroughAnchorPointsForBorderPoint(targetBorderPoint: PlainPoint, lineShapes: ReadonlyArray<LineShape>): ConnectedLinesThroughAnchorPointsMap {
-
-  let connectedLinesThroughAnchorPoints: ConnectedLinesThroughAnchorPointsMap = {}
-
-  for (const lineShape of lineShapes) {
-
-    let points: ReadonlyArray<Point> = (lineShape.points as ReadonlyArray<Point>).concat(lineShape.startPoint)
-
-    for (const point of points) {
-      if (point.x === targetBorderPoint.x && point.y === targetBorderPoint.y) {
-        if (connectedLinesThroughAnchorPoints[lineShape.id] === undefined) {
-          connectedLinesThroughAnchorPoints[lineShape.id] = [point.id]
-        } else {
-          connectedLinesThroughAnchorPoints[lineShape.id] = connectedLinesThroughAnchorPoints[lineShape.id].concat(
-            point.id)
-        }
-      }
-    }
-  }
-
-  return connectedLinesThroughAnchorPoints
-
-}
 
 /**
  *
@@ -801,6 +818,8 @@ function connectPointsWithLine(startFieldX: number, startFieldY: number, startFi
         y: endFieldY + (endIsBorderPoint ? 0 : endFieldHeight / 2)
       }
     }
+  } else {
+    throw new Error(`unknown majorLineDirection: ${majorLineDirection}`)
   }
 
 
@@ -833,6 +852,8 @@ function connectPointsWithLine(startFieldX: number, startFieldY: number, startFi
     arrowHeight: defaultArrowHeight
   }
 
+  //adding the line will automatically add the line as connected to the anchor points
+  //  because of coords
   globalState.dispatch(addLineShape(line))
 
   renewAllZIndicesInTile()
@@ -1093,17 +1114,31 @@ export function isFieldAndLinePointConnectedThroughAnchorPoints(field: FieldShap
 }
 
 
+/**
+ *
+ * @param tile
+ * @param lineId
+ * @param oldPoint
+ * @param newPoint
+ * @param setBorderPointFunc
+ * @param __setLinePointNewPos
+ * @param anchorPointSnapToleranceRadiusInPx
+ * @param shouldCheckIfCanDisconnect if distance to border point is <= anchorPointSnapToleranceRadiusInPx,
+ *   true: when we have a new point (user moved line away) this can disconnect the line if the old point was connected (same coords as border point)
+ *   false: not check if the user moved line away, e.g. when we know we want to connect/snap the line to the border point (if distance to border point is <= anchorPointSnapToleranceRadiusInPx)
+ */
 export function checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap(tile: TileProps, lineId: number, oldPoint: Point, newPoint: PlainPoint,
                                                                         setBorderPointFunc: (borderPoint: BorderPoint, direction: "top" | "bottom" | "left" | "right", tileWidth: number, tileHeight: number) => void,
                                                                         __setLinePointNewPos: (lineId: number, oldPointId: number, newPointPos: PlainPoint) => void,
-                                                                        anchorPointSnapToleranceRadiusInPx: number = 0): void {
+                                                                        anchorPointSnapToleranceRadiusInPx: number,
+                                                                        shouldCheckIfCanDisconnect: boolean): void {
 
 
   let func = (borderPoint: BorderPoint, borderPointPos: PlainPoint, distance: number, direction: "top" | "bottom" | "left" | "right") => {
 
     if (distance <= anchorPointSnapToleranceRadiusInPx) {
 
-      if (oldPoint.x === borderPointPos.x && oldPoint.y === borderPointPos.y &&
+      if (shouldCheckIfCanDisconnect && oldPoint.x === borderPointPos.x && oldPoint.y === borderPointPos.y &&
         (newPoint.x !== borderPointPos.x || newPoint.y !== borderPointPos.y)) {
 
         //old pos was on anchor point

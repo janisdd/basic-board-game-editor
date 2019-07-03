@@ -297,10 +297,14 @@ function _reducer(state: State = initial, action: AllActions): State {
       return state.map<FieldShape>(p => {
         return {
           ...p,
-          connectedLinesThroughAnchorPoints: {}
+          anchorPoints: p.anchorPoints.map(value => {
+            return {
+              ...value,
+              connectedLineTuples: []
+            }
+          })
         }
       })
-
 
     //--- field properties
     case ActionType.SET_fieldText: {

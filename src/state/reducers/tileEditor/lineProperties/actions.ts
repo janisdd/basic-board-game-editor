@@ -30,6 +30,8 @@ import {
   isFieldAndLinePointConnectedThroughAnchorPoints
 } from "../../../../helpers/interactionHelper";
 import {
+  _set_editor_botBorderPoints, _set_editor_leftBorderPoints, _set_editor_rightBorderPoint,
+  _set_editor_topBorderPoints,
   set_editor_botBorderPoints,
   set_editor_leftBorderPoints,
   set_editor_rightBorderPoint,
@@ -88,7 +90,105 @@ export function addLineShape(lineShape: LineShape): MultiActions {
       }
     }
 
-    //TODO tile border points
+    //this is needed e.g. when we auto insert lines from fields to border points...
+
+    const __setLinePointNewPos = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+
+    checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap(getState().tileEditorState.tileProps, lineShape.id, lineShape.startPoint, lineShape.startPoint,
+      (borderPoint, direction, tileWidth, tileHeight) => {
+
+        switch (direction) {
+          case "top": {
+            const topBorderPoints = getState().tileEditorState.tileProps.topBorderPoints
+
+            dispatch(set_editor_topBorderPoints(topBorderPoints.map(p => p.id !== borderPoint.id
+              ? p
+              : borderPoint)))
+
+            break;
+          }
+          case "bottom": {
+            const botBorderPoints = getState().tileEditorState.tileProps.botBorderPoints
+
+            dispatch(set_editor_botBorderPoints(botBorderPoints.map(p => p.id !== borderPoint.id
+              ? p
+              : borderPoint), tileHeight))
+            break;
+          }
+
+          case "left": {
+            const leftBorderPoints = getState().tileEditorState.tileProps.leftBorderPoints
+
+            dispatch(set_editor_leftBorderPoints(leftBorderPoints.map(p => p.id !== borderPoint.id
+              ? p
+              : borderPoint)))
+            break;
+          }
+
+          case "right": {
+            const rightBorderPoint = getState().tileEditorState.tileProps.rightBorderPoint
+
+            dispatch(set_editor_rightBorderPoint(rightBorderPoint.map(p => p.id !== borderPoint.id
+              ? p
+              : borderPoint), tileWidth))
+            break;
+          }
+          default:
+            Logger.fatal('not implemented')
+        }
+      },
+      __setLinePointNewPos,
+      0, false)
+
+    for (let i = 0; i < lineShape.points.length; i++) {
+      const linePoint = lineShape.points[i];
+
+      checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap(getState().tileEditorState.tileProps, lineShape.id, linePoint, linePoint,
+        (borderPoint, direction, tileWidth, tileHeight) => {
+
+          switch (direction) {
+            case "top": {
+              const topBorderPoints = getState().tileEditorState.tileProps.topBorderPoints
+
+              dispatch(set_editor_topBorderPoints(topBorderPoints.map(p => p.id !== borderPoint.id
+                ? p
+                : borderPoint)))
+
+              break;
+            }
+            case "bottom": {
+              const botBorderPoints = getState().tileEditorState.tileProps.botBorderPoints
+
+              dispatch(set_editor_botBorderPoints(botBorderPoints.map(p => p.id !== borderPoint.id
+                ? p
+                : borderPoint), tileHeight))
+              break;
+            }
+
+            case "left": {
+              const leftBorderPoints = getState().tileEditorState.tileProps.leftBorderPoints
+
+              dispatch(set_editor_leftBorderPoints(leftBorderPoints.map(p => p.id !== borderPoint.id
+                ? p
+                : borderPoint)))
+              break;
+            }
+
+            case "right": {
+              const rightBorderPoint = getState().tileEditorState.tileProps.rightBorderPoint
+
+              dispatch(set_editor_rightBorderPoint(rightBorderPoint.map(p => p.id !== borderPoint.id
+                ? p
+                : borderPoint), tileWidth))
+              break;
+            }
+            default:
+              Logger.fatal('not implemented')
+          }
+        },
+        __setLinePointNewPos,
+        0, false)
+    }
 
   }
 }
@@ -129,7 +229,45 @@ export function removeLineShape(lineShapeId: number): MultiActions {
 
     }
 
-    //TODO tile border points
+    const tileProps = getState().tileEditorState.tileProps
+
+    //maybe we could remove the check and always dispatch??
+    if (tileProps.topBorderPoints.some(p => p.connectedLineTuples.some(k => k.lineId === lineShapeId))) {
+      dispatch(_set_editor_topBorderPoints(tileProps.topBorderPoints.map(p => {
+        return {
+          ...p,
+          connectedLineTuples: p.connectedLineTuples.filter(k => k.lineId !== lineShapeId)
+        }
+      })))
+    }
+
+
+    if (tileProps.botBorderPoints.some(p => p.connectedLineTuples.some(k => k.lineId === lineShapeId))) {
+      dispatch(_set_editor_botBorderPoints(tileProps.botBorderPoints.map(p => {
+        return {
+          ...p,
+          connectedLineTuples: p.connectedLineTuples.filter(k => k.lineId !== lineShapeId)
+        }
+      })))
+    }
+
+    if (tileProps.leftBorderPoints.some(p => p.connectedLineTuples.some(k => k.lineId === lineShapeId))) {
+      dispatch(_set_editor_leftBorderPoints(tileProps.leftBorderPoints.map(p => {
+        return {
+          ...p,
+          connectedLineTuples: p.connectedLineTuples.filter(k => k.lineId !== lineShapeId)
+        }
+      })))
+    }
+
+    if (tileProps.rightBorderPoint.some(p => p.connectedLineTuples.some(k => k.lineId === lineShapeId))) {
+      dispatch(_set_editor_rightBorderPoint(tileProps.rightBorderPoint.map(p => {
+        return {
+          ...p,
+          connectedLineTuples: p.connectedLineTuples.filter(k => k.lineId !== lineShapeId)
+        }
+      })))
+    }
 
   }
 }
@@ -173,7 +311,45 @@ export function removePointFromLineShape(lineId: number, pointId: number): Multi
       }
     }
 
-    //TODO tile border points
+    //check if we need to remove the point from a border point connection list
+
+    const tileProps = getState().tileEditorState.tileProps
+
+    if (tileProps.topBorderPoints.some(p => p.connectedLineTuples.some(k => k.lineId === lineId && k.pointId === pointId))) {
+      dispatch(set_editor_topBorderPoints(tileProps.topBorderPoints.map(p => {
+        return {
+          ...p,
+          connectedLineTuples: p.connectedLineTuples.filter(k => k.lineId !== lineId || k.pointId !== pointId)
+        }
+      })))
+    }
+
+    if (tileProps.botBorderPoints.some(p => p.connectedLineTuples.some(k => k.lineId === lineId && k.pointId === pointId))) {
+      dispatch(set_editor_botBorderPoints(tileProps.botBorderPoints.map(p => {
+        return {
+          ...p,
+          connectedLineTuples: p.connectedLineTuples.filter(k => k.lineId !== lineId || k.pointId !== pointId)
+        }
+      }), tileProps.tileSettings.height))
+    }
+
+    if (tileProps.leftBorderPoints.some(p => p.connectedLineTuples.some(k => k.lineId === lineId && k.pointId === pointId))) {
+      dispatch(set_editor_leftBorderPoints(tileProps.leftBorderPoints.map(p => {
+        return {
+          ...p,
+          connectedLineTuples: p.connectedLineTuples.filter(k => k.lineId !== lineId || k.pointId !== pointId)
+        }
+      })))
+    }
+
+    if (tileProps.rightBorderPoint.some(p => p.connectedLineTuples.some(k => k.lineId === lineId && k.pointId === pointId))) {
+      dispatch(set_editor_rightBorderPoint(tileProps.rightBorderPoint.map(p => {
+        return {
+          ...p,
+          connectedLineTuples: p.connectedLineTuples.filter(k => k.lineId !== lineId || k.pointId !== pointId)
+        }
+      }), tileProps.tileSettings.width))
+    }
 
   }
 }
@@ -355,7 +531,7 @@ export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: nu
         }
       },
       __setLinePointNewPos,
-      anchorPointSnapToleranceRadiusInPx)
+      anchorPointSnapToleranceRadiusInPx, true)
 
   }
 }
@@ -421,10 +597,6 @@ export function setPropertyEditor_addPointToLineShape(lineId: number, bezierPoin
       const connectedPointIds = isFieldAndLinePointConnectedThroughAnchorPoints(field, fieldSymbols, lineShape.id, targetPoint, 0)
       if (connectedPointIds !== null) {
 
-        // .filter(p => p.lineId === lineId).concat(connectedTuples)
-        //TOOD line
-        console.log('CHECK!!!!!!!!!')
-
         dispatch(_setPropertyEditor_FieldAnchorPoints(field.id, field.anchorPoints.map((p, index) => {
             return index !== connectedPointIds.anchorPointIndex
               ? p
@@ -443,7 +615,55 @@ export function setPropertyEditor_addPointToLineShape(lineId: number, bezierPoin
       }
     }
 
-    //TODO tile border points
+    //check if the new point is on the same coords as a border point
+
+    const __setLinePointNewPos = (lineId: number, oldPointId: number, newPointPos: PlainPoint) => dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+
+    checkIfTileBorderPointsAndLinePointsAreConnectedAndSnap(getState().tileEditorState.tileProps, lineId, targetPoint, bezierPoint,
+      (borderPoint, direction, tileWidth, tileHeight) => {
+
+        switch (direction) {
+          case "top": {
+            const topBorderPoints = getState().tileEditorState.tileProps.topBorderPoints
+
+            dispatch(set_editor_topBorderPoints(topBorderPoints.map(p => p.id !== borderPoint.id
+              ? p
+              : borderPoint)))
+
+            break;
+          }
+          case "bottom": {
+            const botBorderPoints = getState().tileEditorState.tileProps.botBorderPoints
+
+            dispatch(set_editor_botBorderPoints(botBorderPoints.map(p => p.id !== borderPoint.id
+              ? p
+              : borderPoint), tileHeight))
+            break;
+          }
+
+          case "left": {
+            const leftBorderPoints = getState().tileEditorState.tileProps.leftBorderPoints
+
+            dispatch(set_editor_leftBorderPoints(leftBorderPoints.map(p => p.id !== borderPoint.id
+              ? p
+              : borderPoint)))
+            break;
+          }
+
+          case "right": {
+            const rightBorderPoint = getState().tileEditorState.tileProps.rightBorderPoint
+
+            dispatch(set_editor_rightBorderPoint(rightBorderPoint.map(p => p.id !== borderPoint.id
+              ? p
+              : borderPoint), tileWidth))
+            break;
+          }
+          default:
+            Logger.fatal('not implemented')
+        }
+      },
+      __setLinePointNewPos,
+      0, false)
 
   }
 }
