@@ -306,7 +306,7 @@ export function autoConnectFieldsWithLinesByCmdText(
 ): void {
 
   //one field is possible if we connect a border point to a field
-  if (fields.length === 0) return
+  if (fields.length === 0 && (topBorderPoints.length + botBorderPoints.length + leftBorderPoints.length + rightBorderPoint.length) <= 1) return
 
   const allBorderPoints: ReadonlyArray<BorderPointWithPos> =
     topBorderPoints.map<BorderPointWithPos>(p => {

@@ -79,7 +79,8 @@ export class DuplicateHelper {
         x: fieldShape.x + copyPastDiffXInPx,
         y: fieldShape.y + copyPastDiffYInPx,
         zIndex: nextZIndex + count,
-        text
+        text,
+        anchorPoints: fieldShape.anchorPoints.map(p => ({...p,connectedLineTuples: []})) //new field should not be connected to lines...
       }
       count++
       copies.push(copy)

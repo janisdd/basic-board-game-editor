@@ -41,7 +41,7 @@ import {
 import {MultiActions} from "../../../../types/ui";
 import {adjustLinesFromAnchorPoints} from "../../../../helpers/interactionHelper";
 import {Logger} from "../../../../helpers/logger";
-import {_setLinePointNewPos, set_selectedLinePointNewPosAction} from "../lineProperties/actions";
+import {_setLinePointNewPos} from "../lineProperties/actions";
 import {set_LinePointNewPosAction} from "../../world/tileLibrary/actions";
 
 
@@ -70,14 +70,6 @@ export function removeFieldShape(fieldShapeId: number): REMOVE_fieldShapeAction 
 export function clearAllConnectedLinesFromAllFields(): CLEAR_fieldShape_connectedLinesAction {
   return {
     type: ActionType.CLEAR_fieldShape_connectedLines,
-  }
-}
-
-
-export function setPropertyEditor_TileFieldArray(fields: ReadonlyArray<FieldShape>): SET_fieldsArrayAction {
-  return {
-    type: ActionType.SET_fieldsArray,
-    fields
   }
 }
 
