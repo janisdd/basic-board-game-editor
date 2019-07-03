@@ -129,7 +129,7 @@ export class WorldTilesHelper {
           upperLeftTile = tile
         }
 
-        //border point
+        //-- border point
 
         //probably we don't need them...
         //if implemented in the future make sure we only include border points on the sides e.g.
@@ -140,9 +140,56 @@ export class WorldTilesHelper {
         // -- if we have more than 1 row
         //...
 
-        //shapes
+        //-- shapes
 
-        const changedLineMapping: ChangedLineMapping = {}
+        for (const fieldShape of tile.fieldShapes) {
+
+          const copy: FieldShape = {
+            ...fieldShape,
+            id: currentId++,
+            x: offsetX + fieldShape.x,
+            y: offsetY + fieldShape.y,
+            zIndex: currentZIndex++,
+          }
+
+          fieldShapes.push(copy)
+        }
+
+        for (const lineShape of tile.lineShapes) {
+          const copy: LineShape = {
+            ...lineShape,
+            id: currentId++,
+            startPoint: {
+              ...lineShape.startPoint,
+              id: currentId++,
+              x: offsetX + lineShape.startPoint.x,
+              y: offsetY + lineShape.startPoint.y,
+            },
+            points: lineShape.points.map(p => {
+              return {
+                ...p,
+                id: currentId++,
+                x: offsetX + p.x,
+                y: offsetY + p.y,
+                cp1: {
+                  ...p.cp1,
+                  id: currentId++,
+                  x: offsetX + p.cp1.x,
+                  y: offsetY + p.cp1.y,
+                },
+                cp2: {
+                  ...p.cp2,
+                  id: currentId++,
+                  x: offsetX + p.cp2.x,
+                  y: offsetY + p.cp2.y,
+                }
+              }
+            }),
+            zIndex: currentZIndex++
+          }
+
+          lineShapes.push(copy)
+        }
 
         for (const imgShape of tile.imgShapes) {
           const copy: ImgShape = {
@@ -155,89 +202,22 @@ export class WorldTilesHelper {
           imgShapes.push(copy)
         }
 
-        for (const lineShape of tile.lineShapes) {
-          const copy: LineShape = {
-            ...lineShape,
-            id: currentId++,
-            dashArray: lineShape.dashArray.concat(), //make sure we have a flat copy... no references
-            startPoint: {
-              ...lineShape.startPoint,
-              id: currentId++
-            },
-            points: lineShape.points.map(p => {
-              return {
-                ...p,
-                id: currentId++,
-                cp1: {
-                  ...p.cp1,
-                  id: currentId++
-                },
-                cp2: {
-                  ...p.cp2,
-                  id: currentId++
-                }
-              }
-            }),
-            zIndex: currentZIndex++
-          }
-
-          const arr: Array<[number, number]> = []
-
-          arr.push([lineShape.startPoint.id, copy.startPoint.id])
-
-          for (let k = 0; k < lineShape.points.length; k++) {
-            const point = lineShape.points[k]
-            const newPoint = copy.points[k]
-
-            arr.push([point.id, newPoint.id])
-            arr.push([point.cp2.id, newPoint.cp1.id])
-            arr.push([point.cp2.id, newPoint.cp2.id])
-          }
-
-          const entry: ChangedLineMappingEntry = {
-            newLineId: copy.id,
-            changedLinePoints: arr
-          }
-
-          changedLineMapping[lineShape.id] = entry
-
-          lineShapes.push(copy)
-        }
-
-        for (const fieldShape of tile.fieldShapes) {
-
-          const copy: FieldShape = {
-            ...fieldShape,
-            id: currentId++,
-            x: offsetX + fieldShape.x,
-            y: offsetY + fieldShape.y,
-            anchorPoints: fieldShape.anchorPoints.map(p => { //make sure we have a flat copy... no references
-              return {
-                ...p
-              }
-            }),
-            padding: {
-              ...fieldShape.padding
-            },
-            zIndex: currentZIndex++,
-          }
-
-          fieldShapes.push(copy)
-        }
 
         //increment offset after we added the tile else the first tile would already be shifted
-        offsetX += tile.tileSettings.width
+        // offsetX += tile.tileSettings.width
+        offsetX += expectedTileWidth
       }
 
 
-      offsetY += upperLeftTile.tileSettings.height
+      // offsetY += upperLeftTile.tileSettings.height
+      offsetY += expectedTileHeight
       //start a new row
       offsetX = 0
     }
 
 
-    let totalWidth = upperLeftTile.tileSettings.width * widthInTiles
-    let totalHeight = upperLeftTile.tileSettings.height * heightInTiles
+    let totalWidth = expectedTileWidth * widthInTiles
+    let totalHeight = expectedTileHeight * heightInTiles
 
     const newTile: Tile = {
       guid: getGuid(),
@@ -254,7 +234,7 @@ export class WorldTilesHelper {
         ...upperLeftTile.tileSettings,
         width: totalWidth,
         height: totalHeight,
-        displayName: 'worldTile 1',
+        displayName: 'worldTile converted',
       }
     }
 
