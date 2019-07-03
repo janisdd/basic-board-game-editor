@@ -138,22 +138,24 @@ export class WorldTilesHelper {
         // (0, max x) use only top, right border points
         // all other (0, i) use only top border points
         // -- if we have more than 1 row
-        //...
+        // also make sure to remap the connect lines properly via changedLineMapping
 
         //-- shapes
 
-        for (const fieldShape of tile.fieldShapes) {
-
-          const copy: FieldShape = {
-            ...fieldShape,
+        for (const imgShape of tile.imgShapes) {
+          const copy: ImgShape = {
+            ...imgShape,
             id: currentId++,
-            x: offsetX + fieldShape.x,
-            y: offsetY + fieldShape.y,
-            zIndex: currentZIndex++,
+            x: offsetX + imgShape.x,
+            y: offsetY + imgShape.y,
+            zIndex: currentZIndex++
           }
-
-          fieldShapes.push(copy)
+          imgShapes.push(copy)
         }
+
+
+
+        const changedLineMapping: ChangedLineMapping = {}
 
         for (const lineShape of tile.lineShapes) {
           const copy: LineShape = {
@@ -188,18 +190,67 @@ export class WorldTilesHelper {
             zIndex: currentZIndex++
           }
 
+          const arr: Array<[number, number]> = []
+
+          arr.push([lineShape.startPoint.id, copy.startPoint.id])
+
+          for (let k = 0; k < lineShape.points.length; k++) {
+            const point = lineShape.points[k]
+            const newPoint = copy.points[k]
+
+            arr.push([point.id, newPoint.id])
+            arr.push([point.cp2.id, newPoint.cp1.id])
+            arr.push([point.cp2.id, newPoint.cp2.id])
+          }
+
+          const entry: ChangedLineMappingEntry = {
+            newLineId: copy.id,
+            changedLinePoints: arr
+          }
+
+          changedLineMapping[lineShape.id] = entry
+
           lineShapes.push(copy)
         }
 
-        for (const imgShape of tile.imgShapes) {
-          const copy: ImgShape = {
-            ...imgShape,
+        for (const fieldShape of tile.fieldShapes) {
+
+          const copy: FieldShape = {
+            ...fieldShape,
             id: currentId++,
-            x: offsetX + imgShape.x,
-            y: offsetY + imgShape.y,
-            zIndex: currentZIndex++
+            x: offsetX + fieldShape.x,
+            y: offsetY + fieldShape.y,
+            zIndex: currentZIndex++,
+            anchorPoints: fieldShape.anchorPoints.map((anchorPoint) => {
+              return {
+                ...anchorPoint,
+                id: currentId++,
+                connectedLineTuples: anchorPoint.connectedLineTuples.map((value, index) => {
+
+                  //line and point id changed...find new ids
+                  const oldTuple = changedLineMapping[value.lineId]
+
+                  if (!oldTuple) {
+                      throw new Error(`old line id not found: ${value.lineId} on tile: ${tile.guid} (${tile.tileSettings.displayName})`)
+                  }
+
+                  const oldPointIdTuple = oldTuple.changedLinePoints.find(p => p[0] === value.pointId)
+
+                  if (!oldTuple) {
+                    throw new Error(`old line point id not found: ${value.pointId}, on old line id: ${value.lineId} on tile: ${tile.guid} (${tile.tileSettings.displayName})`)
+                  }
+
+                  return {
+                    ...value,
+                    lineId: oldTuple.newLineId,
+                    pointId: oldPointIdTuple[1]
+                  }
+                })
+              }
+            })
           }
-          imgShapes.push(copy)
+
+          fieldShapes.push(copy)
         }
 
 
