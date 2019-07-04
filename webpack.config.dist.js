@@ -116,8 +116,8 @@ module.exports = {
         to: 'react-dom.js',
       },
       {
-        from: 'node_modules/createjs-easeljs/lib/easeljs-0.8.2.min.js',
-        to: 'easeljs-0.8.2.combined.js',
+        from: 'node_modules/easeljs/lib/easeljs.min.js',
+        to: 'easeljs.js',
       },
       {
         from: 'libs/SVGExporter/SVGExporter.js',

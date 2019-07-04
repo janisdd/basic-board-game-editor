@@ -1440,7 +1440,7 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
         0,
         0,
         hitBounds.width / bitmap.scaleX,
-        hitBounds.height / bitmap.scaleY
+        hitBounds.height / bitmap.scaleY,
       )
 
     bitmap.hitArea = hitTestShape
