@@ -735,14 +735,15 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
     rectShape.graphics
       .beginStroke(worldSettings.fieldSequenceBoxColor)
 
-      .drawRect((symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width),
-        0 - rectHeight,
+      .drawRect(
+        (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width) - rectWidth,
+        - rectHeight - worldSettings.anchorPointDiameter - 1, //-1 for stroke thickness
         rectWidth,
         rectHeight
       )
 
-    rectShape.setBounds((symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width),
-      0 - rectHeight,
+    rectShape.setBounds((symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width) - rectWidth,
+      0 - rectHeight - worldSettings.anchorPointDiameter - 1,
       rectWidth,
       rectHeight
     )
