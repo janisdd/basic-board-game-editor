@@ -295,6 +295,10 @@ class tileLibrary extends React.Component<Props, any> {
                           setSelectedFieldSymbolGuid={nop}
                           setSelectedImageSymbolGuid={nop}
                           setSelectedLineSymbolGuid={nop}
+                          setPropertyEditor_FieldHeight={nop}
+                          setPropertyEditor_FieldWidth={nop}
+                          setPropertyEditor_ImageWidth={nop}
+                          setPropertyEditor_ImageHeight={nop}
                         />
 
                         <div>

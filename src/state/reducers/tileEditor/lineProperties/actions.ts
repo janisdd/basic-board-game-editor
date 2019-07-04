@@ -38,6 +38,7 @@ import {
   set_editor_topBorderPoints
 } from "../actions";
 import {Logger} from "../../../../helpers/logger";
+import {notExhaustiveThrow} from "../../_notExhausiveHelper";
 
 
 export function setPropertyEditor_lineShapes(lines: ReadonlyArray<LineShape>): SET_lineArrayAction {
@@ -134,7 +135,7 @@ export function addLineShape(lineShape: LineShape): MultiActions {
             break;
           }
           default:
-            Logger.fatal('not implemented')
+            notExhaustiveThrow(direction)
         }
       },
       __setLinePointNewPos,
@@ -183,7 +184,7 @@ export function addLineShape(lineShape: LineShape): MultiActions {
               break;
             }
             default:
-              Logger.fatal('not implemented')
+              notExhaustiveThrow(direction)
           }
         },
         __setLinePointNewPos,
@@ -527,7 +528,7 @@ export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: nu
             break;
           }
           default:
-            Logger.fatal('not implemented')
+            notExhaustiveThrow(direction)
         }
       },
       __setLinePointNewPos,
@@ -659,7 +660,7 @@ export function setPropertyEditor_addPointToLineShape(lineId: number, bezierPoin
             break;
           }
           default:
-            Logger.fatal('not implemented')
+            notExhaustiveThrow(direction)
         }
       },
       __setLinePointNewPos,

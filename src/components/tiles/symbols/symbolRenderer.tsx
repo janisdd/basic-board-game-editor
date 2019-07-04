@@ -84,6 +84,10 @@ class symbolRenderer extends React.Component<Props, any> {
           gridSizeInPx={10}
           drawGrid={true}
           drawFieldIds={false}
+          setPropertyEditor_FieldHeight={nop}
+          setPropertyEditor_FieldWidth={nop}
+          setPropertyEditor_ImageHeight={nop}
+          setPropertyEditor_ImageWidth={nop}
 
 
           setSelectedLineShapeIds={nop}

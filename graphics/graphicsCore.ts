@@ -1,20 +1,23 @@
 import {
-  BorderPoint, BorderPointOrientation, CurveMode, FieldBase,
-  FieldShape, FieldSymbol, HorizontalAlign, ImgBase, ImgShape, ImgSymbol, LineBase,
-  LineShape, LineSymbol, PlainPoint, VerticalAlign,
+  BorderPoint,
+  BorderPointOrientation,
+  CurveMode,
+  DragHandlePos,
+  FieldBase,
+  FieldShape,
+  FieldSymbol,
+  HorizontalAlign,
+  ImgShape,
+  ImgSymbol,
+  LineShape,
+  LineSymbol,
+  PlainPoint,
+  Rect,
+  VerticalAlign,
 } from "../src/types/drawing";
-import Stage = createjs.Stage;
-import MouseEvent = createjs.MouseEvent
 import {ImgStorage} from "../src/externalStorage/imgStorage";
 import {ZIndexCache} from "../src/types/ui";
-import Bitmap = createjs.Bitmap;
-import {
-  calcAnchorPointsRaw,
-  getAngleInDeg,
-  getPointDistance,
-  interpolate2DPoint,
-  rotatePointBy
-} from "../src/helpers/interactionHelper";
+import {calcAnchorPointsRaw, getAngleInDeg, interpolate2DPoint, rotatePointBy} from "../src/helpers/interactionHelper";
 import {WorldSettings} from "../src/state/reducers/world/worldSettings/worldSettingsReducer";
 import {
   isFieldShape,
@@ -25,13 +28,18 @@ import {
   isLineSymbol
 } from "../src/helpers/typeHelper";
 import {
-  imgNotFoundBgColor, imgNotFoundColor,
+  imgNotFoundBgColor,
+  imgNotFoundColor,
   imgNotFoundStrokeThickness,
   isLinkedToSymbolIndicatorColor,
   isLinkedToSymbolIndicatorCornerRadius,
-  isLinkedToSymbolIndicatorSizeInPx
+  isLinkedToSymbolIndicatorSizeInPx,
+  resizeDragHandleSize, resizeHandleFillColor
 } from "../src/constants";
 import {Logger} from "../src/helpers/logger";
+import Stage = createjs.Stage;
+import MouseEvent = createjs.MouseEvent;
+import Bitmap = createjs.Bitmap;
 
 const Bezier = require("bezier-js") //used to calculate the arrow head/tail degree
 
@@ -366,9 +374,8 @@ export function drawFieldsOnTile(stage: Stage, fieldShapes: ReadonlyArray<FieldS
                                  xOffset: number,
                                  yOffset: number,
                                  drawBasedOnSymbolIndicator: boolean,
-                                 // onDragHandlerMouseDownHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
-                                 // onDragHandlerMouseUpHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
-                                 // onDragHandlerMouseMoveHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
+                                 onDragHandlerMouseDownHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
+                                 onRotationHandlerMouseDownHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
 ): void {
   for (const shape of fieldShapes) {
     let isSelected = false
@@ -384,7 +391,7 @@ export function drawFieldsOnTile(stage: Stage, fieldShapes: ReadonlyArray<FieldS
     drawFieldShape(stage, shape, selectedFieldShapeIds, onClickHandler, onMouseDownHandler, onMouseUpHandler,
       zIndexCache, drawFieldIds, drawAnchorPoints, worldSettings, fieldSymbols, xOffset, yOffset, isSelected,
       drawBasedOnSymbolIndicator,
-      // onDragHandlerMouseDownHandler, onDragHandlerMouseUpHandler, onDragHandlerMouseMoveHandler
+      onDragHandlerMouseDownHandler, onRotationHandlerMouseDownHandler
     )
   }
 
@@ -403,9 +410,8 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
                                yOffset: number,
                                isSelected: boolean,
                                drawBasedOnSymbolIndicator: boolean,
-                               // onDragHandlerMouseDownHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
-                               // onDragHandlerMouseUpHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
-                               // onDragHandlerMouseMoveHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
+                               onDragHandlerMouseDownHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
+                               onRotationHandlerMouseDownHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
 ): void {
 
 
@@ -415,7 +421,7 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
     const res = fieldSymbols.find(p => p.guid === field.createdFromSymbolGuid)
     if (!res) {
       symbolForShape = null
-      Logger.log('TODO symbol needed but not found')
+      Logger.log(`symbol needed but not found, guid ${field.createdFromSymbolGuid}`)
     } else {
       symbolForShape = res
     }
@@ -532,6 +538,115 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
     )
 
     container.addChild(border)
+
+
+    if (field.createdFromSymbolGuid === null) {
+
+      const bounds = container.getBounds()
+
+      const resizeShapeCoords: { rect: Rect, position: DragHandlePos }[] = [
+        {
+          position: DragHandlePos.topLeft,
+          rect: {
+            x: -(worldSettings.anchorPointDiameter + resizeDragHandleSize),
+            y: -(worldSettings.anchorPointDiameter + resizeDragHandleSize),
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+        {
+          position: DragHandlePos.top,
+          rect: {
+            x: (bounds.width - resizeDragHandleSize) / 2,
+            y: -(worldSettings.anchorPointDiameter + resizeDragHandleSize),
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+        {
+          position: DragHandlePos.topRight,
+          rect: {
+            x: bounds.width + worldSettings.anchorPointDiameter,
+            y: -(worldSettings.anchorPointDiameter + resizeDragHandleSize),
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+        {
+          position: DragHandlePos.right,
+          rect: {
+            x: bounds.width + worldSettings.anchorPointDiameter,
+            y: (bounds.height - resizeDragHandleSize) / 2,
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+        {
+          position: DragHandlePos.left,
+          rect: {
+            x: -(worldSettings.anchorPointDiameter + resizeDragHandleSize),
+            y: (bounds.height - resizeDragHandleSize) / 2,
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+
+        {
+          position: DragHandlePos.botLeft,
+          rect: {
+            x: -(worldSettings.anchorPointDiameter + resizeDragHandleSize),
+            y: bounds.height + worldSettings.anchorPointDiameter,
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+        {
+          position: DragHandlePos.bot,
+          rect: {
+            x: (bounds.width - resizeDragHandleSize) / 2,
+            y: bounds.height + worldSettings.anchorPointDiameter,
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+        {
+          position: DragHandlePos.botRight,
+          rect: {
+            x: bounds.width + worldSettings.anchorPointDiameter,
+            y: bounds.height + worldSettings.anchorPointDiameter,
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+      ]
+
+      for (let i = 0; i < resizeShapeCoords.length; i++) {
+        const resizeShapeCoord = resizeShapeCoords[i];
+
+        const resizeHandle = new createjs.Shape()
+
+        resizeHandle.graphics
+          .beginFill(resizeHandleFillColor)
+          .drawRect(
+            resizeShapeCoord.rect.x,
+            resizeShapeCoord.rect.y,
+            resizeShapeCoord.rect.width,
+            resizeShapeCoord.rect.height
+          )
+          .endFill()
+
+        if (onDragHandlerMouseDownHandler) {
+          resizeHandle.on('mousedown', eventObj => {
+            onDragHandlerMouseDownHandler(field, resizeShapeCoord.position, container, eventObj as MouseEvent)
+          })
+        }
+        container.addChild(resizeHandle)
+
+      }
+
+    }
+
+
   }
 
   if ((symbolForShape !== null && symbolForShape.overwriteText ? symbolForShape.text : field.text) !== null) {
@@ -703,7 +818,7 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
     })
   }
 
-  //set bounds because seq nr would increase bounds
+  //set bounds manually because seq nr would increase bounds
   container.setBounds(
     field.x + xOffset,
     field.y + yOffset,
@@ -718,83 +833,6 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
   container.regX = (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width) / 2
   container.regY = (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : field.height) / 2
   container.rotation = symbolForShape !== null && symbolForShape.overwriteRotationInDeg ? symbolForShape.rotationInDegree : field.rotationInDegree
-
-
-  // if (isSelected && field.createdFromSymbolGuid === null) {
-  //
-  //   const dragHandleSize = 10
-  //   const paddingSize = 5
-  //
-  //   let topLeftDragHandleShape = new createjs.Shape()
-  //   topLeftDragHandleShape.x = -dragHandleSize - paddingSize
-  //   topLeftDragHandleShape.y = -dragHandleSize - paddingSize
-  //   topLeftDragHandleShape.graphics.beginFill('black').drawRect(0, 0, dragHandleSize, dragHandleSize)
-  //   container.addChild(topLeftDragHandleShape)
-  //
-  //
-  //   if (onDragHandlerMouseDownHandler) {
-  //     topLeftDragHandleShape.on('mousedown', eventObj => {
-  //       onDragHandlerMouseDownHandler(field, DragHandlePos.topLeft, container, eventObj as MouseEvent)
-  //     })
-  //   }
-  //
-  //   if (onDragHandlerMouseUpHandler) {
-  //     topLeftDragHandleShape.on('mouseup', eventObj => {
-  //       onDragHandlerMouseUpHandler(field, DragHandlePos.topLeft, container, eventObj as MouseEvent)
-  //     })
-  //   }
-  //
-  //   if (onDragHandlerMouseMoveHandler) {
-  //     topLeftDragHandleShape.on('mousemove', eventObj => {
-  //       onDragHandlerMouseMoveHandler(field, DragHandlePos.topLeft, container, eventObj as MouseEvent)
-  //     })
-  //   }
-  //
-  //   let topCenterDragHandleShape = new createjs.Shape()
-  //   topCenterDragHandleShape.x = field.width / 2 - dragHandleSize / 2
-  //   topCenterDragHandleShape.y = -dragHandleSize - paddingSize
-  //   topCenterDragHandleShape.graphics.beginFill('black').drawRect(0, 0, dragHandleSize, dragHandleSize)
-  //   container.addChild(topCenterDragHandleShape)
-  //
-  //   let topRightDragHandleShape = new createjs.Shape()
-  //   topRightDragHandleShape.x = field.width + paddingSize
-  //   topRightDragHandleShape.y = -dragHandleSize - paddingSize
-  //   topRightDragHandleShape.graphics.beginFill('black').drawRect(0, 0, dragHandleSize, dragHandleSize)
-  //   container.addChild(topRightDragHandleShape)
-  //
-  //
-  //   let botLeftDragHandleShape = new createjs.Shape()
-  //   botLeftDragHandleShape.x = -dragHandleSize - paddingSize
-  //   botLeftDragHandleShape.y = field.height + paddingSize
-  //   botLeftDragHandleShape.graphics.beginFill('black').drawRect(0, 0, dragHandleSize, dragHandleSize)
-  //   container.addChild(botLeftDragHandleShape)
-  //
-  //   let botCenterDragHandleShape = new createjs.Shape()
-  //   botCenterDragHandleShape.x = field.width / 2 - dragHandleSize / 2
-  //   botCenterDragHandleShape.y = field.height + paddingSize
-  //   botCenterDragHandleShape.graphics.beginFill('black').drawRect(0, 0, dragHandleSize, dragHandleSize)
-  //   container.addChild(botCenterDragHandleShape)
-  //
-  //   let botRightDragHandleShape = new createjs.Shape()
-  //   botRightDragHandleShape.x = field.width + paddingSize
-  //   botRightDragHandleShape.y = field.height + paddingSize
-  //   botRightDragHandleShape.graphics.beginFill('black').drawRect(0, 0, dragHandleSize, dragHandleSize)
-  //   container.addChild(botRightDragHandleShape)
-  //
-  //
-  //   let centerLeftDragHandleShape = new createjs.Shape()
-  //   centerLeftDragHandleShape.x = -dragHandleSize - paddingSize
-  //   centerLeftDragHandleShape.y = field.height / 2 - dragHandleSize / 2
-  //   centerLeftDragHandleShape.graphics.beginFill('black').drawRect(0, 0, dragHandleSize, dragHandleSize)
-  //   container.addChild(centerLeftDragHandleShape)
-  //
-  //   let centerRightDragHandleShape = new createjs.Shape()
-  //   centerRightDragHandleShape.x = field.width + paddingSize
-  //   centerRightDragHandleShape.y = field.height / 2 - dragHandleSize / 2
-  //   centerRightDragHandleShape.graphics.beginFill('black').drawRect(0, 0, dragHandleSize, dragHandleSize)
-  //   container.addChild(centerRightDragHandleShape)
-  //
-  // }
 
   stage.addChild(container)
   zIndexCache[field.zIndex] = [container]
@@ -1254,7 +1292,9 @@ export function drawImagesOnTile(stage: Stage, imgShapes: ReadonlyArray<ImgShape
                                  imgSymbols: ReadonlyArray<ImgSymbol>,
                                  xOffset: number,
                                  yOffset: number,
-                                 drawBasedOnSymbolIndicator: boolean
+                                 drawBasedOnSymbolIndicator: boolean,
+                                 onDragHandlerMouseDownHandler: ((field: ImgShape | ImgSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
+                                 onRotationHandlerMouseDownHandler: ((field: ImgShape | ImgSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
 ): void {
 
   for (const shape of imgShapes) {
@@ -1271,7 +1311,9 @@ export function drawImagesOnTile(stage: Stage, imgShapes: ReadonlyArray<ImgShape
 
     drawImgShape(stage, shape, selectedFieldShapeIds, onClickHandler, onMouseDownHandler, onMouseUpHandler,
       zIndexCache,
-      worldSettings, imgSymbols, xOffset, yOffset, isSelected, drawBasedOnSymbolIndicator)
+      worldSettings, imgSymbols, xOffset, yOffset, isSelected, drawBasedOnSymbolIndicator,
+      onDragHandlerMouseDownHandler, onRotationHandlerMouseDownHandler
+    )
   }
 }
 
@@ -1285,7 +1327,9 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
                              xOffset: number,
                              yOffset: number,
                              isSelected: boolean,
-                             drawBasedOnSymbolIndicator: boolean
+                             drawBasedOnSymbolIndicator: boolean,
+                             onDragHandlerMouseDownHandler: ((field: ImgShape | ImgSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
+                             onRotationHandlerMouseDownHandler: ((field: ImgShape | ImgSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
 ): void {
 
 
@@ -1301,6 +1345,12 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     }
   }
 
+
+  if (symbolForShape) {
+    isSelected = isSelected && !(symbolForShape.overwriteIsDisabledForMouseSelection ? symbolForShape.isMouseSelectionDisabled : imgShape.isMouseSelectionDisabled)
+  } else {
+    isSelected = isSelected && !imgShape.isMouseSelectionDisabled
+  }
 
   let container = new createjs.Container()
   const img = ImgStorage.getImgFromGuid(symbolForShape !== null && symbolForShape.overwriteImage ? symbolForShape.imgGuid : imgShape.imgGuid)
@@ -1322,16 +1372,16 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
       .setStrokeStyle(imgNotFoundStrokeThickness)
 
     border.graphics.drawRect(
-      0 - imgNotFoundStrokeThickness,
-      0 - imgNotFoundStrokeThickness,
-      (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) + imgNotFoundStrokeThickness * 2,
-      (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + imgNotFoundStrokeThickness * 2
+      0,
+      0,
+      (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width),
+      (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
     )
 
-    border.setBounds(0 - imgNotFoundStrokeThickness,
-      0 - imgNotFoundStrokeThickness,
-      (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) + imgNotFoundStrokeThickness * 2,
-      (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + imgNotFoundStrokeThickness * 2
+    border.setBounds(0,
+      0,
+      (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width),
+      (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
     )
 
     let lineXLeft = new createjs.Shape()
@@ -1340,8 +1390,8 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
       .setStrokeStyle(imgNotFoundStrokeThickness)
 
     lineXLeft.graphics
-      .moveTo(0, 0)
-      .lineTo(imgShape.width, imgShape.height)
+      .moveTo(1, 1)
+      .lineTo(imgShape.width - 1, imgShape.height - 1)
 
     let lineXRight = new createjs.Shape()
     lineXRight.graphics
@@ -1349,8 +1399,8 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
       .setStrokeStyle(imgNotFoundStrokeThickness)
 
     lineXRight.graphics
-      .moveTo(imgShape.width, 0)
-      .lineTo(0, imgShape.height)
+      .moveTo(imgShape.width - 1, 1)
+      .lineTo(1, imgShape.height - 1)
 
     container.addChild(border)
     container.addChild(lineXLeft)
@@ -1372,6 +1422,28 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
       (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width),
       (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
     )
+
+    const hitBounds = bitmap.getBounds()
+
+    //when we use an svg with width="100%" height="100%" viewBox="0 0 41 103" then the hit test is always wrong
+    //createjs draws the img on a temp canvas and applied transformation so that the mouse point is on pos 0,0
+    //then they use ctx.getImageData(0, 0, 1, 1).data[3] > 0 (the alpha channel) to check if there is a non-transparent
+    //pixel
+    //this however don't work if the svg has the above props... if we use e.g.
+    //width="600px" height="976px" viewBox="0 0 600 976" then this works
+    let hitTestShape = new createjs.Shape()
+
+    //for some reason hitarea gets scaled too...
+    hitTestShape.graphics
+      .beginFill('black')
+      .drawRect(
+        0,
+        0,
+        hitBounds.width / bitmap.scaleX,
+        hitBounds.height / bitmap.scaleY
+      )
+
+    bitmap.hitArea = hitTestShape
 
     //this was old without setting the scale
     // bitmap.draw = function (ctx, ignoreCache) {
@@ -1416,25 +1488,6 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
   container.skewY = (symbolForShape !== null && symbolForShape.overwriteSkewY ? symbolForShape.skewY : imgShape.skewY)
 
 
-  //when we use an svg with width="100%" height="100%" viewBox="0 0 41 103" then the hit test is always wrong
-  //createjs draws the img on a temp canvas and applied transformation so that the mouse point is on pos 0,0
-  //then they use ctx.getImageData(0, 0, 1, 1).data[3] > 0 (the alpha channel) to check if there is a non-transparent
-  //pixel
-  //this however don't work if the svg has the above props... if we use e.g.
-  //width="600px" height="976px" viewBox="0 0 600 976" then this works
-  let hitTestShape = new createjs.Shape()
-  hitTestShape.x = 0
-  hitTestShape.y = 0
-  hitTestShape.graphics
-    .beginFill('black')
-    .drawRect(
-      0,
-      0,
-      (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width),
-      (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
-    )
-  container.hitArea = hitTestShape
-
   if (isSelected) {
     //draw border
     const borderThickness = worldSettings.selectedFieldBorderThicknessInPx
@@ -1444,17 +1497,145 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     const half = borderThickness / 2
 
     border.graphics.drawRect(
-      xOffset - borderThickness,
-      yOffset - borderThickness,
+      -borderThickness,
+      -borderThickness,
       (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) + borderThickness * 2,
       (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + borderThickness * 2
     )
 
-    // border.regX = imgShape.width / 2
-    // border.regY = imgShape.height / 2
-    //border.rotation = 45
-
     container.addChild(border)
+
+    const bounds: Rect = {
+      x: -(borderThickness * 2 + resizeDragHandleSize),
+      y: -(borderThickness * 2 + resizeDragHandleSize),
+      width: (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width) + borderThickness * 2,
+      height: (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + borderThickness * 2
+    }
+
+    if (imgShape.createdFromSymbolGuid === null) {
+
+
+      let minX = 0
+      let minY = 0
+      let maxX = 0
+      let maxY = 0
+
+      const resizeShapeCoords: { rect: Rect, position: DragHandlePos }[] = [
+        {
+          position: DragHandlePos.topLeft,
+          rect: {
+            x: bounds.x,
+            y: bounds.y,
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+        {
+          position: DragHandlePos.top,
+          rect: {
+            x: (bounds.width - resizeDragHandleSize) / 2,
+            y: bounds.y,
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+        {
+          position: DragHandlePos.topRight,
+          rect: {
+            x: bounds.width,
+            y: bounds.y,
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+        {
+          position: DragHandlePos.right,
+          rect: {
+            x: bounds.width,
+            y: (bounds.height - resizeDragHandleSize) / 2,
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+        {
+          position: DragHandlePos.left,
+          rect: {
+            x: bounds.x,
+            y: (bounds.height - resizeDragHandleSize) / 2,
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+
+        {
+          position: DragHandlePos.botLeft,
+          rect: {
+            x: bounds.x,
+            y: bounds.height,
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+        {
+          position: DragHandlePos.bot,
+          rect: {
+            x: (bounds.width - resizeDragHandleSize) / 2,
+            y: bounds.height,
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+        {
+          position: DragHandlePos.botRight,
+          rect: {
+            x: bounds.width,
+            y: bounds.height,
+            width: resizeDragHandleSize,
+            height: resizeDragHandleSize
+          }
+        },
+      ]
+
+      for (let i = 0; i < resizeShapeCoords.length; i++) {
+        const resizeShapeCoord = resizeShapeCoords[i];
+
+        if (resizeShapeCoord.rect.x < minX) {
+          minX = resizeShapeCoord.rect.x
+        }
+        if (resizeShapeCoord.rect.x + resizeShapeCoord.rect.width > maxX) {
+          maxX = resizeShapeCoord.rect.x + resizeShapeCoord.rect.width
+        }
+
+        if (resizeShapeCoord.rect.y < minY) {
+          minY = resizeShapeCoord.rect.y
+        }
+        if (resizeShapeCoord.rect.y + resizeShapeCoord.rect.height > maxY) {
+          maxY = resizeShapeCoord.rect.y + resizeShapeCoord.rect.height
+        }
+
+        const resizeHandle = new createjs.Shape()
+
+        resizeHandle.graphics
+          .beginFill(resizeHandleFillColor)
+          .drawRect(
+            resizeShapeCoord.rect.x,
+            resizeShapeCoord.rect.y,
+            resizeShapeCoord.rect.width,
+            resizeShapeCoord.rect.height
+          )
+          .endFill()
+
+        if (onDragHandlerMouseDownHandler) {
+          resizeHandle.on('mousedown', eventObj => {
+            onDragHandlerMouseDownHandler(imgShape, resizeShapeCoord.position, container, eventObj as MouseEvent)
+          })
+        }
+        container.addChild(resizeHandle)
+
+      }
+
+    }
+
   }
 
   // container.regX = imgShape.width / 2
@@ -1496,6 +1677,14 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
       onMouseUpHandler(imgShape, bitmap, eventObj as MouseEvent)
     })
   }
+
+  //set bounds manually because seq nr would increase bounds
+  container.setBounds(
+    imgShape.x + xOffset,
+    imgShape.y + yOffset,
+    (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : imgShape.width),
+    (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height)
+  )
 
   stage.addChild(container)
 

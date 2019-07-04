@@ -43,6 +43,16 @@ export enum HorizontalAlign {
   right = 2
 }
 
+export enum DragHandlePos {
+  topLeft = 0,
+  top,
+  topRight,
+  right,
+  botRight,
+  bot,
+  botLeft,
+  left,
+}
 
 export interface ConnectedLinesThroughAnchorPointsMap {
   /**

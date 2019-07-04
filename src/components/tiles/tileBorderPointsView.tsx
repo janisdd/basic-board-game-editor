@@ -22,6 +22,7 @@ import IconToolTip from "../helpers/IconToolTip";
 import ToolTip from "../helpers/ToolTip";
 import {Logger} from "../../helpers/logger";
 import {RightTileEditorTabs} from "../../state/reducers/tileEditor/tileEditorReducer";
+import {notExhaustiveThrow} from "../../state/reducers/_notExhausiveHelper";
 
 //const css = require('./styles.styl');
 
@@ -595,7 +596,7 @@ function createBorderPointConnectedLinesList(langId: KnownLangs, borderPoint: Bo
                                   break;
                                 }
                                 default:
-                                  Logger.fatal('not implemented')
+                                  notExhaustiveThrow(direction)
                               }
 
                             }}

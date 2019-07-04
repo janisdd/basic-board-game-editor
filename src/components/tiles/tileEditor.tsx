@@ -7,12 +7,16 @@ import TileRenderer from './tileRenderer'
 import {Button, Icon, Popup, Tab, Table} from 'semantic-ui-react'
 import TileEditorSettings from './editorSettings/tileEditorSettingsModal'
 import {
-  removeFieldShape, setPropertyEditor_FieldCmdText, setPropertyEditor_fieldsShapes,
+  removeFieldShape,
+  setPropertyEditor_FieldCmdText,
+  setPropertyEditor_FieldHeight,
+  setPropertyEditor_fieldsShapes,
+  setPropertyEditor_FieldWidth,
   setPropertyEditor_FieldX,
   setPropertyEditor_FieldY
 } from "../../state/reducers/tileEditor/fieldProperties/actions";
 import {
-  removeImageShape,
+  removeImageShape, setPropertyEditor_ImageHeight, setPropertyEditor_ImageWidth,
   setPropertyEditor_ImageX,
   setPropertyEditor_ImageY, setPropertyEditor_imgShapes
 } from "../../state/reducers/tileEditor/imgProperties/actions";
@@ -144,6 +148,9 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   setPropertyEditor_fieldsShapes,
   set_editor_isSelectingNextField,
 
+  setPropertyEditor_FieldWidth,
+  setPropertyEditor_FieldHeight,
+
 
   //--line props editor
   setSelectedLineShapeIds,
@@ -158,6 +165,9 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   setPropertyEditor_ImageY,
   removeImageShape,
   setPropertyEditor_imgShapes,
+  setPropertyEditor_ImageWidth,
+  setPropertyEditor_ImageHeight,
+
 
   //--
   set_selectedFieldSymbolGuid,
@@ -911,6 +921,20 @@ class tileEditor extends React.Component<Props, any> {
               selectionRect={this.props.selectionRect}
               setSelectionRect={rect => {
                 this.props.set_editorSelection_rect(rect)
+              }}
+
+              setPropertyEditor_FieldWidth={(fieldShape: FieldShape, oldWidth: number, newWidth: number) => {
+                this.props.setPropertyEditor_FieldWidth(fieldShape.id, newWidth)
+              }}
+              setPropertyEditor_FieldHeight={(fieldShape: FieldShape, oldHeight: number, newHeight: number) => {
+                this.props.setPropertyEditor_FieldHeight(fieldShape.id, newHeight)
+              }}
+
+              setPropertyEditor_ImageWidth={(imgShape: ImgShape, oldWidth: number, newWidth: number) => {
+                this.props.setPropertyEditor_ImageWidth(imgShape.id, newWidth)
+              }}
+              setPropertyEditor_ImageHeight={(imgShape: ImgShape, oldHeight: number, newHeight: number) => {
+                this.props.setPropertyEditor_ImageHeight(imgShape.id, newHeight)
               }}
 
               printLargeTilePreferredWidthInPx={this.props.settings.tileProps.tileSettings.printLargeTilePreferredWidthInPx}

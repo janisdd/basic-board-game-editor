@@ -275,7 +275,7 @@ class worldRenderer extends React.Component<Props, any> {
           i * defaultTileWidth,
           j * defaultTileHeight,
           true,
-          // null, null, null
+          null, null
         )
 
         graphics.drawImagesOnTile(
@@ -291,7 +291,8 @@ class worldRenderer extends React.Component<Props, any> {
           this.props.imgSymbols,
           i * defaultTileWidth,
           j * defaultTileHeight,
-          true
+          true,
+          null,null
         )
 
         graphics.drawLinesOnTile(

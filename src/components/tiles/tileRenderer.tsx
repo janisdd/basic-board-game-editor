@@ -5,7 +5,7 @@ import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
 import * as graphics from '../../../graphics/graphicsCore'
 import {
-  BorderPoint,
+  BorderPoint, DragHandlePos,
   FieldShape,
   FieldSymbol,
   ImgShape, ImgSymbol,
@@ -34,6 +34,7 @@ import {MachineState} from "../../../simulation/machine/machineState";
 import {calcLineBoundingBox, intersectRect} from "../../helpers/interactionHelper";
 import {Logger} from "../../helpers/logger";
 import _ = require("lodash");
+import {notExhaustiveThrow} from "../../state/reducers/_notExhausiveHelper";
 
 
 //const css = require('./styles.styl');
@@ -141,8 +142,15 @@ export interface MyProps {
   readonly setPropertyEditor_FieldX: (fieldShape: FieldShape, oldX: number, newX: number) => void
   readonly setPropertyEditor_FieldY: (fieldShape: FieldShape, oldY: number, newY: number) => void
 
+  readonly setPropertyEditor_FieldWidth: (fieldShape: FieldShape, oldWidth: number, newWidth: number) => void
+  readonly setPropertyEditor_FieldHeight: (fieldShape: FieldShape, oldHeight: number, newHeight: number) => void
+
   readonly setPropertyEditor_ImageX: (imgShape: ImgShape, oldX: number, newX: number) => void
   readonly setPropertyEditor_ImageY: (imgShape: ImgShape, oldY: number, newY: number) => void
+
+  readonly setPropertyEditor_ImageWidth: (imgShape: ImgShape, oldWidth: number, newWidth: number) => void
+  readonly setPropertyEditor_ImageHeight: (imgShape: ImgShape, oldHeight: number, newHeight: number) => void
+
   readonly setLinePointNewPos: (lineId: number, oldPointId: number | null, oldPointPos: PlainPoint, newPointPos: PlainPoint, canSetFieldAnchorPoints: boolean) => void
 
 
@@ -193,12 +201,23 @@ type Props = typeof stateProps & typeof dispatchProps;
 //TODO note that there can be at most one renderer with interactions because
 //these vars are global! but would be used by multiple instances
 //we can't move them easy inside the component because the component will be re created for every render?
-let downX = 0
-let downY = 0
-let downXContainerOffset = 0
-let downYContainerOffset = 0
+let downXAbs = 0
+let downYAbs = 0
+
+//the container offset relative to the container coords
+//rect is at x: 100, mouse down 210 (downX) --> downXContainerOffsetAbs = 110 (abs with is 10px in the rect/container)
+//to get abs pos you need to add the container x/y...
+let downXContainerOffsetRel = 0
+let downYContainerOffsetRel = 0
+
+//after we changed the width we don't know the initial container size, so store it here
+let downXContainerWidth = 0
+let downXContainerHeight = 0
 
 let isDraggingField = false
+let isDraggingFieldResizeHandle = false
+let DraggingResizeHandlePosition: DragHandlePos
+let isDraggingImageResizeHandle = false
 let isSelectingMultipleShapes = false
 let isDraggingLinePoint = false
 let isDraggingImage = false
@@ -254,8 +273,7 @@ class tileRenderer extends React.Component<Props, any> {
       const clampVal = Math.max(this.props.stageScaleX - globalZoomStep, globalMinimalZoom)
       newScale = clampVal
       this.props.setEditor_stageScale(clampVal, clampVal)
-    }
-    else {
+    } else {
       //zoom in
       const clampVal = Math.max(this.props.stageScaleX + globalZoomStep, globalMinimalZoom)
       newScale = clampVal
@@ -324,18 +342,18 @@ class tileRenderer extends React.Component<Props, any> {
           // }
 
           isDraggingStage = true
-          downX = mouseX + this.props.stageOffsetX //absolute pos
-          downY = mouseY + this.props.stageOffsetY //absolute pos
-          downXContainerOffset = e.stageX - this.props.stageOffsetX
-          downYContainerOffset = e.stageY - this.props.stageOffsetY
+          downXAbs = mouseX + this.props.stageOffsetX //absolute pos
+          downYAbs = mouseY + this.props.stageOffsetY //absolute pos
+          downXContainerOffsetRel = e.stageX - this.props.stageOffsetX
+          downYContainerOffsetRel = e.stageY - this.props.stageOffsetY
 
           return
         }
 
         if (!el) {
           isSelectingMultipleShapes = true
-          downX = mouseX
-          downY = mouseY
+          downXAbs = mouseX
+          downYAbs = mouseY
 
           return
         }
@@ -373,6 +391,12 @@ class tileRenderer extends React.Component<Props, any> {
       isDraggingImage = false
       isDraggingStage = false
       isSelectingMultipleShapes = false
+      isDraggingFieldResizeHandle = false
+      isDraggingImageResizeHandle = false
+      downXContainerOffsetRel = 0
+      downYContainerOffsetRel = 0
+      downXContainerWidth = 0
+      downXContainerHeight = 0
 
       //store.dispatch(setSelectedFieldShapeId(null))
 
@@ -382,12 +406,11 @@ class tileRenderer extends React.Component<Props, any> {
       const el = this.renderStage.getObjectUnderPoint(mouseX, mouseY, 1)
 
       if (!el) {
-        if (mouseX === downX && mouseY === downY) {
+        if (mouseX === downXAbs && mouseY === downYAbs) {
           //deselect
           if (this.props.isSelectingNextField) {
             this.props.setTileEditorSelectingNextField(false, null)
-          }
-          else {
+          } else {
             //deselect all
             this.props.setSelectedFieldShapeIds([])
             this.props.setSelectedLineShapeIds([])
@@ -466,14 +489,16 @@ class tileRenderer extends React.Component<Props, any> {
 
         const {x: mouseX, y: mouseY} = this.renderStage.globalToLocal(e.stageX, e.stageY)
 
-        downX = mouseX
-        downY = mouseY
-        downXContainerOffset = downX - container.getBounds().x
-        downYContainerOffset = downY - container.getBounds().y
+        downXAbs = mouseX
+        downYAbs = mouseY
+        downXContainerOffsetRel = downXAbs - container.getBounds().x
+        downYContainerOffsetRel = downYAbs - container.getBounds().y
         isDraggingLinePoint = false
         isDraggingField = true
         isDraggingImage = false
         isDraggingStage = false
+        isDraggingFieldResizeHandle = false
+        isDraggingImageResizeHandle = false
 
         if (isFieldShape(field)) {
 
@@ -484,8 +509,7 @@ class tileRenderer extends React.Component<Props, any> {
 
               if (this.props.sourceForSelectingNextField.cmdText.endsWith('\n')) {
                 cmdText = `${this.props.sourceForSelectingNextField.cmdText}${cmdText}`
-              }
-              else {
+              } else {
                 cmdText = `${this.props.sourceForSelectingNextField.cmdText}\n${cmdText}`
               }
             }
@@ -513,8 +537,7 @@ class tileRenderer extends React.Component<Props, any> {
               const newSelectedFieldShapeIds = this.props.selectedFieldShapeIds.filter(p => p !== field.id)
               this.props.setSelectedFieldShapeIds(newSelectedFieldShapeIds)
             }
-          }
-          else {
+          } else {
 
             //normal (not additive select click)
             if (this.props.selectedFieldShapeIds.indexOf(field.id) === -1) {
@@ -564,7 +587,7 @@ class tileRenderer extends React.Component<Props, any> {
 
             //when we stop moving the shapes the mouse is on the shape and moved up... so
             //to distinct stop moving & click we need to check if the mouse up is on the same position
-            if (downX === mouseX && downY === mouseY) {
+            if (downXAbs === mouseX && downYAbs === mouseY) {
               this.props.setSelectedFieldShapeIds([field.id])
             }
           }
@@ -578,7 +601,31 @@ class tileRenderer extends React.Component<Props, any> {
       this.props.fieldSymbols,
       0,
       0,
-      true
+      true,
+      (field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => {
+
+        const {x: mouseX, y: mouseY} = this.renderStage.globalToLocal(e.stageX, e.stageY)
+        const bounds = container.getBounds()
+
+        downXAbs = mouseX
+        downYAbs = mouseY
+        downXContainerOffsetRel = downXAbs - bounds.x
+        downYContainerOffsetRel = downYAbs - bounds.y
+        downXContainerWidth = bounds.width
+        downXContainerHeight = bounds.height
+        isDraggingFieldResizeHandle = true
+        isDraggingImageResizeHandle = false
+        DraggingResizeHandlePosition = dragHandlerPos
+        isDraggingLinePoint = false
+        isDraggingField = false
+        isDraggingImage = false
+        isDraggingStage = false
+
+        //stop mouse down on field
+        e.stopPropagation()
+
+      },
+      null
     )
 
     graphics.drawLinesOnTile(this.renderStage, this.props.lineShapes,
@@ -591,21 +638,23 @@ class tileRenderer extends React.Component<Props, any> {
 
         if (isLineShape(lineShape)) { // && this.props.selectedLineShapeIds.indexOf(line.id) !== -1 //??
           const {x: mouseX, y: mouseY} = this.renderStage.globalToLocal(e.stageX, e.stageY)
-          downX = mouseX
-          downY = mouseY
+          downXAbs = mouseX
+          downYAbs = mouseY
 
           if (pointIdHit === null) {
-            downXContainerOffset = downX - lineShape.startPoint.x
-            downYContainerOffset = downY - lineShape.startPoint.y
+            downXContainerOffsetRel = downXAbs - lineShape.startPoint.x
+            downYContainerOffsetRel = downYAbs - lineShape.startPoint.y
           } else {
-            downXContainerOffset = downX - (shape.getBounds().x + shape.getBounds().width / 2)
-            downYContainerOffset = downY - (shape.getBounds().y + shape.getBounds().height / 2)
+            downXContainerOffsetRel = downXAbs - (shape.getBounds().x + shape.getBounds().width / 2)
+            downYContainerOffsetRel = downYAbs - (shape.getBounds().y + shape.getBounds().height / 2)
           }
 
           isDraggingLinePoint = true
           isDraggingField = false
           isDraggingImage = false
           isDraggingStage = false
+          isDraggingFieldResizeHandle = false
+          isDraggingImageResizeHandle = false
           draggingObjectId = lineShape.id
           draggingPointId = pointIdHit
 
@@ -621,8 +670,7 @@ class tileRenderer extends React.Component<Props, any> {
               const newSelectedLineShapeIds = this.props.selectedLineShapeIds.filter(p => p !== lineShape.id)
               this.props.setSelectedLineShapeIds(newSelectedLineShapeIds)
             }
-          }
-          else {
+          } else {
 
             //normal (not additive select click)
             if (this.props.selectedLineShapeIds.indexOf(lineShape.id) === -1) {
@@ -671,7 +719,7 @@ class tileRenderer extends React.Component<Props, any> {
 
             //when we stop moving the shapes the mouse is on the shape and moved up... so
             //to distinct stop moving & click we need to check if the mouse up is on the same position
-            if (downX === mouseX && downY === mouseY) {
+            if (downXAbs === mouseX && downYAbs === mouseY) {
               this.props.setSelectedLineShapeIds([line.id])
             }
           }
@@ -696,15 +744,17 @@ class tileRenderer extends React.Component<Props, any> {
         if (e.nativeEvent.altKey) return
 
         const {x: mouseX, y: mouseY} = this.renderStage.globalToLocal(e.stageX, e.stageY)
-        downX = mouseX
-        downY = mouseY
+        downXAbs = mouseX
+        downYAbs = mouseY
 
-        downXContainerOffset = downX - imgShape.x
-        downYContainerOffset = downY - imgShape.y
+        downXContainerOffsetRel = downXAbs - imgShape.x
+        downYContainerOffsetRel = downYAbs - imgShape.y
         isDraggingLinePoint = false
         isDraggingField = false
         isDraggingImage = true
         isDraggingStage = false
+        isDraggingFieldResizeHandle = false
+        isDraggingImageResizeHandle = false
 
         if (isImgShape(imgShape)) {
           draggingObjectId = imgShape.id
@@ -721,8 +771,7 @@ class tileRenderer extends React.Component<Props, any> {
               this.props.setSelectedImageShapeIds(newSelectedImageShapeIds)
 
             }
-          }
-          else {
+          } else {
 
             //normal (not additive select click)
             if (this.props.selectedImageShapeIds.indexOf(imgShape.id) === -1) {
@@ -772,7 +821,7 @@ class tileRenderer extends React.Component<Props, any> {
 
             //when we stop moving the shapes the mouse is on the shape and moved up... so
             //to distinct stop moving & click we need to check if the mouse up is on the same position
-            if (downX === mouseX && downY === mouseY) {
+            if (downXAbs === mouseX && downYAbs === mouseY) {
               this.props.setSelectedImageShapeIds([imgShape.id])
             }
           }
@@ -785,7 +834,31 @@ class tileRenderer extends React.Component<Props, any> {
       this.props.imgSymbols,
       0,
       0,
-      true
+      true,
+      (imgShape, dragHandlerPos, container, e) => {
+
+        const {x: mouseX, y: mouseY} = this.renderStage.globalToLocal(e.stageX, e.stageY)
+        const bounds = container.getBounds()
+
+        downXAbs = mouseX
+        downYAbs = mouseY
+        downXContainerOffsetRel = downXAbs - bounds.x
+        downYContainerOffsetRel = downYAbs - bounds.y
+        downXContainerWidth = bounds.width
+        downXContainerHeight = bounds.height
+        isDraggingFieldResizeHandle = false
+        isDraggingImageResizeHandle = true
+        DraggingResizeHandlePosition = dragHandlerPos
+        isDraggingLinePoint = false
+        isDraggingField = false
+        isDraggingImage = false
+        isDraggingStage = false
+
+        //stop mouse down on field
+        e.stopPropagation()
+
+      },
+      null
     )
 
     this.renderStage.enableMouseOver(1)
@@ -807,7 +880,7 @@ class tileRenderer extends React.Component<Props, any> {
       //--> index 0 is drawn first so we need to revert the order to preserve the order when drawing)
 
       //this is only important for tile editor because other (e.g. world) we have only one shape per z-index
-      for(let i = list.length-1; i >= 0;i--) {
+      for (let i = list.length - 1; i >= 0; i--) {
         const child = list[i]
 
         this.renderStage.setChildIndex(child, parseInt(zIndex))
@@ -838,8 +911,7 @@ class tileRenderer extends React.Component<Props, any> {
 
             if (this.props.sourceForSelectingNextField.cmdText.endsWith('\n')) {
               cmdText = `${this.props.sourceForSelectingNextField.cmdText}${cmdText}`
-            }
-            else {
+            } else {
               cmdText = `${this.props.sourceForSelectingNextField.cmdText}\n${cmdText}`
             }
           }
@@ -857,7 +929,7 @@ class tileRenderer extends React.Component<Props, any> {
 
     for (const zIndex in this.zIndexCache) {
       const list = this.zIndexCache[zIndex]
-      for(let i = list.length-1; i >= 0;i--) {
+      for (let i = list.length - 1; i >= 0; i--) {
         const child = list[i]
 
         this.renderStage.setChildIndex(child, parseInt(zIndex))
@@ -928,16 +1000,38 @@ class tileRenderer extends React.Component<Props, any> {
     //transform in case we translate/scaled
     const {x: mouseX, y: mouseY} = this.renderStage.globalToLocal(e.stageX, e.stageY)
 
-    if (isDraggingField || isDraggingImage || isDraggingLinePoint) {
+    if (isDraggingField || isDraggingImage || isDraggingLinePoint || isDraggingFieldResizeHandle || isDraggingImageResizeHandle) {
 
 
+      /*
+      | (100,100)     (200,100)
+      |        +-------+         * (mouse down point at 220, 100)
+      |        | field |
+      |        +-------+
+      |                  * (110,100 )
+      |        |---------| = downXContainerOffsetRel
+      |
+      |---------------------------| = mouse down point
+      |
+      |                  |--------| = x = 110
+      |--------|
+      | = field.x
+      |
+      |
+      |-| = deltaX = x - field.x = 10
+
+      */
+
+      //how much the mouse moved away from in container rel down point
+      //x also contains the field.x
       const x = this.props.snapToGrid
-        ? Math.floor((mouseX - downXContainerOffset) / this.props.gridSizeInPx) * this.props.gridSizeInPx
-        : mouseX - downXContainerOffset
+        ? Math.floor((mouseX - downXContainerOffsetRel) / this.props.gridSizeInPx) * this.props.gridSizeInPx
+        : mouseX - downXContainerOffsetRel
 
+      //how much the mouse moved away from in container rel down point
       const y = this.props.snapToGrid
-        ? Math.floor((mouseY - downYContainerOffset) / this.props.gridSizeInPx) * this.props.gridSizeInPx
-        : mouseY - downYContainerOffset
+        ? Math.floor((mouseY - downYContainerOffsetRel) / this.props.gridSizeInPx) * this.props.gridSizeInPx
+        : mouseY - downYContainerOffsetRel
 
 
       if (isDraggingLinePoint && draggingPointId !== null) {
@@ -947,49 +1041,218 @@ class tileRenderer extends React.Component<Props, any> {
         //line point + anchor points + too lazy
         this.props.setLinePointNewPos(draggingObjectId, draggingPointId, {x: 0, y: 0}, {x: x, y: y}, true)
 
-      }
-      else {
+      } else {
 
 
         //same as this.props.setPropertyEditor_FieldX()
         let draggedShape: FieldShape | ImgShape | LineShape = (this.props.fieldShapes as ReadonlyArray<FieldShape>).find(
           p => p.id === draggingObjectId)
 
+        if (!draggedShape) {
+          draggedShape = (this.props.imgShapes as ReadonlyArray<ImgShape>).find(
+            p => p.id === draggingObjectId)
+        }
+
+        //delta for the shape position
+        //we then use x: field.x + deltaX so deltaX must be shape x agnostic
+        //needed because the shape x/y is different after we set it last event
         let deltaX = 0
         let deltaY = 0
 
-        if (draggedShape !== undefined) {
+        //needed because the shape width/height is different after we set it last event
+        let resizedWidth = 0
+        let deltaHeight = 0
+
+        if (draggedShape !== undefined) { //field or img
+
           deltaX = x - draggedShape.x
           deltaY = y - draggedShape.y
-        }
-        else {
 
-          draggedShape = (this.props.imgShapes as ReadonlyArray<ImgShape>).find(
+          resizedWidth = this.props.snapToGrid
+            ? Math.floor((mouseX - draggedShape.x - (downXContainerOffsetRel - downXContainerWidth)) / this.props.gridSizeInPx) * this.props.gridSizeInPx
+            : mouseX - draggedShape.x - (downXContainerOffsetRel - downXContainerWidth)
+
+          deltaHeight = this.props.snapToGrid
+            ? Math.floor((mouseY - draggedShape.y - (downXContainerHeight - downXContainerHeight)) / this.props.gridSizeInPx) * this.props.gridSizeInPx
+            : mouseY - draggedShape.y - (downXContainerHeight - downXContainerHeight)
+
+        } else {
+
+          draggedShape = (this.props.lineShapes as ReadonlyArray<LineShape>).find(
             p => p.id === draggingObjectId)
 
-          if (draggedShape !== undefined) {
-            deltaX = x - draggedShape.x
-            deltaY = y - draggedShape.y
-          }
-          else {
-
-            draggedShape = (this.props.lineShapes as ReadonlyArray<LineShape>).find(
+          if (draggedShape !== null) {
+            //move all points of all selected lines
+            const draggedLine = (this.props.lineShapes as ReadonlyArray<LineShape>).find(
               p => p.id === draggingObjectId)
 
-            if (draggedShape !== null) {
-              //move all points of all selected lines
-              const draggedLine = (this.props.lineShapes as ReadonlyArray<LineShape>).find(
-                p => p.id === draggingObjectId)
-
-              if (draggedLine) {
-                deltaX = x - draggedLine.startPoint.x
-                deltaY = y - draggedLine.startPoint.y
-              }
-
+            if (draggedLine) {
+              deltaX = x - draggedLine.startPoint.x
+              deltaY = y - draggedLine.startPoint.y
             }
+
           }
+
         }
 
+        if (isDraggingFieldResizeHandle) {
+
+          for (const id of this.props.selectedFieldShapeIds) {
+            const field = (this.props.fieldShapes as ReadonlyArray<FieldShape>).find(p => p.id === id)
+
+            switch (DraggingResizeHandlePosition) {
+              case DragHandlePos.topLeft: {
+
+                this.props.setPropertyEditor_FieldX(field, field.x, field.x + deltaX)
+                this.props.setPropertyEditor_FieldY(field, field.y, field.y + deltaY)
+
+                this.props.setPropertyEditor_FieldWidth(field, field.width, field.width - deltaX)
+                this.props.setPropertyEditor_FieldHeight(field, field.height, field.height - deltaY)
+
+                break;
+              }
+
+              case DragHandlePos.top: {
+
+                this.props.setPropertyEditor_FieldY(field, field.y, field.y + deltaY)
+
+                this.props.setPropertyEditor_FieldHeight(field, field.height, field.height - deltaY)
+
+                break;
+              }
+              case DragHandlePos.topRight: {
+
+                this.props.setPropertyEditor_FieldY(field, field.y, field.y + deltaY)
+
+                this.props.setPropertyEditor_FieldWidth(field, field.width, resizedWidth)
+                this.props.setPropertyEditor_FieldHeight(field, field.height, field.height - deltaY)
+
+                break;
+              }
+              case DragHandlePos.right: {
+
+                this.props.setPropertyEditor_FieldWidth(field, field.width, resizedWidth)
+
+                break;
+              }
+              case DragHandlePos.botRight: {
+
+                this.props.setPropertyEditor_FieldWidth(field, field.width, resizedWidth)
+                this.props.setPropertyEditor_FieldHeight(field, field.height, deltaHeight)
+
+                break;
+              }
+              case DragHandlePos.bot: {
+
+                this.props.setPropertyEditor_FieldHeight(field, field.height, deltaHeight)
+
+                break;
+              }
+              case DragHandlePos.botLeft: {
+
+                this.props.setPropertyEditor_FieldX(field, field.x, field.x + deltaX)
+
+                this.props.setPropertyEditor_FieldWidth(field, field.width, field.width - deltaX)
+                this.props.setPropertyEditor_FieldHeight(field, field.height, deltaHeight)
+
+                break;
+              }
+              case DragHandlePos.left: {
+
+                this.props.setPropertyEditor_FieldX(field, field.x, field.x + deltaX)
+                this.props.setPropertyEditor_FieldWidth(field, field.width, field.width - deltaX)
+
+                break;
+              }
+
+              default:
+                notExhaustiveThrow(DraggingResizeHandlePosition)
+                break;
+            }
+          }
+
+          return
+        }
+
+        if (isDraggingImageResizeHandle) {
+
+          for (const id of this.props.selectedImageShapeIds) {
+            const imgShape = (this.props.imgShapes as ReadonlyArray<ImgShape>).find(p => p.id === id)
+
+
+            switch (DraggingResizeHandlePosition) {
+              case DragHandlePos.topLeft: {
+
+                this.props.setPropertyEditor_ImageX(imgShape, imgShape.x, imgShape.x + deltaX)
+                this.props.setPropertyEditor_ImageY(imgShape, imgShape.y, imgShape.y + deltaY)
+
+                this.props.setPropertyEditor_ImageWidth(imgShape, imgShape.width, imgShape.width - deltaX)
+                this.props.setPropertyEditor_ImageHeight(imgShape, imgShape.height, imgShape.height - deltaY)
+
+                break;
+              }
+
+              case DragHandlePos.top: {
+
+                this.props.setPropertyEditor_ImageY(imgShape, imgShape.y, imgShape.y + deltaY)
+
+                this.props.setPropertyEditor_ImageHeight(imgShape, imgShape.height, imgShape.height - deltaY)
+
+                break;
+              }
+              case DragHandlePos.topRight: {
+
+                this.props.setPropertyEditor_ImageY(imgShape, imgShape.y, imgShape.y + deltaY)
+
+                this.props.setPropertyEditor_ImageWidth(imgShape, imgShape.width, resizedWidth)
+                this.props.setPropertyEditor_ImageHeight(imgShape, imgShape.height, imgShape.height - deltaY)
+
+                break;
+              }
+              case DragHandlePos.right: {
+
+                this.props.setPropertyEditor_ImageWidth(imgShape, imgShape.width, resizedWidth)
+
+                break;
+              }
+              case DragHandlePos.botRight: {
+
+                this.props.setPropertyEditor_ImageWidth(imgShape, imgShape.width, resizedWidth)
+                this.props.setPropertyEditor_ImageHeight(imgShape, imgShape.height, deltaHeight)
+
+                break;
+              }
+              case DragHandlePos.bot: {
+
+                this.props.setPropertyEditor_ImageHeight(imgShape, imgShape.height, deltaHeight)
+
+                break;
+              }
+              case DragHandlePos.botLeft: {
+
+                this.props.setPropertyEditor_ImageX(imgShape, imgShape.x, imgShape.x + deltaX)
+
+                this.props.setPropertyEditor_ImageWidth(imgShape, imgShape.width, imgShape.width - deltaX)
+                this.props.setPropertyEditor_ImageHeight(imgShape, imgShape.height, deltaHeight)
+
+                break;
+              }
+              case DragHandlePos.left: {
+
+                this.props.setPropertyEditor_ImageX(imgShape, imgShape.x, imgShape.x + deltaX)
+                this.props.setPropertyEditor_ImageWidth(imgShape, imgShape.width, imgShape.width - deltaX)
+
+                break;
+              }
+
+              default:
+                notExhaustiveThrow(DraggingResizeHandlePosition)
+                break;
+            }
+          }
+
+          return
+        }
 
         for (const id of this.props.selectedFieldShapeIds) {
           const field = (this.props.fieldShapes as ReadonlyArray<FieldShape>).find(p => p.id === id)
@@ -1035,8 +1298,8 @@ class tileRenderer extends React.Component<Props, any> {
       //e.g. 0,0 can be at 100,100 when the offset x,y is 100
 
       //mouseX is relative to the offset so we need to add the offset
-      const x = e.stageX - downXContainerOffset //mouseX + this.props.stageOffsetX - downXContainerOffset
-      const y = e.stageY - downYContainerOffset //mouseY + this.props.stageOffsetY - downYContainerOffset
+      const x = e.stageX - downXContainerOffsetRel //mouseX + this.props.stageOffsetX - downXContainerOffset
+      const y = e.stageY - downYContainerOffsetRel //mouseY + this.props.stageOffsetY - downYContainerOffset
       this.props.setEditor_stageOffset(Math.floor(x), Math.floor(y))
       return
     }
@@ -1044,10 +1307,10 @@ class tileRenderer extends React.Component<Props, any> {
     if (isSelectingMultipleShapes) {
 
       const rect: Rect = {
-        x: downX,
-        y: downY,
-        width: mouseX - downX,
-        height: mouseY - downY
+        x: downXAbs,
+        y: downYAbs,
+        width: mouseX - downXAbs,
+        height: mouseY - downYAbs
       }
       this.props.setSelectionRect(rect)
 
@@ -1068,8 +1331,7 @@ class tileRenderer extends React.Component<Props, any> {
         if (intersectRect(rect, fieldShape)) {
           fieldsToSelect.push((fieldShape as FieldShape).id)
         }
-      }
-      else {
+      } else {
         const fieldSymbol = this.props.fieldSymbols.find(p => p.guid === fieldShape.createdFromSymbolGuid)
 
         if (!fieldSymbol) {
@@ -1096,8 +1358,7 @@ class tileRenderer extends React.Component<Props, any> {
         if (intersectRect(rect, imgShape)) {
           imgsToSelect.push((imgShape as ImgShape).id)
         }
-      }
-      else {
+      } else {
         const imgSymbol = this.props.imgSymbols.find(p => p.guid === imgShape.createdFromSymbolGuid)
 
         if (!imgSymbol) {
@@ -1143,8 +1404,7 @@ class tileRenderer extends React.Component<Props, any> {
       if (linesToSelect.length > 0)
         this.props.setSelectedLineShapeIds(_.unionWith(this.props.selectedLineShapeIds, linesToSelect, (a, b) => a === b))
 
-    }
-    else {
+    } else {
 
       //this can also deselect
 

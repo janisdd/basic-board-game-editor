@@ -30,6 +30,9 @@ export const changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol = true
 
 export  const exportPngImagesBgColor: string | null = 'white'
 
+export const resizeDragHandleSize = 10
+export const resizeHandleFillColor = 'black'
+
 export const qrCodeSizeInPx = 300
 export const qrCodeDataVersion = 1
 export const qrCodeCorrectionLevel: "low" | "medium" | "quartile" | "high" = "low"

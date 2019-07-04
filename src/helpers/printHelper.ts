@@ -370,7 +370,7 @@ export class PrintHelper {
           i * tilesWidth,
           j * tilesHeight,
           false,
-          //null,null,null
+          null,null
         )
 
         graphics.drawImagesOnTile(
@@ -386,7 +386,8 @@ export class PrintHelper {
           imgSymbols,
           i * tilesWidth,
           j * tilesHeight,
-          false
+          false,
+          null,null
         )
 
         graphics.drawLinesOnTile(
@@ -665,14 +666,14 @@ export class PrintHelper {
     graphics.drawFieldsOnTile(stage, tile.fieldShapes, [], [], null, null, null, zIndexCache, false, false,
       worldSettings,
       fieldSymbols, 0, 0, false,
-      // null,null,null
+      null,null
     )
 
     graphics.drawLinesOnTile(stage, tile.lineShapes, [], [], null, null, zIndexCache, worldSettings, lineSymbols, 0, 0,
       false)
 
     graphics.drawImagesOnTile(stage, tile.imgShapes, [], [], null, null, null, zIndexCache, worldSettings, imgSymbols,
-      0, 0, false)
+      0, 0, false, null, null)
 
 
     for (const zIndex in zIndexCache) {
@@ -1066,7 +1067,7 @@ export class PrintHelper {
             i * tilesWidth,
             j * tilesHeight,
             false,
-            //null,null,null
+            null,null
           )
 
           graphics.drawImagesOnTile(
@@ -1082,7 +1083,8 @@ export class PrintHelper {
             imgSymbols,
             i * tilesWidth,
             j * tilesHeight,
-            false
+            false,
+            null,null
           )
 
           graphics.drawLinesOnTile(
