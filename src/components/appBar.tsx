@@ -77,6 +77,13 @@ class appBar extends React.Component<Props, any> {
                   </div>
 
 
+                  {/*<h2>Changelog</h2>*/}
+
+                  {/*<div>*/}
+                  {/*  asdasd*/}
+                  {/*</div>*/}
+
+
                 </Modal.Content>
               </Modal>
 

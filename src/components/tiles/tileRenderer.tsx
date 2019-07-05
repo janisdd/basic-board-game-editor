@@ -17,7 +17,7 @@ import MouseEvent = createjs.MouseEvent
 import {ZIndexCache} from "../../types/ui";
 import {
   globalMinimalZoom,
-  globalZoomStep, maxTileRendererCanvasHeight, maxTileRendererCanvasWidth,
+  globalZoomStep,
   selectionBgAlpha,
   selectionRectBgColor,
   selectionRectBorderColor
@@ -35,6 +35,7 @@ import {calcLineBoundingBox, intersectRect} from "../../helpers/interactionHelpe
 import {Logger} from "../../helpers/logger";
 import _ = require("lodash");
 import {notExhaustiveThrow} from "../../state/reducers/_notExhausiveHelper";
+import {debounce} from "../../helpers/functionHelpers";
 
 
 //const css = require('./styles.styl');
@@ -68,13 +69,28 @@ export interface MyProps {
   readonly drawFieldIds: boolean
 
   /**
+   * only applied on mount
+   */
+  readonly setupResizeListener: boolean
+  /**
    * the canvas width with corresponds to the stage size
+   * if this is larger than the view size, the stage gets scaled
    */
   readonly canvasWidth: number
   /**
    * the canvas height with corresponds to the stage size
+   * if this is larger than the view size, the stage gets scaled
    */
   readonly canvasHeight: number
+
+  /**
+   * the actual width that is rendered by html
+   */
+  readonly viewWidth: number
+  /**
+   * the actual height that is rendered by html
+   */
+  readonly viewHeight: number
 
   /**
    * the actual tile width
@@ -87,15 +103,6 @@ export interface MyProps {
    * because the canvasHeight can get cut
    */
   readonly tileHeight: number
-
-  /**
-   * the actual width that is rendered by html
-   */
-  readonly viewMaxWidth: number
-  /**
-   * the actual height that is rendered by html
-   */
-  readonly viewMaxHeight: number
 
   readonly stageOffsetX: number
   readonly stageOffsetY: number
@@ -229,6 +236,10 @@ class tileRenderer extends React.Component<Props, any> {
 
   canvas: HTMLCanvasElement = null
 
+  canvasContainer: HTMLDivElement = null
+
+  resizeHandler: EventListener
+
   /**
    * because we used z index the order of stage.addChild does not matter
    */
@@ -249,10 +260,31 @@ class tileRenderer extends React.Component<Props, any> {
     //also no need to re attache the listeners in every update
     this.setupListeners()
     this.updateCanvasModel()
+
+    let self = this
+
+    if (this.props.setupResizeListener) {
+      window.addEventListener('resize', this.resizeHandler = debounce(() => {
+        self.resizeRenderer()
+      }, 200, false))
+      self.resizeRenderer()
+    }
+
+  }
+
+  componentWillUnmount(): void {
+
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler)
+    }
   }
 
   componentDidUpdate() {
     this.updateCanvasModel()
+
+    if (this.resizeHandler) {
+      this.resizeRenderer()
+    }
   }
 
   onWheel(e: WheelEvent) {
@@ -1422,11 +1454,24 @@ class tileRenderer extends React.Component<Props, any> {
 
   }
 
+  resizeRenderer() {
+
+    if (!this.canvas || !this.canvasContainer) return
+
+
+    this.canvas.height = this.canvasContainer.offsetHeight
+    this.canvas.width = this.canvasContainer.offsetWidth
+
+    //force redraw
+    this.updateCanvasModel()
+
+  }
 
   render(): JSX.Element {
 
     return (
-      <div className="render-area">
+      <div className="render-area" style={this.props.setupResizeListener ? null : {width: this.props.viewWidth, height: this.props.viewHeight}}
+           ref={p => this.canvasContainer = p}>
         {
           //show drag handles
         }
@@ -1434,11 +1479,14 @@ class tileRenderer extends React.Component<Props, any> {
         {/*canvasTop={this.canvas !== null ? this.canvas.offsetTop : 0}/>*/}
 
         <canvas
-          className={['tile-canvas', this.props.isSelectingNextField ? 'is-selecting-next-field-cursor' : ''].join(' ')}
-          ref={p => this.canvas = p}
-          width={Math.min(this.props.canvasWidth, maxTileRendererCanvasWidth)}
-          height={Math.min(this.props.canvasHeight, maxTileRendererCanvasHeight)}
-          style={{maxHeight: this.props.viewMaxHeight, maxWidth: this.props.viewMaxWidth}}
+                className={['tile-canvas', this.props.isSelectingNextField ? 'is-selecting-next-field-cursor' : ''].join(' ')}
+                ref={p => this.canvas = p}
+                width={this.props.canvasWidth}
+                height={this.props.canvasHeight}
+
+
+                style={this.props.setupResizeListener ? null : {width: this.props.viewWidth, height: this.props.viewHeight}}
+          // style={{maxHeight: this.props.viewMaxHeight, maxWidth: this.props.viewMaxWidth}}
         ></canvas>
 
 

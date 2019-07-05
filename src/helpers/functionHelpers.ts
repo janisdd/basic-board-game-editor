@@ -39,3 +39,18 @@ export function replacePropertyByGuid<T extends GuidAble>(array: ReadonlyArray<T
       modifier(p)
   )
 }
+
+export const debounce = (func: any, wait: any, immediate: any) => {
+  var timeout: any;
+  return () => {
+    const context = this
+    const later = function () {
+      timeout = null;
+      if (!immediate) func.apply(context);
+    };
+    const callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context);
+  };
+};

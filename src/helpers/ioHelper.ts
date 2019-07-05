@@ -1,6 +1,5 @@
 import {ExportTile, ExportWorld, ImageAsset, Tile} from "../types/world";
 import globalState from "../state/state";
-import fileSaver = require("file-saver");
 import {ImgStorage} from "../externalStorage/imgStorage";
 import {appProperties, tileFileExtensionWithoutDot, worldFileExtensionWithoutDot} from "../constants";
 import {set_tileLibrary_possibleTiles} from "../state/reducers/world/tileLibrary/actions";
@@ -12,28 +11,9 @@ import {imgLibrary_addImg} from "../state/reducers/imgLibrary/actions";
 import {set_world_tiles} from "../state/reducers/world/tileSurrogates/actions";
 import {MigrationHelper} from "./MigrationHelpers";
 import {Logger} from "./logger";
-import {
-  replace_worldSettings,
-  set_world_expectedTileHeight,
-  set_world_expectedTileWidth, set_world_printGameAsOneImageAction, set_world_timeInS_advancePlayerAction,
-  set_world_timeInS_choose_bool_funcAction,
-  set_world_timeInS_expr_comparisonAction,
-  set_world_timeInS_expr_conjunctionAction,
-  set_world_timeInS_expr_disjunctionAction,
-  set_world_timeInS_expr_factorAction, set_world_timeInS_expr_primary_constantAction,
-  set_world_timeInS_expr_primary_identAction,
-  set_world_timeInS_expr_primary_incrementOrDecrementAction,
-  set_world_timeInS_expr_primary_leftStepsAction,
-  set_world_timeInS_expr_relationAction,
-  set_world_timeInS_expr_sumAction,
-  set_world_timeInS_expr_termAction,
-  set_world_timeInS_gotoAction,
-  set_world_timeInS_rollbackAction, set_world_timeInS_rollDiceAction,
-  set_world_timeInS_set_varAction,
-  set_world_timeInS_var_declAction,
-  set_world_worldCmdTextAction, set_world_worldHeightInTiles, set_world_worldWidthInTiles
-} from "../state/reducers/world/worldSettings/actions";
+import {replace_worldSettings} from "../state/reducers/world/worldSettings/actions";
 import {WorldSettings} from "../state/reducers/world/worldSettings/worldSettingsReducer";
+import fileSaver = require("file-saver");
 
 
 export class IoHelper {
@@ -179,12 +159,12 @@ export class IoHelper {
 
   }
 
-  public static importTile(data: string): void {
+  public static async importTile(data: string): Promise<void> {
 
     let exportedTile: ExportTile | null = JSON.parse(data)
 
     //maybe we need to migrate...
-    exportedTile = MigrationHelper.applyMigrationsToTile(exportedTile)
+    exportedTile = await MigrationHelper.applyMigrationsToTile(exportedTile)
 
     if (exportedTile === null) {
       //error is already displayed in MigrationHelper.applyMigrationsToTile
@@ -329,12 +309,12 @@ export class IoHelper {
     fileSaver.saveAs(blob, fileName)
   }
 
-  public static importWorld(data: string): void {
+  public static async importWorld(data: string): Promise<void> {
 
     let exportedWorld: ExportWorld | null = JSON.parse(data)
 
     //maybe we need to migrate...
-    exportedWorld = MigrationHelper.applyMigrationsToWorld(exportedWorld)
+    exportedWorld = await MigrationHelper.applyMigrationsToWorld(exportedWorld)
 
     if (exportedWorld === null) {
       //error is already displayed in MigrationHelper.applyMigrationsToTile

@@ -55,7 +55,7 @@ class symbolRenderer extends React.Component<Props, any> {
   render(): JSX.Element {
 
     return (
-      <div>
+      <div className="symbol-renderer-tile-renderer-wrapper">
         <TileRenderer
           selectionRect={null}
           setSelectionRect={nop}
@@ -71,12 +71,13 @@ class symbolRenderer extends React.Component<Props, any> {
           leftBorderPoints={[]}
           rightBorderPoint={[]}
           topBorderPoints={[]}
-          canvasWidth={this.props.widthInPx}
-          canvasHeight={this.props.heightInPx}
           tileHeight={this.props.heightInPx}
           tileWidth={this.props.widthInPx}
-          viewMaxHeight={this.props.heightInPx}
-          viewMaxWidth={this.props.widthInPx}
+          canvasWidth={this.props.widthInPx}
+          canvasHeight={this.props.heightInPx}
+          viewHeight={this.props.heightInPx}
+          viewWidth={this.props.widthInPx}
+          setupResizeListener={false}
           lineShapes={this.props.lineSymbol ? [this.props.lineSymbol] : []}
           imgShapes={this.props.imgSymbol ? [this.props.imgSymbol] : []}
           fieldShapes={this.props.fieldSymbol ? [this.props.fieldSymbol] : []}

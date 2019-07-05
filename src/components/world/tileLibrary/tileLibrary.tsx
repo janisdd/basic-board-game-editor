@@ -276,10 +276,11 @@ class tileLibrary extends React.Component<Props, any> {
                           fieldShapes={tile.fieldShapes}
                           imgShapes={tile.imgShapes}
                           lineShapes={tile.lineShapes}
-                          canvasHeight={500}
-                          canvasWidth={500}
-                          viewMaxHeight={250}
-                          viewMaxWidth={250}
+                          canvasHeight={tile.tileSettings.height}
+                          canvasWidth={tile.tileSettings.width}
+                          viewHeight={250}
+                          viewWidth={250}
+                          setupResizeListener={false}
                           tileWidth={tile.tileSettings.width}
                           tileHeight={tile.tileSettings.height}
                           topBorderPoints={tile.topBorderPoints}

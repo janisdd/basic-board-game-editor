@@ -13,15 +13,11 @@ import {getGuid} from "./helpers/guid";
 import {ActionTypes} from "redux-undo";
 
 export const appProperties = {
-  version: '1.2.3',
+  version: '1.3.0',
   appName: 'Basic board game editor',
   exportFileNamePrefix: 'bbge'
 }
 
-
-//if we have e.g. widht 5000 and height 1000 we get a small rectangle...
-export const maxTileRendererCanvasWidth = 1000
-export const maxTileRendererCanvasHeight = 1000
 
 export const symbolPreviewWidth = 150
 export const symbolPreviewHeight = 150

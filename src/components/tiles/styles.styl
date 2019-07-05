@@ -1,40 +1,50 @@
 
 .tile-editor {
-
+  height calc(100% - 55px) //the size of the header bar
+  display flex
+  flex-direction column
 }
 
 //the main area wrapper
 //3x1 grid (cols x rows)
 .tile-editor-content {
 
-  display: grid
-  grid-column-gap 0.5em
-  grid-row-gap 0.5em
-  overflow-y hidden
-  overflow-x auto
+  flex 1
+  display: flex
+  margin-bottom 2px
 
   .left-tab-menu {
-    grid-column-start 1
-    grid-column-end 1
-    grid-row-start 1
-    grid-row-end 1
-    justify-self left
+    margin-right 0.5em
+
+    .left-tab-menu-inner-wrapper {
+      height 100%
+      display flex
+      flex-direction column
+
+      >div {
+        height 100%
+        display flex
+        flex-direction column
+      }
+    }
+
   }
 
   .tile-editor-center-area {
-    grid-column-start 2
-    grid-column-end 2
-    grid-row-start 1
-    grid-row-end 1
-    justify-self center
+    flex 1
+    grid-template-rows: max-content auto;
   }
 
   .right-tab-menu {
-    grid-column-start 3
-    grid-column-end 3
-    grid-row-start 1
-    grid-row-end 1
-    justify-self right
+    margin-left 0.5em
+
+    height 100%
+
+    >div {
+      height 100%
+      display flex
+      flex-direction column
+    }
   }
 
 }
@@ -44,6 +54,7 @@
   display grid
   grid-column-gap 0.5em
   grid-row-gap 0.5em
+  grid-template-columns max-content auto max-content
   height 100%
 
   .top-bar {
@@ -52,18 +63,21 @@
     grid-row-start 1
     grid-row-end 1
   }
+
   .left-bar {
     grid-column-start 1
     grid-column-end 1
     grid-row-start 2
     grid-row-end 3
   }
+
   .right-bar {
     grid-column-start 3
     grid-column-end 3
     grid-row-start 2
     grid-row-end 3
   }
+
   .bottom-bar {
     grid-column-start 2
     grid-column-end 2
@@ -76,6 +90,9 @@
     grid-column-end 2
     grid-row-start 2
     grid-row-end 2
+
+    position relative
+    margin 0.5em
   }
 }
 
@@ -98,11 +115,13 @@ $selectionBorderSize = 5px
     //left (0 - $dragHandleWidth - $selectionBorderSize)
     cursor nw-resize
   }
+
   > div.top-center {
     //top (0 - $dragHandleHeight - $selectionBorderSize)
     //left "calc(50% - %s)" % ($dragHandleWidth / 2)
     cursor ns-resize
   }
+
   > div.top-right {
     //top (0 - $dragHandleHeight - $selectionBorderSize)
     //right (0 - $dragHandleWidth - $selectionBorderSize)
@@ -114,6 +133,7 @@ $selectionBorderSize = 5px
     //left (0 - $dragHandleWidth - $selectionBorderSize)
     cursor ew-resize
   }
+
   > div.right-center {
     //top "calc(50% - %s)" % ($dragHandleHeight / 2)
     //right (0 - $dragHandleWidth - $selectionBorderSize)
@@ -125,11 +145,13 @@ $selectionBorderSize = 5px
     //left (0 - $dragHandleWidth - $selectionBorderSize)
     cursor sw-resize
   }
+
   > div.bottom-center {
     //bottom (0 - $dragHandleHeight - $selectionBorderSize)
     //left "calc(50% - %s)" % ($dragHandleWidth / 2)
     cursor ns-resize
   }
+
   > div.bottom-right {
     //bottom (0 - $dragHandleHeight - $selectionBorderSize)
     //right (0 - $dragHandleWidth - $selectionBorderSize)

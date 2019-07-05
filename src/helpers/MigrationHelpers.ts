@@ -2,7 +2,7 @@ import {ExportTile, ExportWorld, MajorLineDirection, Tile} from "../types/world"
 import {Logger} from "./logger";
 import {FieldShape, FieldSymbol, ImgShape, ImgSymbol, LineShape, LineSymbol} from "../types/drawing";
 import {appProperties, defaultGameInitCode, defaultTileHeight, defaultTileWidth, getDefaultNewTile} from "../constants";
-import {SimulationTimes} from "../../simulation/machine/AbstractMachine";
+import {DialogHelper} from "./dialogHelper";
 
 
 interface MigrationClass {
@@ -33,6 +33,12 @@ interface MigrationClass {
    * @returns {ExportWorld} the migrated world
    */
   migrateWorld(exportWorld: ExportWorld): ExportWorld
+
+  /**
+   * a message to display to the user what changed when migrating a tile/world to this new version
+   * can be empty string
+   */
+  warningMsg: string
 }
 
 /**
@@ -45,7 +51,7 @@ class Migration_1_0_0__to__1_0_1 implements MigrationClass {
 
   oldVersion = '1.0.0'
   newVersion = '1.0.1'
-
+  warningMsg = ''
 
   public migrateTile(exportTile: ExportTile): ExportTile {
 
@@ -98,6 +104,8 @@ class Migration_1_0_0__to__1_0_1 implements MigrationClass {
     return copy
   }
 
+
+
 }
 
 /**
@@ -110,6 +118,7 @@ class Migration_1_0_1__to__1_0_2 implements MigrationClass {
 
   oldVersion = '1.0.1'
   newVersion = '1.0.2'
+  warningMsg = ''
 
   public migrateTile(exportTile: ExportTile): ExportTile {
 
@@ -179,6 +188,7 @@ class Migration_1_0_3__to__1_1_0 implements MigrationClass {
 
   oldVersion = '1.0.3'
   newVersion = '1.1.0'
+  warningMsg = ''
 
   public migrateTile(exportTile: ExportTile): ExportTile {
 
@@ -313,6 +323,7 @@ class Migration_1_1_0__to__1_1_1 implements MigrationClass {
 
   oldVersion = '1.1.0'
   newVersion = '1.1.1'
+  warningMsg = ''
 
   public migrateTile(exportTile: ExportTile): ExportTile {
 
@@ -364,6 +375,7 @@ class Migration_1_2_0__to__1_2_1 implements MigrationClass {
 
   oldVersion = '1.2.0'
   newVersion = '1.2.1'
+  warningMsg = ''
 
   migrateTile(exportTile: ExportTile): ExportTile {
     const copy: ExportTile = {
@@ -431,45 +443,45 @@ class Migration_1_2_0__to__1_2_1 implements MigrationClass {
           overwriteBackgroundImage: true,
           overwriteRotationInDeg: true,
           overwriteCornerRadius: true,
-          overwritePadding:true,
-          overwriteVerticalTextAlign:true,
-          overwriteHorizontalTextAlign:true,
-          overwriteHeight:true,
-          overwriteWidth:true,
-          overwriteColor:true,
-          overwriteBgColor:true,
-          overwriteBorderColor:true,
-          overwriteBorderSizeInPx:true,
-          overwriteFontName:true,
-          overwriteFontSizeInPx:true,
-          overwriteFontDecoration:true,
-          overwriteText:true,
+          overwritePadding: true,
+          overwriteVerticalTextAlign: true,
+          overwriteHorizontalTextAlign: true,
+          overwriteHeight: true,
+          overwriteWidth: true,
+          overwriteColor: true,
+          overwriteBgColor: true,
+          overwriteBorderColor: true,
+          overwriteBorderSizeInPx: true,
+          overwriteFontName: true,
+          overwriteFontSizeInPx: true,
+          overwriteFontDecoration: true,
+          overwriteText: true,
           kind: "field"
         }
       }),
       imgSymbols: exportWorld.imgSymbols.map<ImgSymbol>(imgSymbol => {
         return {
           ...imgSymbol,
-          overwriteHeight:true,
-          overwriteImage:true,
-          overwriteIsDisabledForMouseSelection:true,
-          overwriteRotationInDeg:true,
-          overwriteSkewX:true,
-          overwriteSkewY:true,
-          overwriteWidth:true,
+          overwriteHeight: true,
+          overwriteImage: true,
+          overwriteIsDisabledForMouseSelection: true,
+          overwriteRotationInDeg: true,
+          overwriteSkewX: true,
+          overwriteSkewY: true,
+          overwriteWidth: true,
           kind: "img"
         }
       }),
       lineSymbols: exportWorld.lineSymbols.map<LineSymbol>(lineSymbol => {
         return {
           ...lineSymbol,
-          overwriteArrowHeight:true,
-          overwriteArrowWidth:true,
-          overwriteColor:true,
-          overwriteGapsInPx:true,
-          overwriteHasEndArrow:true,
-          overwriteHasStartArrow:true,
-          overwriteThicknessInPx:true,
+          overwriteArrowHeight: true,
+          overwriteArrowWidth: true,
+          overwriteColor: true,
+          overwriteGapsInPx: true,
+          overwriteHasEndArrow: true,
+          overwriteHasStartArrow: true,
+          overwriteThicknessInPx: true,
           kind: "line"
         } as LineSymbol
       }),
@@ -506,6 +518,7 @@ class Migration_1_2_0__to__1_2_1 implements MigrationClass {
 class Migration_1_2_2__to__1_2_3 implements MigrationClass {
   oldVersion = '1.2.2'
   newVersion = '1.2.3'
+  warningMsg = ''
 
   public migrateTile(exportTile: ExportTile): ExportTile {
     return {
@@ -515,14 +528,117 @@ class Migration_1_2_2__to__1_2_3 implements MigrationClass {
   }
 
   migrateWorld(exportWorld: ExportWorld): ExportWorld {
-   return {
-     ...exportWorld,
-     editorVersion: this.newVersion,
-     worldSettings: {
-       ...exportWorld.worldSettings,
-       additionalBorderWidthInPx: 5
-     }
-   }
+    return {
+      ...exportWorld,
+      editorVersion: this.newVersion,
+      worldSettings: {
+        ...exportWorld.worldSettings,
+        additionalBorderWidthInPx: 5
+      }
+    }
+  }
+
+}
+
+/**
+ * we migrate to a new line connection system --> drop all old
+ */
+class Migration_1_2_3__to__1_3_0 implements MigrationClass {
+  oldVersion = '1.2.3'
+  newVersion = '1.3.0'
+
+  warningMsg = 'We changed the connected lines system (field to lines), thus we dropped all the connected lines information in your fields. Please reconnect all your lines and fields!'
+
+  public migrateTile(exportTile: ExportTile): ExportTile {
+    return {
+      ...exportTile,
+      editorVersion: this.newVersion,
+      tile: {
+        ...exportTile.tile,
+        fieldShapes: exportTile.tile.fieldShapes.map(field => {
+          return {
+            ...field,
+            anchorPoints: field.anchorPoints.map(p => {
+              return {
+                ...p,
+                connectedLineTuples: [],
+              }
+            })
+          }
+        }),
+        topBorderPoints: exportTile.tile.topBorderPoints.map(p => {
+          return {
+            ...p,
+            connectedLineTuples: []
+          }
+        }),
+        botBorderPoints: exportTile.tile.botBorderPoints.map(p => {
+          return {
+            ...p,
+            connectedLineTuples: []
+          }
+        }),
+        leftBorderPoints: exportTile.tile.leftBorderPoints.map(p => {
+          return {
+            ...p,
+            connectedLineTuples: []
+          }
+        }),
+        rightBorderPoint: exportTile.tile.rightBorderPoint.map(p => {
+          return {
+            ...p,
+            connectedLineTuples: []
+          }
+        }),
+      }
+    }
+  }
+
+  migrateWorld(exportWorld: ExportWorld): ExportWorld {
+    return {
+      ...exportWorld,
+      editorVersion: this.newVersion,
+      allTiles: exportWorld.allTiles.map(tile => {
+        return {
+          ...tile,
+          fieldShapes: tile.fieldShapes.map(field => {
+            return {
+              ...field,
+              anchorPoints: field.anchorPoints.map(p => {
+                return {
+                  ...p,
+                  connectedLineTuples: [],
+                }
+              })
+            }
+          }),
+          topBorderPoints: tile.topBorderPoints.map(p => {
+            return {
+              ...p,
+              connectedLineTuples: []
+            }
+          }),
+          botBorderPoints: tile.botBorderPoints.map(p => {
+            return {
+              ...p,
+              connectedLineTuples: []
+            }
+          }),
+          leftBorderPoints: tile.leftBorderPoints.map(p => {
+            return {
+              ...p,
+              connectedLineTuples: []
+            }
+          }),
+          rightBorderPoint: tile.rightBorderPoint.map(p => {
+            return {
+              ...p,
+              connectedLineTuples: []
+            }
+          }),
+        }
+      })
+    }
   }
 
 }
@@ -538,6 +654,7 @@ function createVersionShallowMigration(oldVersion: string, newVersion: string): 
   return {
     oldVersion,
     newVersion,
+    warningMsg: '',
     migrateTile: exportTile => {
       return {
         ...exportTile,
@@ -574,6 +691,7 @@ export class MigrationHelper {
     new Migration_1_2_0__to__1_2_1(),
     createVersionShallowMigration('1.2.1', '1.2.2'),
     new Migration_1_2_2__to__1_2_3(),
+    new Migration_1_2_3__to__1_3_0(),
   ]
 
   /**
@@ -584,7 +702,7 @@ export class MigrationHelper {
    * @param {ExportTile} exportTile
    * @returns {ExportTile | null} null on any error
    */
-  public static applyMigrationsToTile(exportTile: ExportTile): ExportTile | null {
+  public static async applyMigrationsToTile(exportTile: ExportTile): Promise<ExportTile | null> {
 
     for (let i = 0; i < this.allMigrations.length; i++) {
       const migration = this.allMigrations[i]
@@ -593,12 +711,17 @@ export class MigrationHelper {
         try {
           exportTile = migration.migrateTile(exportTile)
           Logger.log(`migrated export tile from version ${migration.oldVersion} to ${migration.newVersion}`)
+
+
+          if (migration.warningMsg) {
+            await DialogHelper.okDialog(`Migration version ${migration.oldVersion} to ${migration.newVersion}`, migration.warningMsg)
+          }
+
         } catch (err) {
           Logger.fatal(`migrating export tile failed from version ${migration.oldVersion} to ${migration.newVersion}`)
           return null
         }
-      }
-      else {
+      } else {
 
 
       }
@@ -620,7 +743,7 @@ export class MigrationHelper {
    * @param {ExportWorld} exportWorld
    * @returns {ExportWorld | null} null on any error
    */
-  public static applyMigrationsToWorld(exportWorld: ExportWorld): ExportWorld | null {
+  public static async applyMigrationsToWorld(exportWorld: ExportWorld): Promise<ExportWorld | null> {
 
     for (let i = 0; i < this.allMigrations.length; i++) {
       const migration = this.allMigrations[i]
@@ -630,6 +753,10 @@ export class MigrationHelper {
         try {
           exportWorld = migration.migrateWorld(exportWorld)
           Logger.log(`migrated export world from version ${migration.oldVersion} to ${migration.newVersion}`)
+
+          if (migration.warningMsg) {
+            await DialogHelper.okDialog(`Migration version ${migration.oldVersion} to ${migration.newVersion}`, migration.warningMsg)
+          }
         } catch (err) {
           Logger.fatal(`migrating export world failed from version ${migration.oldVersion} to ${migration.newVersion}`)
           return null
@@ -645,3 +772,4 @@ export class MigrationHelper {
   }
 
 }
+

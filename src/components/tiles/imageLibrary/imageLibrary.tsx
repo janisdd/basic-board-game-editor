@@ -18,6 +18,7 @@ import {swapDisplayIndexWithGuid} from "../../../helpers/someIndexHelper";
 import SparkMD5 = require("spark-md5");
 import {getI18n, getRawI18n} from "../../../../i18n/i18nRoot";
 import {ImageAsset, ImageAssetSurrogate} from "../../../types/world";
+import {Logger} from "../../../helpers/logger";
 
 
 export interface MyProps {
@@ -100,7 +101,7 @@ class imageLibrary extends React.Component<Props, any> {
     fileReader.readAsDataURL(file)
 
     fileReader.onprogress = ev => {
-      console.log(ev.loaded + '/' + ev.total)
+      Logger.log(`load status: ${ev.loaded}/${ev.total}`)
     }
 
     fileReader.onload = ev => {
@@ -145,7 +146,7 @@ class imageLibrary extends React.Component<Props, any> {
     }
 
     fileReader.onerror = ev => {
-      console.log('error')
+      Logger.log('error')
       this.imgInput.value = ''
     }
   }

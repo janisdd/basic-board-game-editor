@@ -17,6 +17,7 @@ import {set_world_selectedTilePos} from "../../state/reducers/world/actions";
 import {WorldTilesHelper} from "../../helpers/worldTilesHelper";
 import {set_world_tiles} from "../../state/reducers/world/tileSurrogates/actions";
 import * as mousetrap from "mousetrap";
+import {debounce} from "../../helpers/functionHelpers";
 
 
 //const css = require('./styles.styl');
@@ -61,8 +62,6 @@ const stateProps = returntypeof(mapStateToProps);
 const dispatchProps = returntypeof(mapDispatchToProps);
 type Props = typeof stateProps & typeof dispatchProps;
 
-
-const canvasContainerId = 'canvasContainerId'
 
 class worldRenderer extends React.Component<Props, any> {
 
@@ -112,7 +111,7 @@ class worldRenderer extends React.Component<Props, any> {
 
 
   componentWillUnmount() {
-    window.removeEventListener('resize', this.resizeHandler)
+  window.removeEventListener('resize', this.resizeHandler)
     mousetrap.unbind(['backspace', 'del'])
   }
 
@@ -446,8 +445,9 @@ class worldRenderer extends React.Component<Props, any> {
     if (!this.canvas || !this.canvasContainer) return
 
 
-    this.canvas.height = this.canvasContainer.offsetHeight
-    this.canvas.width = this.canvasContainer.offsetWidth
+    //-2 because of 1px border
+    this.canvas.height = this.canvasContainer.offsetHeight-2
+    this.canvas.width = this.canvasContainer.offsetWidth-2
 
     //force redraw
     this.updateCanvasModel()
@@ -456,7 +456,7 @@ class worldRenderer extends React.Component<Props, any> {
 
   render(): JSX.Element {
     return (
-      <div id={canvasContainerId} className="fh fw" ref={p => this.canvasContainer = p}>
+      <div className="fh fw" ref={p => this.canvasContainer = p}>
 
         <canvas id="world-renderer-canvas" className="tile-canvas" ref={p => this.canvas = p}
                 width={1200}
@@ -470,17 +470,3 @@ class worldRenderer extends React.Component<Props, any> {
 
 export default connect(mapStateToProps, mapDispatchToProps)(worldRenderer)
 
-const debounce = (func: any, wait: any, immediate: any) => {
-  var timeout: any;
-  return () => {
-    const context = this
-    const later = function () {
-      timeout = null;
-      if (!immediate) func.apply(context);
-    };
-    const callNow = immediate && !timeout;
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-    if (callNow) func.apply(context);
-  };
-};

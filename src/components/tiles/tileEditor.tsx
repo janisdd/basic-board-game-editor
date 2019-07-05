@@ -466,7 +466,7 @@ class tileEditor extends React.Component<Props, any> {
 
 
     return (
-      <div>
+      <div className="tile-editor">
 
         <div className="flexed" style={{marginBottom: '0.5em'}}>
 
@@ -949,12 +949,13 @@ class tileEditor extends React.Component<Props, any> {
                 this.props.set_editor_isSelectingNextField(isSelectingNextField, sourceForSelectingNextField)
               }}
               simulationMachineState={this.props.machineState}
-              viewMaxWidth={1000}
-              viewMaxHeight={1000}
+              viewWidth={-1}
+              viewHeight={-1}
               canvasHeight={this.props.tileProps.tileSettings.height}
               canvasWidth={this.props.tileProps.tileSettings.width}
               tileWidth={this.props.tileProps.tileSettings.width}
               tileHeight={this.props.tileProps.tileSettings.height}
+              setupResizeListener={true}
 
               topBorderPoints={this.props.tileProps.topBorderPoints}
               botBorderPoints={this.props.tileProps.botBorderPoints}
@@ -1054,9 +1055,9 @@ class tileEditor extends React.Component<Props, any> {
               <TileRightActionBar/>
             </div>
 
-            <div className="bottom-bar">
+            {/*<div className="bottom-bar">*/}
 
-            </div>
+            {/*</div>*/}
 
           </div>
 

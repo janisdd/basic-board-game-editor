@@ -4,6 +4,18 @@
 
 already changed but version has not changed
 
+## 1.3.0
+
+- [break-soft] overhaul connected lines and fields
+  - now works better reliable
+- [added] field and img resize handles
+- [package] updated easeljs to version 1.0.2
+- sever editor bug fixes
+
+## 1.2.3
+
+???
+
 ## 1.1.1
 
 - [improved] the world view will now resize to the window size

@@ -143,6 +143,9 @@ export function set_editor_isCreatingNewTile(isCreatingNewTile: boolean, tile: T
     dispatch(reset_shapeEditor()) //this is needed because we changed lines & ... to [] which will set the last edited shape type
     dispatch(clearHistory_shapeEditor()) //this only clears the history arrays but not reset the shape reducer state
 
+    //todo center tile... but we need to available width...
+    // dispatch(setEditor_stageOffset(tile.tileSettings.width / 2, tile.tileSettings.height / 2))
+
   }
 }
 

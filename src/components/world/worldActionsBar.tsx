@@ -93,10 +93,10 @@ class worldActionsBar extends React.Component<Props, any> {
     const fileReader = new FileReader()
 
     fileReader.onprogress = ev => {
-      console.log(ev.loaded + '/' + ev.total)
+      Logger.log(`load status: ${ev.loaded}/${ev.total}`)
     }
 
-    fileReader.onload = ev => {
+    fileReader.onload = async (ev) => {
       const json = fileReader.result as string
 
       IoHelper.importWorld(json)
@@ -105,7 +105,7 @@ class worldActionsBar extends React.Component<Props, any> {
     }
 
     fileReader.onerror = ev => {
-      console.log('error')
+      Logger.log('error')
       this.importInput.value = ''
     }
 

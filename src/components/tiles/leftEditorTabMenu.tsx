@@ -50,10 +50,15 @@ class leftEditorTabMenu extends React.Component<Props, any> {
 
         {
           this.props.isLeftTabMenuExpanded === false &&
-          <div style={{marginTop: '4px'}}>
+          <div style={{marginTop: '4px'}} className="fh">
             <Button icon
                     onClick={() => {
                       this.props.set_editor_isLeftTabMenuExpandedAction(true)
+
+                      //make sure the canvas resizes
+                      setTimeout(() => {
+                        window.dispatchEvent(new Event('resize'))
+                      }, 100)
                     }}
             >
               <div className="flexed-h vertical-stacked-icons">
@@ -69,20 +74,25 @@ class leftEditorTabMenu extends React.Component<Props, any> {
         {
           this.props.isLeftTabMenuExpanded &&
 
-          <div style={{position: 'relative'}}>
+          <div style={{position: 'relative'}} className="left-tab-menu-inner-wrapper">
 
             {
               //display inside the tab menu content because the header spans the full with and we cannot access it
               //because it's generated
             }
-            <div style={{position: 'absolute', top: '36px', right: '-5px'}}
+            <span style={{position: 'absolute', top: '36px', right: '-5px'}}
                  className="clickable"
                  onClick={() => {
                    this.props.set_editor_isLeftTabMenuExpandedAction(false)
+
+                   //make sure the canvas resizes
+                   setTimeout(() => {
+                     window.dispatchEvent(new Event('resize'))
+                   }, 100)
                  }}
             >
               <Icon size='large' name="caret square left outline"/>
-            </div>
+            </span>
 
             <Tab menu={{secondary: true, pointing: true}}
                  activeIndex={this.props.leftTabActiveIndex}

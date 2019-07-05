@@ -27,10 +27,8 @@ body {
   border-top 1px solid #dddddd
   border-bottom 1px solid #dddddd
 
-  height 657px //TODO make this stretch to bottom but without site scrollbar
-  overflow visible
+  height 100%
   //padding 1em
-
 }
 
 .right-tab-menu {
@@ -38,10 +36,7 @@ body {
   border-top 1px solid #dddddd
   border-bottom 1px solid #dddddd
 
-  height 657px //TODO make this stretch to bottom but without site scrollbar
-  //height calc(100% - 1em)
-  overflow visible
-
+  height 100%
 }
 
 .right-tab-menu-full-sized {
@@ -60,8 +55,6 @@ body {
 
 .property-editor-right {
   width 350px
-  max-height 600px //TODO make this stretch to bottom but without site scrollbar
-  height 600px
   overflow auto
   padding 0.5em
 }
@@ -75,8 +68,6 @@ body {
 
 .property-editor-left {
   width 416px
-  //max-height 600px  //TODO make this stretch to bottom but without site scrollbar
-  height 600px
   overflow auto
   padding 0.5em
   display flex
@@ -86,12 +77,22 @@ body {
 
 .symbol-menu-item {
   padding 0.5em
+
+  .symbol-renderer-tile-renderer-wrapper {
+    position relative
+  }
 }
 
 .tile-canvas {
   border 1px solid #c9c9c9
   user-select none
   -webkit-user-select: none;
+
+  position absolute
+  top 0
+  left 0
+  right 0
+  bottom 0
 }
 
 .tile-outline-selected {
@@ -192,6 +193,8 @@ $imgHeight = 100px
   margin 1em
   display flex
   flex-direction column
+
+  position relative
 }
 
 .active-player {
