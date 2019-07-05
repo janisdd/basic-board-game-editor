@@ -1,4 +1,12 @@
-import {BezierPoint, CurveMode, LineShape, PlainPoint, Point} from "../../../../types/drawing";
+import {
+  AnchorPoint,
+  BezierPoint,
+  CurveMode,
+  FieldSymbol,
+  LineShape,
+  PlainPoint,
+  Point
+} from "../../../../types/drawing";
 import {
   ActionType,
   ADD_LineShapeAction,
@@ -368,6 +376,8 @@ export function _setLinePointNewPos(lineId: number, oldPointId: number, newPoint
 
 /**
  * this will attach or detach the line from fields
+ *
+ * TODO performance when we have many fields!!
  * @param lineId
  * @param oldPointId
  * @param newPointPos
@@ -391,14 +401,16 @@ export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: nu
 
     if (!line) return
 
+    //this is the old point (coords)
     const targetPoint: Point = line.startPoint.id === oldPointId
       ? line.startPoint
       : line.points.find(p => p.id === oldPointId)
 
+    dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
 
-    //undefined then probably a control point... nothing to do here
+    //undefined then probably a control point... nothing to do here (connected lines cannot change)
     if (targetPoint === undefined) {
-      dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+
       return
     }
 
@@ -406,12 +418,38 @@ export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: nu
 
     for (const field of fields) {
 
+      let symbol: FieldSymbol | null = null
+      if (field.createdFromSymbolGuid !== null) {
+        symbol = fieldSymbols.find(p => p.guid === field.createdFromSymbolGuid)
+        if (!symbol) {
+          const msg = `could not find field symbol for guid ${field.createdFromSymbolGuid}`
+          Logger.fatal(msg)
+          throw new Error(msg)
+        }
+      }
+
+      //if we have many fields this has a big performance impact (positively)...
+      if (targetPoint.x < field.x && newPointPos.x < field.x) continue
+      if (targetPoint.y < field.y && newPointPos.y < field.y) continue
+
+      if (targetPoint.x < field.x && newPointPos.x < field.x) continue
+      if (targetPoint.y < field.y && newPointPos.y < field.y) continue
+
+      if (field.x + (field.createdFromSymbolGuid !== null && symbol.overwriteWidth ? symbol.width : field.width) < targetPoint.x &&
+        field.x + (field.createdFromSymbolGuid !== null && symbol.overwriteWidth ? symbol.width : field.width) < newPointPos.x
+      ) continue
+
+      if (field.y + (field.createdFromSymbolGuid !== null && symbol.overwriteHeight ? symbol.height : field.height) < targetPoint.y &&
+        field.y + (field.createdFromSymbolGuid !== null && symbol.overwriteHeight ? symbol.height : field.height) < newPointPos.y
+      ) continue
+
+
       const connectedLineTuple = isFieldAndLinePointConnectedThroughAnchorPoints(field, fieldSymbols, lineId, targetPoint, anchorPointSnapToleranceRadiusInPx)
 
       if (connectedLineTuple === null) {
         //try to remove connected
 
-        dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
+        console.log('33333333')
         posSet = true
 
         //if no anchor point is connected to this point don't dispatch
@@ -477,12 +515,6 @@ export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: nu
 
     }
 
-
-    if (!posSet) {
-
-      //border points could overwrite this... but that's ok for now
-      dispatch(_setLinePointNewPos(lineId, oldPointId, newPointPos))
-    }
 
     //--- check if the line points snaps to a tile border point
 

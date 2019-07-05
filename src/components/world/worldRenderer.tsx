@@ -273,7 +273,7 @@ class worldRenderer extends React.Component<Props, any> {
           this.props.fieldSymbols,
           i * defaultTileWidth,
           j * defaultTileHeight,
-          true,
+          true, false,
           null, null
         )
 
@@ -290,7 +290,7 @@ class worldRenderer extends React.Component<Props, any> {
           this.props.imgSymbols,
           i * defaultTileWidth,
           j * defaultTileHeight,
-          true,
+          true, false,
           null,null
         )
 

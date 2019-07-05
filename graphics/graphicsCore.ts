@@ -374,6 +374,7 @@ export function drawFieldsOnTile(stage: Stage, fieldShapes: ReadonlyArray<FieldS
                                  xOffset: number,
                                  yOffset: number,
                                  drawBasedOnSymbolIndicator: boolean,
+                                 drawResizeHandles: boolean,
                                  onDragHandlerMouseDownHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
                                  onRotationHandlerMouseDownHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
 ): void {
@@ -390,7 +391,7 @@ export function drawFieldsOnTile(stage: Stage, fieldShapes: ReadonlyArray<FieldS
 
     drawFieldShape(stage, shape, selectedFieldShapeIds, onClickHandler, onMouseDownHandler, onMouseUpHandler,
       zIndexCache, drawFieldIds, drawAnchorPoints, worldSettings, fieldSymbols, xOffset, yOffset, isSelected,
-      drawBasedOnSymbolIndicator,
+      drawBasedOnSymbolIndicator,drawResizeHandles,
       onDragHandlerMouseDownHandler, onRotationHandlerMouseDownHandler
     )
   }
@@ -410,6 +411,7 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
                                yOffset: number,
                                isSelected: boolean,
                                drawBasedOnSymbolIndicator: boolean,
+                               drawResizeHandles: boolean,
                                onDragHandlerMouseDownHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
                                onRotationHandlerMouseDownHandler: ((field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
 ): void {
@@ -540,7 +542,7 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
     container.addChild(border)
 
 
-    if (field.createdFromSymbolGuid === null) {
+    if (field.createdFromSymbolGuid === null && drawResizeHandles) {
 
       const bounds = container.getBounds()
 
@@ -1294,6 +1296,7 @@ export function drawImagesOnTile(stage: Stage, imgShapes: ReadonlyArray<ImgShape
                                  xOffset: number,
                                  yOffset: number,
                                  drawBasedOnSymbolIndicator: boolean,
+                                 drawResizeHandles: boolean,
                                  onDragHandlerMouseDownHandler: ((field: ImgShape | ImgSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
                                  onRotationHandlerMouseDownHandler: ((field: ImgShape | ImgSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
 ): void {
@@ -1312,7 +1315,7 @@ export function drawImagesOnTile(stage: Stage, imgShapes: ReadonlyArray<ImgShape
 
     drawImgShape(stage, shape, selectedFieldShapeIds, onClickHandler, onMouseDownHandler, onMouseUpHandler,
       zIndexCache,
-      worldSettings, imgSymbols, xOffset, yOffset, isSelected, drawBasedOnSymbolIndicator,
+      worldSettings, imgSymbols, xOffset, yOffset, isSelected, drawBasedOnSymbolIndicator, drawResizeHandles,
       onDragHandlerMouseDownHandler, onRotationHandlerMouseDownHandler
     )
   }
@@ -1329,6 +1332,7 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
                              yOffset: number,
                              isSelected: boolean,
                              drawBasedOnSymbolIndicator: boolean,
+                             drawResizeHandles: boolean,
                              onDragHandlerMouseDownHandler: ((field: ImgShape | ImgSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
                              onRotationHandlerMouseDownHandler: ((field: ImgShape | ImgSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => void) | null,
 ): void {
@@ -1513,13 +1517,10 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
       height: (symbolForShape !== null && symbolForShape.overwriteHeight ? symbolForShape.height : imgShape.height) + borderThickness * 2
     }
 
-    if (imgShape.createdFromSymbolGuid === null) {
+    if (imgShape.createdFromSymbolGuid === null && drawResizeHandles) {
 
 
-      let minX = 0
-      let minY = 0
-      let maxX = 0
-      let maxY = 0
+
 
       const resizeShapeCoords: { rect: Rect, position: DragHandlePos }[] = [
         {
@@ -1599,20 +1600,6 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
 
       for (let i = 0; i < resizeShapeCoords.length; i++) {
         const resizeShapeCoord = resizeShapeCoords[i];
-
-        if (resizeShapeCoord.rect.x < minX) {
-          minX = resizeShapeCoord.rect.x
-        }
-        if (resizeShapeCoord.rect.x + resizeShapeCoord.rect.width > maxX) {
-          maxX = resizeShapeCoord.rect.x + resizeShapeCoord.rect.width
-        }
-
-        if (resizeShapeCoord.rect.y < minY) {
-          minY = resizeShapeCoord.rect.y
-        }
-        if (resizeShapeCoord.rect.y + resizeShapeCoord.rect.height > maxY) {
-          maxY = resizeShapeCoord.rect.y + resizeShapeCoord.rect.height
-        }
 
         const resizeHandle = new createjs.Shape()
 

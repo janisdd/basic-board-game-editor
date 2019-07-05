@@ -55,7 +55,7 @@ import LeftEditorTabMenu from './leftEditorTabMenu'
 import RightEditorTabMenu from './rightEditorTabMenu'
 import TileActionsBar from './tileActionsBar'
 import * as mousetrap from "mousetrap";
-import {FieldShape, ImgShape, LineShape} from "../../types/drawing";
+import {FieldShape, ImgShape, LineShape, PlainPoint} from "../../types/drawing";
 import {DuplicateHelper} from "../../helpers/duplicateHelper";
 import TileRightActionBar from './tileRightActionBar'
 import {getI18n, getRawI18n} from "../../../i18n/i18nRoot";
@@ -70,6 +70,9 @@ import {renewAllZIndicesInTile} from "../../helpers/someIndexHelper";
 import {set_editorSelection_rect} from "../../state/reducers/tileEditorSelection/tileEditorSelectionReducer";
 import {exportPngImagesBgColor} from "../../constants";
 import {IoHelper} from "../../helpers/ioHelper";
+import * as _ from "lodash";
+
+// import {debounce} from "../../helpers/functionHelpers";
 
 
 export interface MyProps {

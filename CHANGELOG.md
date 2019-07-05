@@ -6,6 +6,13 @@ already changed but version has not changed
 
 ## 1.3.0
 
+- performance fixes
+- anchor points cannot longer be outside of the field bounds
+  - thus we can check if a line gets connected/disconnected when we check field bounds...
+- added lodash
+
+## 1.3.0
+
 - [break-soft] overhaul connected lines and fields
   - now works better reliable
 - [added] field and img resize handles

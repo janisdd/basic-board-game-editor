@@ -1065,6 +1065,12 @@ export function isFieldAndLineConnectedThroughAnchorPoints(field: FieldShape, fi
  */
 export function isFieldAndLinePointConnectedThroughAnchorPoints(field: FieldShape, fieldSymbols: ReadonlyArray<FieldSymbol>, lineId: number, linePoint: Point, anchorPointSnapToleranceRadiusInPx: number = 0): IsFieldAndLineConnectedResult | null {
 
+
+
+  if (linePoint.x < field.x) return null
+  if (linePoint.y < field.y) return null
+
+
   //use field anchor point definitions
   let fieldAnchorPoints: ReadonlyArray<AnchorPoint> = field.anchorPoints
   let symbol: FieldSymbol | null = null
@@ -1078,6 +1084,9 @@ export function isFieldAndLinePointConnectedThroughAnchorPoints(field: FieldShap
       throw new Error(msg)
     }
   }
+
+  if (field.x + (field.createdFromSymbolGuid !== null && symbol.overwriteWidth ? symbol.width : field.width) < linePoint.x) return null
+  if (field.y + (field.createdFromSymbolGuid !== null && symbol.overwriteHeight ? symbol.height : field.height) < linePoint.y) return null
 
 
   const anchorPoints = calcAnchorPointsRaw(

@@ -692,6 +692,7 @@ export class MigrationHelper {
     createVersionShallowMigration('1.2.1', '1.2.2'),
     new Migration_1_2_2__to__1_2_3(),
     new Migration_1_2_3__to__1_3_0(),
+    createVersionShallowMigration('1.3.0', '1.3.1'),
   ]
 
   /**

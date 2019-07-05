@@ -446,7 +446,13 @@ function _reducer(state: State = initial, action: AllActions): State {
 
     case ActionType.SET_fieldAnchorPoints: {
       const res = replaceProperty(state, action.fieldId, p => {
-        return {...p, anchorPoints: action.anchorPoints}
+        return {...p, anchorPoints: action.anchorPoints.map(an => {
+          return {
+            ...an,
+            percentX: Math.max(0, Math.min(100, an.percentX)),
+            percentY: Math.max(0, Math.min(100, an.percentY)),
+          }
+          })}
       })
       return res
     }

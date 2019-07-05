@@ -327,6 +327,10 @@ class tileRenderer extends React.Component<Props, any> {
     e.preventDefault()
   }
 
+
+  mouseMoveThrottled = _.throttle(( eventObj: MouseEvent) => {
+    this.onMouseMove(eventObj)
+  }, 100)
   /**
    * clears and attaches the listeners to the stage
    */
@@ -348,7 +352,8 @@ class tileRenderer extends React.Component<Props, any> {
     })
 
 
-    this.renderStage.on('stagemousemove', this.onMouseMove.bind(this))
+    // this.renderStage.on('stagemousemove', this.onMouseMove.bind(this))
+    this.renderStage.on('stagemousemove', this.mouseMoveThrottled)
 
     this.renderStage.on('stagemousedown', eventObj => {
       const e = eventObj as MouseEvent
@@ -488,6 +493,59 @@ class tileRenderer extends React.Component<Props, any> {
 
     this.renderStage.x = this.props.stageOffsetX + this.props.stageOffsetXScaleCorrection
     this.renderStage.y = this.props.stageOffsetY + this.props.stageOffsetYScaleCorrection
+
+
+    //resize handles are only displayed if not based on symbol and selected (automatically in graphics core)
+    //field + field symbol is selected or
+    //field + line(symbol)/img (symbol)
+    let canShowFieldResizeHandles: boolean = true
+
+    //img + img symbol is selected or
+    //img + line(symbol)/field (symbol )
+    let canShowImgResizeHandles: boolean = true
+
+    if (this.props.selectedLineShapeIds.length > 0) {
+      canShowFieldResizeHandles = false
+      canShowImgResizeHandles = false
+    }
+
+    if (this.props.selectedFieldShapeIds.length > 0) {
+
+      canShowImgResizeHandles = false
+
+      const selectedFieldShapes = this.props.selectedFieldShapeIds.map<FieldShape>(id => this.props.fieldShapes.find(field => {
+
+        if (isFieldShape(field)) {
+
+          return id === field.id
+        }
+
+        return false
+      }) as FieldShape)
+
+      if (selectedFieldShapes.some(p => p.createdFromSymbolGuid !== null)) {
+        canShowFieldResizeHandles = false
+      }
+    }
+
+    if (this.props.selectedImageShapeIds.length > 0) {
+
+      canShowFieldResizeHandles = false
+
+      const selectedImgShapes = this.props.selectedImageShapeIds.map<ImgShape>(id => this.props.imgShapes.find(img => {
+
+        if (isImgShape(img)) {
+
+         return id === img.id
+        }
+
+        return false
+      }) as ImgShape)
+
+      if (selectedImgShapes.some(p => p.createdFromSymbolGuid !== null)) {
+        canShowImgResizeHandles = false
+      }
+    }
 
     // const width = (this.renderStage.canvas as HTMLCanvasElement).width
     // const height = (this.renderStage.canvas as HTMLCanvasElement).height
@@ -634,6 +692,7 @@ class tileRenderer extends React.Component<Props, any> {
       0,
       0,
       true,
+      canShowFieldResizeHandles,
       (field: FieldShape | FieldSymbol, dragHandlerPos: DragHandlePos, container: createjs.Container, e: MouseEvent) => {
 
         const {x: mouseX, y: mouseY} = this.renderStage.globalToLocal(e.stageX, e.stageY)
@@ -867,6 +926,7 @@ class tileRenderer extends React.Component<Props, any> {
       0,
       0,
       true,
+      canShowImgResizeHandles,
       (imgShape, dragHandlerPos, container, e) => {
 
         const {x: mouseX, y: mouseY} = this.renderStage.globalToLocal(e.stageX, e.stageY)
@@ -1073,7 +1133,8 @@ class tileRenderer extends React.Component<Props, any> {
         //line point + anchor points + too lazy
         this.props.setLinePointNewPos(draggingObjectId, draggingPointId, {x: 0, y: 0}, {x: x, y: y}, true)
 
-      } else {
+      }
+      else {
 
 
         //same as this.props.setPropertyEditor_FieldX()
@@ -1470,7 +1531,8 @@ class tileRenderer extends React.Component<Props, any> {
   render(): JSX.Element {
 
     return (
-      <div className="render-area" style={this.props.setupResizeListener ? null : {width: this.props.viewWidth, height: this.props.viewHeight}}
+      <div className="render-area"
+           style={this.props.setupResizeListener ? null : {width: this.props.viewWidth, height: this.props.viewHeight}}
            ref={p => this.canvasContainer = p}>
         {
           //show drag handles
@@ -1479,13 +1541,13 @@ class tileRenderer extends React.Component<Props, any> {
         {/*canvasTop={this.canvas !== null ? this.canvas.offsetTop : 0}/>*/}
 
         <canvas
-                className={['tile-canvas', this.props.isSelectingNextField ? 'is-selecting-next-field-cursor' : ''].join(' ')}
-                ref={p => this.canvas = p}
-                width={this.props.canvasWidth}
-                height={this.props.canvasHeight}
+          className={['tile-canvas', this.props.isSelectingNextField ? 'is-selecting-next-field-cursor' : ''].join(' ')}
+          ref={p => this.canvas = p}
+          width={this.props.canvasWidth}
+          height={this.props.canvasHeight}
 
 
-                style={this.props.setupResizeListener ? null : {width: this.props.viewWidth, height: this.props.viewHeight}}
+          style={this.props.setupResizeListener ? null : {width: this.props.viewWidth, height: this.props.viewHeight}}
           // style={{maxHeight: this.props.viewMaxHeight, maxWidth: this.props.viewMaxWidth}}
         ></canvas>
 
