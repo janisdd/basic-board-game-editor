@@ -26,6 +26,7 @@ import {set_world_tiles} from "../../../state/reducers/world/tileSurrogates/acti
 import {AvailableAppTabs} from "../../../state/reducers/appReducer";
 import {DialogHelper} from "../../../helpers/dialogHelper";
 import {WorldTilesHelper} from "../../../helpers/worldTilesHelper";
+import {escapeHtml} from "../../../helpers/stringHelper";
 
 export interface MyProps {
   //readonly test: string
@@ -79,20 +80,27 @@ class tileLibrary extends React.Component<Props, any> {
     this.onTileDragLeave = this.onTileDragLeave.bind(this)
   }
 
-  async onImportTile(e: SyntheticEvent<HTMLInputElement>): Promise<void> {
+  onImportTile(e: SyntheticEvent<HTMLInputElement>){
 
     const files = e.currentTarget.files
     if (!files) return
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files.item(i)
-      //TODO maybe make real promise?
-      await this.importTileFile(file)
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files.item(i)
+
+        //we cannot normally handle this and show dialogs because we dispatch actions here that trigger rerender and
+        //thus the input get's removed and added again and the file list gets discarded
+        this.importTileFile(file)
+      }
+
+    } catch(err) {
+
     }
 
   }
 
-  async importTileFile(file: File): Promise<void> {
+  importTileFile(file: File) {
 
     const fileReader = new FileReader()
 
@@ -100,7 +108,7 @@ class tileLibrary extends React.Component<Props, any> {
       Logger.log(ev.loaded + '/' + ev.total)
     }
 
-    fileReader.onload = ev => {
+    fileReader.onload = (ev) => {
       const json = fileReader.result as string
 
       IoHelper.importTile(json)
@@ -110,7 +118,11 @@ class tileLibrary extends React.Component<Props, any> {
 
     fileReader.onerror = ev => {
       this.importInput.value = ''
-      Logger.fatal('Some error occurred during tile upload/import')
+      const msg = `Some error occurred during tile upload/import, file name: ${escapeHtml(file.name)}`
+      Logger.log(msg)
+
+
+      Logger.fatal(msg)
     }
 
     fileReader.readAsText(file)
@@ -132,17 +144,19 @@ class tileLibrary extends React.Component<Props, any> {
   //   return fileIds
   // }
 
-  async onTileDrop(e: DragEvent<HTMLDivElement>) {
+  onTileDrop(e: DragEvent<HTMLDivElement>) {
 
-    //because async
-    e.persist()
+    try {
 
-    // const imgFilesIds = this.getValidFilesIds(e)
-    for (let i = 0; i < e.dataTransfer.items.length; i++) {
-      const file = e.dataTransfer.files.item(i)
-      if (file.name.endsWith(tileFileExtensionWithoutDot)) {
-        await this.importTileFile(file)
+      // const imgFilesIds = this.getValidFilesIds(e)
+      for (let i = 0; i < e.dataTransfer.items.length; i++) {
+        const file = e.dataTransfer.files.item(i)
+        if (file.name.endsWith(tileFileExtensionWithoutDot)) {
+          this.importTileFile(file)
+        }
       }
+    } catch(err) {
+
     }
 
     e.preventDefault()

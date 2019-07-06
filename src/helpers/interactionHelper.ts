@@ -288,6 +288,7 @@ export function calcSingleAnchorPoint(fieldX: number, fieldY: number, fieldWidth
  * @param majorLineDirection the line direction to start with (to know where the line start (head) should be)
  * @param lineShapes the lines to check if a border point is connected to a line (not add a line twice)
  * @param insertLinesEvenIfFieldsIntersect
+ * @param alwaysInsertArrowHeadsWhenAutoConnectingFields if an arrow head should be added to all lines or just when branching (control if)?
  */
 export function autoConnectFieldsWithLinesByCmdText(
   fields: ReadonlyArray<FieldShape>,
@@ -302,7 +303,8 @@ export function autoConnectFieldsWithLinesByCmdText(
   borderPointsDiameterInPx: number,
   majorLineDirection: MajorLineDirection,
   lineShapes: ReadonlyArray<LineShape>,
-  insertLinesEvenIfFieldsIntersect: boolean
+  insertLinesEvenIfFieldsIntersect: boolean,
+  alwaysInsertArrowHeadsWhenAutoConnectingFields: boolean,
 ): void {
 
   //one field is possible if we connect a border point to a field
@@ -360,7 +362,7 @@ export function autoConnectFieldsWithLinesByCmdText(
   let lastZIndex = newZIndex
   for (const field of fields) {
     lastZIndex = connectFieldsFromRootFieldByCmdText(field, fields, fieldSymbols, lastZIndex, majorLineDirection,
-      allBorderPoints, borderPointsDiameterInPx, lineShapes, insertLinesEvenIfFieldsIntersect)
+      allBorderPoints, borderPointsDiameterInPx, lineShapes, insertLinesEvenIfFieldsIntersect, alwaysInsertArrowHeadsWhenAutoConnectingFields)
   }
 
   //connect border points to the fields
@@ -496,6 +498,7 @@ export function autoConnectFieldsWithLinesByCmdText(
  * @param borderPointsDiameterInPx
  * @param lineShapes the lines to check if a border point is connected to a line (not add a line twice)
  * @param insertLinesEvenIfFieldsIntersect
+ * @param alwaysInsertArrowHeadsWhenAutoConnectingFields if an arrow head should be added to all lines or just when branching (control if)?
  * @returns {number} the new z index
  */
 function connectFieldsFromRootFieldByCmdText(
@@ -507,7 +510,8 @@ function connectFieldsFromRootFieldByCmdText(
   allBorderPoints: ReadonlyArray<BorderPointWithPos>,
   borderPointsDiameterInPx: number,
   lineShapes: ReadonlyArray<LineShape>,
-  insertLinesEvenIfFieldsIntersect: boolean
+  insertLinesEvenIfFieldsIntersect: boolean,
+  alwaysInsertArrowHeadsWhenAutoConnectingFields: boolean
 ): number {
 
   if (rootField.cmdText === null || rootField.cmdText.trim() === '') return
@@ -547,7 +551,7 @@ function connectFieldsFromRootFieldByCmdText(
         majorLineDirection,
         allBorderPoints,
         borderPointsDiameterInPx,
-        false,
+        alwaysInsertArrowHeadsWhenAutoConnectingFields,
         lastZIndex,
         lineShapes,
         insertLinesEvenIfFieldsIntersect

@@ -28,6 +28,8 @@ import {
   isLineSymbol
 } from "../src/helpers/typeHelper";
 import {
+  anchorPointConnectedColor,
+  fontAwesomeMatchRegex,
   imgNotFoundBgColor,
   imgNotFoundColor,
   imgNotFoundStrokeThickness,
@@ -40,9 +42,13 @@ import {Logger} from "../src/helpers/logger";
 import Stage = createjs.Stage;
 import MouseEvent = createjs.MouseEvent;
 import Bitmap = createjs.Bitmap;
+import {GameUnit} from "../simulation/model/executionUnit";
+import {Compiler} from "../simulation/compiler/compiler";
 
 const Bezier = require("bezier-js") //used to calculate the arrow head/tail degree
 
+const langCompiler = require('../simulation/compiler/langCompiler').parser
+const compiler = new Compiler(langCompiler)
 
 /**
  *
@@ -391,7 +397,7 @@ export function drawFieldsOnTile(stage: Stage, fieldShapes: ReadonlyArray<FieldS
 
     drawFieldShape(stage, shape, selectedFieldShapeIds, onClickHandler, onMouseDownHandler, onMouseUpHandler,
       zIndexCache, drawFieldIds, drawAnchorPoints, worldSettings, fieldSymbols, xOffset, yOffset, isSelected,
-      drawBasedOnSymbolIndicator,drawResizeHandles,
+      drawBasedOnSymbolIndicator, drawResizeHandles,
       onDragHandlerMouseDownHandler, onRotationHandlerMouseDownHandler
     )
   }
@@ -429,6 +435,42 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
     }
   }
 
+  let realCmdText = (symbolForShape !== null && symbolForShape.overwriteCmdText ? symbolForShape.cmdText : field.cmdText)
+
+  realCmdText = realCmdText === null ? '' : realCmdText
+
+  let isForceOrImplicitlyForced = false
+  let isBranchIf = false
+
+  if (realCmdText !== '') {
+    //apply global tile settings
+
+    let game: GameUnit
+    try {
+      game = compiler.parse(realCmdText)
+
+      //apply forced style if forced or implicitly forced
+      if (game.statements.some(p =>
+        p.type === "force" ||
+        p.type === "begin_scope" ||
+        p.type === "end_scope" ||
+        p.type === "set_return_result" ||
+        p.type === "limit_scope"
+      )) {
+        isForceOrImplicitlyForced = true
+      }
+
+      if (game.statements.some(p =>
+        p.type === "control_ifElse")) {
+        isBranchIf = true
+      }
+
+    } catch (err) {
+      //this is ok
+    }
+
+  }
+
   let container = new createjs.Container()
   let rectShape = new createjs.Shape()
   //let borderShape = new createjs.Shape() //we use the stroke instead
@@ -436,8 +478,18 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
 
 
   //--start
-  const borderSize = (symbolForShape !== null && symbolForShape.overwriteBorderSizeInPx ? symbolForShape.borderSizeInPx : field.borderSizeInPx)
-  const borderColor = symbolForShape !== null && symbolForShape.overwriteBorderColor ? symbolForShape.borderColor : field.borderColor
+  const borderSize = (isBranchIf && worldSettings.branchIfAutoBorderSizeInPx > 0)
+    ? worldSettings.branchIfAutoBorderSizeInPx
+    : (isForceOrImplicitlyForced && worldSettings.forcedFieldAutoBorderSizeInPx > 0)
+      ? worldSettings.forcedFieldAutoBorderSizeInPx
+      : (symbolForShape !== null && symbolForShape.overwriteBorderSizeInPx ? symbolForShape.borderSizeInPx : field.borderSizeInPx)
+
+  const borderColor = (isBranchIf && worldSettings.branchIfBorderColor !== '')
+    ? worldSettings.branchIfBorderColor
+    : (isForceOrImplicitlyForced && worldSettings.forcedFieldBorderColor !== '')
+      ? worldSettings.forcedFieldBorderColor
+      : symbolForShape !== null && symbolForShape.overwriteBorderColor ? symbolForShape.borderColor : field.borderColor
+
 
   graphics = graphics.beginFill(symbolForShape !== null && symbolForShape.overwriteBgColor ? symbolForShape.bgColor : field.bgColor)
 
@@ -651,17 +703,37 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
 
   }
 
-  if ((symbolForShape !== null && symbolForShape.overwriteText ? symbolForShape.text : field.text) !== null) {
+  let fieldText = (symbolForShape !== null && symbolForShape.overwriteText ? symbolForShape.text : field.text)
+
+  if (isBranchIf && worldSettings.branchIfPrependText !== '') {
+    fieldText = worldSettings.branchIfPrependText + ' ' + fieldText
+  } else if (isForceOrImplicitlyForced && worldSettings.forcedFieldAutoPrependText !== '') {
+    fieldText = worldSettings.forcedFieldAutoPrependText + ' ' + fieldText
+  }
+
+
+  if (fieldText !== null && fieldText !== '') {
 
     let textShape = new createjs.Text();
 
 
-    let fontSizeInPx = (symbolForShape !== null && symbolForShape.overwriteFontSizeInPx ? symbolForShape.fontSizeInPx : field.fontSizeInPx)
-    let fontName = (symbolForShape !== null && symbolForShape.overwriteFontName ? symbolForShape.fontName : field.fontName)
-    let isFontBold = (symbolForShape !== null && symbolForShape.overwriteFontDecoration ? symbolForShape.isFontBold : field.isFontBold)
-    let isFontItalic = (symbolForShape !== null && symbolForShape.overwriteFontDecoration ? symbolForShape.isFontItalic : field.isFontItalic)
+    const fontSizeInPx = (symbolForShape !== null && symbolForShape.overwriteFontSizeInPx ? symbolForShape.fontSizeInPx : field.fontSizeInPx)
+    const fontName = (symbolForShape !== null && symbolForShape.overwriteFontName ? symbolForShape.fontName : field.fontName)
 
-    textShape.font = `${isFontBold ? 'bold ' : ''}${isFontItalic ? 'italic ' : ''}${fontSizeInPx}px '${fontName}'`
+    const isFontBold = isBranchIf
+      ? worldSettings.branchIfIsFontBold
+      : isForceOrImplicitlyForced
+        ? worldSettings.forcedFieldIsFontBold
+        : (symbolForShape !== null && symbolForShape.overwriteFontDecoration ? symbolForShape.isFontBold : field.isFontBold)
+
+    const isFontItalic = isBranchIf
+      ? worldSettings.branchIfIsFontItalic
+      : isForceOrImplicitlyForced
+        ? worldSettings.forcedFieldIsFontItalic
+        : (symbolForShape !== null && symbolForShape.overwriteFontDecoration ? symbolForShape.isFontItalic : field.isFontItalic)
+
+    textShape.font = `${isFontBold ? 'bold ' : ''}${isFontItalic ? 'italic ' : ''}${fontSizeInPx}px '${fontName}', 'Font Awesome 5 Free'`
+
 
     textShape.color = symbolForShape !== null && symbolForShape.overwriteColor ? symbolForShape.color : field.color
 
@@ -686,7 +758,19 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
 
     let singleLineHeight = textShape.getMeasuredHeight()
 
-    textShape.text = (symbolForShape !== null && symbolForShape.overwriteText ? symbolForShape.text : field.text) || ''
+    textShape.text = fieldText || ''
+
+    const matchResults = textShape.text.match(fontAwesomeMatchRegex)
+
+    if (matchResults) {
+
+      for (let i = 0; i < matchResults.length; i++) {
+        const matchResult = matchResults[i]
+        const intVal = parseInt(matchResult.substr(1), 16)
+        textShape.text = textShape.text.replace(matchResult, String.fromCharCode(intVal))
+      }
+    }
+
 
     //vertical text align
     if ((symbolForShape !== null && symbolForShape.overwriteVerticalTextAlign ? symbolForShape.verticalTextAlign : field.verticalTextAlign) === VerticalAlign.center) {
@@ -739,7 +823,7 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
 
       .drawRect(
         (symbolForShape !== null && symbolForShape.overwriteWidth ? symbolForShape.width : field.width) - rectWidth,
-        - rectHeight - worldSettings.anchorPointDiameter - 1, //-1 for stroke thickness
+        -rectHeight - worldSettings.anchorPointDiameter - 1, //-1 for stroke thickness
         rectWidth,
         rectHeight
       )
@@ -789,16 +873,26 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
       (symbolForShape !== null ? symbolForShape.anchorPoints : field.anchorPoints), xOffset, yOffset,
       0, //the container is rotated no need to do it here...
     )
-    for (const point of anchorPoints) { //anchor points depend on x,y so not use the symbol
+
+    for (let i = 0; i < anchorPoints.length; i++) { //anchor points depend on x,y so not use the symbol
+      const anchorPointPos = anchorPoints[i];
+
+      //field anchor points and symbol are in sync... so we can just use index
+      const anchorPoint = field.anchorPoints[i]
+
+
 
       let pointShape = new createjs.Shape()
-      pointShape.graphics.beginFill(worldSettings.anchorPointColor)
-        .drawCircle(point.x, point.y, worldSettings.anchorPointDiameter)
+      pointShape.graphics.beginFill(anchorPoint.connectedLineTuples.length > 0
+        ? worldSettings.anchorPointSomeConnectedColor
+        : worldSettings.anchorPointColor)
+        .drawCircle(anchorPointPos.x, anchorPointPos.y, worldSettings.anchorPointDiameter)
 
-      pointShape.setBounds(point.x - (worldSettings.anchorPointDiameter / 2), point.y - (worldSettings.anchorPointDiameter / 2),
+      pointShape.setBounds(anchorPointPos.x - (worldSettings.anchorPointDiameter / 2), anchorPointPos.y - (worldSettings.anchorPointDiameter / 2),
         worldSettings.anchorPointDiameter, worldSettings.anchorPointDiameter)
 
       container.addChild(pointShape)
+
     }
   }
 
@@ -1518,8 +1612,6 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
     }
 
     if (imgShape.createdFromSymbolGuid === null && drawResizeHandles) {
-
-
 
 
       const resizeShapeCoords: { rect: Rect, position: DragHandlePos }[] = [

@@ -105,7 +105,6 @@ class Migration_1_0_0__to__1_0_1 implements MigrationClass {
   }
 
 
-
 }
 
 /**
@@ -253,6 +252,7 @@ class Migration_1_0_3__to__1_1_0 implements MigrationClass {
         anchorPointColor: '#f1b213',
         anchorPointDiameter: 3,
         anchorPointSnapToleranceRadiusInPx: 7,
+        anchorPointSomeConnectedColor: 'green',
 
         stageOffsetX: 0,
         stageOffsetY: 0,
@@ -289,6 +289,18 @@ class Migration_1_0_3__to__1_1_0 implements MigrationClass {
         timeInS_expr_sum: 1,
         timeInS_expr_term: 1,
         timeInS_expr_factor: 1,
+
+        alwaysInsertArrowHeadsWhenAutoConnectingFields: true,
+        forcedFieldIsFontItalic: false,
+        forcedFieldIsFontBold: true,
+        branchIfIsFontItalic: false,
+        branchIfIsFontBold: true,
+        forcedFieldBorderColor: 'black',
+        forcedFieldAutoBorderSizeInPx: 12,
+        forcedFieldAutoPrependText: '\\f071',
+        branchIfPrependText: '\\f126',
+        branchIfBorderColor: 'black',
+        branchIfAutoBorderSizeInPx: 2
       },
       allTiles: exportWorld.allTiles.map(exportTile => {
         return {
@@ -550,55 +562,144 @@ class Migration_1_2_3__to__1_3_0 implements MigrationClass {
   warningMsg = 'We changed the connected lines system (field to lines), thus we dropped all the connected lines information in your fields. Please reconnect all your lines and fields!'
 
   public migrateTile(exportTile: ExportTile): ExportTile {
-    return {
+
+    let maxId = 0
+
+    maxId = Math.max(
+      ...exportTile.tile.fieldShapes.map(p => p.id),
+      ...exportTile.tile.imgShapes.map(p => p.id),
+      ...exportTile.tile.lineShapes.map(p => p.id),
+    )
+
+    for (let i = 0; i < exportTile.tile.lineShapes.length; i++) {
+      const lineShape = exportTile.tile.lineShapes[i];
+
+      maxId = Math.max(maxId, lineShape.startPoint.id)
+      maxId = Math.max(maxId, ...lineShape.points.map(p => p.id))
+    }
+
+    exportTile = {
+      ...exportTile,
+      editorVersion: this.newVersion,
+
+      fieldSymbols: exportTile.fieldSymbols.map(fieldS => {
+        return {
+          ...fieldS,
+          anchorPoints: fieldS.anchorPoints.map(p => {
+            return {
+              ...p,
+              connectedLineTuples: [],
+              id: maxId++
+            }
+          })
+        }
+      })
+    }
+
+
+    let newVar = {
       ...exportTile,
       editorVersion: this.newVersion,
       tile: {
         ...exportTile.tile,
         fieldShapes: exportTile.tile.fieldShapes.map(field => {
+
+          const symbol = field.createdFromSymbolGuid === null
+            ? undefined
+            : exportTile.fieldSymbols.find(p => p.guid === field.createdFromSymbolGuid)
+
           return {
             ...field,
-            anchorPoints: field.anchorPoints.map(p => {
-              return {
-                ...p,
-                connectedLineTuples: [],
-              }
-            })
+            anchorPoints: symbol
+              ? symbol.anchorPoints.map(p => {
+                return {
+                  ...p
+                }
+              })
+              : field.anchorPoints.map(p => {
+                return {
+                  ...p,
+                  connectedLineTuples: [],
+                  id: maxId++
+                }
+              })
           }
         }),
         topBorderPoints: exportTile.tile.topBorderPoints.map(p => {
           return {
             ...p,
-            connectedLineTuples: []
+            connectedLineTuples: [],
+            id: maxId++
           }
         }),
         botBorderPoints: exportTile.tile.botBorderPoints.map(p => {
           return {
             ...p,
-            connectedLineTuples: []
+            connectedLineTuples: [],
+            id: maxId++
           }
         }),
         leftBorderPoints: exportTile.tile.leftBorderPoints.map(p => {
           return {
             ...p,
-            connectedLineTuples: []
+            connectedLineTuples: [],
+            id: maxId++
           }
         }),
         rightBorderPoint: exportTile.tile.rightBorderPoint.map(p => {
           return {
             ...p,
-            connectedLineTuples: []
+            connectedLineTuples: [],
+            id: maxId++
           }
         }),
       }
-    }
+    };
+    return newVar
   }
 
   migrateWorld(exportWorld: ExportWorld): ExportWorld {
+
+    let maxId = 2000 //...
+
+    exportWorld = {
+      ...exportWorld,
+      editorVersion: this.newVersion,
+
+      fieldSymbols: exportWorld.fieldSymbols.map(fieldS => {
+        return {
+          ...fieldS,
+          anchorPoints: fieldS.anchorPoints.map(p => {
+            return {
+              ...p,
+              connectedLineTuples: [],
+              id: maxId++
+            }
+          })
+        }
+      })
+    }
+
     return {
       ...exportWorld,
       editorVersion: this.newVersion,
       allTiles: exportWorld.allTiles.map(tile => {
+
+        let maxId = 0
+
+        maxId = Math.max(
+          ...tile.fieldShapes.map(p => p.id),
+          ...tile.imgShapes.map(p => p.id),
+          ...tile.lineShapes.map(p => p.id),
+        )
+
+        for (let i = 0; i < tile.lineShapes.length; i++) {
+          const lineShape = tile.lineShapes[i];
+
+          maxId = Math.max(maxId, lineShape.startPoint.id)
+          maxId = Math.max(maxId, ...lineShape.points.map(p => p.id))
+        }
+
         return {
           ...tile,
           fieldShapes: tile.fieldShapes.map(field => {
@@ -608,6 +709,7 @@ class Migration_1_2_3__to__1_3_0 implements MigrationClass {
                 return {
                   ...p,
                   connectedLineTuples: [],
+                  id: maxId++
                 }
               })
             }
@@ -615,29 +717,48 @@ class Migration_1_2_3__to__1_3_0 implements MigrationClass {
           topBorderPoints: tile.topBorderPoints.map(p => {
             return {
               ...p,
-              connectedLineTuples: []
+              connectedLineTuples: [],
+              id: maxId++
             }
           }),
           botBorderPoints: tile.botBorderPoints.map(p => {
             return {
               ...p,
-              connectedLineTuples: []
+              connectedLineTuples: [],
+              id: maxId++
             }
           }),
           leftBorderPoints: tile.leftBorderPoints.map(p => {
             return {
               ...p,
-              connectedLineTuples: []
+              connectedLineTuples: [],
+              id: maxId++
             }
           }),
           rightBorderPoint: tile.rightBorderPoint.map(p => {
             return {
               ...p,
-              connectedLineTuples: []
+              connectedLineTuples: [],
+              id: maxId++
             }
           }),
         }
-      })
+      }),
+      worldSettings: {
+        ...exportWorld.worldSettings,
+        alwaysInsertArrowHeadsWhenAutoConnectingFields: true,
+        forcedFieldIsFontItalic: false,
+        forcedFieldIsFontBold: true,
+        branchIfIsFontItalic: false,
+        branchIfIsFontBold: true,
+        forcedFieldBorderColor: 'black',
+        forcedFieldAutoBorderSizeInPx: 12,
+        forcedFieldAutoPrependText: '\\f071',
+        branchIfPrependText: '\\f126',
+        branchIfBorderColor: 'black',
+        branchIfAutoBorderSizeInPx: 2,
+        anchorPointSomeConnectedColor: 'green',
+      },
     }
   }
 
@@ -699,11 +820,13 @@ export class MigrationHelper {
    * applies all pending migrations to the tile
    * the returned tile version is the latest version
    *
+   * this cannot be async because for file inputs react would rerender the input and the file list would get discarded
+   *
    * a new obj is created
    * @param {ExportTile} exportTile
    * @returns {ExportTile | null} null on any error
    */
-  public static async applyMigrationsToTile(exportTile: ExportTile): Promise<ExportTile | null> {
+  public static applyMigrationsToTile(exportTile: ExportTile): ExportTile | null {
 
     for (let i = 0; i < this.allMigrations.length; i++) {
       const migration = this.allMigrations[i]
@@ -715,7 +838,8 @@ export class MigrationHelper {
 
 
           if (migration.warningMsg) {
-            await DialogHelper.okDialog(`Migration version ${migration.oldVersion} to ${migration.newVersion}`, migration.warningMsg)
+            Logger.log(`Migration version ${migration.oldVersion} to ${migration.newVersion}, msg: ${migration.warningMsg}`)
+            // DialogHelper.okDialog(`Migration version ${migration.oldVersion} to ${migration.newVersion}`, migration.warningMsg)
           }
 
         } catch (err) {
@@ -740,11 +864,13 @@ export class MigrationHelper {
    * applies all pending migrations to the world
    * the returned world version is the latest version
    *
+   * this cannot be async because for file inputs react would rerender the input and the file list would get discarded
+   *
    * a new obj is created
    * @param {ExportWorld} exportWorld
    * @returns {ExportWorld | null} null on any error
    */
-  public static async applyMigrationsToWorld(exportWorld: ExportWorld): Promise<ExportWorld | null> {
+  public static applyMigrationsToWorld(exportWorld: ExportWorld): ExportWorld | null {
 
     for (let i = 0; i < this.allMigrations.length; i++) {
       const migration = this.allMigrations[i]
@@ -756,7 +882,8 @@ export class MigrationHelper {
           Logger.log(`migrated export world from version ${migration.oldVersion} to ${migration.newVersion}`)
 
           if (migration.warningMsg) {
-            await DialogHelper.okDialog(`Migration version ${migration.oldVersion} to ${migration.newVersion}`, migration.warningMsg)
+            Logger.log(`Migration version ${migration.oldVersion} to ${migration.newVersion}, msg: ${migration.warningMsg}`)
+            // DialogHelper.okDialog(`Migration version ${migration.oldVersion} to ${migration.newVersion}`, migration.warningMsg)
           }
         } catch (err) {
           Logger.fatal(`migrating export world failed from version ${migration.oldVersion} to ${migration.newVersion}`)

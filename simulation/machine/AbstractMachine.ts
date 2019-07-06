@@ -739,7 +739,14 @@ export class AbstractMachine {
       case "log": {
 
         const res = this.execExpression(statement.expr, state)
-        this.builtIn_log(res.val)
+
+        if (res.boolVal !== null) {
+          this.builtIn_log(res.boolVal)
+        }
+        else if (res.val !== null) {
+          this.builtIn_log(res.val)
+        }
+
         return state
       }
 
@@ -1545,8 +1552,9 @@ export class AbstractMachine {
       this.makeError(`ternary expression condition didn't evaluate to a bool`)
     }
 
-    const trueState = {...state}
-    const falseState = {...state}
+    //make a deep copy to check for both branches and do not modify state
+    const trueState: MachineState = JSON.parse(JSON.stringify(state))
+    const falseState: MachineState = JSON.parse(JSON.stringify(state))
 
     const trueRes = this.execExpression(ternaryExpr.trueExpression, trueState)
     const falseRes = this.execExpression(ternaryExpr.falseExpression, falseState)

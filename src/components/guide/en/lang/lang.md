@@ -360,6 +360,8 @@ end_scope()
 
 `return [expr]` or `result [expr]` sets the player last return/result value this is useful if you want to mimic a function with a value value
 
+**all statements in the same field will be always executed (field is implicit forced)!**
+
 ```bbgel
 return 3
 /* or */

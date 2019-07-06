@@ -1090,7 +1090,7 @@ export class Simulator {
   }
 
   private static getImplicitForcedStatements(stats: ReadonlyArray<StatementUnit>): ReadonlyArray<StatementUnit> {
-    return stats.filter(p => (p.type === "begin_scope" || p.type === "end_scope" || p.type === 'limit_scope'))
+    return stats.filter(p => (p.type === "begin_scope" || p.type === "end_scope" || p.type === 'limit_scope' || p.type === 'set_return_result'))
   }
 
   /**

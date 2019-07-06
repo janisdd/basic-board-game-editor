@@ -43,6 +43,7 @@ export interface LangObj {
   "Edit tile in the selected area": string
   "Remove tile from the selected area": string
   "Zoom": string
+  "TilesGlobal tiles settings": string
   //--- tile library
   "Add tile to world": string
   "Edit tile. This will also change all instances of this the in the map. If you want to change only 1 instance then create a clone first and exchange the tile with the clone": string
@@ -84,13 +85,13 @@ export interface LangObj {
   "Create a constant (expr)": string
   "Get a variable value (expr)": string
   "Increment/Decrement a variable (expr)": string
-  "Calulcate or (expr)": string
-  "Calulcate and (expr)": string
-  "Calulcate a comparison (==, !=) (expr)": string
-  "Calulcate a relation (>,<, <=, >=) (expr)": string
-  "Calulcate a sum (expr)": string
-  "Calulcate a term (*,/,%) (expr)": string
-  "Calulcate a factor (unary -, unary +, not) (expr)": string
+  "Calculate or (expr)": string
+  "Calculate and (expr)": string
+  "Calculate a comparison (==, !=) (expr)": string
+  "Calculate a relation (>,<, <=, >=) (expr)": string
+  "Calculate a sum (expr)": string
+  "Calculate a term (*,/,%) (expr)": string
+  "Calculate a factor (unary -, unary +, not) (expr)": string
   //--- simulation tab
   "Simulation": string
   "Random seed number": string
@@ -223,6 +224,7 @@ export interface LangObj {
   "Font size in px": string
   "Text decoration": string
   "Text": string
+  "You can use fontawesome icons here (use \\[unicode] e.g. \\f061) BUT no brand icons. To get solid/filled icons the text mus be set to bold, SOME icons are only working for bold text (all with fas- prefix)": string
   "Horizontal text align": string
   "Vertical text align": string
   "padding (for text align)": string
@@ -292,6 +294,26 @@ export interface LangObj {
   "You can now print the page. Note that this text & other elements will be removed when printing this page. To remove some tiles uncheck them and remove them with a click on the remove button": string
   "Print game as one image": string
   "If enable this will print all game tiles combined into one image. The variables will be put into separate images.": string
+  "Always auto insert arrow heads in tile editor": string
+  "When auto inserting lines always insert lines(true) or just when branching (control if)": string
+
+  "Forced field auto prepend text": string
+  "The text to prepend to the field text when the field is a (implicitly) forced field (command text is forced)": string
+  "Forced field auto border size in px": string
+  "The border size to set when the field is a (implicitly) forced field (command text is forced)": string
+  "Forced field border color": string
+  "The border color to set when the field is a (implicitly) forced field (command text is forced)": string
+  "Forced field is font bold": string
+  "Forced field is font italic": string
+  "Branch if prepend text": string
+  "The text to prepend to the field text when the field command is a branching if (control if)": string
+  "Branch if auto border size in px": string
+  "The border size to set for the field text when the field command is a branching if (control if)": string
+  "Branch if border color": string
+  "The border color to set for the field text when the field command is a branching if (control if)": string
+  "Branch if is font bold": string
+  "Branch if is font italic": string
+
 
   //--- symbol library
   "Symbol library": string

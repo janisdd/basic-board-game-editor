@@ -50,7 +50,18 @@ import {
   WorldSettings,
   replace_worldSettingsAction,
   SET_world_printScaleAction,
-  SET_world_additionalBorderWidthInPxAction
+  SET_world_additionalBorderWidthInPxAction,
+  SET_alwaysInsertArrowHeadsWhenAutoConnectingFieldsAction,
+  SET_forcedFieldAutoPrependTextAction,
+  SET_forcedFieldAutoBorderSizeInPxAction,
+  SET_forcedFieldBorderColorAction,
+  SET_branchIfPrependTextAction,
+  SET_forcedFieldIsFontBoldAction,
+  SET_forcedFieldIsFontItalicAction,
+  SET_branchIfIsFontBoldAction,
+  SET_branchIfIsFontItalicAction,
+  SET_branchIfAutoBorderSizeInPxAction,
+  SET_branchIfBorderColorAction
 } from "./worldSettingsReducer";
 
 
@@ -406,3 +417,86 @@ export function replace_worldSettings(newWorldSettings: WorldSettings): replace_
     newWorldSettings
   }
 }
+
+
+//--- global tile settings
+
+export function set_world_alwaysInsertArrowHeadsWhenAutoConnectingFields(alwaysInsertArrowHeadsWhenAutoConnectingFields: boolean): SET_alwaysInsertArrowHeadsWhenAutoConnectingFieldsAction {
+  return {
+    type: ActionType.SET_alwaysInsertArrowHeadsWhenAutoConnectingFields,
+    alwaysInsertArrowHeadsWhenAutoConnectingFields
+  }
+}
+
+export function set_world_forcedFieldAutoPrependText(forcedFieldAutoPrependText: string): SET_forcedFieldAutoPrependTextAction {
+  return {
+    type: ActionType.SET_forcedFieldAutoPrependText,
+    forcedFieldAutoPrependText
+  }
+}
+
+export function set_world_forcedFieldAutoBorderSizeInPx(forcedFieldAutoBorderSizeInPx: number): SET_forcedFieldAutoBorderSizeInPxAction {
+  return {
+    type: ActionType.SET_forcedFieldAutoBorderSizeInPx,
+    forcedFieldAutoBorderSizeInPx
+  }
+}
+
+export function set_world_forcedFieldBorderColor(forcedFieldBorderColor: string): SET_forcedFieldBorderColorAction {
+  return {
+    type: ActionType.SET_forcedFieldBorderColor,
+    forcedFieldBorderColor
+  }
+}
+
+export function set_world_forcedFieldIsFontBold(forcedFieldIsFontBold: boolean): SET_forcedFieldIsFontBoldAction {
+  return {
+    type: ActionType.SET_forcedFieldIsFontBold,
+    forcedFieldIsFontBold
+  }
+}
+
+export function set_world_forcedFieldIsFontItalic(forcedFieldIsFontItalic: boolean): SET_forcedFieldIsFontItalicAction {
+  return {
+    type: ActionType.SET_forcedFieldIsFontItalic,
+    forcedFieldIsFontItalic
+  }
+}
+
+
+
+export function set_world_branchIfPrependText(branchIfPrependText: string): SET_branchIfPrependTextAction {
+  return {
+    type: ActionType.SET_branchIfPrependText,
+    branchIfPrependText
+  }
+}
+
+export function set_world_branchIfAutoBorderSizeInPx(branchIfAutoBorderSizeInPx: number): SET_branchIfAutoBorderSizeInPxAction {
+  return {
+    type: ActionType.SET_branchIfAutoBorderSizeInPx,
+    branchIfAutoBorderSizeInPx
+  }
+}
+
+export function set_world_branchIfBorderColor(branchIfBorderColor: string): SET_branchIfBorderColorAction {
+  return {
+    type: ActionType.SET_branchIfBorderColor,
+    branchIfBorderColor
+  }
+}
+
+export function set_world_branchIfIsFontBold(branchIfIsFontBold: boolean): SET_branchIfIsFontBoldAction {
+  return {
+    type: ActionType.SET_branchIfIsFontBold,
+    branchIfIsFontBold
+  }
+}
+
+export function set_world_branchIfIsFontItalic(branchIfIsFontItalic: boolean): SET_branchIfIsFontItalicAction {
+  return {
+    type: ActionType.SET_branchIfIsFontItalic,
+    branchIfIsFontItalic
+  }
+}
+

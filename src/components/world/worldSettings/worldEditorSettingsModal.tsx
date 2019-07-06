@@ -4,7 +4,7 @@ import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../../state/index";
 import {CSSProperties, SyntheticEvent} from "react";
-import {Button, Input, Form, Icon, Modal, Checkbox, Tab} from "semantic-ui-react";
+import {Button, Input, Form, Icon, Modal, Checkbox, Tab, Popup} from "semantic-ui-react";
 import {
   set_world_expectedTileHeight,
   set_world_expectedTileWidth,
@@ -30,7 +30,17 @@ import {
   set_world_timeInS_expr_sumAction,
   set_world_timeInS_expr_termAction,
   set_world_timeInS_expr_factorAction,
-  set_world_printScale, set_world_additionalBorderWidthInPx
+  set_world_printScale,
+  set_world_additionalBorderWidthInPx,
+  set_world_alwaysInsertArrowHeadsWhenAutoConnectingFields,
+  set_world_forcedFieldAutoPrependText,
+  set_world_forcedFieldBorderColor,
+  set_world_branchIfIsFontBold,
+  set_world_forcedFieldAutoBorderSizeInPx,
+  set_world_branchIfIsFontItalic,
+  set_world_forcedFieldIsFontBold,
+  set_world_forcedFieldIsFontItalic,
+  set_world_branchIfAutoBorderSizeInPx, set_world_branchIfBorderColor, set_world_branchIfPrependText
 
 } from "../../../state/reducers/world/worldSettings/actions";
 import {
@@ -38,7 +48,7 @@ import {
 } from "../../../state/reducers/world/actions";
 import {getI18n, getRawI18n} from "../../../../i18n/i18nRoot";
 import {CheckboxData} from "../../../types/ui";
-import IconToolTip from "../../helpers/IconToolTip";
+import IconToolTip, {horizontalIconPopupOffsetInPx} from "../../helpers/IconToolTip";
 import ToolTip from "../../helpers/ToolTip";
 import {AbstractMachine, SimulationTimes} from "../../../../simulation/machine/AbstractMachine";
 import EditorWrapper, {editorInstancesMap} from '../../helpers/editorWrapper'
@@ -46,6 +56,7 @@ import {Simulator} from "../../../../simulation/simulator";
 import {Logger} from "../../../helpers/logger";
 import {GameUnit} from "../../../../simulation/model/executionUnit";
 import {DialogHelper} from "../../../helpers/dialogHelper";
+import {ChromePicker} from "react-color";
 
 //const css = require('./styles.styl');
 
@@ -77,6 +88,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_world_printScale,
   set_world_additionalBorderWidthInPx,
 
+
   set_world_timeInS_rollDiceAction,
   set_world_timeInS_choose_bool_funcAction,
   set_world_timeInS_gotoAction,
@@ -95,6 +107,19 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_world_timeInS_expr_sumAction,
   set_world_timeInS_expr_termAction,
   set_world_timeInS_expr_factorAction,
+
+  set_world_alwaysInsertArrowHeadsWhenAutoConnectingFields,
+  set_world_forcedFieldAutoPrependText,
+  set_world_forcedFieldBorderColor,
+  set_world_forcedFieldAutoBorderSizeInPx,
+  set_world_forcedFieldIsFontBold,
+  set_world_forcedFieldIsFontItalic,
+
+  set_world_branchIfPrependText,
+  set_world_branchIfAutoBorderSizeInPx,
+  set_world_branchIfBorderColor,
+  set_world_branchIfIsFontBold,
+  set_world_branchIfIsFontItalic,
 
 }, dispatch)
 
@@ -307,6 +332,240 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                 },
                 {
+                  menuItem: `${getI18n(this.props.langId, "TilesGlobal tiles settings")}`,
+                  render: () => {
+                    return (
+                      <Form as="div">
+
+                        <Form.Group widths='equal'>
+                          <Form.Field>
+                            <Checkbox label={getI18n(this.props.langId, "Always auto insert arrow heads in tile editor")}
+                                      checked={this.props.worldSettings.alwaysInsertArrowHeadsWhenAutoConnectingFields}
+                                      onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
+                                        this.props.set_world_alwaysInsertArrowHeadsWhenAutoConnectingFields(data.checked)
+                                      }}
+                            />
+                            <IconToolTip
+                              message={getI18n(this.props.langId,
+                                "When auto inserting lines always insert lines(true) or just when branching (control if)")}
+                            />
+                          </Form.Field>
+                        </Form.Group>
+
+
+                        <Form.Group widths='equal'>
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Forced field auto prepend text")}
+                              <IconToolTip
+                                message={getI18n(this.props.langId,
+                                  "The text to prepend to the field text when the field is a (implicitly) forced field (command text is forced)")}
+                              />
+                            </label>
+                            <Input value={this.props.worldSettings.forcedFieldAutoPrependText}
+
+                                   style={{width: '100px'}}
+                                   onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+                                     this.props.set_world_forcedFieldAutoPrependText(e.currentTarget.value)
+                                   }}
+                            />
+                          </Form.Field>
+
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Forced field auto border size in px")}
+                              <IconToolTip
+                                message={getI18n(this.props.langId,
+                                  "The border size to set when the field is a (implicitly) forced field (command text is forced)")}
+                              />
+                            </label>
+                            <Input value={this.props.worldSettings.forcedFieldAutoBorderSizeInPx}
+                                   type="number"
+                                   style={{width: '100px'}}
+                                   onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+                                     const val = parseInt(e.currentTarget.value)
+                                     if (isNaN(val) || val < 0) return
+                                     this.props.set_world_forcedFieldAutoBorderSizeInPx(val)
+                                   }}
+                            />
+                          </Form.Field>
+
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Forced field border color")}
+                              <IconToolTip
+                                message={getI18n(this.props.langId,
+                                  "The border color to set when the field is a (implicitly) forced field (command text is forced)")}
+                              />
+                            </label>
+                            <div className="flexed">
+                              <Popup
+                                trigger={<div className="hoverable" style={{margin: 'auto 0'}}>
+                                  <Icon style={{
+                                    'color': 'black'
+                                  }} name="paint brush"/>
+                                </div>}
+                                on="click"
+                                offset={horizontalIconPopupOffsetInPx}
+                                content={<ChromePicker
+                                  color={this.props.worldSettings.forcedFieldBorderColor}
+                                  onChangeComplete={color => {
+                                    this.props.set_world_forcedFieldBorderColor(color.hex)
+                                  }}
+                                />}
+                              />
+
+                              <Input value={this.props.worldSettings.forcedFieldBorderColor}
+                                     type="text"
+                                     style={{width: '100px'}}
+                                     disabled
+                              />
+                            </div>
+                          </Form.Field>
+
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Forced field is font bold")} <br />
+                              {getI18n(this.props.langId, "Forced field is font italic")}
+                            </label>
+
+                            <Button.Group>
+                              <Button
+                                active={this.props.worldSettings.forcedFieldIsFontBold}
+                                icon
+                                onClick={() => {
+                                  this.props.set_world_forcedFieldIsFontBold(!this.props.worldSettings.forcedFieldIsFontBold)
+                                }}
+                              >
+                                <Icon name='bold'/>
+                              </Button>
+                              <Button
+                                active={this.props.worldSettings.forcedFieldIsFontItalic}
+                                icon
+                                onClick={() => {
+                                  this.props.set_world_forcedFieldIsFontItalic(!this.props.worldSettings.forcedFieldIsFontItalic)
+                                }}
+                              >
+                                <Icon name='italic'/>
+                              </Button>
+                            </Button.Group>
+
+                          </Form.Field>
+
+
+
+                        </Form.Group>
+
+
+                        <Form.Group widths='equal'>
+
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Branch if prepend text")}
+                              <IconToolTip
+                                message={getI18n(this.props.langId,
+                                  "The text to prepend to the field text when the field command is a branching if (control if)")}
+                              />
+                            </label>
+                            <Input  value={this.props.worldSettings.branchIfPrependText}
+
+                                   style={{width: '100px'}}
+                                   onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+                                     this.props.set_world_branchIfPrependText(e.currentTarget.value)
+                                   }}
+                            />
+                          </Form.Field>
+
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Branch if auto border size in px")}
+                              <IconToolTip
+                                message={getI18n(this.props.langId,
+                                  "The border size to set for the field text when the field command is a branching if (control if)")}
+                              />
+                            </label>
+                            <Input value={this.props.worldSettings.branchIfAutoBorderSizeInPx}
+                                   type="number"
+                                   style={{width: '100px'}}
+                                   onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+                                     const val = parseInt(e.currentTarget.value)
+                                     if (isNaN(val) || val < 0) return
+                                     this.props.set_world_branchIfAutoBorderSizeInPx(val)
+                                   }}
+                            />
+                          </Form.Field>
+
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Branch if border color")}
+                              <IconToolTip
+                                message={getI18n(this.props.langId,
+                                  "The border color to set for the field text when the field command is a branching if (control if)")}
+                              />
+                            </label>
+                            <div className="flexed">
+                              <Popup
+                                trigger={<div className="hoverable" style={{margin: 'auto 0'}}>
+                                  <Icon style={{
+                                    'color': 'black'
+                                  }} name="paint brush"/>
+                                </div>}
+                                on="click"
+                                offset={horizontalIconPopupOffsetInPx}
+                                content={<ChromePicker
+                                  color={this.props.worldSettings.branchIfBorderColor}
+                                  onChangeComplete={color => {
+                                    this.props.set_world_branchIfBorderColor(color.hex)
+                                  }}
+                                />}
+                              />
+
+                              <Input value={this.props.worldSettings.branchIfBorderColor}
+                                     type="text"
+                                     style={{width: '100px'}}
+                                     disabled
+                              />
+                            </div>
+                          </Form.Field>
+
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Branch if is font bold")} <br />
+                              {getI18n(this.props.langId, "Branch if is font italic")}
+                            </label>
+
+                            <Button.Group>
+                              <Button
+                                      active={this.props.worldSettings.branchIfIsFontBold}
+                                      icon
+                                      onClick={() => {
+                                        this.props.set_world_branchIfIsFontBold(!this.props.worldSettings.branchIfIsFontBold)
+                                      }}
+                              >
+                                <Icon name='bold'/>
+                              </Button>
+                              <Button
+                                      active={this.props.worldSettings.branchIfIsFontItalic}
+                                      icon
+                                      onClick={() => {
+                                        this.props.set_world_branchIfIsFontItalic(!this.props.worldSettings.branchIfIsFontItalic)
+                                      }}
+                              >
+                                <Icon name='italic'/>
+                              </Button>
+                            </Button.Group>
+
+                          </Form.Field>
+
+                        </Form.Group>
+
+
+                      </Form>
+                    )
+                  }
+
+                },
+                {
                   menuItem: `${getI18n(this.props.langId, "Simulation")}`,
                   render: () => {
                     return (
@@ -502,7 +761,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                           </Form.Field>
 
                           <Form.Field>
-                            <label>{getI18n(this.props.langId, "Calulcate or (expr)")}</label>
+                            <label>{getI18n(this.props.langId, "Calculate or (expr)")}</label>
                             <Input type="number" placeholder={SimulationTimes.timeInS_expr_disjunction_default}
                                    value={this.props.worldSettings.timeInS_expr_disjunction}
                                    step={defaultSimulationTimeInc}
@@ -522,7 +781,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                         <Form.Group widths='equal'>
 
                           <Form.Field>
-                            <label>{getI18n(this.props.langId, "Calulcate and (expr)")}</label>
+                            <label>{getI18n(this.props.langId, "Calculate and (expr)")}</label>
                             <Input type="number" placeholder={SimulationTimes.timeInS_expr_conjunction_default}
                                    value={this.props.worldSettings.timeInS_expr_conjunction}
                                    step={defaultSimulationTimeInc}
@@ -538,7 +797,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                           </Form.Field>
 
                           <Form.Field>
-                            <label>{getI18n(this.props.langId, "Calulcate a comparison (==, !=) (expr)")}</label>
+                            <label>{getI18n(this.props.langId, "Calculate a comparison (==, !=) (expr)")}</label>
                             <Input type="number" placeholder={SimulationTimes.timeInS_expr_comparison_default}
                                    value={this.props.worldSettings.timeInS_expr_comparison}
                                    step={defaultSimulationTimeInc}
@@ -555,7 +814,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                           <Form.Field>
                             <label dangerouslySetInnerHTML={getRawI18n(this.props.langId,
-                              "Calulcate a relation (>,<, <=, >=) (expr)")}></label>
+                              "Calculate a relation (>,<, <=, >=) (expr)")}></label>
                             <Input type="number" placeholder={SimulationTimes.timeInS_expr_relation_default}
                                    value={this.props.worldSettings.timeInS_expr_relation}
                                    step={defaultSimulationTimeInc}
@@ -575,7 +834,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                         <Form.Group widths='equal'>
 
                           <Form.Field>
-                            <label>{getI18n(this.props.langId, "Calulcate a sum (expr)")}</label>
+                            <label>{getI18n(this.props.langId, "Calculate a sum (expr)")}</label>
                             <Input type="number" placeholder={SimulationTimes.timeInS_expr_sum_default}
                                    value={this.props.worldSettings.timeInS_expr_sum} step={defaultSimulationTimeInc}
 
@@ -590,7 +849,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                           </Form.Field>
 
                           <Form.Field>
-                            <label>{getI18n(this.props.langId, "Calulcate a term (*,/,%) (expr)")}</label>
+                            <label>{getI18n(this.props.langId, "Calculate a term (*,/,%) (expr)")}</label>
                             <Input type="number" placeholder={SimulationTimes.timeInS_expr_term_default}
                                    value={this.props.worldSettings.timeInS_expr_term} step={defaultSimulationTimeInc}
 
@@ -606,7 +865,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                           <Form.Field>
                             <label>{getI18n(this.props.langId,
-                              "Calulcate a factor (unary -, unary +, not) (expr)")}</label>
+                              "Calculate a factor (unary -, unary +, not) (expr)")}</label>
                             <Input type="number" placeholder={SimulationTimes.timeInS_expr_factor_default}
                                    value={this.props.worldSettings.timeInS_expr_factor}
                                    step={defaultSimulationTimeInc}

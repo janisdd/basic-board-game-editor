@@ -131,12 +131,13 @@ class tileRightActionBar extends React.Component<Props, any> {
                         this.props.worldSettings.tileMidPointsDiameter,
                         this.props.settings.tileProps.tileSettings.majorLineDirection,
                         this.props.lineShapes,
-                        this.props.settings.tileProps.tileSettings.insertLinesEvenIfFieldsIntersect
+                        this.props.settings.tileProps.tileSettings.insertLinesEvenIfFieldsIntersect,
+                        this.props.worldSettings.alwaysInsertArrowHeadsWhenAutoConnectingFields,
                       )
                     } catch (err) {
                       //probably a syntax error
                       console.error(err)
-                      Logger.fatal('error connecting fields: ' + err)
+                      Logger.fatalSyntaxError('error connecting fields: ' + err)
                     }
 
 

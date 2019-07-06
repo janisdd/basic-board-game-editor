@@ -238,6 +238,9 @@ class tileEditor extends React.Component<Props, any> {
       for (const id of this.props.selectedFieldShapeIds) {
         this.props.removeFieldShape(id)
       }
+      //make sure selected is are correctly
+      this.props.setSelectedFieldShapeIds([])
+
       renewAllZIndicesInTile()
       this.props.set_editor_restoreRightTabActiveIndex()
     }
@@ -246,6 +249,10 @@ class tileEditor extends React.Component<Props, any> {
       for (const id of this.props.selectedImageShapeIds) {
         this.props.removeImageShape(id)
       }
+
+      //make sure selected is are correctly
+      this.props.setSelectedImageShapeIds([])
+
       renewAllZIndicesInTile()
       this.props.set_editor_restoreRightTabActiveIndex()
     }
@@ -254,6 +261,10 @@ class tileEditor extends React.Component<Props, any> {
       for (const id of this.props.selectedLineShapeIds) {
         this.props.removeLineShape(id)
       }
+
+      //make sure selected is are correctly
+      this.props.setSelectedLineShapeIds([])
+
       renewAllZIndicesInTile()
       this.props.set_editor_restoreRightTabActiveIndex()
     }

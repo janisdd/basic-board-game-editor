@@ -312,9 +312,15 @@ export interface PlainPoint {
 }
 
 /**
- * this has no real line id because not a real shape & not needed for now
- * we can identify the anchor point by the index in the field
- * @see FieldBase.anchorPoints
+ *
+ * @see FieldBase.anchorPoints is in sync (same values ... id, percentages, ..., except  connectedLineTuples) with the
+ * @see FieldSymbol.anchorPoints because only
+ * @see FieldBase.anchorPoints stores connection to lines
+ *
+ * because when we connect a line to a symbol instance we need to connect it to the right
+ * @see FieldBase.anchorPoints and it's good when they have the same id to find the right one
+ *
+ * also it's good when we disconnect field symbol instances from the symbol so the anchor point and lines position will stay the same
  */
 export interface AnchorPoint {
   /**

@@ -1,6 +1,7 @@
 import {Action} from "redux";
 import {notExhaustive} from "../../_notExhausiveHelper";
 import {
+  anchorPointConnectedColor,
   defaultBezierControlPoint1UiColor,
   defaultBezierControlPoint2UiColor,
   defaultGameInitCode
@@ -31,6 +32,10 @@ export interface WorldSettings {
   readonly fieldSequenceFontColor: string
   readonly fieldSequenceFontSizeInPx: number
   readonly anchorPointColor: string
+  /**
+   * color when at least one line is connected
+   */
+  readonly anchorPointSomeConnectedColor: string
   readonly anchorPointDiameter: number
 
   /**
@@ -112,6 +117,47 @@ export interface WorldSettings {
   readonly timeInS_expr_term: number
   readonly timeInS_expr_factor: number
 
+
+  /**
+   * in the editor when auto connecting (via gotos)
+   * if an arrow head should be added to all lines or just when branching (control if)?
+   *
+   * this is normally a tile editor setting but we want to change it for all not for every tile individually
+   */
+  readonly alwaysInsertArrowHeadsWhenAutoConnectingFields: boolean
+
+
+  //-- language rendering settings
+  // these settings overwrite the field properties for rendering when the field has cmd text
+
+  //we could add a lot of props here e.g. font family, font size...
+  //but keep in mind that these can destroy the rendering e.g. font size 24 will probably not fit anymore in the field)
+
+  /**
+   * text to prepend when we have a forced field (also implicitly forced)
+   * can be a font awesome unicode icon \fxxx
+   */
+  readonly forcedFieldAutoPrependText: string
+
+  readonly forcedFieldAutoBorderSizeInPx: number
+  readonly forcedFieldBorderColor: string
+
+  readonly forcedFieldIsFontBold: boolean
+  readonly forcedFieldIsFontItalic: boolean
+
+  //branch if has priority
+  /**
+   * text to prepend when we have a control if statement ... if we have multiple ways (2) with a condition
+   * can be a font awesome unicode icon \fxxx
+   */
+  readonly branchIfPrependText: string
+
+  readonly branchIfAutoBorderSizeInPx: number
+  readonly branchIfBorderColor: string
+
+  readonly branchIfIsFontBold: boolean
+  readonly branchIfIsFontItalic: boolean
+
 }
 
 
@@ -137,6 +183,7 @@ export const initial: State = {
   anchorPointColor: '#f1b213',
   anchorPointDiameter: 3,
   anchorPointSnapToleranceRadiusInPx: 7,
+  anchorPointSomeConnectedColor: 'green',
 
   stageOffsetX: 0,
   stageOffsetY: 0,
@@ -177,6 +224,21 @@ export const initial: State = {
   timeInS_expr_sum: SimulationTimes.timeInS_expr_sum_default,
   timeInS_expr_term: SimulationTimes.timeInS_expr_term_default,
   timeInS_expr_factor: SimulationTimes.timeInS_expr_factor_default,
+
+
+  alwaysInsertArrowHeadsWhenAutoConnectingFields: true,
+
+  forcedFieldAutoPrependText: '\\f071',
+  forcedFieldAutoBorderSizeInPx: 2,
+  forcedFieldBorderColor: 'black',
+  forcedFieldIsFontBold: true,
+  forcedFieldIsFontItalic: false,
+
+  branchIfPrependText: '\\f126',
+  branchIfAutoBorderSizeInPx: 2,
+  branchIfBorderColor: 'black',
+  branchIfIsFontBold: true,
+  branchIfIsFontItalic: false,
 
 }
 
@@ -244,6 +306,21 @@ export enum ActionType {
   SET_world_timeInS_expr_sum = 'worldSettingsReducer_SET_timeInS_expr_sum',
   SET_world_timeInS_expr_term = 'worldSettingsReducer_SET_timeInS_expr_term',
   SET_world_timeInS_expr_factor = 'worldSettingsReducer_SET_timeInS_expr_factor',
+
+  SET_alwaysInsertArrowHeadsWhenAutoConnectingFields = 'worldSettingsReducer_SET_alwaysInsertArrowHeadsWhenAutoConnectingFields',
+
+  SET_forcedFieldAutoPrependText = 'worldSettingsReducer_SET_forcedFieldAutoPrependText',
+  SET_forcedFieldAutoBorderSizeInPx = 'worldSettingsReducer_SET_forcedFieldAutoBorderSizeInPx',
+  SET_forcedFieldBorderColor = 'worldSettingsReducer_SET_forcedFieldBorderColor',
+  SET_forcedFieldIsFontBold = 'worldSettingsReducer_SET_forcedFieldIsFontBold',
+  SET_forcedFieldIsFontItalic = 'worldSettingsReducer_SET_forcedFieldIsFontItalic',
+
+
+  SET_branchIfPrependText = 'worldSettingsReducer_SET_branchIfPrependText',
+  SET_branchIfAutoBorderSizeInPx = 'worldSettingsReducer_SET_branchIfAutoBorderSizeInPx',
+  SET_branchIfBorderColor = 'worldSettingsReducer_SET_branchIfBorderColor',
+  SET_branchIfIsFontBold = 'worldSettingsReducer_SET_branchIfIsFontBold',
+  SET_branchIfIsFontItalic = 'worldSettingsReducer_SET_branchIfIsFontItalic',
 
   RESET = 'worldSettingsReducer_RESET',
 }
@@ -416,7 +493,6 @@ export interface SET_world_additionalBorderWidthInPxAction extends ActionBase {
   readonly additionalBorderWidthInPx: number
 }
 
-
 //--- times for simulation
 
 export interface SET_world_timeInS_rollDiceAction extends ActionBase {
@@ -511,6 +587,66 @@ export interface SET_world_timeInS_expr_factorAction extends ActionBase {
   readonly timeInS_expr_factor: number
 }
 
+export interface SET_alwaysInsertArrowHeadsWhenAutoConnectingFieldsAction extends ActionBase {
+  readonly type: ActionType.SET_alwaysInsertArrowHeadsWhenAutoConnectingFields
+  readonly alwaysInsertArrowHeadsWhenAutoConnectingFields: boolean
+}
+
+export interface SET_forcedFieldAutoPrependTextAction extends ActionBase {
+  readonly type: ActionType.SET_forcedFieldAutoPrependText
+  readonly forcedFieldAutoPrependText: string
+}
+
+export interface SET_forcedFieldAutoBorderSizeInPxAction extends ActionBase {
+  readonly type: ActionType.SET_forcedFieldAutoBorderSizeInPx
+  readonly forcedFieldAutoBorderSizeInPx: number
+}
+
+export interface SET_forcedFieldBorderColorAction extends ActionBase {
+  readonly type: ActionType.SET_forcedFieldBorderColor
+  readonly forcedFieldBorderColor: string
+}
+
+export interface SET_forcedFieldIsFontBoldAction extends ActionBase {
+  readonly type: ActionType.SET_forcedFieldIsFontBold
+  readonly forcedFieldIsFontBold: boolean
+}
+
+export interface SET_forcedFieldIsFontItalicAction extends ActionBase {
+  readonly type: ActionType.SET_forcedFieldIsFontItalic
+  readonly forcedFieldIsFontItalic: boolean
+}
+
+
+
+
+export interface SET_branchIfPrependTextAction extends ActionBase {
+  readonly type: ActionType.SET_branchIfPrependText
+  readonly branchIfPrependText: string
+}
+
+export interface SET_branchIfAutoBorderSizeInPxAction extends ActionBase {
+  readonly type: ActionType.SET_branchIfAutoBorderSizeInPx
+  readonly branchIfAutoBorderSizeInPx: number
+}
+
+export interface SET_branchIfBorderColorAction extends ActionBase {
+  readonly type: ActionType.SET_branchIfBorderColor
+  readonly branchIfBorderColor: string
+}
+
+
+export interface SET_branchIfIsFontBoldAction extends ActionBase {
+  readonly type: ActionType.SET_branchIfIsFontBold
+  readonly branchIfIsFontBold: boolean
+}
+
+export interface SET_branchIfIsFontItalicAction extends ActionBase {
+  readonly type: ActionType.SET_branchIfIsFontItalic
+  readonly branchIfIsFontItalic: boolean
+}
+
+
 export interface ResetAction extends ActionBase {
   readonly type: ActionType.RESET
 }
@@ -570,6 +706,18 @@ export type AllActions =
   | SET_world_timeInS_expr_sumAction
   | SET_world_timeInS_expr_termAction
   | SET_world_timeInS_expr_factorAction
+  | SET_alwaysInsertArrowHeadsWhenAutoConnectingFieldsAction
+  | SET_forcedFieldAutoPrependTextAction
+  | SET_forcedFieldAutoBorderSizeInPxAction
+  | SET_forcedFieldBorderColorAction
+  | SET_forcedFieldIsFontItalicAction
+  | SET_forcedFieldIsFontBoldAction
+
+  | SET_branchIfPrependTextAction
+| SET_branchIfAutoBorderSizeInPxAction
+| SET_branchIfBorderColorAction
+  | SET_branchIfIsFontBoldAction
+  | SET_branchIfIsFontItalicAction
 
 
 export function reducer(state: State = initial, action: AllActions): State {
@@ -753,7 +901,7 @@ export function reducer(state: State = initial, action: AllActions): State {
         ...state,
         additionalBorderWidthInPx: action.additionalBorderWidthInPx
       }
-
+    //--- times
 
     case ActionType.SET_world_timeInS_rollDice:
 
@@ -872,6 +1020,72 @@ export function reducer(state: State = initial, action: AllActions): State {
     case ActionType.replace_worldSettings:
       return {
         ...action.newWorldSettings
+      }
+
+
+    //--- global tile settings
+    case ActionType.SET_alwaysInsertArrowHeadsWhenAutoConnectingFields:
+      return {
+        ...state,
+        alwaysInsertArrowHeadsWhenAutoConnectingFields: action.alwaysInsertArrowHeadsWhenAutoConnectingFields
+      }
+
+    case ActionType.SET_forcedFieldAutoPrependText:
+      return {
+        ...state,
+        forcedFieldAutoPrependText: action.forcedFieldAutoPrependText
+      }
+    case ActionType.SET_forcedFieldAutoBorderSizeInPx:
+      return {
+        ...state,
+        forcedFieldAutoBorderSizeInPx: action.forcedFieldAutoBorderSizeInPx
+      }
+
+    case ActionType.SET_forcedFieldBorderColor:
+      return {
+        ...state,
+        forcedFieldBorderColor: action.forcedFieldBorderColor
+      }
+    case ActionType.SET_forcedFieldIsFontBold:
+      return {
+        ...state,
+        forcedFieldIsFontBold: action.forcedFieldIsFontBold
+      }
+
+    case ActionType.SET_forcedFieldIsFontItalic:
+      return {
+        ...state,
+        forcedFieldIsFontItalic: action.forcedFieldIsFontItalic
+      }
+
+
+
+    case ActionType.SET_branchIfPrependText:
+      return {
+        ...state,
+        branchIfPrependText: action.branchIfPrependText
+      }
+    case ActionType.SET_branchIfAutoBorderSizeInPx:
+      return {
+        ...state,
+        branchIfAutoBorderSizeInPx: action.branchIfAutoBorderSizeInPx
+      }
+    case ActionType.SET_branchIfBorderColor:
+      return {
+        ...state,
+        branchIfBorderColor: action.branchIfBorderColor
+      }
+
+    case ActionType.SET_branchIfIsFontBold:
+      return {
+        ...state,
+        branchIfIsFontBold: action.branchIfIsFontBold
+      }
+
+    case ActionType.SET_branchIfIsFontItalic:
+      return {
+        ...state,
+        branchIfIsFontItalic: action.branchIfIsFontItalic
       }
 
     case ActionType.RESET:

@@ -7,6 +7,9 @@
 
 - change the worker deploy... the hash is bad for git because it's changed every build
 
+- when we remove all shapes (fields/imgs/lines) in the tile outline the canvas collapses... but should not
+  - maybe somehow connected that tile outline collapses to min size for some ms
+
 ISSUES
 
 - could all be resolved by creating a new reducer & new actions that do multiple actions at once e.g.

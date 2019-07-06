@@ -168,6 +168,10 @@ module.exports = {
       {
         from: 'node_modules/semantic-ui-css/themes/default/assets/fonts/outline-icons.woff',
         to: 'themes/default/assets/fonts/outline-icons.woff',
+      },
+      {
+        from: 'thirdPartyFiles/fontawesome-free-5.9.0-web',
+        to: 'thirdPartyFiles/fontawesome-free-5.9.0-web',
       }
     ]),
     new webpack.DefinePlugin({

@@ -781,6 +781,12 @@ class fieldPropertyEditor extends React.Component<Props, any> {
           isSingleField &&
           <Form.Field>
             <label>{getI18n(this.props.langId, "Text")}
+              <IconToolTip wide="very"
+                           message={getI18n(this.props.langId, "You can use fontawesome icons here (use \\[unicode] e.g. \\f061) BUT no brand icons. To get solid/filled icons the text mus be set to bold, SOME icons are only working for bold text (all with fas- prefix)")}
+              />
+              <a href="https://fontawesome.com/icons?d=gallery&m=free" target="_blank" className="clickable mar-left-half">
+                <Icon name="external" />
+              </a>
               {
                 isBasedOnSymbol && fieldSymbol.overwriteText &&
                 <IconToolTip icon="arrow down"
@@ -1285,7 +1291,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                     {
                       singleFieldAnchorPoint.connectedLineTuples.map((value, _index) => {
                         return (
-                          <List.Item key={_index}>
+                          <List.Item key={`${value.lineId}-${value.pointId}`}>
 
                             <List.Content>
                               <ToolTip

@@ -159,12 +159,16 @@ export class IoHelper {
 
   }
 
-  public static async importTile(data: string): Promise<void> {
+  /**
+   * returns the warn msg from migrations
+   * @param data
+   */
+  public static importTile(data: string): string | null {
 
     let exportedTile: ExportTile | null = JSON.parse(data)
 
     //maybe we need to migrate...
-    exportedTile = await MigrationHelper.applyMigrationsToTile(exportedTile)
+    exportedTile = MigrationHelper.applyMigrationsToTile(exportedTile)
 
     if (exportedTile === null) {
       //error is already displayed in MigrationHelper.applyMigrationsToTile
@@ -216,7 +220,7 @@ export class IoHelper {
       const oldImg = ImgStorage.images.find(p => p.guid === img.guid)
 
       if (oldImg) {
-        //TODO warn??
+        Logger.log(`already got image with guid: ${oldImg.guid}, not importing`)
         continue
       }
 
@@ -234,7 +238,7 @@ export class IoHelper {
       const oldSymbol = fieldSymbols.find(p => p.guid == importFieldSymbol.guid)
 
       if (oldSymbol) {
-        //TODO display warning?? ... us old symbol --> no import
+        Logger.log(`already got field symbol with guid: ${oldSymbol.guid}, not importing`)
         continue
       }
       fieldSymbolsToImport.push(importFieldSymbol)
@@ -249,7 +253,7 @@ export class IoHelper {
       const oldSymbol = imgSymbols.find(p => p.guid == importImgSymbol.guid)
 
       if (oldSymbol) {
-        //TODO display warning?? ... us old symbol --> no import
+        Logger.log(`already got img symbol with guid: ${oldSymbol.guid}, not importing`)
         continue
       }
       imgSymbolsToImport.push(importImgSymbol)
@@ -266,7 +270,7 @@ export class IoHelper {
       const oldSymbol = lineSymbols.find(p => p.guid == importLineSymbol.guid)
 
       if (oldSymbol) {
-        //TODO display warning?? ... us old symbol --> no import
+        Logger.log(`already got ling symbol with guid: ${oldSymbol.guid}, not importing`)
         continue
       }
       lineSymbolsToImport.push(importLineSymbol)

@@ -19,6 +19,10 @@ export const appProperties = {
 }
 
 
+export const fontAwesomeMatchRegex = /\\f[0-9a-z]{3}/gim
+
+export const anchorPointConnectedColor = 'green'
+
 export const symbolPreviewWidth = 150
 export const symbolPreviewHeight = 150
 

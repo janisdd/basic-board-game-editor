@@ -4,6 +4,14 @@
 
 already changed but version has not changed
 
+## 1.3.1
+
+- fixed issue where importing multiple tiles will only import first tile
+- added support for fontawesome icons
+  - note that brand icons are not included because this violates copyright
+- [lang] `return` is now implicitly forced 
+- added global tiles (and tile render) settings
+
 ## 1.3.0
 
 - performance fixes

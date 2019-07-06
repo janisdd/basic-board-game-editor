@@ -1519,6 +1519,8 @@ class tileRenderer extends React.Component<Props, any> {
 
     if (!this.canvas || !this.canvasContainer) return
 
+    //dirty fix... see todo
+    if (this.canvasContainer.offsetHeight < 200) return
 
     this.canvas.height = this.canvasContainer.offsetHeight
     this.canvas.width = this.canvasContainer.offsetWidth

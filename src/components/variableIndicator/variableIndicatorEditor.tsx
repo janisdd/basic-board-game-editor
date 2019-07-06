@@ -314,7 +314,7 @@ class variableIndicatorEditor extends React.Component<Props, any> {
 
           </Form>
 
-          <div>
+          <div style={{position: 'relative'}}>
             <canvas className="tile-canvas" ref={p => this.canvas = p} width={this.props.state.outerCircleDiameterInPx}
                     height={this.props.state.outerCircleDiameterInPx}
                     style={{maxHeight: 1000, maxWidth: 1000}}
