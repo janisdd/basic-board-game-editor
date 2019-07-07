@@ -382,7 +382,7 @@ var AbstractMachine = /** @class */ (function () {
                 return res;
             }
             default:
-                _notExhausiveHelper_1.notExhaustive(statement);
+                _notExhausiveHelper_1.notExhaustiveThrow(statement);
                 throw new Error();
         }
     };
@@ -468,6 +468,7 @@ var AbstractMachine = /** @class */ (function () {
                 }
                 //replace the modified player
                 lastState = tslib_1.__assign({}, lastState, { players: lastState.players.map(function (p, index) {
+                        var _a;
                         return playerIndex !== index
                             ? p
                             : tslib_1.__assign({}, p, { defTable: tslib_1.__assign({}, p.defTable, (_a = {}, _a[varDecl.ident] = {
@@ -475,7 +476,6 @@ var AbstractMachine = /** @class */ (function () {
                                     ident: varDecl.ident,
                                     maxVal: varDecl.maxVal
                                 }, _a)) });
-                        var _a;
                     }) });
             }
             else if (varDecl.var_type === executionUnit_1.VarType.bool) {
@@ -484,13 +484,13 @@ var AbstractMachine = /** @class */ (function () {
                 }
                 //replace the modified player
                 lastState = tslib_1.__assign({}, lastState, { players: lastState.players.map(function (p, index) {
+                        var _a;
                         return playerIndex !== index
                             ? p
                             : tslib_1.__assign({}, p, { defTable: tslib_1.__assign({}, p.defTable, (_a = {}, _a[varDecl.ident] = {
                                     boolVal: expRes.boolVal,
                                     ident: varDecl.ident,
                                 }, _a)) });
-                        var _a;
                     }) });
             }
         };
@@ -527,6 +527,7 @@ var AbstractMachine = /** @class */ (function () {
             if (machineState_1.isIntVar(entry)) {
                 //priori and posteriori type matches (int, int)
                 var copyState = tslib_1.__assign({}, exprRes.state, { players: state.players.map(function (p, index) {
+                        var _a;
                         return index !== playerIndex
                             ? p
                             : tslib_1.__assign({}, p, { defTable: tslib_1.__assign({}, p.defTable, (_a = {}, _a[entry.ident] = {
@@ -534,7 +535,6 @@ var AbstractMachine = /** @class */ (function () {
                                     maxVal: entry.maxVal,
                                     ident: entry.ident
                                 }, _a)) });
-                        var _a;
                     }), elapsedTimeInS: exprRes.state.elapsedTimeInS + SimulationTimes.timeInS_set_var() });
                 return {
                     val: exprRes.val,
@@ -549,13 +549,13 @@ var AbstractMachine = /** @class */ (function () {
             }
             if (machineState_1.isBoolVar(entry)) {
                 var copyState = tslib_1.__assign({}, exprRes.state, { players: state.players.map(function (p, index) {
+                        var _a;
                         return index !== playerIndex
                             ? p
                             : tslib_1.__assign({}, p, { defTable: tslib_1.__assign({}, p.defTable, (_a = {}, _a[entry.ident] = {
                                     boolVal: exprRes.boolVal,
                                     ident: entry.ident
                                 }, _a)) });
-                        var _a;
                     }), elapsedTimeInS: exprRes.state.elapsedTimeInS + SimulationTimes.timeInS_set_var() });
                 return {
                     val: null,
@@ -572,6 +572,7 @@ var AbstractMachine = /** @class */ (function () {
         return tslib_1.__assign({}, res, { maxDiceValue: gameVars.maxDiceValue, gameEndCondition: gameVars.endCondition });
     };
     AbstractMachine.execGameVars = function (vars, state) {
+        var _a, _b;
         for (var i = 0; i < vars.length; i++) {
             var varDecl = vars[i];
             var entry = state.globalDefTable[varDecl.ident];
@@ -601,7 +602,6 @@ var AbstractMachine = /** @class */ (function () {
             }
         }
         return state;
-        var _a, _b;
     };
     // statements
     AbstractMachine.executeAll = function (statements, state) {
@@ -624,7 +624,12 @@ var AbstractMachine = /** @class */ (function () {
             }
             case "log": {
                 var res = this.execExpression(statement.expr, state);
-                this.builtIn_log(res.val);
+                if (res.boolVal !== null) {
+                    this.builtIn_log(res.boolVal);
+                }
+                else if (res.val !== null) {
+                    this.builtIn_log(res.val);
+                }
                 return state;
             }
             case "if": {
@@ -687,7 +692,7 @@ var AbstractMachine = /** @class */ (function () {
                 return res;
             }
             default:
-                _notExhausiveHelper_1.notExhaustive(statement);
+                _notExhausiveHelper_1.notExhaustiveThrow(statement);
         }
     };
     //-- control stats - all control statements decrease the left dice value
@@ -872,6 +877,7 @@ var AbstractMachine = /** @class */ (function () {
             copy = tslib_1.__assign({}, state, { players: state.players.map(function (p, playerIdex) { return playerIdex !== state.currentPlayerIndex
                     ? p
                     : tslib_1.__assign({}, p, { localDefTables: p.localDefTables.map(function (value, index) {
+                            var _a;
                             return index !== scopeIndex
                                 ? value
                                 : tslib_1.__assign({}, value, { defTable: tslib_1.__assign({}, value.defTable, (_a = {}, _a[varDecl.ident] = {
@@ -879,7 +885,6 @@ var AbstractMachine = /** @class */ (function () {
                                         val: _this.circularArithmeticVal(expRes.val, varDecl.maxVal + 1, varDecl.maxVal),
                                         maxVal: varDecl.maxVal
                                     }, _a)) });
-                            var _a;
                         }) }); }), elapsedTimeInS: expRes.state.elapsedTimeInS + SimulationTimes.timeInS_var_decl() });
             return copy;
         }
@@ -890,13 +895,13 @@ var AbstractMachine = /** @class */ (function () {
             copy = tslib_1.__assign({}, state, { players: state.players.map(function (p, playerIdex) { return playerIdex !== state.currentPlayerIndex
                     ? p
                     : tslib_1.__assign({}, p, { localDefTables: p.localDefTables.map(function (value, index) {
+                            var _a;
                             return index !== scopeIndex
                                 ? value
                                 : tslib_1.__assign({}, value, { defTable: tslib_1.__assign({}, value.defTable, (_a = {}, _a[varDecl.ident] = {
                                         ident: varDecl.ident,
                                         boolVal: expRes.boolVal,
                                     }, _a)) });
-                            var _a;
                         }) }); }), elapsedTimeInS: expRes.state.elapsedTimeInS + SimulationTimes.timeInS_var_decl() });
             return copy;
         }
@@ -979,7 +984,7 @@ var AbstractMachine = /** @class */ (function () {
                 return res;
             }
             default:
-                _notExhausiveHelper_1.notExhaustive(expr.right);
+                _notExhausiveHelper_1.notExhaustiveThrow(expr.right);
         }
     };
     /**
@@ -992,6 +997,7 @@ var AbstractMachine = /** @class */ (function () {
     AbstractMachine.execAssign = function (assign, state) {
         //if the assign is prefixed we would call execPlayerVarAssign directly
         var _this = this;
+        var _a, _b;
         var expRes = this.execExpression(assign.expr, state);
         state = expRes.state;
         //check first local var assign
@@ -1017,13 +1023,13 @@ var AbstractMachine = /** @class */ (function () {
                             state: tslib_1.__assign({}, state, { players: state.players.map(function (p, playerIndex) { return playerIndex !== state.currentPlayerIndex
                                     ? p
                                     : tslib_1.__assign({}, p, { localDefTables: p.localDefTables.map(function (value, index) {
+                                            var _a;
                                             return index !== scopeIndex_1
                                                 ? value
                                                 : tslib_1.__assign({}, value, { defTable: tslib_1.__assign({}, value.defTable, (_a = {}, _a[assign.ident] = {
                                                         ident: assign.ident,
                                                         boolVal: expRes.boolVal
                                                     }, _a)) });
-                                            var _a;
                                         }) }); }), elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_set_var() })
                         } };
                 }
@@ -1037,6 +1043,7 @@ var AbstractMachine = /** @class */ (function () {
                             state: tslib_1.__assign({}, state, { players: state.players.map(function (p, playerIndex) { return playerIndex !== state.currentPlayerIndex
                                     ? p
                                     : tslib_1.__assign({}, p, { localDefTables: p.localDefTables.map(function (value, index) {
+                                            var _a;
                                             return index !== scopeIndex_1
                                                 ? value
                                                 : tslib_1.__assign({}, value, { defTable: tslib_1.__assign({}, value.defTable, (_a = {}, _a[assign.ident] = {
@@ -1044,7 +1051,6 @@ var AbstractMachine = /** @class */ (function () {
                                                         maxVal: entry.maxVal,
                                                         val: _this.circularArithmeticVal(expRes.val, entry.maxVal + 1, entry.maxVal)
                                                     }, _a)) });
-                                            var _a;
                                         }) }); }), elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_set_var() })
                         } };
                 }
@@ -1107,7 +1113,6 @@ var AbstractMachine = /** @class */ (function () {
             val: null,
             boolVal: null
         };
-        var _a, _b;
     };
     AbstractMachine.execTernaryExpr = function (ternaryExpr, state) {
         if (ternaryExpr.disjunction !== null) {
@@ -1129,8 +1134,9 @@ var AbstractMachine = /** @class */ (function () {
         if (conditionRes.boolVal === null) {
             this.makeError("ternary expression condition didn't evaluate to a bool");
         }
-        var trueState = tslib_1.__assign({}, state);
-        var falseState = tslib_1.__assign({}, state);
+        //make a deep copy to check for both branches and do not modify state
+        var trueState = JSON.parse(JSON.stringify(state));
+        var falseState = JSON.parse(JSON.stringify(state));
         var trueRes = this.execExpression(ternaryExpr.trueExpression, trueState);
         var falseRes = this.execExpression(ternaryExpr.falseExpression, falseState);
         if (trueRes.val !== null && falseRes.val !== null) {
@@ -1479,12 +1485,20 @@ var AbstractMachine = /** @class */ (function () {
                      })
                 };
             }
+            case "primary_num_players": {
+                return {
+                    boolVal: null,
+                    val: state.players.length,
+                    state: tslib_1.__assign({}, state, { elapsedTimeInS: state.elapsedTimeInS + SimulationTimes._timeInS_expr_primary_constant })
+                };
+            }
             default:
-                _notExhausiveHelper_1.notExhaustive(primary.primary);
+                _notExhausiveHelper_1.notExhaustiveThrow(primary.primary);
         }
     };
     AbstractMachine.execPrimary_inc_or_decrement = function (primary, state) {
         var _this = this;
+        var _a;
         var increment = primary.type === "primary_increment";
         if (primary.player !== null) { //this must be a player var (no global/local var)
             var playerIndex_1 = this.getSomePlayerIndex(primary.player, state, 'primary_increment invalid player');
@@ -1514,6 +1528,7 @@ var AbstractMachine = /** @class */ (function () {
                     : newVal_1,
                 boolVal: null,
                 state: tslib_1.__assign({}, state, { players: state.players.map(function (p, index) {
+                        var _a;
                         return index !== playerIndex_1
                             ? p
                             : tslib_1.__assign({}, p, { defTable: tslib_1.__assign({}, p.defTable, (_a = {}, _a[primary.ident] = {
@@ -1521,7 +1536,6 @@ var AbstractMachine = /** @class */ (function () {
                                     maxVal: playerDefTabEntry_1.maxVal,
                                     ident: primary.ident
                                 }, _a)) });
-                        var _a;
                     }), elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_expr_primary_incrementOrDecrement() })
             };
             return copy_1;
@@ -1559,6 +1573,7 @@ var AbstractMachine = /** @class */ (function () {
                     state: tslib_1.__assign({}, state, { players: state.players.map(function (p, index) { return index !== state.currentPlayerIndex
                             ? p
                             : tslib_1.__assign({}, p, { localDefTables: p.localDefTables.map(function (value, defTableIndex) {
+                                    var _a;
                                     return defTableIndex !== scopeIndex_2
                                         ? value
                                         : tslib_1.__assign({}, value, { defTable: tslib_1.__assign({}, value.defTable, (_a = {}, _a[primary.ident] = {
@@ -1566,7 +1581,6 @@ var AbstractMachine = /** @class */ (function () {
                                                 maxVal: entry.maxVal,
                                                 ident: primary.ident
                                             }, _a)) });
-                                    var _a;
                                 }) }); }), elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_expr_primary_incrementOrDecrement() })
                 };
                 return { value: copy_2 };
@@ -1600,6 +1614,7 @@ var AbstractMachine = /** @class */ (function () {
                     : newVal_3,
                 boolVal: null,
                 state: tslib_1.__assign({}, state, { players: state.players.map(function (p, index) {
+                        var _a;
                         return index !== state.currentPlayerIndex
                             ? p
                             : tslib_1.__assign({}, p, { defTable: tslib_1.__assign({}, p.defTable, (_a = {}, _a[primary.ident] = {
@@ -1607,7 +1622,6 @@ var AbstractMachine = /** @class */ (function () {
                                     maxVal: playerDefTabEntry.maxVal,
                                     ident: primary.ident
                                 }, _a)) });
-                        var _a;
                     }), elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_expr_primary_incrementOrDecrement() })
             };
             return copy_3;
@@ -1645,7 +1659,6 @@ var AbstractMachine = /** @class */ (function () {
                 }, _a)), elapsedTimeInS: state.elapsedTimeInS + SimulationTimes.timeInS_expr_primary_incrementOrDecrement() })
         };
         return copy;
-        var _a;
     };
     /**
      * we explicitly used: cp.x
@@ -2050,6 +2063,10 @@ function notExhaustive(x) {
     // throw new Error("Didn't expect to get here");
 }
 exports.notExhaustive = notExhaustive;
+function notExhaustiveThrow(x) {
+    throw new Error("Didn't expect to get here... some case not matched");
+}
+exports.notExhaustiveThrow = notExhaustiveThrow;
 
 
 /***/ }),

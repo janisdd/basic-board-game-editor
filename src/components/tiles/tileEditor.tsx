@@ -68,7 +68,13 @@ import {PrintHelper} from "../../helpers/printHelper";
 import {AvailableAppTabs} from "../../state/reducers/appReducer";
 import {renewAllZIndicesInTile} from "../../helpers/someIndexHelper";
 import {set_editorSelection_rect} from "../../state/reducers/tileEditorSelection/tileEditorSelectionReducer";
-import {exportPngImagesBgColor} from "../../constants";
+import {
+  exportPngImagesBgColor,
+  fontAwesomeSolidIconsFontFileLink,
+  fontAwesomeLink,
+  isProduction,
+  fontAwesomeRegularIconsFontFileLink
+} from "../../constants";
 import {IoHelper} from "../../helpers/ioHelper";
 import * as _ from "lodash";
 
@@ -770,7 +776,7 @@ class tileEditor extends React.Component<Props, any> {
 
             <div className="mar-left">
               <ToolTip
-                message={getI18n(this.props.langId, "Export as svg (experimental)")}>
+                message={getI18n(this.props.langId, "Export as svg (experimental). If you used icons you need to download the font awesome font file and place it in the same folder as the svg. For not filled (regular) icons you will need the file 'fa-regular-400.woff', for the filled (solid) icons you need the file 'fa-solid-900.woff'. Use the buttons in the world editor next to the svg download button.")}>
                 <Button icon onClick={() => {
 
                   this.exportTileAs('svg')

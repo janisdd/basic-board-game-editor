@@ -172,6 +172,7 @@ module.exports = {
       {
         from: 'thirdPartyFiles/fontawesome-free-5.9.0-web',
         to: 'thirdPartyFiles/fontawesome-free-5.9.0-web',
+        toType: 'dir'
       }
     ]),
     new webpack.DefinePlugin({

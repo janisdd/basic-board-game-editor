@@ -4,9 +4,9 @@ import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
 import {
-  exportPngImagesBgColor,
+  exportPngImagesBgColor, fontAwesomeSolidIconsFontFileLink, fontAwesomeLink,
   printVariableIndicatorStrokeThickness,
-  worldFileExtensionWithoutDot
+  worldFileExtensionWithoutDot, fontAwesomeRegularIconsFontFileLink
 } from "../../constants";
 import {Button, Icon} from "semantic-ui-react";
 import {
@@ -278,26 +278,25 @@ class worldActionsBar extends React.Component<Props, any> {
           <Button icon disabled={tiles.length === 0}
                   onClick={() => {
 
-            let newTile: Tile
+                    let newTile: Tile
 
 
-            try {
-              newTile = WorldTilesHelper.convertWorldToTile(this.props.tileSurrogatesState.present, this.props.allTiles, this.props.worldSettings.expectedTileWidth, this.props.worldSettings.expectedTileHeight)
-            } catch(err) {
-              return
-            }
+                    try {
+                      newTile = WorldTilesHelper.convertWorldToTile(this.props.tileSurrogatesState.present, this.props.allTiles, this.props.worldSettings.expectedTileWidth, this.props.worldSettings.expectedTileHeight)
+                    } catch (err) {
+                      return
+                    }
 
-            this.props.set_tileLibrary_possibleTiles(this.props.allTiles.concat(newTile))
-            DialogHelper.okDialog(getI18n(this.props.langId, "Convert world into one tile"), getI18n(this.props.langId, "Successfully converted the world into tile. The tile was added to the tile library"))
+                    this.props.set_tileLibrary_possibleTiles(this.props.allTiles.concat(newTile))
+                    DialogHelper.okDialog(getI18n(this.props.langId, "Convert world into one tile"), getI18n(this.props.langId, "Successfully converted the world into tile. The tile was added to the tile library"))
 
-          }}>
+                  }}>
             <Icon name="compress"/>
           </Button>
         </ToolTip>
 
         <ToolTip
-
-          message={getI18n(this.props.langId, "Export as svg (experimental)")}>
+          message={getI18n(this.props.langId, "Export as svg (experimental). If you used icons you need to download the font awesome font file and place it in the same folder as the svg. For not filled (regular) icons you will need the file 'fa-regular-400.woff', for the filled (solid) icons you need the file 'fa-solid-900.woff'. Use the buttons in the world editor next to the svg download button.")}>
           <Button disabled={tiles.length === 0} icon onClick={() => {
 
             PrintHelper.exportWorldAsLargeImage(this.props.tileSurrogatesState.present, tiles, this.props.fieldSymbols,
@@ -314,6 +313,30 @@ class worldActionsBar extends React.Component<Props, any> {
               <Icon corner name='code'/>
             </Icon.Group>
           </Button>
+        </ToolTip>
+
+        <ToolTip
+          message={getI18n(this.props.langId, "Click to download the font awesome font file 'fa-regular-400.woff'. If you used not filled (regular) icons you will need to place this font awesome font file in the same folder as the svg!")}>
+          <a href={fontAwesomeRegularIconsFontFileLink} download="fa-regular-400.woff">
+            <Button icon>
+              <Icon.Group>
+                <Icon name='upload'/>
+                <Icon corner name='font'/>
+              </Icon.Group>
+            </Button>
+          </a>
+        </ToolTip>
+
+        <ToolTip
+          message={getI18n(this.props.langId, "Click to download the font awesome font file 'fa-solid-900.woff'. If you used not filled (regular) icons you will need to place this font awesome font file in the same folder as the svg!")}>
+          <a href={fontAwesomeSolidIconsFontFileLink} download="fa-solid-900.woff">
+            <Button icon>
+              <Icon.Group>
+                <Icon name='upload'/>
+                <Icon corner name='font'/>
+              </Icon.Group>
+            </Button>
+          </a>
         </ToolTip>
 
         <ToolTip

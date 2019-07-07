@@ -4,6 +4,16 @@
 
 already changed but version has not changed
 
+## 1.3.2
+
+- printing now supports fontawesome icons
+- export as png now supports fontawesome icons
+- export as svg now supports fontawesome icons (user has to download the font file in the same folder...)
+- added support for start & end field styles
+- fixed issue where print window keeps spinning
+- [lang] `$numPlayers` a new built-in constant/var for the player count
+- added font awesome regular icon support
+
 ## 1.3.1
 
 - fixed issue where importing multiple tiles will only import first tile
@@ -11,6 +21,8 @@ already changed but version has not changed
   - note that brand icons are not included because this violates copyright
 - [lang] `return` is now implicitly forced 
 - added global tiles (and tile render) settings
+- added button to (re)connect all lines to anchor points
+- fixed issue where deleting a symbol and having the symbol props editor open will throw an error
 
 ## 1.3.0
 

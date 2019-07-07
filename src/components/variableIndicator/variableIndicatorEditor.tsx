@@ -21,9 +21,9 @@ import {VariableIndicatorDrawer} from "../../../graphics/variableIndicatorDrawer
 import * as graphics from '../../../graphics/graphicsCore'
 import {PrintHelper} from "../../helpers/printHelper";
 import {
-  exportPngImagesBgColor,
+  exportPngImagesBgColor, fontAwesomeSolidIconsFontFileLink, fontAwesomeLink,
   printVariableIndicatorBorderColor,
-  printVariableIndicatorStrokeThickness
+  printVariableIndicatorStrokeThickness, fontAwesomeRegularIconsFontFileLink
 } from "../../constants";
 import {getI18n} from "../../../i18n/i18nRoot";
 import ToolTip from '../helpers/ToolTip'
@@ -174,7 +174,7 @@ class variableIndicatorEditor extends React.Component<Props, any> {
 
 
           <ToolTip
-            message={getI18n(this.props.langId, "Export as svg (experimental)")}>
+            message={getI18n(this.props.langId, "Export as svg (experimental). If you used icons you need to download the font awesome font file and place it in the same folder as the svg. For not filled (regular) icons you will need the file 'fa-regular-400.woff', for the filled (solid) icons you need the file 'fa-solid-900.woff'. Use the buttons in the world editor next to the svg download button.")}>
             <Button icon onClick={() => {
 
               this.exportVarIndicatorAs('svg')

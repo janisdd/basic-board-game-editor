@@ -252,7 +252,6 @@ class Migration_1_0_3__to__1_1_0 implements MigrationClass {
         anchorPointColor: '#f1b213',
         anchorPointDiameter: 3,
         anchorPointSnapToleranceRadiusInPx: 7,
-        anchorPointSomeConnectedColor: 'green',
 
         stageOffsetX: 0,
         stageOffsetY: 0,
@@ -291,16 +290,39 @@ class Migration_1_0_3__to__1_1_0 implements MigrationClass {
         timeInS_expr_factor: 1,
 
         alwaysInsertArrowHeadsWhenAutoConnectingFields: true,
+        anchorPointSomeConnectedColor: 'green',
+
         forcedFieldIsFontItalic: false,
         forcedFieldIsFontBold: true,
-        branchIfIsFontItalic: false,
-        branchIfIsFontBold: true,
         forcedFieldBorderColor: 'black',
         forcedFieldAutoBorderSizeInPx: 12,
         forcedFieldAutoPrependText: '\\f071',
+        forcedFieldBgColor: '#DDDDDD',
+        forcedFieldColor: 'black',
+
+        startFieldIsFontItalic: false,
+        startFieldIsFontBold: true,
+        startFieldBorderColor: 'black',
+        startFieldAutoBorderSizeInPx: 12,
+        startFieldAutoPrependText: '\\f35a',
+        startFieldBgColor: '#DDDDDD',
+        startFieldColor: 'black',
+
+        endFieldIsFontItalic: false,
+        endFieldIsFontBold: true,
+        endFieldBorderColor: 'black',
+        endFieldAutoBorderSizeInPx: 12,
+        endFieldAutoPrependText: '\\f11e',
+        endFieldBgColor: '#DDDDDD',
+        endFieldColor: 'black',
+
+        branchIfIsFontItalic: false,
+        branchIfIsFontBold: true,
         branchIfPrependText: '\\f126',
         branchIfBorderColor: 'black',
-        branchIfAutoBorderSizeInPx: 2
+        branchIfAutoBorderSizeInPx: 2,
+        branchIfBgColor: '#DDDDDD',
+        branchIfColor: 'black',
       },
       allTiles: exportWorld.allTiles.map(exportTile => {
         return {
@@ -744,26 +766,106 @@ class Migration_1_2_3__to__1_3_0 implements MigrationClass {
           }),
         }
       }),
+      //not sure when we added these settings so to be sure add them here too
       worldSettings: {
         ...exportWorld.worldSettings,
+        anchorPointSomeConnectedColor: 'green',
         alwaysInsertArrowHeadsWhenAutoConnectingFields: true,
         forcedFieldIsFontItalic: false,
         forcedFieldIsFontBold: true,
-        branchIfIsFontItalic: false,
-        branchIfIsFontBold: true,
         forcedFieldBorderColor: 'black',
         forcedFieldAutoBorderSizeInPx: 12,
         forcedFieldAutoPrependText: '\\f071',
+        forcedFieldBgColor: '#DDDDDD',
+        forcedFieldColor: 'black',
+
+        startFieldIsFontItalic: false,
+        startFieldIsFontBold: true,
+        startFieldBorderColor: 'black',
+        startFieldAutoBorderSizeInPx: 12,
+        startFieldAutoPrependText: '\\f35a',
+        startFieldBgColor: '#DDDDDD',
+        startFieldColor: 'black',
+
+        endFieldIsFontItalic: false,
+        endFieldIsFontBold: true,
+        endFieldBorderColor: 'black',
+        endFieldAutoBorderSizeInPx: 12,
+        endFieldAutoPrependText: '\\f11e',
+        endFieldBgColor: '#DDDDDD',
+        endFieldColor: 'black',
+
+        branchIfIsFontItalic: false,
+        branchIfIsFontBold: true,
         branchIfPrependText: '\\f126',
         branchIfBorderColor: 'black',
         branchIfAutoBorderSizeInPx: 2,
-        anchorPointSomeConnectedColor: 'green',
+        branchIfBgColor: '#DDDDDD',
+        branchIfColor: 'black',
       },
     }
   }
 
 }
 
+class Migration_1_3_1__to__1_3_2 implements MigrationClass {
+  oldVersion = '1.3.1'
+  newVersion = '1.3.2'
+  warningMsg: string;
+
+  migrateTile(exportTile: ExportTile): ExportTile {
+    return {
+      ...exportTile,
+      editorVersion: this.newVersion
+    };
+  }
+
+  migrateWorld(exportWorld: ExportWorld): ExportWorld {
+    return {
+      ...exportWorld,
+      editorVersion: this.newVersion,
+
+      worldSettings: {
+        ...exportWorld.worldSettings,
+
+        anchorPointSomeConnectedColor: 'green',
+        alwaysInsertArrowHeadsWhenAutoConnectingFields: true,
+        forcedFieldIsFontItalic: false,
+        forcedFieldIsFontBold: true,
+        forcedFieldBorderColor: 'black',
+        forcedFieldAutoBorderSizeInPx: 12,
+        forcedFieldAutoPrependText: '\\f071',
+        forcedFieldBgColor: '#DDDDDD',
+        forcedFieldColor: 'black',
+
+        startFieldIsFontItalic: false,
+        startFieldIsFontBold: true,
+        startFieldBorderColor: 'black',
+        startFieldAutoBorderSizeInPx: 12,
+        startFieldAutoPrependText: '\\f35a',
+        startFieldBgColor: '#DDDDDD',
+        startFieldColor: 'black',
+
+        endFieldIsFontItalic: false,
+        endFieldIsFontBold: true,
+        endFieldBorderColor: 'black',
+        endFieldAutoBorderSizeInPx: 12,
+        endFieldAutoPrependText: '\\f11e',
+        endFieldBgColor: '#DDDDDD',
+        endFieldColor: 'black',
+
+        branchIfIsFontItalic: false,
+        branchIfIsFontBold: true,
+        branchIfPrependText: '\\f126',
+        branchIfBorderColor: 'black',
+        branchIfAutoBorderSizeInPx: 2,
+        branchIfBgColor: '#DDDDDD',
+        branchIfColor: 'black',
+      }
+    };
+  }
+
+}
 
 /**
  * a helper to create a shallow migration (no field/img/line props are changed, model) only ui stuff
@@ -814,6 +916,7 @@ export class MigrationHelper {
     new Migration_1_2_2__to__1_2_3(),
     new Migration_1_2_3__to__1_3_0(),
     createVersionShallowMigration('1.3.0', '1.3.1'),
+    new Migration_1_3_1__to__1_3_2(),
   ]
 
   /**

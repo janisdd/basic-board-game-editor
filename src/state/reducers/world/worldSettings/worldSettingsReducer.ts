@@ -133,11 +133,21 @@ export interface WorldSettings {
   //we could add a lot of props here e.g. font family, font size...
   //but keep in mind that these can destroy the rendering e.g. font size 24 will probably not fit anymore in the field)
 
+
   /**
    * text to prepend when we have a forced field (also implicitly forced)
    * can be a font awesome unicode icon \fxxx
    */
   readonly forcedFieldAutoPrependText: string
+
+  /**
+   * don't allow null, use transparent
+   */
+  readonly forcedFieldColor: string
+  /**
+   * don't allow null, use transparent
+   */
+  readonly forcedFieldBgColor: string
 
   readonly forcedFieldAutoBorderSizeInPx: number
   readonly forcedFieldBorderColor: string
@@ -145,7 +155,52 @@ export interface WorldSettings {
   readonly forcedFieldIsFontBold: boolean
   readonly forcedFieldIsFontItalic: boolean
 
-  //branch if has priority
+
+  /**
+   * text to prepend when we have a forced field (also implicitly forced)
+   * can be a font awesome unicode icon \fxxx
+   */
+  readonly startFieldAutoPrependText: string
+
+  /**
+   * don't allow null, use transparent
+   */
+  readonly startFieldColor: string
+  /**
+   * don't allow null, use transparent
+   */
+  readonly startFieldBgColor: string
+
+  readonly startFieldAutoBorderSizeInPx: number
+  readonly startFieldBorderColor: string
+
+  readonly startFieldIsFontBold: boolean
+  readonly startFieldIsFontItalic: boolean
+
+
+  /**
+   * text to prepend when we have a forced field (also implicitly forced)
+   * can be a font awesome unicode icon \fxxx
+   */
+  readonly endFieldAutoPrependText: string
+
+  /**
+   * don't allow null, use transparent
+   */
+  readonly endFieldColor: string
+  /**
+   * don't allow null, use transparent
+   */
+  readonly endFieldBgColor: string
+
+  readonly endFieldAutoBorderSizeInPx: number
+  readonly endFieldBorderColor: string
+
+  readonly endFieldIsFontBold: boolean
+  readonly endFieldIsFontItalic: boolean
+
+
+  //---branch if has priority
   /**
    * text to prepend when we have a control if statement ... if we have multiple ways (2) with a condition
    * can be a font awesome unicode icon \fxxx
@@ -157,6 +212,15 @@ export interface WorldSettings {
 
   readonly branchIfIsFontBold: boolean
   readonly branchIfIsFontItalic: boolean
+
+  /**
+   * don't allow null, use transparent
+   */
+  readonly branchIfColor: string
+  /**
+   * don't allow null, use transparent
+   */
+  readonly branchIfBgColor: string
 
 }
 
@@ -233,12 +297,32 @@ export const initial: State = {
   forcedFieldBorderColor: 'black',
   forcedFieldIsFontBold: true,
   forcedFieldIsFontItalic: false,
+  forcedFieldColor: 'black',
+  forcedFieldBgColor: '#DDDDDD',
+
+  startFieldAutoPrependText: '\\f35a',
+  startFieldColor: 'black',
+  startFieldBgColor: '#DDDDDD',
+  startFieldAutoBorderSizeInPx: 2,
+  startFieldBorderColor: 'black',
+  startFieldIsFontBold: true,
+  startFieldIsFontItalic: false,
+
+  endFieldAutoPrependText: '\\f11e',
+  endFieldColor: 'black',
+  endFieldBgColor: '#DDDDDD',
+  endFieldAutoBorderSizeInPx: 2,
+  endFieldBorderColor: 'black',
+  endFieldIsFontBold: true,
+  endFieldIsFontItalic: false,
 
   branchIfPrependText: '\\f126',
   branchIfAutoBorderSizeInPx: 2,
   branchIfBorderColor: 'black',
   branchIfIsFontBold: true,
   branchIfIsFontItalic: false,
+  branchIfColor: 'black',
+  branchIfBgColor: '#DDDDDD',
 
 }
 
@@ -314,13 +398,33 @@ export enum ActionType {
   SET_forcedFieldBorderColor = 'worldSettingsReducer_SET_forcedFieldBorderColor',
   SET_forcedFieldIsFontBold = 'worldSettingsReducer_SET_forcedFieldIsFontBold',
   SET_forcedFieldIsFontItalic = 'worldSettingsReducer_SET_forcedFieldIsFontItalic',
+  SET_forcedFieldColor = 'worldSettingsReducer_SET_forcedFieldColor',
+  SET_forcedFieldBgColor = 'worldSettingsReducer_SET_forcedFieldBgColor',
 
+
+  SET_startFieldAutoPrependText = 'worldSettingsReducer_SET_startFieldAutoPrependText',
+  SET_startFieldColor = 'worldSettingsReducer_SET_startFieldColor',
+  SET_startFieldBgColor = 'worldSettingsReducer_SET_startFieldBgColor',
+  SET_startFieldAutoBorderSizeInPx = 'worldSettingsReducer_SET_startFieldAutoBorderSizeInPx',
+  SET_startFieldBorderColor = 'worldSettingsReducer_SET_startFieldBorderColor',
+  SET_startFieldIsFontBold = 'worldSettingsReducer_SET_startFieldIsFontBold',
+  SET_startFieldIsFontItalic = 'worldSettingsReducer_SET_startFieldIsFontItalic',
+
+  SET_endFieldAutoPrependText = 'worldSettingsReducer_SET_endFieldAutoPrependText',
+  SET_endFieldColor = 'worldSettingsReducer_SET_endFieldColor',
+  SET_endFieldBgColor = 'worldSettingsReducer_SET_endFieldBgColor',
+  SET_endFieldAutoBorderSizeInPx = 'worldSettingsReducer_SET_endFieldAutoBorderSizeInPx',
+  SET_endFieldBorderColor = 'worldSettingsReducer_SET_endFieldBorderColor',
+  SET_endFieldIsFontBold = 'worldSettingsReducer_SET_endFieldIsFontBold',
+  SET_endFieldIsFontItalic = 'worldSettingsReducer_SET_endFieldIsFontItalic',
 
   SET_branchIfPrependText = 'worldSettingsReducer_SET_branchIfPrependText',
   SET_branchIfAutoBorderSizeInPx = 'worldSettingsReducer_SET_branchIfAutoBorderSizeInPx',
   SET_branchIfBorderColor = 'worldSettingsReducer_SET_branchIfBorderColor',
   SET_branchIfIsFontBold = 'worldSettingsReducer_SET_branchIfIsFontBold',
   SET_branchIfIsFontItalic = 'worldSettingsReducer_SET_branchIfIsFontItalic',
+  SET_branchIfColor = 'worldSettingsReducer_SET_branchIfColor',
+  SET_branchIfBgColor = 'worldSettingsReducer_SET_branchIfBgColor',
 
   RESET = 'worldSettingsReducer_RESET',
 }
@@ -592,6 +696,8 @@ export interface SET_alwaysInsertArrowHeadsWhenAutoConnectingFieldsAction extend
   readonly alwaysInsertArrowHeadsWhenAutoConnectingFields: boolean
 }
 
+//--- forced field style
+
 export interface SET_forcedFieldAutoPrependTextAction extends ActionBase {
   readonly type: ActionType.SET_forcedFieldAutoPrependText
   readonly forcedFieldAutoPrependText: string
@@ -617,8 +723,86 @@ export interface SET_forcedFieldIsFontItalicAction extends ActionBase {
   readonly forcedFieldIsFontItalic: boolean
 }
 
+export interface SET_forcedFieldColorAction extends ActionBase {
+  readonly type: ActionType.SET_forcedFieldColor
+  readonly forcedFieldColor: string
+}
+
+export interface SET_forcedFieldBgColorAction extends ActionBase {
+  readonly type: ActionType.SET_forcedFieldBgColor
+  readonly forcedFieldBgColor: string
+}
+
+//--- start field style
+
+export interface SET_startFieldAutoPrependTextAction extends ActionBase {
+  readonly type: ActionType.SET_startFieldAutoPrependText
+  readonly startFieldAutoPrependText: string
+}
+
+export interface SET_startFieldColorAction extends ActionBase {
+  readonly type: ActionType.SET_startFieldColor
+  readonly startFieldColor: string
+}
+
+export interface SET_startFieldBgColorAction extends ActionBase {
+  readonly type: ActionType.SET_startFieldBgColor
+  readonly startFieldBgColor: string
+}
+
+export interface SET_startFieldAutoBorderSizeInPxAction extends ActionBase {
+  readonly type: ActionType.SET_startFieldAutoBorderSizeInPx
+  readonly startFieldAutoBorderSizeInPx: number
+}
+
+export interface SET_startFieldBorderColorAction extends ActionBase {
+  readonly type: ActionType.SET_startFieldBorderColor
+  readonly startFieldBorderColor: string
+}
+
+export interface SET_startFieldIsFontBoldAction extends ActionBase {
+  readonly type: ActionType.SET_startFieldIsFontBold
+  readonly startFieldIsFontBold: boolean
+}
+
+export interface SET_startFieldIsFontItalicAction extends ActionBase {
+  readonly type: ActionType.SET_startFieldIsFontItalic
+  readonly startFieldIsFontItalic: boolean
+}
 
 
+//--- end field style
+
+export interface SET_endFieldAutoPrependTextAction extends ActionBase {
+  readonly type: ActionType.SET_endFieldAutoPrependText
+  readonly endFieldAutoPrependText: string
+}
+export interface SET_endFieldColorAction extends ActionBase {
+  readonly type: ActionType.SET_endFieldColor
+  readonly endFieldColor: string
+}
+export interface SET_endFieldBgColorAction extends ActionBase {
+  readonly type: ActionType.SET_endFieldBgColor
+  readonly endFieldBgColor: string
+}
+export interface SET_endFieldAutoBorderSizeInPxAction extends ActionBase {
+  readonly type: ActionType.SET_endFieldAutoBorderSizeInPx
+  readonly endFieldAutoBorderSizeInPx: number
+}
+export interface SET_endFieldBorderColorAction extends ActionBase {
+  readonly type: ActionType.SET_endFieldBorderColor
+  readonly endFieldBorderColor: string
+}
+export interface SET_endFieldIsFontBoldAction extends ActionBase {
+  readonly type: ActionType.SET_endFieldIsFontBold
+  readonly endFieldIsFontBold: boolean
+}
+export interface SET_endFieldIsFontItalicAction extends ActionBase {
+  readonly type: ActionType.SET_endFieldIsFontItalic
+  readonly endFieldIsFontItalic: boolean
+}
+
+//--- branch if field style
 
 export interface SET_branchIfPrependTextAction extends ActionBase {
   readonly type: ActionType.SET_branchIfPrependText
@@ -644,6 +828,16 @@ export interface SET_branchIfIsFontBoldAction extends ActionBase {
 export interface SET_branchIfIsFontItalicAction extends ActionBase {
   readonly type: ActionType.SET_branchIfIsFontItalic
   readonly branchIfIsFontItalic: boolean
+}
+
+export interface SET_branchIfColorAction extends ActionBase {
+  readonly type: ActionType.SET_branchIfColor
+  readonly branchIfColor: string
+}
+
+export interface SET_branchIfBgColorAction extends ActionBase {
+  readonly type: ActionType.SET_branchIfBgColor
+  readonly branchIfBgColor: string
 }
 
 
@@ -707,17 +901,38 @@ export type AllActions =
   | SET_world_timeInS_expr_termAction
   | SET_world_timeInS_expr_factorAction
   | SET_alwaysInsertArrowHeadsWhenAutoConnectingFieldsAction
+
   | SET_forcedFieldAutoPrependTextAction
   | SET_forcedFieldAutoBorderSizeInPxAction
   | SET_forcedFieldBorderColorAction
   | SET_forcedFieldIsFontItalicAction
   | SET_forcedFieldIsFontBoldAction
+  | SET_forcedFieldColorAction
+  | SET_forcedFieldBgColorAction
+
+  | SET_startFieldAutoPrependTextAction
+  | SET_startFieldColorAction
+  | SET_startFieldBgColorAction
+  | SET_startFieldAutoBorderSizeInPxAction
+  | SET_startFieldBorderColorAction
+  | SET_startFieldIsFontBoldAction
+  | SET_startFieldIsFontItalicAction
+
+ | SET_endFieldAutoPrependTextAction
+ | SET_endFieldColorAction
+ | SET_endFieldBgColorAction
+ | SET_endFieldAutoBorderSizeInPxAction
+ | SET_endFieldBorderColorAction
+ | SET_endFieldIsFontBoldAction
+ | SET_endFieldIsFontItalicAction
 
   | SET_branchIfPrependTextAction
-| SET_branchIfAutoBorderSizeInPxAction
-| SET_branchIfBorderColorAction
+  | SET_branchIfAutoBorderSizeInPxAction
+  | SET_branchIfBorderColorAction
   | SET_branchIfIsFontBoldAction
   | SET_branchIfIsFontItalicAction
+  | SET_branchIfColorAction
+  | SET_branchIfBgColorAction
 
 
 export function reducer(state: State = initial, action: AllActions): State {
@@ -1030,6 +1245,7 @@ export function reducer(state: State = initial, action: AllActions): State {
         alwaysInsertArrowHeadsWhenAutoConnectingFields: action.alwaysInsertArrowHeadsWhenAutoConnectingFields
       }
 
+
     case ActionType.SET_forcedFieldAutoPrependText:
       return {
         ...state,
@@ -1058,6 +1274,91 @@ export function reducer(state: State = initial, action: AllActions): State {
         forcedFieldIsFontItalic: action.forcedFieldIsFontItalic
       }
 
+    case ActionType.SET_forcedFieldColor:
+      return {
+        ...state,
+        forcedFieldColor: action.forcedFieldColor
+      }
+
+    case ActionType.SET_forcedFieldBgColor:
+      return {
+        ...state,
+        forcedFieldBgColor: action.forcedFieldBgColor
+      }
+
+
+    case ActionType.SET_startFieldAutoPrependText:
+      return {
+        ...state,
+        startFieldAutoPrependText: action.startFieldAutoPrependText
+      }
+    case ActionType.SET_startFieldColor:
+      return {
+        ...state,
+        startFieldColor: action.startFieldColor
+      }
+    case ActionType.SET_startFieldBgColor:
+      return {
+        ...state,
+        startFieldBgColor: action.startFieldBgColor
+      }
+    case ActionType.SET_startFieldAutoBorderSizeInPx:
+      return {
+        ...state,
+        startFieldAutoBorderSizeInPx: action.startFieldAutoBorderSizeInPx
+      }
+    case ActionType.SET_startFieldBorderColor:
+      return {
+        ...state,
+        startFieldBorderColor: action.startFieldBorderColor
+      }
+    case ActionType.SET_startFieldIsFontBold:
+      return {
+        ...state,
+        startFieldIsFontBold: action.startFieldIsFontBold
+      }
+    case ActionType.SET_startFieldIsFontItalic:
+      return {
+        ...state,
+        startFieldIsFontItalic: action.startFieldIsFontItalic
+      }
+
+
+    case ActionType.SET_endFieldAutoPrependText:
+      return {
+        ...state,
+        endFieldAutoPrependText: action.endFieldAutoPrependText
+      }
+    case ActionType.SET_endFieldColor:
+      return {
+        ...state,
+        endFieldColor: action.endFieldColor
+      }
+    case ActionType.SET_endFieldBgColor:
+      return {
+        ...state,
+        endFieldBgColor: action.endFieldBgColor
+      }
+    case ActionType.SET_endFieldAutoBorderSizeInPx:
+      return {
+        ...state,
+        endFieldAutoBorderSizeInPx: action.endFieldAutoBorderSizeInPx
+      }
+    case ActionType.SET_endFieldBorderColor:
+      return {
+        ...state,
+        endFieldBorderColor: action.endFieldBorderColor
+      }
+    case ActionType.SET_endFieldIsFontBold:
+      return {
+        ...state,
+        endFieldIsFontBold: action.endFieldIsFontBold
+      }
+    case ActionType.SET_endFieldIsFontItalic:
+      return {
+        ...state,
+        endFieldIsFontItalic: action.endFieldIsFontItalic
+      }
 
 
     case ActionType.SET_branchIfPrependText:
@@ -1081,12 +1382,22 @@ export function reducer(state: State = initial, action: AllActions): State {
         ...state,
         branchIfIsFontBold: action.branchIfIsFontBold
       }
-
     case ActionType.SET_branchIfIsFontItalic:
       return {
         ...state,
         branchIfIsFontItalic: action.branchIfIsFontItalic
       }
+    case ActionType.SET_branchIfColor:
+      return {
+        ...state,
+        branchIfColor: action.branchIfColor
+      }
+    case ActionType.SET_branchIfBgColor:
+      return {
+        ...state,
+        branchIfBgColor: action.branchIfBgColor
+      }
+
 
     case ActionType.RESET:
       return initial

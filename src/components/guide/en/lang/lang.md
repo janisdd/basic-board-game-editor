@@ -44,34 +44,34 @@ the common structure for game setup is
 
 ```bbgel
 game {
-	maxDiceValue: [NUMBER]
+	maxDiceValue [NUMBER]
 }
 ```
 
 ```bbgel
 game {
-	endCondition: [bool expression]
+	endCondition [bool expression]
 }
 ```
 
 ```bbgel
 game {
-	maxDiceValue: [NUMBER]
-	endCondition: [bool expression]
+	maxDiceValue [NUMBER]
+	endCondition [bool expression]
 }
 ```
 
 ```bbgel
 game {
-	maxDiceValue: [NUMBER]
+	maxDiceValue [NUMBER]
 	[variables]
 }
 ```
 
 ```bbgel
 game {
-	maxDiceValue: [NUMBER]
-	endCondition: [bool expression]
+	maxDiceValue [NUMBER]
+	endCondition [bool expression]
 	[variables]
 }
 ```
@@ -110,7 +110,7 @@ the common structure for game setup is
 
 ```bbgel
 [NUMBER] players {
-	numTokens: [NUMBER]
+	numTokens [NUMBER]
 }
 ```
 
@@ -122,7 +122,7 @@ the common structure for game setup is
 
 ```bbgel
 [NUMBER] players {
-	numTokens: [NUMBER]
+	numTokens [NUMBER]
 	[variables]
 }
 ```
@@ -426,13 +426,15 @@ x = roll(10) /* x will be between 1 and 10 */
 b = choose_bool()
 ```
 
-## built-in vars (cannot be set)
+## built-in vars (cannot be set, are set automatically)
 
 `$leftSteps` the left steps the player token can move
 *can become negative when the move function is called with a negative value*
 
 `$result` or `$result` will set when you call `return [expr] / result [expr]`
 then `$result` will have the value of `[expr]`
+
+`$numPlayers` the current number of players in the game (if a player finished the game the number won't change)
 
 ## built-in constants
 

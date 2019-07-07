@@ -13,12 +13,69 @@ import {getGuid} from "./helpers/guid";
 import {ActionTypes} from "redux-undo";
 
 export const appProperties = {
-  version: '1.3.1',
+  version: '1.3.2',
   appName: 'Basic board game editor',
   exportFileNamePrefix: 'bbge'
 }
 
+declare var process: {
+  // noinspection TsLint
+  env: {
+    // noinspection TsLint
+    NODE_ENV: string
+  }
+}
 
+/**
+ * changes url origin, api origin, disables logging
+ * @type {boolean}
+ */
+export const isProduction = (process.env.NODE_ENV === 'production')
+
+
+/**
+ * we need this for the printing window
+ */
+export const fontAwesomeLink = isProduction
+  ? '../thirdPartyFiles/fontawesome-free-5.9.0-web/css/all.css'
+  : 'thirdPartyFiles/fontawesome-free-5.9.0-web/css/all.css'
+
+/**
+ * we need this for download link (for svg export)
+ */
+export const fontAwesomeRegularIconsFontFileLink = isProduction
+  ? '../thirdPartyFiles/fontawesome-free-5.9.0-web/webfonts/fa-regular-400.woff'
+  : 'thirdPartyFiles/fontawesome-free-5.9.0-web/webfonts/fa-regular-400.woff'
+
+/**
+ * we need this for download link (for svg export)
+ */
+export const fontAwesomeSolidIconsFontFileLink = isProduction
+  ? '../thirdPartyFiles/fontawesome-free-5.9.0-web/webfonts/fa-solid-900.woff'
+  : 'thirdPartyFiles/fontawesome-free-5.9.0-web/webfonts/fa-solid-900.woff'
+
+//see https://forums.tumult.com/t/using-a-custom-web-font-within-an-svg-file/7254
+export const fontAwesomeCssFontFaceDefForSvg = `<defs>
+  <style type="text/css">
+  @font-face {
+  font-family: 'Font Awesome 5 Free';
+  font-style: normal;
+  font-weight: 400;
+  font-display: auto;
+  src: url("fa-regular-400.woff2") format("woff2"), url("fa-regular-400.woff") format("woff") }
+  @font-face {
+    font-family: 'Font Awesome 5 Free';
+    font-style: normal;
+    font-weight: 900;
+    font-display: auto;
+    src: url("fa-solid-900.woff2") format("woff2"), url("fa-solid-900.woff") format("woff") }
+  </style>
+</defs>
+`
+
+/**
+ * when we match this we convert it to a real utf icon e.g. to \\ufxxx
+ */
 export const fontAwesomeMatchRegex = /\\f[0-9a-z]{3}/gim
 
 export const anchorPointConnectedColor = 'green'
@@ -28,7 +85,7 @@ export const symbolPreviewHeight = 150
 
 export const changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol = true
 
-export  const exportPngImagesBgColor: string | null = 'white'
+export const exportPngImagesBgColor: string | null = 'white'
 
 export const resizeDragHandleSize = 10
 export const resizeHandleFillColor = 'black'

@@ -24,7 +24,7 @@ import {
   PrimaryIdentLastResult,
   PrimaryIdentLeftStepsUnit,
   PrimaryIdentUnit,
-  PrimaryIncrementUnit,
+  PrimaryIncrementUnit, PrimaryNumPlayers,
   PrimaryPlayerVarIdentUnit,
   PrimaryRollDiceFunc,
   PrimaryUnit,
@@ -269,6 +269,12 @@ export class ExecutionUnitBuilder {
       type: 'primary_player_var_ident',
       ident,
       player: who
+    }
+  }
+
+  public static primaryNumPlayers(): PrimaryNumPlayers {
+    return {
+      type: 'primary_num_players',
     }
   }
 

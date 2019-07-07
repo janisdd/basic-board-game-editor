@@ -197,6 +197,11 @@ var ExecutionUnitBuilder = /** @class */ (function () {
             player: who
         };
     };
+    ExecutionUnitBuilder.primaryNumPlayers = function () {
+        return {
+            type: 'primary_num_players',
+        };
+    };
     //--- END expressions
     ExecutionUnitBuilder.ifUnit = function (conditionExpr, trueUnits) {
         return {

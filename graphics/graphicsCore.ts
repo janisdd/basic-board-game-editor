@@ -440,6 +440,8 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
   realCmdText = realCmdText === null ? '' : realCmdText
 
   let isForceOrImplicitlyForced = false
+  let isStartField = false
+  let isEndField = false
   let isBranchIf = false
 
   if (realCmdText !== '') {
@@ -465,6 +467,16 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
         isBranchIf = true
       }
 
+      if (game.statements.some(p =>
+        p.type === "start")) {
+        isStartField = true
+      }
+
+      if (game.statements.some(p =>
+        p.type === "end")) {
+        isEndField = true
+      }
+
     } catch (err) {
       //this is ok
     }
@@ -480,15 +492,23 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
   //--start
   const borderSize = (isBranchIf && worldSettings.branchIfAutoBorderSizeInPx > 0)
     ? worldSettings.branchIfAutoBorderSizeInPx
-    : (isForceOrImplicitlyForced && worldSettings.forcedFieldAutoBorderSizeInPx > 0)
-      ? worldSettings.forcedFieldAutoBorderSizeInPx
-      : (symbolForShape !== null && symbolForShape.overwriteBorderSizeInPx ? symbolForShape.borderSizeInPx : field.borderSizeInPx)
+    : (isStartField && worldSettings.startFieldAutoBorderSizeInPx > 0)
+      ? worldSettings.startFieldAutoBorderSizeInPx
+      : (isEndField && worldSettings.endFieldAutoBorderSizeInPx > 0)
+        ? worldSettings.endFieldAutoBorderSizeInPx
+        : (isForceOrImplicitlyForced && worldSettings.forcedFieldAutoBorderSizeInPx > 0)
+          ? worldSettings.forcedFieldAutoBorderSizeInPx
+          : (symbolForShape !== null && symbolForShape.overwriteBorderSizeInPx ? symbolForShape.borderSizeInPx : field.borderSizeInPx)
 
   const borderColor = (isBranchIf && worldSettings.branchIfBorderColor !== '')
     ? worldSettings.branchIfBorderColor
-    : (isForceOrImplicitlyForced && worldSettings.forcedFieldBorderColor !== '')
-      ? worldSettings.forcedFieldBorderColor
-      : symbolForShape !== null && symbolForShape.overwriteBorderColor ? symbolForShape.borderColor : field.borderColor
+    : (isStartField && worldSettings.startFieldBorderColor !== '')
+      ? worldSettings.startFieldBorderColor
+      : (isEndField && worldSettings.endFieldBorderColor !== '')
+        ? worldSettings.endFieldBorderColor
+        : (isForceOrImplicitlyForced && worldSettings.forcedFieldBorderColor !== '')
+          ? worldSettings.forcedFieldBorderColor
+          : symbolForShape !== null && symbolForShape.overwriteBorderColor ? symbolForShape.borderColor : field.borderColor
 
 
   graphics = graphics.beginFill(symbolForShape !== null && symbolForShape.overwriteBgColor ? symbolForShape.bgColor : field.bgColor)
@@ -707,6 +727,13 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
 
   if (isBranchIf && worldSettings.branchIfPrependText !== '') {
     fieldText = worldSettings.branchIfPrependText + ' ' + fieldText
+
+  } else if (isStartField && worldSettings.startFieldAutoPrependText) {
+    fieldText = worldSettings.startFieldAutoPrependText + ' ' + fieldText
+
+  } else if (isEndField && worldSettings.endFieldAutoPrependText) {
+    fieldText = worldSettings.endFieldAutoPrependText + ' ' + fieldText
+
   } else if (isForceOrImplicitlyForced && worldSettings.forcedFieldAutoPrependText !== '') {
     fieldText = worldSettings.forcedFieldAutoPrependText + ' ' + fieldText
   }
@@ -722,15 +749,23 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
 
     const isFontBold = isBranchIf
       ? worldSettings.branchIfIsFontBold
-      : isForceOrImplicitlyForced
-        ? worldSettings.forcedFieldIsFontBold
-        : (symbolForShape !== null && symbolForShape.overwriteFontDecoration ? symbolForShape.isFontBold : field.isFontBold)
+      : isStartField
+        ? worldSettings.startFieldIsFontBold
+        : isEndField
+          ? worldSettings.endFieldIsFontBold
+          : isForceOrImplicitlyForced
+            ? worldSettings.forcedFieldIsFontBold
+            : (symbolForShape !== null && symbolForShape.overwriteFontDecoration ? symbolForShape.isFontBold : field.isFontBold)
 
     const isFontItalic = isBranchIf
       ? worldSettings.branchIfIsFontItalic
-      : isForceOrImplicitlyForced
-        ? worldSettings.forcedFieldIsFontItalic
-        : (symbolForShape !== null && symbolForShape.overwriteFontDecoration ? symbolForShape.isFontItalic : field.isFontItalic)
+      : isStartField
+        ? worldSettings.startFieldIsFontItalic
+        : isEndField
+          ? worldSettings.endFieldIsFontItalic
+          : isForceOrImplicitlyForced
+            ? worldSettings.forcedFieldIsFontItalic
+            : (symbolForShape !== null && symbolForShape.overwriteFontDecoration ? symbolForShape.isFontItalic : field.isFontItalic)
 
     textShape.font = `${isFontBold ? 'bold ' : ''}${isFontItalic ? 'italic ' : ''}${fontSizeInPx}px '${fontName}', 'Font Awesome 5 Free'`
 
@@ -879,8 +914,6 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
 
       //field anchor points and symbol are in sync... so we can just use index
       const anchorPoint = field.anchorPoints[i]
-
-
 
       let pointShape = new createjs.Shape()
       pointShape.graphics.beginFill(anchorPoint.connectedLineTuples.length > 0

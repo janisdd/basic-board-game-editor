@@ -49,7 +49,9 @@ export interface LangObj {
   "Edit tile. This will also change all instances of this the in the map. If you want to change only 1 instance then create a clone first and exchange the tile with the clone": string
   "Export single tile. This will export the tile, only the symbols & only the used images": string
   "Export the current state of the tile. It will also export the used symbols & the used images": string
-  "Export as svg (experimental)": string
+  "Export as svg (experimental). If you used icons you need to download the font awesome font file and place it in the same folder as the svg. For not filled (regular) icons you will need the file 'fa-regular-400.woff', for the filled (solid) icons you need the file 'fa-solid-900.woff'. Use the buttons in the world editor next to the svg download button.": string
+  "Click to download the font awesome font file 'fa-regular-400.woff'. If you used not filled (regular) icons you will need to place this font awesome font file in the same folder as the svg!": string
+  "Click to download the font awesome font file 'fa-solid-900.woff'. If you used not filled (regular) icons you will need to place this font awesome font file in the same folder as the svg!" : string
   "Export as png (experimental)": string
   "Export as png (experimental), the world tile size is used": string
   "Print tile": string
@@ -298,22 +300,22 @@ export interface LangObj {
   "Always auto insert arrow heads in tile editor": string
   "When auto inserting lines always insert lines(true) or just when branching (control if)": string
 
-  "Forced field auto prepend text": string
-  "The text to prepend to the field text when the field is a (implicitly) forced field (command text is forced)": string
-  "Forced field auto border size in px": string
-  "The border size to set when the field is a (implicitly) forced field (command text is forced)": string
-  "Forced field border color": string
-  "The border color to set when the field is a (implicitly) forced field (command text is forced)": string
-  "Forced field is font bold": string
-  "Forced field is font italic": string
-  "Branch if prepend text": string
-  "The text to prepend to the field text when the field command is a branching if (control if)": string
-  "Branch if auto border size in px": string
-  "The border size to set for the field text when the field command is a branching if (control if)": string
-  "Branch if border color": string
-  "The border color to set for the field text when the field command is a branching if (control if)": string
-  "Branch if is font bold": string
-  "Branch if is font italic": string
+  "Forced field style": string
+  "A forced field is a field with the command text containing the force command. The forced style has the lowes priority from all field styles.": string
+
+  "Start field style": string
+  "A start field is a field with the command text containing the game start command": string
+
+  "End field style": string
+  "An end field is a field with the command text containing the game end command": string
+  "Auto prepend text": string
+  "Auto border size in px": string
+  "Is font bold": string
+  "Is font italic": string
+  "Font color": string
+
+  "Branch if field style": string
+  "A branch if field is a field with the command text containing the control if command": string
 
 
   //--- symbol library

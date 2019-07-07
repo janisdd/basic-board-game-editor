@@ -36,6 +36,7 @@ hints:
 ('np'|'next_player') return 'np'
 ('pp'|'previous_player') return 'pp'
 
+'numPlayers' return 'numPlayers'
 
 'true' return 'true'
 'false' return 'false'
@@ -340,6 +341,7 @@ primary
         : yy.ExecutionUnitBuilder.primaryPlayerVarIdentUnit($1.player, $1.ident)
 
   }
+  | '$numPlayers' /* built-in var */ { $$ = yy.ExecutionUnitBuilder.primaryNumPlayers() }
   ;
 
 

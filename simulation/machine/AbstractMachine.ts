@@ -2035,6 +2035,19 @@ export class AbstractMachine {
 
       }
 
+      case "primary_num_players": {
+
+        return {
+          boolVal: null,
+          val: state.players.length,
+          state: {
+            ...state,
+            elapsedTimeInS: state.elapsedTimeInS + SimulationTimes._timeInS_expr_primary_constant
+          }
+        }
+
+      }
+
       default:
         notExhaustiveThrow(primary.primary)
     }

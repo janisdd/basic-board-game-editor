@@ -119,7 +119,9 @@ export interface PlayerObj {
    * the current scope is always the last def table
    * note that we have a default function scope
    *  @see AbstractMachine.createNewMachineState
-   *  if we are in the default (0) scope vars can be in localDefTables or defTable
+   *  if we are in the default (0) scope vars can be in
+   *  @see localDefTables or
+   *  @see defTable
    */
   readonly localDefTables: ReadonlyArray<DefinitionTableWrapper>
 
@@ -165,7 +167,7 @@ export interface DefinitionTableWrapper {
 
   readonly defTable: DefinitionTable
 
-  readonly [id: string]: boolean | DefinitionTable
+  // readonly [id: string]: boolean | DefinitionTable
 }
 
 export interface DefinitionTable {

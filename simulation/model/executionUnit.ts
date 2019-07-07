@@ -140,7 +140,7 @@ export interface FactorUnit {
 
 export interface PrimaryUnit {
   type: 'primary'
-  primary: PrimaryConstantUnit | PrimaryIdentUnit | PrimaryIdentLeftStepsUnit | PrimaryIdentLastResult | ExpressionUnit | PrimaryIncrementUnit | PrimaryDecrementUnit | PrimaryPlayerVarIdentUnit | PrimaryRollDiceFunc | PrimaryChooseBoolFunc
+  primary: PrimaryConstantUnit | PrimaryIdentUnit | PrimaryIdentLeftStepsUnit | PrimaryIdentLastResult | ExpressionUnit | PrimaryIncrementUnit | PrimaryDecrementUnit | PrimaryPlayerVarIdentUnit | PrimaryRollDiceFunc | PrimaryChooseBoolFunc | PrimaryNumPlayers
 }
 
 export interface PrimaryConstantUnit {
@@ -204,6 +204,13 @@ export interface PrimaryPlayerVarIdentUnit {
   type: 'primary_player_var_ident'
   ident: string
   player: SomePlayer
+}
+
+/**
+ * a built-in var returning the player count
+ */
+export interface PrimaryNumPlayers {
+  type: 'primary_num_players'
 }
 
 // export interface ClauseUnit {
@@ -395,3 +402,4 @@ export type SomeExprUnits =
   | PrimaryPlayerVarIdentUnit
   | PrimaryRollDiceFunc
   | PrimaryChooseBoolFunc
+  | PrimaryNumPlayers

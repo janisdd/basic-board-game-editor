@@ -40,7 +40,26 @@ import {
   set_world_branchIfIsFontItalic,
   set_world_forcedFieldIsFontBold,
   set_world_forcedFieldIsFontItalic,
-  set_world_branchIfAutoBorderSizeInPx, set_world_branchIfBorderColor, set_world_branchIfPrependText
+  set_world_branchIfAutoBorderSizeInPx,
+  set_world_branchIfBorderColor,
+  set_world_branchIfPrependText,
+  set_world_forcedFieldBgColor,
+  set_world_branchIfColor,
+  set_world_branchIfBgColor,
+  set_world_forcedFieldColor,
+  set_world_startFieldBgColor,
+  set_world_startFieldIsFontBold,
+  set_world_startFieldBorderColor,
+  set_world_startFieldColor,
+  set_world_startFieldAutoPrependText,
+  set_world_startFieldAutoBorderSizeInPx,
+  set_world_startFieldIsFontItalic,
+  set_world_endFieldBgColor,
+  set_world_endFieldBorderColor,
+  set_world_endFieldIsFontItalic,
+  set_world_endFieldColor,
+  set_world_endFieldAutoPrependText,
+  set_world_endFieldIsFontBold, set_world_endFieldAutoBorderSizeInPx
 
 } from "../../../state/reducers/world/worldSettings/actions";
 import {
@@ -114,12 +133,32 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_world_forcedFieldAutoBorderSizeInPx,
   set_world_forcedFieldIsFontBold,
   set_world_forcedFieldIsFontItalic,
+  set_world_forcedFieldColor,
+  set_world_forcedFieldBgColor,
+
+  set_world_startFieldAutoPrependText,
+  set_world_startFieldColor,
+  set_world_startFieldBgColor,
+  set_world_startFieldAutoBorderSizeInPx,
+  set_world_startFieldBorderColor,
+  set_world_startFieldIsFontBold,
+  set_world_startFieldIsFontItalic,
+
+  set_world_endFieldAutoPrependText,
+  set_world_endFieldColor,
+  set_world_endFieldBgColor,
+  set_world_endFieldAutoBorderSizeInPx,
+  set_world_endFieldBorderColor,
+  set_world_endFieldIsFontBold,
+  set_world_endFieldIsFontItalic,
 
   set_world_branchIfPrependText,
   set_world_branchIfAutoBorderSizeInPx,
   set_world_branchIfBorderColor,
   set_world_branchIfIsFontBold,
   set_world_branchIfIsFontItalic,
+  set_world_branchIfColor,
+  set_world_branchIfBgColor,
 
 }, dispatch)
 
@@ -253,7 +292,8 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                               />
                             </label>
 
-                            <Input type="number" placeholder='1' value={this.props.worldSettings.additionalBorderWidthInPx}
+                            <Input type="number" placeholder='1'
+                                   value={this.props.worldSettings.additionalBorderWidthInPx}
                                    step='0.1'
                                    style={{width: '100px'}}
                                    onChange={(e: SyntheticEvent<HTMLInputElement>) => {
@@ -339,11 +379,12 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                         <Form.Group widths='equal'>
                           <Form.Field>
-                            <Checkbox label={getI18n(this.props.langId, "Always auto insert arrow heads in tile editor")}
-                                      checked={this.props.worldSettings.alwaysInsertArrowHeadsWhenAutoConnectingFields}
-                                      onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
-                                        this.props.set_world_alwaysInsertArrowHeadsWhenAutoConnectingFields(data.checked)
-                                      }}
+                            <Checkbox
+                              label={getI18n(this.props.langId, "Always auto insert arrow heads in tile editor")}
+                              checked={this.props.worldSettings.alwaysInsertArrowHeadsWhenAutoConnectingFields}
+                              onChange={(e: SyntheticEvent<HTMLInputElement>, data: CheckboxData) => {
+                                this.props.set_world_alwaysInsertArrowHeadsWhenAutoConnectingFields(data.checked)
+                              }}
                             />
                             <IconToolTip
                               message={getI18n(this.props.langId,
@@ -352,14 +393,25 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                           </Form.Field>
                         </Form.Group>
 
-
+                        {
+                          //forced field style
+                        }
+                        <h3 className="ui dividing header">
+                          {
+                            getI18n(this.props.langId, "Forced field style")
+                          }
+                          <IconToolTip
+                            message={getI18n(this.props.langId,
+                              "A forced field is a field with the command text containing the force command. The forced style has the lowes priority from all field styles.")}
+                          />
+                        </h3>
                         <Form.Group widths='equal'>
                           <Form.Field>
                             <label>
-                              {getI18n(this.props.langId, "Forced field auto prepend text")}
+                              {getI18n(this.props.langId, "Auto prepend text")}
                               <IconToolTip
                                 message={getI18n(this.props.langId,
-                                  "The text to prepend to the field text when the field is a (implicitly) forced field (command text is forced)")}
+                                  "Auto prepend text")}
                               />
                             </label>
                             <Input value={this.props.worldSettings.forcedFieldAutoPrependText}
@@ -373,11 +425,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                           <Form.Field>
                             <label>
-                              {getI18n(this.props.langId, "Forced field auto border size in px")}
-                              <IconToolTip
-                                message={getI18n(this.props.langId,
-                                  "The border size to set when the field is a (implicitly) forced field (command text is forced)")}
-                              />
+                              {getI18n(this.props.langId, "Auto border size in px")}
                             </label>
                             <Input value={this.props.worldSettings.forcedFieldAutoBorderSizeInPx}
                                    type="number"
@@ -392,11 +440,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                           <Form.Field>
                             <label>
-                              {getI18n(this.props.langId, "Forced field border color")}
-                              <IconToolTip
-                                message={getI18n(this.props.langId,
-                                  "The border color to set when the field is a (implicitly) forced field (command text is forced)")}
-                              />
+                              {getI18n(this.props.langId, "Border color")}
                             </label>
                             <div className="flexed">
                               <Popup
@@ -425,8 +469,8 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                           <Form.Field>
                             <label>
-                              {getI18n(this.props.langId, "Forced field is font bold")} <br />
-                              {getI18n(this.props.langId, "Forced field is font italic")}
+                              {getI18n(this.props.langId, "Is font bold")} <br/>
+                              {getI18n(this.props.langId, "Is font italic")}
                             </label>
 
                             <Button.Group>
@@ -453,21 +497,491 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                           </Form.Field>
 
 
+                          {
+                            //color
+                          }
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Font color")}
+                            </label>
+                            <div className="flexed">
+                              <Popup
+                                trigger={<div className="hoverable" style={{margin: 'auto 0'}}>
+                                  <Icon style={{
+                                    'color': 'black'
+                                  }} name="paint brush"/>
+                                </div>}
+                                on="click"
+                                offset={horizontalIconPopupOffsetInPx}
+                                content={<ChromePicker
+                                  color={this.props.worldSettings.forcedFieldColor}
+                                  onChangeComplete={color => {
+                                    this.props.set_world_forcedFieldColor(color.hex)
+                                  }}
+                                />}
+                              />
+
+                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                                <IconToolTip
+                                  message={getI18n(this.props.langId, "Transparent color")}
+                                  icon="circle outline"
+                                  onClick={() => {
+                                    this.props.set_world_forcedFieldColor('transparent')
+                                  }}
+                                />
+                              </div>
+
+                              <Input value={this.props.worldSettings.forcedFieldColor}
+                                     type="text"
+                                     style={{width: '100px'}}
+                                     disabled
+                              />
+                            </div>
+                          </Form.Field>
+
+                          {
+                            //bg color
+                          }
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Background color")}
+                            </label>
+
+                            <div className="flexed">
+                              <Popup
+                                trigger={<div className="hoverable" style={{margin: 'auto 0'}}>
+                                  <Icon style={{
+                                    'color': 'black'
+                                  }} name="paint brush"/>
+                                </div>}
+                                on="click"
+                                offset={horizontalIconPopupOffsetInPx}
+                                content={<ChromePicker
+                                  color={this.props.worldSettings.forcedFieldBgColor}
+                                  onChangeComplete={color => {
+                                    this.props.set_world_forcedFieldBgColor(color.hex)
+                                  }}
+                                />}
+                              />
+
+                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                                <IconToolTip
+                                  message={getI18n(this.props.langId, "Transparent color")}
+                                  icon="circle outline"
+                                  onClick={() => {
+                                    this.props.set_world_forcedFieldBgColor('transparent')
+                                  }}
+                                />
+                              </div>
+
+                              <Input value={this.props.worldSettings.forcedFieldBgColor}
+                                     type="text"
+                                     style={{width: '100px'}}
+                                     disabled
+                              />
+                            </div>
+                          </Form.Field>
+
 
                         </Form.Group>
 
 
+                        {
+                          //start field style
+                        }
+                        <h3 className="ui dividing header">
+                          {
+                            getI18n(this.props.langId, "Start field style")
+                          }
+                          <IconToolTip
+                            message={getI18n(this.props.langId,
+                              "A start field is a field with the command text containing the game start command")}
+                          />
+                        </h3>
+                        <Form.Group widths='equal'>
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Auto prepend text")}
+                            </label>
+                            <Input value={this.props.worldSettings.startFieldAutoPrependText}
+
+                                   style={{width: '100px'}}
+                                   onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+                                     this.props.set_world_startFieldAutoPrependText(e.currentTarget.value)
+                                   }}
+                            />
+                          </Form.Field>
+
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Auto border size in px")}
+                            </label>
+                            <Input value={this.props.worldSettings.startFieldAutoBorderSizeInPx}
+                                   type="number"
+                                   style={{width: '100px'}}
+                                   onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+                                     const val = parseInt(e.currentTarget.value)
+                                     if (isNaN(val) || val < 0) return
+                                     this.props.set_world_startFieldAutoBorderSizeInPx(val)
+                                   }}
+                            />
+                          </Form.Field>
+
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Border color")}
+                            </label>
+                            <div className="flexed">
+                              <Popup
+                                trigger={<div className="hoverable" style={{margin: 'auto 0'}}>
+                                  <Icon style={{
+                                    'color': 'black'
+                                  }} name="paint brush"/>
+                                </div>}
+                                on="click"
+                                offset={horizontalIconPopupOffsetInPx}
+                                content={<ChromePicker
+                                  color={this.props.worldSettings.startFieldBorderColor}
+                                  onChangeComplete={color => {
+                                    this.props.set_world_startFieldBorderColor(color.hex)
+                                  }}
+                                />}
+                              />
+
+                              <Input value={this.props.worldSettings.startFieldBorderColor}
+                                     type="text"
+                                     style={{width: '100px'}}
+                                     disabled
+                              />
+                            </div>
+                          </Form.Field>
+
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Is font bold")} <br/>
+                              {getI18n(this.props.langId, "Is font italic")}
+                            </label>
+
+                            <Button.Group>
+                              <Button
+                                active={this.props.worldSettings.startFieldIsFontBold}
+                                icon
+                                onClick={() => {
+                                  this.props.set_world_startFieldIsFontBold(!this.props.worldSettings.startFieldIsFontBold)
+                                }}
+                              >
+                                <Icon name='bold'/>
+                              </Button>
+                              <Button
+                                active={this.props.worldSettings.startFieldIsFontItalic}
+                                icon
+                                onClick={() => {
+                                  this.props.set_world_startFieldIsFontItalic(!this.props.worldSettings.startFieldIsFontItalic)
+                                }}
+                              >
+                                <Icon name='italic'/>
+                              </Button>
+                            </Button.Group>
+
+                          </Form.Field>
+
+
+                          {
+                            //color
+                          }
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Font color")}
+                            </label>
+                            <div className="flexed">
+                              <Popup
+                                trigger={<div className="hoverable" style={{margin: 'auto 0'}}>
+                                  <Icon style={{
+                                    'color': 'black'
+                                  }} name="paint brush"/>
+                                </div>}
+                                on="click"
+                                offset={horizontalIconPopupOffsetInPx}
+                                content={<ChromePicker
+                                  color={this.props.worldSettings.startFieldColor}
+                                  onChangeComplete={color => {
+                                    this.props.set_world_startFieldColor(color.hex)
+                                  }}
+                                />}
+                              />
+
+                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                                <IconToolTip
+                                  message={getI18n(this.props.langId, "Transparent color")}
+                                  icon="circle outline"
+                                  onClick={() => {
+                                    this.props.set_world_startFieldColor('transparent')
+                                  }}
+                                />
+                              </div>
+
+                              <Input value={this.props.worldSettings.startFieldColor}
+                                     type="text"
+                                     style={{width: '100px'}}
+                                     disabled
+                              />
+                            </div>
+                          </Form.Field>
+
+                          {
+                            //bg color
+                          }
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Background color")}
+                            </label>
+
+                            <div className="flexed">
+                              <Popup
+                                trigger={<div className="hoverable" style={{margin: 'auto 0'}}>
+                                  <Icon style={{
+                                    'color': 'black'
+                                  }} name="paint brush"/>
+                                </div>}
+                                on="click"
+                                offset={horizontalIconPopupOffsetInPx}
+                                content={<ChromePicker
+                                  color={this.props.worldSettings.startFieldBgColor}
+                                  onChangeComplete={color => {
+                                    this.props.set_world_startFieldBgColor(color.hex)
+                                  }}
+                                />}
+                              />
+
+                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                                <IconToolTip
+                                  message={getI18n(this.props.langId, "Transparent color")}
+                                  icon="circle outline"
+                                  onClick={() => {
+                                    this.props.set_world_startFieldBgColor('transparent')
+                                  }}
+                                />
+                              </div>
+
+                              <Input value={this.props.worldSettings.startFieldBgColor}
+                                     type="text"
+                                     style={{width: '100px'}}
+                                     disabled
+                              />
+                            </div>
+                          </Form.Field>
+
+
+                        </Form.Group>
+
+
+                        {
+                          //end field style
+                        }
+                        <h3 className="ui dividing header">
+                          {
+                            getI18n(this.props.langId, "End field style")
+                          }
+                          <IconToolTip
+                            message={getI18n(this.props.langId,
+                              "An end field is a field with the command text containing the game end command")}
+                          />
+                        </h3>
+                        <Form.Group widths='equal'>
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Auto prepend text")}
+                            </label>
+                            <Input value={this.props.worldSettings.endFieldAutoPrependText}
+
+                                   style={{width: '100px'}}
+                                   onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+                                     this.props.set_world_endFieldAutoPrependText(e.currentTarget.value)
+                                   }}
+                            />
+                          </Form.Field>
+
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Auto border size in px")}
+                            </label>
+                            <Input value={this.props.worldSettings.endFieldAutoBorderSizeInPx}
+                                   type="number"
+                                   style={{width: '100px'}}
+                                   onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+                                     const val = parseInt(e.currentTarget.value)
+                                     if (isNaN(val) || val < 0) return
+                                     this.props.set_world_endFieldAutoBorderSizeInPx(val)
+                                   }}
+                            />
+                          </Form.Field>
+
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Border color")}
+                            </label>
+                            <div className="flexed">
+                              <Popup
+                                trigger={<div className="hoverable" style={{margin: 'auto 0'}}>
+                                  <Icon style={{
+                                    'color': 'black'
+                                  }} name="paint brush"/>
+                                </div>}
+                                on="click"
+                                offset={horizontalIconPopupOffsetInPx}
+                                content={<ChromePicker
+                                  color={this.props.worldSettings.endFieldBorderColor}
+                                  onChangeComplete={color => {
+                                    this.props.set_world_endFieldBorderColor(color.hex)
+                                  }}
+                                />}
+                              />
+
+                              <Input value={this.props.worldSettings.endFieldBorderColor}
+                                     type="text"
+                                     style={{width: '100px'}}
+                                     disabled
+                              />
+                            </div>
+                          </Form.Field>
+
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Is font bold")} <br/>
+                              {getI18n(this.props.langId, "Is font italic")}
+                            </label>
+
+                            <Button.Group>
+                              <Button
+                                active={this.props.worldSettings.endFieldIsFontBold}
+                                icon
+                                onClick={() => {
+                                  this.props.set_world_endFieldIsFontBold(!this.props.worldSettings.endFieldIsFontBold)
+                                }}
+                              >
+                                <Icon name='bold'/>
+                              </Button>
+                              <Button
+                                active={this.props.worldSettings.endFieldIsFontItalic}
+                                icon
+                                onClick={() => {
+                                  this.props.set_world_endFieldIsFontItalic(!this.props.worldSettings.endFieldIsFontItalic)
+                                }}
+                              >
+                                <Icon name='italic'/>
+                              </Button>
+                            </Button.Group>
+
+                          </Form.Field>
+
+
+                          {
+                            //color
+                          }
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Font color")}
+                            </label>
+                            <div className="flexed">
+                              <Popup
+                                trigger={<div className="hoverable" style={{margin: 'auto 0'}}>
+                                  <Icon style={{
+                                    'color': 'black'
+                                  }} name="paint brush"/>
+                                </div>}
+                                on="click"
+                                offset={horizontalIconPopupOffsetInPx}
+                                content={<ChromePicker
+                                  color={this.props.worldSettings.endFieldColor}
+                                  onChangeComplete={color => {
+                                    this.props.set_world_endFieldColor(color.hex)
+                                  }}
+                                />}
+                              />
+
+                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                                <IconToolTip
+                                  message={getI18n(this.props.langId, "Transparent color")}
+                                  icon="circle outline"
+                                  onClick={() => {
+                                    this.props.set_world_endFieldColor('transparent')
+                                  }}
+                                />
+                              </div>
+
+                              <Input value={this.props.worldSettings.endFieldColor}
+                                     type="text"
+                                     style={{width: '100px'}}
+                                     disabled
+                              />
+                            </div>
+                          </Form.Field>
+
+                          {
+                            //bg color
+                          }
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Background color")}
+                            </label>
+
+                            <div className="flexed">
+                              <Popup
+                                trigger={<div className="hoverable" style={{margin: 'auto 0'}}>
+                                  <Icon style={{
+                                    'color': 'black'
+                                  }} name="paint brush"/>
+                                </div>}
+                                on="click"
+                                offset={horizontalIconPopupOffsetInPx}
+                                content={<ChromePicker
+                                  color={this.props.worldSettings.endFieldBgColor}
+                                  onChangeComplete={color => {
+                                    this.props.set_world_endFieldBgColor(color.hex)
+                                  }}
+                                />}
+                              />
+
+                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                                <IconToolTip
+                                  message={getI18n(this.props.langId, "Transparent color")}
+                                  icon="circle outline"
+                                  onClick={() => {
+                                    this.props.set_world_endFieldBgColor('transparent')
+                                  }}
+                                />
+                              </div>
+
+                              <Input value={this.props.worldSettings.endFieldBgColor}
+                                     type="text"
+                                     style={{width: '100px'}}
+                                     disabled
+                              />
+                            </div>
+                          </Form.Field>
+
+
+                        </Form.Group>
+
+                        {
+                          //branch if field style
+                        }
+                        <h3 className="ui dividing header">
+                          {
+                            getI18n(this.props.langId, "Branch if field style")
+                          }
+                          <IconToolTip
+                            message={getI18n(this.props.langId,
+                              "A branch if field is a field with the command text containing the control if command")}
+                          />
+                        </h3>
                         <Form.Group widths='equal'>
 
                           <Form.Field>
                             <label>
-                              {getI18n(this.props.langId, "Branch if prepend text")}
-                              <IconToolTip
-                                message={getI18n(this.props.langId,
-                                  "The text to prepend to the field text when the field command is a branching if (control if)")}
-                              />
+                              {getI18n(this.props.langId, "Auto prepend text")}
                             </label>
-                            <Input  value={this.props.worldSettings.branchIfPrependText}
+                            <Input value={this.props.worldSettings.branchIfPrependText}
 
                                    style={{width: '100px'}}
                                    onChange={(e: SyntheticEvent<HTMLInputElement>) => {
@@ -478,11 +992,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                           <Form.Field>
                             <label>
-                              {getI18n(this.props.langId, "Branch if auto border size in px")}
-                              <IconToolTip
-                                message={getI18n(this.props.langId,
-                                  "The border size to set for the field text when the field command is a branching if (control if)")}
-                              />
+                              {getI18n(this.props.langId, "Auto border size in px")}
                             </label>
                             <Input value={this.props.worldSettings.branchIfAutoBorderSizeInPx}
                                    type="number"
@@ -497,11 +1007,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                           <Form.Field>
                             <label>
-                              {getI18n(this.props.langId, "Branch if border color")}
-                              <IconToolTip
-                                message={getI18n(this.props.langId,
-                                  "The border color to set for the field text when the field command is a branching if (control if)")}
-                              />
+                              {getI18n(this.props.langId, "Border color")}
                             </label>
                             <div className="flexed">
                               <Popup
@@ -530,31 +1036,117 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                           <Form.Field>
                             <label>
-                              {getI18n(this.props.langId, "Branch if is font bold")} <br />
-                              {getI18n(this.props.langId, "Branch if is font italic")}
+                              {getI18n(this.props.langId, "Is font bold")} <br/>
+                              {getI18n(this.props.langId, "Is font italic")}
                             </label>
 
                             <Button.Group>
                               <Button
-                                      active={this.props.worldSettings.branchIfIsFontBold}
-                                      icon
-                                      onClick={() => {
-                                        this.props.set_world_branchIfIsFontBold(!this.props.worldSettings.branchIfIsFontBold)
-                                      }}
+                                active={this.props.worldSettings.branchIfIsFontBold}
+                                icon
+                                onClick={() => {
+                                  this.props.set_world_branchIfIsFontBold(!this.props.worldSettings.branchIfIsFontBold)
+                                }}
                               >
                                 <Icon name='bold'/>
                               </Button>
                               <Button
-                                      active={this.props.worldSettings.branchIfIsFontItalic}
-                                      icon
-                                      onClick={() => {
-                                        this.props.set_world_branchIfIsFontItalic(!this.props.worldSettings.branchIfIsFontItalic)
-                                      }}
+                                active={this.props.worldSettings.branchIfIsFontItalic}
+                                icon
+                                onClick={() => {
+                                  this.props.set_world_branchIfIsFontItalic(!this.props.worldSettings.branchIfIsFontItalic)
+                                }}
                               >
                                 <Icon name='italic'/>
                               </Button>
                             </Button.Group>
 
+                          </Form.Field>
+
+
+                          {
+                            //color
+                          }
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Font color")}
+                            </label>
+
+                            <div className="flexed">
+                              <Popup
+                                trigger={<div className="hoverable" style={{margin: 'auto 0'}}>
+                                  <Icon style={{
+                                    'color': 'black'
+                                  }} name="paint brush"/>
+                                </div>}
+                                on="click"
+                                offset={horizontalIconPopupOffsetInPx}
+                                content={<ChromePicker
+                                  color={this.props.worldSettings.branchIfColor}
+                                  onChangeComplete={color => {
+                                    this.props.set_world_branchIfColor(color.hex)
+                                  }}
+                                />}
+                              />
+
+                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                                <IconToolTip
+                                  message={getI18n(this.props.langId, "Transparent color")}
+                                  icon="circle outline"
+                                  onClick={() => {
+                                    this.props.set_world_branchIfColor('transparent')
+                                  }}
+                                />
+                              </div>
+
+                              <Input value={this.props.worldSettings.branchIfColor}
+                                     type="text"
+                                     style={{width: '100px'}}
+                                     disabled
+                              />
+                            </div>
+                          </Form.Field>
+
+                          {
+                            //bg color
+                          }
+                          <Form.Field>
+                            <label>
+                              {getI18n(this.props.langId, "Background color")}
+                            </label>
+                            <div className="flexed">
+                              <Popup
+                                trigger={<div className="hoverable" style={{margin: 'auto 0'}}>
+                                  <Icon style={{
+                                    'color': 'black'
+                                  }} name="paint brush"/>
+                                </div>}
+                                on="click"
+                                offset={horizontalIconPopupOffsetInPx}
+                                content={<ChromePicker
+                                  color={this.props.worldSettings.branchIfBgColor}
+                                  onChangeComplete={color => {
+                                    this.props.set_world_branchIfBgColor(color.hex)
+                                  }}
+                                />}
+                              />
+
+                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                                <IconToolTip
+                                  message={getI18n(this.props.langId, "Transparent color")}
+                                  icon="circle outline"
+                                  onClick={() => {
+                                    this.props.set_world_branchIfBgColor('transparent')
+                                  }}
+                                />
+                              </div>
+
+                              <Input value={this.props.worldSettings.branchIfBgColor}
+                                     type="text"
+                                     style={{width: '100px'}}
+                                     disabled
+                              />
+                            </div>
                           </Form.Field>
 
                         </Form.Group>

@@ -3,7 +3,7 @@ import * as graphics from '../../graphics/graphicsCore'
 import {ZIndexCache} from "../types/ui";
 import {FieldSymbol, ImgSymbol, LineSymbol} from "../types/drawing";
 import {
-  appProperties,
+  appProperties, fontAwesomeCssFontFaceDefForSvg, fontAwesomeLink,
   printLargeTileBgColor,
   worldTileBorderColor
 } from "../constants";
@@ -63,10 +63,6 @@ export class PrintHelper {
 
     stage.scaleX = stageWidth / outerCircleDiameterInPx
     stage.scaleY = stageHeight / outerCircleDiameterInPx
-
-    console.log(stage.scaleX)
-    console.log(stage.scaleY)
-    console.log(fillBackgroundColor)
 
     //stage width??
     await VariableIndicatorDrawer.drawVariableIndicator(stage,
@@ -170,10 +166,14 @@ export class PrintHelper {
       const serializer = new XMLSerializer();
       const svgStr = serializer.serializeToString(exporter.svg);
 
+      //dirty inject fontawesome font
+      //note that the woff/woff2 file needs to be in the same folder for fontawesome icons to work in svg...
+      const svgWithFontawesomeFont = svgStr.replace('<defs/>', fontAwesomeCssFontFaceDefForSvg)
+
       const date = new Date(Date.now())
       let fileName = `export_${appProperties.exportFileNamePrefix}_${date.getFullYear()}_${date.getMonth()}_${date.getDay()}__${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}.svg`
 
-      const blob = new Blob([svgStr], {type: "image/svg+xml;charset=utf-8"});
+      const blob = new Blob([svgWithFontawesomeFont], {type: "image/svg+xml;charset=utf-8"});
       fileSaver.saveAs(blob, fileName)
 
     } else if (format === 'png') {
@@ -430,10 +430,14 @@ export class PrintHelper {
       const serializer = new XMLSerializer();
       const svgStr = serializer.serializeToString(exporter.svg);
 
+      //dirty inject fontawesome font
+      //note that the woff/woff2 file needs to be in the same folder for fontawesome icons to work in svg...
+      const svgWithFontawesomeFont = svgStr.replace('<defs/>', fontAwesomeCssFontFaceDefForSvg)
+
       const date = new Date(Date.now())
       let fileName = `export_${appProperties.exportFileNamePrefix}_${date.getFullYear()}_${date.getMonth()}_${date.getDay()}__${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}.svg`
 
-      const blob = new Blob([svgStr], {type: "image/svg+xml;charset=utf-8"});
+      const blob = new Blob([svgWithFontawesomeFont], {type: "image/svg+xml;charset=utf-8"});
       fileSaver.saveAs(blob, fileName)
 
     } else if (format === "png") {
@@ -502,114 +506,130 @@ export class PrintHelper {
     const printWindow = window.open()
     printWindow.document.write(boilerplateHtml1)
 
-    const canvas = printWindow.document.createElement('canvas') as HTMLCanvasElement
+    printWindow.onload = async () => {
 
-    if (splitLargeTileForPrint) {
-      canvas.classList.add(fullCanvasClass)
-    }
+      await ((printWindow.document as any).fonts.load("12px 'Font Awesome 5 Free'") as Promise<void>);
+      await ((printWindow.document as any).fonts.load("bold 12px 'Font Awesome 5 Free'") as Promise<void>);
 
-    const dpi = 300
-    let scaleFactor = dpi / 96;
-    scaleFactor = 6
+      const canvas = printWindow.document.createElement('canvas') as HTMLCanvasElement
 
-    scaleFactor = scaleFactor * printScale
+      if (splitLargeTileForPrint) {
+        canvas.classList.add(fullCanvasClass)
+      }
 
-    canvas.style.width = `${fullTileWidth * printScale}px`
-    canvas.style.height = `${fillTileHeight * printScale}px`
+      const dpi = 300
+      let scaleFactor = dpi / 96;
+      scaleFactor = 6
 
-    canvas.width = Math.ceil(fullTileWidth * scaleFactor);
-    canvas.height = Math.ceil(fillTileHeight * scaleFactor);
+      scaleFactor = scaleFactor * printScale
 
-    if (!drawGrid) {
-      //we only draw border
-      gridStrokeThicknessInPx = 2 //better for high dpi printing
-    }
+      canvas.style.width = `${fullTileWidth * printScale}px`
+      canvas.style.height = `${fillTileHeight * printScale}px`
 
-    const stage = this.printFullTile(tile, fieldSymbols, imgSymbols, lineSymbols, canvas, drawGrid, gridSizeInPx,
-      gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor, printScale, additionalBorderWidthInPx)
+      canvas.width = Math.ceil(fullTileWidth * scaleFactor);
+      canvas.height = Math.ceil(fillTileHeight * scaleFactor);
 
-    stage.scaleX = stage.scaleY = scaleFactor
-    stage.update()
+      if (!drawGrid) {
+        //we only draw border
+        gridStrokeThicknessInPx = 2 //better for high dpi printing
+      }
 
-    if (splitLargeTileForPrint) {
-      this.printTileBorders(
-        stage,
-        fullTileWidth,
-        fillTileHeight,
-        preferredSubTileWidth,
-        preferredSubTileHeight,
-        gridStrokeThicknessInPx,
-        'black',
-      )
-    }
+      const stage = this.printFullTile(tile, fieldSymbols, imgSymbols, lineSymbols, canvas, drawGrid, gridSizeInPx,
+        gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor, printScale, additionalBorderWidthInPx)
 
-    printWindow.document.body.appendChild(canvas)
+      stage.scaleX = stage.scaleY = scaleFactor
+      stage.update()
 
-    const stageData = (stage.canvas as HTMLCanvasElement).toDataURL(printLargeTileBgColor, 'image/png')//stage.toDataURL(printLargeTileBgColor, 'image/png')
+      if (splitLargeTileForPrint) {
+        this.printTileBorders(
+          stage,
+          fullTileWidth,
+          fillTileHeight,
+          preferredSubTileWidth,
+          preferredSubTileHeight,
+          gridStrokeThicknessInPx,
+          'black',
+        )
+      }
 
-    if (splitLargeTileForPrint) {
+      printWindow.document.body.appendChild(canvas)
 
-      const pieces = this.imgToPieces(
-        stageData, fullTileWidth * scaleFactor, fillTileHeight * scaleFactor, preferredSubTileWidth * scaleFactor,
-        preferredSubTileHeight * scaleFactor)
+      const stageData = (stage.canvas as HTMLCanvasElement).toDataURL(printLargeTileBgColor, 'image/png')//stage.toDataURL(printLargeTileBgColor, 'image/png')
 
-      for (let i = 0; i < pieces.length; i++) {
+      if (splitLargeTileForPrint) {
 
-        const pieceBitmap: createjs.Bitmap = pieces[i]
+        const pieces = this.imgToPieces(
+          stageData, fullTileWidth * scaleFactor, fillTileHeight * scaleFactor, preferredSubTileWidth * scaleFactor,
+          preferredSubTileHeight * scaleFactor)
 
-        const wrapperDiv = printWindow.document.createElement('div') as HTMLDivElement
-        wrapperDiv.classList.add('wrapper-div')
-        wrapperDiv.dataset[idDataAttributeKey] = i.toString()
+        for (let i = 0; i < pieces.length; i++) {
 
-        const checkbox = printWindow.document.createElement('input') as HTMLInputElement
-        checkbox.type = 'checkbox'
-        checkbox.checked = true
-        checkbox.dataset[idCheckboxDataSetKey] = i.toString()
+          const pieceBitmap: createjs.Bitmap = pieces[i]
 
-        const checkboxLabel = printWindow.document.createElement('label') as HTMLLabelElement
-        checkboxLabel.innerText = "" //maybe some text??
+          const wrapperDiv = printWindow.document.createElement('div') as HTMLDivElement
+          wrapperDiv.classList.add('wrapper-div')
+          wrapperDiv.dataset[idDataAttributeKey] = i.toString()
 
-        const checkboxDiv = printWindow.document.createElement('div')
-        checkboxDiv.classList.add('print-hidden')
+          const checkbox = printWindow.document.createElement('input') as HTMLInputElement
+          checkbox.type = 'checkbox'
+          checkbox.checked = true
+          checkbox.dataset[idCheckboxDataSetKey] = i.toString()
 
-        checkboxDiv.appendChild(checkbox)
-        checkboxDiv.appendChild(checkboxLabel)
+          const checkboxLabel = printWindow.document.createElement('label') as HTMLLabelElement
+          checkboxLabel.innerText = "" //maybe some text??
 
-        const pieceCanvas = printWindow.document.createElement('canvas') as HTMLCanvasElement
+          const checkboxDiv = printWindow.document.createElement('div')
+          checkboxDiv.classList.add('print-hidden')
 
-        pieceCanvas.style.width = `${preferredSubTileWidth * printScale}px`
-        pieceCanvas.style.height = `${preferredSubTileHeight * printScale}px`
+          checkboxDiv.appendChild(checkbox)
+          checkboxDiv.appendChild(checkboxLabel)
 
-        pieceCanvas.width = preferredSubTileWidth * scaleFactor
-        pieceCanvas.height = preferredSubTileHeight * scaleFactor
+          const pieceCanvas = printWindow.document.createElement('canvas') as HTMLCanvasElement
 
-        // pieceCanvas.width = Math.ceil(preferredSubTileWidth * scaleFactor)
-        // pieceCanvas.height = Math.ceil(preferredSubTileHeight * scaleFactor)
-        //
-        // pieceBitmap.scaleX = pieceBitmap.scaleY = scaleFactor
+          pieceCanvas.style.width = `${preferredSubTileWidth * printScale}px`
+          pieceCanvas.style.height = `${preferredSubTileHeight * printScale}px`
 
-        // const dpiHelper = new CanvasDpiHelper(stage)
-        // dpiHelper.setDPI(canvas, 600)
-        // console.log(dpiHelper)
+          pieceCanvas.width = preferredSubTileWidth * scaleFactor
+          pieceCanvas.height = preferredSubTileHeight * scaleFactor
 
-        wrapperDiv.appendChild(checkboxDiv)
-        wrapperDiv.appendChild(pieceCanvas)
+          // pieceCanvas.width = Math.ceil(preferredSubTileWidth * scaleFactor)
+          // pieceCanvas.height = Math.ceil(preferredSubTileHeight * scaleFactor)
+          //
+          // pieceBitmap.scaleX = pieceBitmap.scaleY = scaleFactor
 
-        pieceBitmap.image.onload = ev1 => {
+          // const dpiHelper = new CanvasDpiHelper(stage)
+          // dpiHelper.setDPI(canvas, 600)
+          // console.log(dpiHelper)
 
-          const pieceStage = new createjs.Stage(pieceCanvas)
-          pieceStage.addChild(pieceBitmap)
-          pieceStage.update()
-          // printWindow.document.body.appendChild(pieceCanvas)
-          printWindow.document.body.appendChild(wrapperDiv)
+          wrapperDiv.appendChild(checkboxDiv)
+          wrapperDiv.appendChild(pieceCanvas)
+
+          pieceBitmap.image.onload = ev1 => {
+
+            const pieceStage = new createjs.Stage(pieceCanvas)
+            pieceStage.addChild(pieceBitmap)
+            pieceStage.update()
+            // printWindow.document.body.appendChild(pieceCanvas)
+            printWindow.document.body.appendChild(wrapperDiv)
+          }
         }
+
+
       }
 
 
     }
 
-    // printWindow.window.print()
-    // printWindow.window.close()
+    const fontAwesomeRule = printWindow.document.createElement('link')
+    fontAwesomeRule.rel = 'stylesheet'
+    fontAwesomeRule.href = fontAwesomeLink
+
+    //works but we use window onload if we have multiple...
+    // fontAwesomeRule.onload = async function()  {}
+
+    printWindow.document.head.append(fontAwesomeRule)
+    printWindow.document.close()
+
   }
 
 
@@ -910,359 +930,306 @@ export class PrintHelper {
       langId)
 
     const printWindow = window.open()
-    printWindow.document.write(boilerplateHtml1)
-    const dpi = 300
-    let scaleFactor = dpi / 96
-    scaleFactor = 6
 
-    scaleFactor = scaleFactor * printScale
+    printWindow.document.write(boilerplateHtml1);
 
-    let printTileCount = 0
-    const shouldPrintBorder = additionalBorderWidthInPx > 0
+    //not fired...not even if placed before write
+    // printWindow.document.onload = function ()  {}
 
-    if (onlyWholeWorld) {
+    //we need to wait until everything is loaded (especially the fontawesome link)
+    printWindow.onload = async () => {
 
-      //only print the world as one image
+      await ((printWindow.document as any).fonts.load("12px 'Font Awesome 5 Free'") as Promise<void>);
+      await ((printWindow.document as any).fonts.load("bold 12px 'Font Awesome 5 Free'") as Promise<void>);
 
-      const tilesWidth = tilesToPrint[0].tileSettings.width
-      const tilesHeight = tilesToPrint[0].tileSettings.height
+      const dpi = 300
+      let scaleFactor = dpi / 96
+      scaleFactor = 6
 
-      const boundingBox = WorldTilesHelper.getWorldBoundingBox(tileSurrogates)
-      const widthInTiles = boundingBox.maxX - boundingBox.minX + 1 //+1 max = min = 1 --> 0 but this is 1 tile
-      const heightInTiles = boundingBox.maxY - boundingBox.minY + 1
+      scaleFactor = scaleFactor * printScale
 
-      const fullGameWidth = widthInTiles * tilesWidth
-      const fullGameHeight = heightInTiles * tilesHeight
+      let printTileCount = 0
+      const shouldPrintBorder = additionalBorderWidthInPx > 0
 
-      const fullGameCanvas = printWindow.document.createElement('canvas') as HTMLCanvasElement
+      if (onlyWholeWorld) {
 
-      fullGameCanvas.style.width = `${fullGameWidth * printScale}px`
-      fullGameCanvas.style.height = `${fullGameHeight * printScale}px`
-      fullGameCanvas.width = Math.ceil(fullGameWidth * scaleFactor);
-      fullGameCanvas.height = Math.ceil(fullGameHeight * scaleFactor);
+        //only print the world as one image
 
-      const zIndexCache: ZIndexCache = {}
+        const tilesWidth = tilesToPrint[0].tileSettings.width
+        const tilesHeight = tilesToPrint[0].tileSettings.height
 
-      const stage = new createjs.Stage(fullGameCanvas)
+        const boundingBox = WorldTilesHelper.getWorldBoundingBox(tileSurrogates)
+        const widthInTiles = boundingBox.maxX - boundingBox.minX + 1 //+1 max = min = 1 --> 0 but this is 1 tile
+        const heightInTiles = boundingBox.maxY - boundingBox.minY + 1
 
-      stage.clear()
+        const fullGameWidth = widthInTiles * tilesWidth
+        const fullGameHeight = heightInTiles * tilesHeight
 
-      stage.scaleX = 1
-      stage.scaleY = 1
-      stage.x = 0
-      stage.y = 0
+        const fullGameCanvas = printWindow.document.createElement('canvas') as HTMLCanvasElement
 
-      const bgRects: Shape[] = []
+        fullGameCanvas.style.width = `${fullGameWidth * printScale}px`
+        fullGameCanvas.style.height = `${fullGameHeight * printScale}px`
+        fullGameCanvas.width = Math.ceil(fullGameWidth * scaleFactor);
+        fullGameCanvas.height = Math.ceil(fullGameHeight * scaleFactor);
 
-      for (let i = 0; i < widthInTiles; i++) { // 0 ... width
-        for (let j = 0; j < heightInTiles; j++) { // 0 ... height
+        const zIndexCache: ZIndexCache = {}
 
-          const tileSurrogate = WorldTilesHelper.getTileFromPos(i, j, tileSurrogates)
+        const stage = new createjs.Stage(fullGameCanvas)
 
-          if (tileSurrogate === null) continue
+        stage.clear()
 
-          graphics.drawGrid(
-            stage,
-            tilesWidth,
-            tilesHeight,
-            0,
-            1,
-            worldTileBorderColor,
-            true,
-            i * tilesWidth,
-            j * tilesHeight
-          )
+        stage.scaleX = 1
+        stage.scaleY = 1
+        stage.x = 0
+        stage.y = 0
 
-          if (shouldPrintBorder) {
-            //only tiles on the sides needs borders...
+        const bgRects: Shape[] = []
 
-            //for quadratic games this is enough but we could have holes..
-            // let hasTopBorder = j === 0
-            // let hasRightBorder = i === widthInTiles - 1
-            // let hasBottomBorder = j === heightInTiles - 1
-            // let hasLeftBorder = i === 0
+        for (let i = 0; i < widthInTiles; i++) { // 0 ... width
+          for (let j = 0; j < heightInTiles; j++) { // 0 ... height
 
-            //so overwrite
+            const tileSurrogate = WorldTilesHelper.getTileFromPos(i, j, tileSurrogates)
 
-            const neighbors = this.hasNeighbors(i, j, tileSurrogates)
+            if (tileSurrogate === null) continue
 
-            //only draw border if we have no neighbor in the direction
-            let hasTopBorder = neighbors[0] === false
-            let hasRightBorder = neighbors[1] === false
-            let hasBottomBorder = neighbors[2] === false
-            let hasLeftBorder = neighbors[3] === false
-
-            //note that borders are drawn from the middle of the coordinates
-            //so for tiles on the sides we get only additionalPrintBorderWidthInPx / 2 widths...
-            //make sure all widths are additionalPrintBorderWidthInPx / 2
-
-            //some side tiles some borders can use the full width because they will be clipped to / 2 width
-            let topWidth = j === 0 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
-            let rightWidth = i === widthInTiles - 1 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
-            let botWidth = j === heightInTiles - 1 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
-            let leftWidth = i === 0 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
-
-            //when the size was 5 we made all borders to be 2.5 px
-            //but for the changed width borders we use 2.5px which would draw:  1.75 | 1.75 px
-            //so we need to move the starting position a bit so we get: | 2.5 px where | is the border start
-            //so we move by 2.5 / 2 --> additionalPrintBorderWidthInPx / 4
-            let topAdjust = j === 0 ? 0 : additionalBorderWidthInPx / 4
-            let rightAdjust = i === widthInTiles - 1 ? 0 : additionalBorderWidthInPx / 4
-            let botAdjust = j === heightInTiles - 1 ? 0 : additionalBorderWidthInPx / 4
-            let leftAdjust = i === 0 ? 0 : additionalBorderWidthInPx / 4
-
-            graphics.drawBorder(
+            graphics.drawGrid(
               stage,
               tilesWidth,
               tilesHeight,
-              'black',
+              0,
+              1,
+              worldTileBorderColor,
+              true,
+              i * tilesWidth,
+              j * tilesHeight
+            )
+
+            if (shouldPrintBorder) {
+              //only tiles on the sides needs borders...
+
+              //for quadratic games this is enough but we could have holes..
+              // let hasTopBorder = j === 0
+              // let hasRightBorder = i === widthInTiles - 1
+              // let hasBottomBorder = j === heightInTiles - 1
+              // let hasLeftBorder = i === 0
+
+              //so overwrite
+
+              const neighbors = this.hasNeighbors(i, j, tileSurrogates)
+
+              //only draw border if we have no neighbor in the direction
+              let hasTopBorder = neighbors[0] === false
+              let hasRightBorder = neighbors[1] === false
+              let hasBottomBorder = neighbors[2] === false
+              let hasLeftBorder = neighbors[3] === false
+
+              //note that borders are drawn from the middle of the coordinates
+              //so for tiles on the sides we get only additionalPrintBorderWidthInPx / 2 widths...
+              //make sure all widths are additionalPrintBorderWidthInPx / 2
+
+              //some side tiles some borders can use the full width because they will be clipped to / 2 width
+              let topWidth = j === 0 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
+              let rightWidth = i === widthInTiles - 1 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
+              let botWidth = j === heightInTiles - 1 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
+              let leftWidth = i === 0 ? additionalBorderWidthInPx : additionalBorderWidthInPx / 2
+
+              //when the size was 5 we made all borders to be 2.5 px
+              //but for the changed width borders we use 2.5px which would draw:  1.75 | 1.75 px
+              //so we need to move the starting position a bit so we get: | 2.5 px where | is the border start
+              //so we move by 2.5 / 2 --> additionalPrintBorderWidthInPx / 4
+              let topAdjust = j === 0 ? 0 : additionalBorderWidthInPx / 4
+              let rightAdjust = i === widthInTiles - 1 ? 0 : additionalBorderWidthInPx / 4
+              let botAdjust = j === heightInTiles - 1 ? 0 : additionalBorderWidthInPx / 4
+              let leftAdjust = i === 0 ? 0 : additionalBorderWidthInPx / 4
+
+              graphics.drawBorder(
+                stage,
+                tilesWidth,
+                tilesHeight,
+                'black',
+                i * tilesWidth,
+                j * tilesHeight,
+                [
+                  hasTopBorder,
+                  hasRightBorder,
+                  hasBottomBorder,
+                  hasLeftBorder
+                ],
+                [
+                  topWidth,
+                  rightWidth,
+                  botWidth,
+                  leftWidth
+                ],
+                [
+                  topAdjust,
+                  rightAdjust,
+                  botAdjust,
+                  leftAdjust,
+                ]
+              )
+            }
+
+            const tile = allTiles.find(p => p.guid === tileSurrogate.tileGuid)
+
+            if (!tile) continue
+
+            if (fillBackgroundColor) {
+              let bgShape = new createjs.Shape()
+              bgShape.graphics.beginFill(fillBackgroundColor)
+                .drawRect(i * tilesWidth, j * tilesHeight, tilesWidth, tilesHeight)
+
+              stage.addChild(bgShape)
+              bgRects.push(bgShape)
+            }
+
+            graphics.drawFieldsOnTile(
+              stage,
+              tile.fieldShapes,
+              [],
+              [],
+              null,
+              null,
+              null,
+              zIndexCache,
+              false,
+              false,
+              worldSettings,
+              fieldSymbols,
               i * tilesWidth,
               j * tilesHeight,
-              [
-                hasTopBorder,
-                hasRightBorder,
-                hasBottomBorder,
-                hasLeftBorder
-              ],
-              [
-                topWidth,
-                rightWidth,
-                botWidth,
-                leftWidth
-              ],
-              [
-                topAdjust,
-                rightAdjust,
-                botAdjust,
-                leftAdjust,
-              ]
+              false, false,
+              null,null
             )
+
+            graphics.drawImagesOnTile(
+              stage,
+              tile.imgShapes,
+              [],
+              [],
+              null,
+              null,
+              null,
+              zIndexCache,
+              worldSettings,
+              imgSymbols,
+              i * tilesWidth,
+              j * tilesHeight,
+              false, false,
+              null,null
+            )
+
+            graphics.drawLinesOnTile(
+              stage,
+              tile.lineShapes,
+              [],
+              [],
+              null,
+              null,
+              zIndexCache,
+              worldSettings,
+              lineSymbols,
+              i * tilesWidth,
+              j * tilesHeight,
+              false
+            )
+
           }
+        }
 
-          const tile = allTiles.find(p => p.guid === tileSurrogate.tileGuid)
+        //set zindex
+        for (const zIndex in zIndexCache) {
+          const list = zIndexCache[zIndex]
 
-          if (!tile) continue
-
-          if (fillBackgroundColor) {
-            let bgShape = new createjs.Shape()
-            bgShape.graphics.beginFill(fillBackgroundColor)
-              .drawRect(i * tilesWidth, j * tilesHeight, tilesWidth, tilesHeight)
-
-            stage.addChild(bgShape)
-            bgRects.push(bgShape)
+          for (const child of list) {
+            stage.setChildIndex(child, parseInt(zIndex))
           }
-
-          graphics.drawFieldsOnTile(
-            stage,
-            tile.fieldShapes,
-            [],
-            [],
-            null,
-            null,
-            null,
-            zIndexCache,
-            false,
-            false,
-            worldSettings,
-            fieldSymbols,
-            i * tilesWidth,
-            j * tilesHeight,
-            false, false,
-            null,null
-          )
-
-          graphics.drawImagesOnTile(
-            stage,
-            tile.imgShapes,
-            [],
-            [],
-            null,
-            null,
-            null,
-            zIndexCache,
-            worldSettings,
-            imgSymbols,
-            i * tilesWidth,
-            j * tilesHeight,
-            false, false,
-            null,null
-          )
-
-          graphics.drawLinesOnTile(
-            stage,
-            tile.lineShapes,
-            [],
-            [],
-            null,
-            null,
-            zIndexCache,
-            worldSettings,
-            lineSymbols,
-            i * tilesWidth,
-            j * tilesHeight,
-            false
-          )
-
-        }
-      }
-
-      //set zindex
-      for (const zIndex in zIndexCache) {
-        const list = zIndexCache[zIndex]
-
-        for (const child of list) {
-          stage.setChildIndex(child, parseInt(zIndex))
-        }
-      }
-
-      for (const bgRect of bgRects) {
-        stage.setChildIndex(bgRect, 0)
-      }
-
-      stage.scaleX = stage.scaleY = scaleFactor
-      stage.update()
-
-      printWindow.document.body.appendChild(fullGameCanvas)
-
-    } else {
-      //print all tiles
-      for (let i = 0; i < tilesToPrint.length; i++) {
-        const printTile = tilesToPrint[i]
-
-        const wrapperDiv = printWindow.document.createElement('div') as HTMLDivElement
-        wrapperDiv.classList.add('wrapper-div')
-        wrapperDiv.dataset[idDataAttributeKey] = i.toString()
-
-        const checkbox = printWindow.document.createElement('input') as HTMLInputElement
-        checkbox.type = 'checkbox'
-        checkbox.checked = true
-        checkbox.dataset[idCheckboxDataSetKey] = i.toString()
-
-        const checkboxLabel = printWindow.document.createElement('label') as HTMLLabelElement
-        checkboxLabel.innerText = "" //maybe some text??
-
-        const checkboxDiv = printWindow.document.createElement('div')
-        checkboxDiv.classList.add('print-hidden')
-
-        checkboxDiv.appendChild(checkbox)
-        checkboxDiv.appendChild(checkboxLabel)
-
-        const canvas = printWindow.document.createElement('canvas') as HTMLCanvasElement
-
-        const fullTileWidth = printTile.tileSettings.width
-        const fillTileHeight = printTile.tileSettings.height
-
-        canvas.style.width = `${fullTileWidth * printScale}px`
-        canvas.style.height = `${fillTileHeight * printScale}px`
-
-        canvas.width = Math.ceil(fullTileWidth * scaleFactor);
-        canvas.height = Math.ceil(fillTileHeight * scaleFactor);
-
-        if (!drawGrid) {
-          //we only draw border
-          gridStrokeThicknessInPx = 2 //better for high dpi printing
         }
 
-        const stage = this.printFullTile(printTile, fieldSymbols, imgSymbols, lineSymbols, canvas, drawGrid,
-          gridSizeInPx,
-          gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor, printScale, additionalBorderWidthInPx)
+        for (const bgRect of bgRects) {
+          stage.setChildIndex(bgRect, 0)
+        }
 
         stage.scaleX = stage.scaleY = scaleFactor
         stage.update()
 
-        wrapperDiv.appendChild(checkboxDiv)
-        wrapperDiv.appendChild(canvas)
+        printWindow.document.body.appendChild(fullGameCanvas)
 
-        printWindow.document.body.appendChild(wrapperDiv)
-      }
-    }
+      } else {
+        //print all tiles
+        for (let i = 0; i < tilesToPrint.length; i++) {
+          const printTile = tilesToPrint[i]
 
-    printTileCount = tilesToPrint.length
+          const wrapperDiv = printWindow.document.createElement('div') as HTMLDivElement
+          wrapperDiv.classList.add('wrapper-div')
+          wrapperDiv.dataset[idDataAttributeKey] = i.toString()
 
-    if (onlyWholeWorld === false) {
-      //only print vars when we print every tile
+          const checkbox = printWindow.document.createElement('input') as HTMLInputElement
+          checkbox.type = 'checkbox'
+          checkbox.checked = true
+          checkbox.dataset[idCheckboxDataSetKey] = i.toString()
 
-      let uniqueTiles: Tile[] = []
+          const checkboxLabel = printWindow.document.createElement('label') as HTMLLabelElement
+          checkboxLabel.innerText = "" //maybe some text??
 
-      for (const tile of tilesToPrint) {
+          const checkboxDiv = printWindow.document.createElement('div')
+          checkboxDiv.classList.add('print-hidden')
 
-        if (uniqueTiles.find(p => p.guid === tile.guid)) {
-          //we have a tile >1 tiles... we only need 1 var tile for this
-        } else {
-          uniqueTiles.push(tile)
+          checkboxDiv.appendChild(checkbox)
+          checkboxDiv.appendChild(checkboxLabel)
+
+          const canvas = printWindow.document.createElement('canvas') as HTMLCanvasElement
+
+          const fullTileWidth = printTile.tileSettings.width
+          const fillTileHeight = printTile.tileSettings.height
+
+          canvas.style.width = `${fullTileWidth * printScale}px`
+          canvas.style.height = `${fillTileHeight * printScale}px`
+
+          canvas.width = Math.ceil(fullTileWidth * scaleFactor);
+          canvas.height = Math.ceil(fillTileHeight * scaleFactor);
+
+          if (!drawGrid) {
+            //we only draw border
+            gridStrokeThicknessInPx = 2 //better for high dpi printing
+          }
+
+          const stage = this.printFullTile(printTile, fieldSymbols, imgSymbols, lineSymbols, canvas, drawGrid,
+            gridSizeInPx,
+            gridStrokeThicknessInPx, gridStrokeColor, worldSettings, fillBackgroundColor, printScale, additionalBorderWidthInPx)
+
+          stage.scaleX = stage.scaleY = scaleFactor
+          stage.update()
+
+          wrapperDiv.appendChild(checkboxDiv)
+          wrapperDiv.appendChild(canvas)
+
+          printWindow.document.body.appendChild(wrapperDiv)
         }
       }
 
-      const allVarDefs = LangHelper.getAllVarDefiningStatements(worldSettings.worldCmdText, uniqueTiles)
+      printTileCount = tilesToPrint.length
 
-      const variableIndicatorWidth = outerCircleDiameterInPx //expectTileWidth
-      const variableIndicatorHeight = outerCircleDiameterInPx //expectedTileHeight
+      if (onlyWholeWorld === false) {
+        //only print vars when we print every tile
 
-      for (const globalVar of allVarDefs.globalVars) {
+        let uniqueTiles: Tile[] = []
 
-        const wrapperDiv = await this.getVariablePrintTile(printWindow,
-          idDataAttributeKey,
-          idCheckboxDataSetKey,
-          printTileCount++,
-          scaleFactor,
-          variableIndicatorWidth,
-          variableIndicatorHeight,
-          outerCircleDiameterInPx,
-          innerCircleDiameterInPx,
-          variableFontSizeInPx,
-          variableFontName,
-          (globalVar.var_type === VarType.bool
-            ? {
-              ident: globalVar.ident,
-              boolVal: false //actual value doesn't matter
-            } as DefinitionTableBoolEntry
-            : {
-              ident: globalVar.ident,
-              val: 0, //actual value doesn't matter
-              maxVal: globalVar.maxVal
-            } as DefinitionTableIntEntry),
-          variableIndicatorStrokeThickness,
-          fillBackgroundColor,
-          drawQrCode
-        )
+        for (const tile of tilesToPrint) {
 
-        printWindow.document.body.appendChild(wrapperDiv)
-      }
+          if (uniqueTiles.find(p => p.guid === tile.guid)) {
+            //we have a tile >1 tiles... we only need 1 var tile for this
+          } else {
+            uniqueTiles.push(tile)
+          }
+        }
 
-      for (const playerVar of allVarDefs.playerVars) {
-        const wrapperDiv = await this.getVariablePrintTile(printWindow,
-          idDataAttributeKey,
-          idCheckboxDataSetKey,
-          printTileCount++,
-          scaleFactor,
-          variableIndicatorWidth,
-          variableIndicatorHeight,
-          outerCircleDiameterInPx,
-          innerCircleDiameterInPx,
-          variableFontSizeInPx,
-          variableFontName,
-          (playerVar.var_type === VarType.bool
-            ? {
-              ident: playerVar.ident,
-              boolVal: false //actual value doesn't matter
-            } as DefinitionTableBoolEntry
-            : {
-              ident: playerVar.ident,
-              val: 0, //actual value doesn't matter
-              maxVal: playerVar.maxVal
-            } as DefinitionTableIntEntry),
-          variableIndicatorStrokeThickness,
-          fillBackgroundColor,
-          drawQrCode
-        )
+        const allVarDefs = LangHelper.getAllVarDefiningStatements(worldSettings.worldCmdText, uniqueTiles)
 
-        printWindow.document.body.appendChild(wrapperDiv)
-      }
+        const variableIndicatorWidth = outerCircleDiameterInPx //expectTileWidth
+        const variableIndicatorHeight = outerCircleDiameterInPx //expectedTileHeight
 
-      //TODO maybe we have adjacent scopes with same var names ... we could reuse them (only print once)??
-      for (const localVarObj of allVarDefs.localVars) {
-
-        for (const localVarDef of localVarObj.localVars) {
+        for (const globalVar of allVarDefs.globalVars) {
 
           const wrapperDiv = await this.getVariablePrintTile(printWindow,
             idDataAttributeKey,
@@ -1275,15 +1242,15 @@ export class PrintHelper {
             innerCircleDiameterInPx,
             variableFontSizeInPx,
             variableFontName,
-            (localVarDef.var_type === VarType.bool
+            (globalVar.var_type === VarType.bool
               ? {
-                ident: localVarDef.ident,
+                ident: globalVar.ident,
                 boolVal: false //actual value doesn't matter
               } as DefinitionTableBoolEntry
               : {
-                ident: localVarDef.ident,
+                ident: globalVar.ident,
                 val: 0, //actual value doesn't matter
-                maxVal: localVarDef.maxVal
+                maxVal: globalVar.maxVal
               } as DefinitionTableIntEntry),
             variableIndicatorStrokeThickness,
             fillBackgroundColor,
@@ -1292,9 +1259,87 @@ export class PrintHelper {
 
           printWindow.document.body.appendChild(wrapperDiv)
         }
+
+        for (const playerVar of allVarDefs.playerVars) {
+          const wrapperDiv = await this.getVariablePrintTile(printWindow,
+            idDataAttributeKey,
+            idCheckboxDataSetKey,
+            printTileCount++,
+            scaleFactor,
+            variableIndicatorWidth,
+            variableIndicatorHeight,
+            outerCircleDiameterInPx,
+            innerCircleDiameterInPx,
+            variableFontSizeInPx,
+            variableFontName,
+            (playerVar.var_type === VarType.bool
+              ? {
+                ident: playerVar.ident,
+                boolVal: false //actual value doesn't matter
+              } as DefinitionTableBoolEntry
+              : {
+                ident: playerVar.ident,
+                val: 0, //actual value doesn't matter
+                maxVal: playerVar.maxVal
+              } as DefinitionTableIntEntry),
+            variableIndicatorStrokeThickness,
+            fillBackgroundColor,
+            drawQrCode
+          )
+
+          printWindow.document.body.appendChild(wrapperDiv)
+        }
+
+        //TODO maybe we have adjacent scopes with same var names ... we could reuse them (only print once)??
+        for (const localVarObj of allVarDefs.localVars) {
+
+          for (const localVarDef of localVarObj.localVars) {
+
+            const wrapperDiv = await this.getVariablePrintTile(printWindow,
+              idDataAttributeKey,
+              idCheckboxDataSetKey,
+              printTileCount++,
+              scaleFactor,
+              variableIndicatorWidth,
+              variableIndicatorHeight,
+              outerCircleDiameterInPx,
+              innerCircleDiameterInPx,
+              variableFontSizeInPx,
+              variableFontName,
+              (localVarDef.var_type === VarType.bool
+                ? {
+                  ident: localVarDef.ident,
+                  boolVal: false //actual value doesn't matter
+                } as DefinitionTableBoolEntry
+                : {
+                  ident: localVarDef.ident,
+                  val: 0, //actual value doesn't matter
+                  maxVal: localVarDef.maxVal
+                } as DefinitionTableIntEntry),
+              variableIndicatorStrokeThickness,
+              fillBackgroundColor,
+              drawQrCode
+            )
+
+            printWindow.document.body.appendChild(wrapperDiv)
+          }
+        }
+
       }
 
     }
+
+
+    const fontAwesomeRule = printWindow.document.createElement('link')
+    fontAwesomeRule.rel = 'stylesheet'
+    fontAwesomeRule.href = fontAwesomeLink
+
+    //works but we use window onload if we have multiple...
+    // fontAwesomeRule.onload = async function()  {}
+
+    printWindow.document.head.append(fontAwesomeRule)
+    printWindow.document.close()
+
 
   }
 
@@ -1415,10 +1460,12 @@ export class PrintHelper {
 
     const fullCanvasClass = 'full-canvas'
 
+    //do not add css link here else the document.write is not processed immediately e.g. printWindow.document.body is null
+
     const html = `
 <html>
   <head>
-  <title>Printing</title>
+  <title>Printing</title>  
     <style>
       @media screen {
         .wrapper-div {

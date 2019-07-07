@@ -61,7 +61,25 @@ import {
   SET_branchIfIsFontBoldAction,
   SET_branchIfIsFontItalicAction,
   SET_branchIfAutoBorderSizeInPxAction,
-  SET_branchIfBorderColorAction
+  SET_branchIfBorderColorAction,
+  SET_forcedFieldColorAction,
+  SET_forcedFieldBgColorAction,
+  SET_branchIfColorAction,
+  SET_branchIfBgColorAction,
+  SET_startFieldAutoPrependTextAction,
+  SET_startFieldColorAction,
+  SET_startFieldBgColorAction,
+  SET_startFieldAutoBorderSizeInPxAction,
+  SET_startFieldBorderColorAction,
+  SET_startFieldIsFontBoldAction,
+  SET_startFieldIsFontItalicAction,
+  SET_endFieldAutoPrependTextAction,
+  SET_endFieldColorAction,
+  SET_endFieldBgColorAction,
+  SET_endFieldAutoBorderSizeInPxAction,
+  SET_endFieldBorderColorAction,
+  SET_endFieldIsFontBoldAction,
+  SET_endFieldIsFontItalicAction,
 } from "./worldSettingsReducer";
 
 
@@ -156,6 +174,7 @@ export function SET_world_fieldSequenceBoxColor(fieldSequenceBoxColor: string): 
     fieldSequenceBoxColor
   }
 }
+
 export function SET_world_fieldSequenceFont(fieldSequenceFont: string): SET_fieldSequenceFontAction {
   return {
     type: ActionType.SET_fieldSequenceFont,
@@ -428,6 +447,8 @@ export function set_world_alwaysInsertArrowHeadsWhenAutoConnectingFields(alwaysI
   }
 }
 
+//--- force field style
+
 export function set_world_forcedFieldAutoPrependText(forcedFieldAutoPrependText: string): SET_forcedFieldAutoPrependTextAction {
   return {
     type: ActionType.SET_forcedFieldAutoPrependText,
@@ -463,7 +484,113 @@ export function set_world_forcedFieldIsFontItalic(forcedFieldIsFontItalic: boole
   }
 }
 
+export function set_world_forcedFieldColor(forcedFieldColor: string): SET_forcedFieldColorAction {
+  return {
+    type: ActionType.SET_forcedFieldColor,
+    forcedFieldColor
+  }
+}
 
+
+export function set_world_forcedFieldBgColor(forcedFieldBgColor: string): SET_forcedFieldBgColorAction {
+  return {
+    type: ActionType.SET_forcedFieldBgColor,
+    forcedFieldBgColor
+  }
+}
+
+
+//--- start field style
+
+export function set_world_startFieldAutoPrependText(startFieldAutoPrependText: string) : SET_startFieldAutoPrependTextAction {
+  return {
+    type: ActionType.SET_startFieldAutoPrependText,
+    startFieldAutoPrependText
+  }
+}
+export function set_world_startFieldColor(startFieldColor: string) : SET_startFieldColorAction {
+  return {
+    type: ActionType.SET_startFieldColor,
+    startFieldColor
+  }
+}
+export function set_world_startFieldBgColor(startFieldBgColor: string) : SET_startFieldBgColorAction {
+  return {
+    type: ActionType.SET_startFieldBgColor,
+    startFieldBgColor
+  }
+}
+export function set_world_startFieldAutoBorderSizeInPx(startFieldAutoBorderSizeInPx: number) : SET_startFieldAutoBorderSizeInPxAction {
+  return {
+    type: ActionType.SET_startFieldAutoBorderSizeInPx,
+    startFieldAutoBorderSizeInPx
+  }
+}
+export function set_world_startFieldBorderColor(startFieldBorderColor: string) : SET_startFieldBorderColorAction {
+  return {
+    type: ActionType.SET_startFieldBorderColor,
+    startFieldBorderColor
+  }
+}
+export function set_world_startFieldIsFontBold(startFieldIsFontBold: boolean) : SET_startFieldIsFontBoldAction {
+  return {
+    type: ActionType.SET_startFieldIsFontBold,
+    startFieldIsFontBold
+  }
+}
+export function set_world_startFieldIsFontItalic(startFieldIsFontItalic: boolean) : SET_startFieldIsFontItalicAction {
+  return {
+    type: ActionType.SET_startFieldIsFontItalic,
+    startFieldIsFontItalic
+  }
+}
+
+//--- end field style
+
+export function set_world_endFieldAutoPrependText(endFieldAutoPrependText: string): SET_endFieldAutoPrependTextAction {
+  return {
+    type: ActionType.SET_endFieldAutoPrependText,
+    endFieldAutoPrependText
+  }
+}
+export function set_world_endFieldColor(endFieldColor: string): SET_endFieldColorAction {
+  return {
+    type: ActionType.SET_endFieldColor,
+    endFieldColor
+  }
+}
+export function set_world_endFieldBgColor(endFieldBgColor: string): SET_endFieldBgColorAction {
+  return {
+    type: ActionType.SET_endFieldBgColor,
+    endFieldBgColor
+  }
+}
+export function set_world_endFieldAutoBorderSizeInPx(endFieldAutoBorderSizeInPx: number): SET_endFieldAutoBorderSizeInPxAction {
+  return {
+    type: ActionType.SET_endFieldAutoBorderSizeInPx,
+    endFieldAutoBorderSizeInPx
+  }
+}
+export function set_world_endFieldBorderColor(endFieldBorderColor: string): SET_endFieldBorderColorAction {
+  return {
+    type: ActionType.SET_endFieldBorderColor,
+    endFieldBorderColor
+  }
+}
+export function set_world_endFieldIsFontBold(endFieldIsFontBold: boolean): SET_endFieldIsFontBoldAction {
+  return {
+    type: ActionType.SET_endFieldIsFontBold,
+    endFieldIsFontBold
+  }
+}
+export function set_world_endFieldIsFontItalic(endFieldIsFontItalic: boolean): SET_endFieldIsFontItalicAction {
+  return {
+    type: ActionType.SET_endFieldIsFontItalic,
+    endFieldIsFontItalic
+  }
+}
+
+//--- branch if field style
 
 export function set_world_branchIfPrependText(branchIfPrependText: string): SET_branchIfPrependTextAction {
   return {
@@ -497,6 +624,20 @@ export function set_world_branchIfIsFontItalic(branchIfIsFontItalic: boolean): S
   return {
     type: ActionType.SET_branchIfIsFontItalic,
     branchIfIsFontItalic
+  }
+}
+
+export function set_world_branchIfColor(branchIfColor: string): SET_branchIfColorAction {
+  return {
+    type: ActionType.SET_branchIfColor,
+    branchIfColor
+  }
+}
+
+export function set_world_branchIfBgColor(branchIfBgColor: string): SET_branchIfBgColorAction {
+  return {
+    type: ActionType.SET_branchIfBgColor,
+    branchIfBgColor
   }
 }
 
