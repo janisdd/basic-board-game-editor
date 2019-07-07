@@ -146,7 +146,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
     const fieldSymbol = this.props.fieldShape
 
 
-    let connectedPointsList = ''
+    if (!fieldSymbol) return null
 
     return (<div>
 

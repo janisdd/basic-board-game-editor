@@ -89,6 +89,15 @@ export type State = {
 
   readonly isSymbolLibraryModalDisplayed: boolean
 
+  /**
+   * true: to display a loader in the button,
+   * false: not
+   * when (re-)connecting lines via position this could take a while
+   * when we have many lines or fields (we need to call new pos for every point (with the old pos) in order to
+   * connect them
+   */
+  readonly isReconnectingLinesToAnchorPoints: boolean
+
 }
 
 export interface SimulationResult {
@@ -131,7 +140,9 @@ export const initial: State = {
 
   isChooseImgShapeImageLibraryDisplayed: false,
 
-  isSymbolLibraryModalDisplayed: false
+  isSymbolLibraryModalDisplayed: false,
+
+  isReconnectingLinesToAnchorPoints: false,
 
 }
 
@@ -204,6 +215,9 @@ export enum ActionType {
   SET_editor_arePrintGuidesDisplayed = 'tileEditorReducer_SET_editor_arePrintGuidesDisplayed',
 
   SET_editor_isSymbolLibraryModalDisplayed = 'tileEditorReducer_SET_editor_isSymbolLibraryModalDisplayed',
+
+  SET_editor_isReconnectingLinesToAnchorPoints = 'tileEditorReducer_SET_editor_isReconnectingLinesToAnchorPoints',
+
 
   CLEAR_allBorderPoints_connectedLines = 'tileEditorReducer_CLEAR_allBorderPoints_connectedLines',
 
@@ -294,7 +308,6 @@ export interface SET_editor_isSymbolLibraryModalDisplayedAction extends ActionBa
   readonly type: ActionType.SET_editor_isSymbolLibraryModalDisplayed
   readonly isSymbolLibraryModalDisplayed: boolean
 }
-
 
 
 //--- editor settings
@@ -428,6 +441,11 @@ export interface SET_editor_simulationEndFieldIdsAction extends ActionBase {
   readonly simulationEndFieldIds: ReadonlyArray<number>
 }
 
+export interface SET_editor_isReconnectingLinesToAnchorPointsAction extends ActionBase {
+  readonly type: ActionType.SET_editor_isReconnectingLinesToAnchorPoints
+  readonly isReconnectingLinesToAnchorPoints: boolean
+}
+
 export interface CLEAR_allBorderPoints_connectedLinesAction extends ActionBase {
   readonly type: ActionType.CLEAR_allBorderPoints_connectedLines
 }
@@ -483,7 +501,9 @@ export type AllActions =
   | SET_editor_insertLinesEvenIfFieldsIntersectAction
   | SET_editor_majorLineDirectionAction
   | SET_editor_arePrintGuidesDisplayedAction
-| CLEAR_allBorderPoints_connectedLinesAction
+  | SET_editor_isReconnectingLinesToAnchorPointsAction
+
+  | CLEAR_allBorderPoints_connectedLinesAction
 
 
 export function reducer(state: State = initial, action: AllActions): State {
@@ -502,10 +522,10 @@ export function reducer(state: State = initial, action: AllActions): State {
         ...state,
         tileProps: {
           ...state.tileProps,
-          topBorderPoints: state.tileProps.topBorderPoints.map(p => ({...p,connectedLineTuples: []})),
-          botBorderPoints: state.tileProps.botBorderPoints.map(p => ({...p,connectedLineTuples: []})),
-          leftBorderPoints: state.tileProps.leftBorderPoints.map(p => ({...p,connectedLineTuples: []})),
-          rightBorderPoint: state.tileProps.rightBorderPoint.map(p => ({...p,connectedLineTuples: []})),
+          topBorderPoints: state.tileProps.topBorderPoints.map(p => ({...p, connectedLineTuples: []})),
+          botBorderPoints: state.tileProps.botBorderPoints.map(p => ({...p, connectedLineTuples: []})),
+          leftBorderPoints: state.tileProps.leftBorderPoints.map(p => ({...p, connectedLineTuples: []})),
+          rightBorderPoint: state.tileProps.rightBorderPoint.map(p => ({...p, connectedLineTuples: []})),
         }
       }
 
@@ -858,6 +878,11 @@ export function reducer(state: State = initial, action: AllActions): State {
         },
       }
 
+    case ActionType.SET_editor_isReconnectingLinesToAnchorPoints:
+      return {
+        ...state,
+        isReconnectingLinesToAnchorPoints: action.isReconnectingLinesToAnchorPoints
+      }
 
     case ActionType.RESET:
       return initial

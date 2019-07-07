@@ -1287,7 +1287,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
 
                 {
                   singleFieldAnchorPoint !== undefined &&
-                  <List divided verticalAlign='middle'>
+                  <List verticalAlign='middle'>
                     {
                       singleFieldAnchorPoint.connectedLineTuples.map((value, _index) => {
                         return (

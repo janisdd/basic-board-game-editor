@@ -12,6 +12,7 @@ import {LangObj} from "../../../i18n/i18nRoot";
 export interface MyProps {
   readonly message: string | {__html: string}
   readonly title?: string
+  readonly wide?: boolean | "very"
 }
 
 const mapStateToProps = (rootState: RootState , props: MyProps) => {
@@ -42,6 +43,7 @@ class ToolTip extends React.Component<Props, any> {
         content={typeof this.props.message === "string" ? this.props.message : <div dangerouslySetInnerHTML={this.props.message}></div>  }
         header={this.props.title}
         mouseEnterDelay={popupDelay}
+        wide={this.props.wide}
       />
     )
   }

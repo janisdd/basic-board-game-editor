@@ -1,15 +1,23 @@
 import {
-  ActionType, CLEAR_allBorderPoints_connectedLinesAction,
+  ActionType,
+  CLEAR_allBorderPoints_connectedLinesAction,
   LeftTileEditorTabs,
-  RightTileEditorTabs, SET_editor_arePrintGuidesDisplayedAction,
+  RightTileEditorTabs,
+  SET_editor_arePrintGuidesDisplayedAction,
   SET_editor_autoIncrementFieldTextNumbersOnDuplicateAction,
   SET_editor_botBorderPointsAction,
-  SET_editor_gridSizeInPxAction, SET_editor_insertLinesEvenIfFieldsIntersectAction,
-  SET_editor_isAddImgShapeLibraryDisplayedAction, SET_editor_isChooseFieldShapeBackgroundImageLibraryDisplayedAction,
+  SET_editor_gridSizeInPxAction,
+  SET_editor_insertLinesEvenIfFieldsIntersectAction,
+  SET_editor_isAddImgShapeLibraryDisplayedAction,
+  SET_editor_isChooseFieldShapeBackgroundImageLibraryDisplayedAction,
   SET_editor_isChooseImgShapeImageLibraryDisplayedAction,
-  SET_editor_isCreatingNewTileAction, SET_editor_isLeftTabMenuExpandedAction,
-  SET_editor_isSelectingNextFieldAction, SET_editor_isSymbolLibraryModalDisplayedAction,
-  SET_editor_isTileEditorSettingsModalDisplayedAction, SET_editor_lastRightTabActiveIndexAction,
+  SET_editor_isCreatingNewTileAction,
+  SET_editor_isLeftTabMenuExpandedAction,
+  SET_editor_isReconnectingLinesToAnchorPointsAction,
+  SET_editor_isSelectingNextFieldAction,
+  SET_editor_isSymbolLibraryModalDisplayedAction,
+  SET_editor_isTileEditorSettingsModalDisplayedAction,
+  SET_editor_lastRightTabActiveIndexAction,
   SET_editor_leftBorderPointsAction,
   SET_editor_leftTabActiveIndexAction,
   SET_editor_majorLineDirectionAction,
@@ -18,7 +26,9 @@ import {
   SET_editor_rightBorderPointAction,
   SET_editor_rightTabActiveIndexAction,
   SET_editor_showGridAction,
-  SET_editor_showSequenceIdsAction, SET_editor_simulationEndFieldIdsAction, SET_editor_simulationStartFieldIdsAction,
+  SET_editor_showSequenceIdsAction,
+  SET_editor_simulationEndFieldIdsAction,
+  SET_editor_simulationStartFieldIdsAction,
   SET_editor_snapToGridAction,
   SET_editor_splitLargeTileForPrintAction,
   SET_editor_stageOffsetAction,
@@ -429,6 +439,15 @@ export function set_editor_simulationEndFieldIds(simulationEndFieldIds: Readonly
     simulationEndFieldIds
   }
 }
+
+export function set_editor_isReconnectingLinesToAnchorPoints(isReconnectingLinesToAnchorPoints: boolean): SET_editor_isReconnectingLinesToAnchorPointsAction {
+  return {
+    type: ActionType.SET_editor_isReconnectingLinesToAnchorPoints,
+    isReconnectingLinesToAnchorPoints
+  }
+}
+
+
 
 export function set_editor_isTileEditorSettingsModalDisplayed(isTileEditorSettingsModalDisplayed: boolean): SET_editor_isTileEditorSettingsModalDisplayedAction {
   return {

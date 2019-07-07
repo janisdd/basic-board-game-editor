@@ -80,6 +80,8 @@ class imagePropertyEditor extends React.Component<Props, any> {
 
     const imgSymbol = this.props.imgShape
 
+    if (!imgSymbol) return null
+
     return (
       <div>
 
@@ -105,14 +107,14 @@ class imagePropertyEditor extends React.Component<Props, any> {
             </div>
           </Form.Field>
 
-          
+
             <Form.Field>
               <label>{getI18n(this.props.langId, "Name")}</label>
               <input value={imgSymbol.displayName}
                      onChange={(e) => this.props.set_imgSymbol_displayName(e.currentTarget.value)}
               />
             </Form.Field>
-          
+
             <Form.Group widths='equal'>
               <Form.Field>
                 <label>{getI18n(this.props.langId, "Height")}
@@ -152,9 +154,9 @@ class imagePropertyEditor extends React.Component<Props, any> {
                 />
               </Form.Field>
             </Form.Group>
-          
 
-          
+
+
             <Form.Field>
               <label>{getI18n(this.props.langId, "Rotation in degree")}
                 <Checkbox className="mar-left-half" checked={imgSymbol.overwriteRotationInDeg}
@@ -186,7 +188,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
                 labelPosition='right'
               />
             </Form.Field>
-          
+
 
             <Form.Field>
               <label>{getI18n(this.props.langId, "Image")}

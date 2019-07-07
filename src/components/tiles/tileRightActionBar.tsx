@@ -15,6 +15,9 @@ import {Logger} from "../../helpers/logger";
 import {getI18n} from "../../../i18n/i18nRoot";
 import ToolTip from '../helpers/ToolTip'
 import {exportPngImagesBgColor} from "../../constants";
+import {set_selectedLinePointNewPosAction} from "../../state/reducers/tileEditor/lineProperties/actions";
+import {set_editor_isReconnectingLinesToAnchorPoints} from "../../state/reducers/tileEditor/actions";
+import {delay} from "../../helpers/functionHelpers";
 
 //const css = require('./styles.styl');
 
@@ -36,6 +39,8 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
 
     tileProps: rootState.tileEditorState.tileProps,
 
+    isReconnectingLinesToAnchorPoints: rootState.tileEditorState.isReconnectingLinesToAnchorPoints,
+
     amountOfShapesInTile: rootState.tileEditorLineShapeState.present.length + rootState.tileEditorImgShapesState.present.length + rootState.tileEditorFieldShapesState.present.length,
     amountOfFieldsInTile: rootState.tileEditorFieldShapesState.present.length,
 
@@ -52,6 +57,8 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   //imported reducer funcs here
 
   setPropertyEditor_FieldCmdText,
+  set_selectedLinePointNewPosAction,
+  set_editor_isReconnectingLinesToAnchorPoints,
 
 }, dispatch)
 
@@ -144,6 +151,48 @@ class tileRightActionBar extends React.Component<Props, any> {
                   }}
           >
             <Icon name="wizard"/>
+          </Button>
+        </ToolTip>
+
+        <ToolTip
+          wide="very"
+          message={getI18n(this.props.langId, "Connect all lines to anchor points in snap range. Sometimes the line points will not snap to anchor points properly. This ensures that all lines are properly connected to anchor points if a line point is in snap range. If you have many lines or field this could take a while.")}
+        >
+          <Button icon
+                  loading={this.props.isReconnectingLinesToAnchorPoints}
+                  onClick={() => {
+
+                    this.props.set_editor_isReconnectingLinesToAnchorPoints(true)
+
+
+                    //a new macro task so set_editor_isReconnectingLinesToAnchorPoints(true) is rendered (current script)
+                    //so we will see the spinner animation
+                    setTimeout(() => {
+
+                      //setting the pos to the old will snap the lines to the anchor points
+                      try {
+
+                        for (let i = 0; i < this.props.lineShapes.length; i++) {
+                          const lineShape = this.props.lineShapes[i];
+
+                          this.props.set_selectedLinePointNewPosAction(lineShape.id, lineShape.startPoint.id, lineShape.startPoint)
+
+                          for (let j = 0; j < lineShape.points.length; j++) {
+                            const linePoint = lineShape.points[j];
+                            this.props.set_selectedLinePointNewPosAction(lineShape.id, linePoint.id, linePoint)
+                          }
+                        }
+                      } catch (err) {
+                        Logger.fatal(err)
+                      } finally {
+                        this.props.set_editor_isReconnectingLinesToAnchorPoints(false)
+                      }
+
+                    }, 0)
+
+                  }}
+          >
+            <Icon name="plug"/>
           </Button>
         </ToolTip>
 

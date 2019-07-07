@@ -222,7 +222,7 @@ class tileLibrary extends React.Component<Props, any> {
             <Modal.Header>{getI18n(this.props.langId, "Tile library")}</Modal.Header>
             <Modal.Content>
               <div className="flexed">
-                <div>
+                <div style={{alignSelf: 'flex-start'}}>
                   {
                     //we need the padding else we trigger instantly onTileDragLeave after onTileDragEnter
                     //because we disable cursor events?

@@ -84,6 +84,8 @@ class linePropertyEditor extends React.Component<Props, any> {
 
     const lineSymbol = this.props.lineShape
 
+    if (!lineSymbol) return null
+
     return (
       <div>
 

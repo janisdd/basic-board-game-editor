@@ -377,11 +377,9 @@ export function _setLinePointNewPos(lineId: number, oldPointId: number, newPoint
 /**
  * this will attach or detach the line from fields
  *
- * TODO performance when we have many fields!!
  * @param lineId
  * @param oldPointId
  * @param newPointPos
- * @param canSetFieldAnchorPoints
  */
 export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: number, newPointPos: PlainPoint): MultiActions {
   return (dispatch, getState) => {
@@ -449,7 +447,6 @@ export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: nu
       if (connectedLineTuple === null) {
         //try to remove connected
 
-        console.log('33333333')
         posSet = true
 
         //if no anchor point is connected to this point don't dispatch
@@ -473,6 +470,7 @@ export function set_selectedLinePointNewPosAction(lineId: number, oldPointId: nu
 
         if (targetPoint.x === anchorPointPos.x && targetPoint.y === anchorPointPos.y &&
           (newPointPos.x !== anchorPointPos.x || newPointPos.y !== anchorPointPos.y)) {
+
           //old pos was on anchor point
           //new not... user wants to remove connection
 

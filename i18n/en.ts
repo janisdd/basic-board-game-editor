@@ -137,6 +137,7 @@ export const lang_en: LangObj = {
   "Check all fields for correct command syntax": "Check all fields for correct command syntax",
   "Checks if all variables are defined. This also executes the game init/setup code (experimental/not enough tested)": "Checks if all variables are defined. This also executes the game init/setup code (experimental/not enough tested)",
   "Auto connect fields by command texts. Fields that are alreay connected through at least one line will be omitted": "Auto connect fields by command texts. Fields that are alreay connected through at least one line will be omitted",
+  "Connect all lines to anchor points in snap range. Sometimes the line points will not snap to anchor points properly. This ensures that all lines are properly connected to anchor points if a line point is in snap range. If you have many lines or field this could take a while." : "Connect all lines to anchor points in snap range. Sometimes the line points will not snap to anchor points properly. This ensures that all lines are properly connected to anchor points if a line point is in snap range. If you have many lines or field this could take a while.",
   "Clear all commands from all field": "Clear all commands from all field",
   //--- shortcuts
   "Hint: Make sure you don't have any text field focused to use the shortcuts. Else the text field will receive the shortcuts and they won't work.": "Hint: Make sure you don't have any text field focused to use the shortcuts. Else the text field will receive the shortcuts and they won't work.",

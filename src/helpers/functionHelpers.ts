@@ -54,3 +54,12 @@ export const debounce = (func: any, wait: any, immediate: any) => {
     if (callNow) func.apply(context);
   };
 };
+
+
+export function delay(timeInMs: number): Promise<void> {
+  return new Promise<void>(resolve => {
+    setTimeout(() => {
+      resolve()
+    }, timeInMs)
+  })
+}
