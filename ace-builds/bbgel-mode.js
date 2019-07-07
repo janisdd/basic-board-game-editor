@@ -76,7 +76,7 @@ define('ace/mode/bbgel_highlight_rules', ['require', 'exports', 'ace/lib/oop', '
 
     var buildinConstants = (
       "" +
-      "$leftSteps|$result|$return|cp|np|pp|current_player|next_player|previous_player"
+      "$leftSteps|$result|$return|cp|np|pp|current_player|next_player|previous_player|$numPlayers"
     );
 
 

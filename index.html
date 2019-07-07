@@ -4,8 +4,9 @@
     <title>Basic Board Game Editor</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="semantic.min.css">
+    <link rel="stylesheet" href="thirdPartyFiles/fontawesome-free-5.9.0-web/css/all.css">
     <!-- styles.css will be injected by HtmlWebpackPlugin (with a cache busting hash) -->
-<link href="styles.css?3bb55538d9e15c3eecb3" rel="stylesheet"></head>
+<link href="styles.css?540174e2895f509801c1" rel="stylesheet"></head>
 <body>
 
 <div id="root" style="height: 100%">
@@ -23,5 +24,10 @@
 
 <!-- app.js will be injected by HtmlWebpackPlugin (with a cache busting hash) -->
 
-<script type="text/javascript" src="app.js?3bb55538d9e15c3eecb3"></script></body>
+<script>
+  document.fonts.load("12px 'Font Awesome 5 Free'")
+
+  document.fonts.load("bold 12px 'Font Awesome 5 Free'")
+</script>
+<script type="text/javascript" src="app.js?540174e2895f509801c1"></script></body>
 </html>
