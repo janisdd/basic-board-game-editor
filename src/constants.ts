@@ -37,21 +37,21 @@ export const isProduction = (process.env.NODE_ENV === 'production')
  * we need this for the printing window
  */
 export const fontAwesomeLink = isProduction
-  ? '../thirdPartyFiles/fontawesome-free-5.9.0-web/css/all.css'
+  ? 'thirdPartyFiles/fontawesome-free-5.9.0-web/css/all.css'
   : 'thirdPartyFiles/fontawesome-free-5.9.0-web/css/all.css'
 
 /**
  * we need this for download link (for svg export)
  */
 export const fontAwesomeRegularIconsFontFileLink = isProduction
-  ? '../thirdPartyFiles/fontawesome-free-5.9.0-web/webfonts/fa-regular-400.woff'
+  ? 'thirdPartyFiles/fontawesome-free-5.9.0-web/webfonts/fa-regular-400.woff'
   : 'thirdPartyFiles/fontawesome-free-5.9.0-web/webfonts/fa-regular-400.woff'
 
 /**
  * we need this for download link (for svg export)
  */
 export const fontAwesomeSolidIconsFontFileLink = isProduction
-  ? '../thirdPartyFiles/fontawesome-free-5.9.0-web/webfonts/fa-solid-900.woff'
+  ? 'thirdPartyFiles/fontawesome-free-5.9.0-web/webfonts/fa-solid-900.woff'
   : 'thirdPartyFiles/fontawesome-free-5.9.0-web/webfonts/fa-solid-900.woff'
 
 //see https://forums.tumult.com/t/using-a-custom-web-font-within-an-svg-file/7254
