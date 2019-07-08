@@ -358,6 +358,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                           <EditorWrapper
                             readony={false}
                             id={editorId}
+                            mode="bbgel"
                             value={this.props.worldSettings.worldCmdText}
                             onLostFocus={(val) => this.props.set_world_worldCmdTextAction(val)}
                             height='300px'

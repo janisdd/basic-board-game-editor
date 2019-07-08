@@ -8,10 +8,11 @@ import WorldEditor from './world/worldEditor'
 import AppContentWrapper from './appContentWrapper'
 import TileEditor from './tiles/tileEditor'
 import VariableIndicatorEditor from './variableIndicator/variableIndicatorEditor'
-import {Label, Menu, Tab} from "semantic-ui-react";
+import {Menu, Tab} from "semantic-ui-react";
 import {set_app_activeTabIndex} from "../state/reducers/actions";
 import {getI18n} from "../../i18n/i18nRoot";
 import Guide from './guide/guide'
+import GameInstructionsEditor from './gameInstructionsEditor/gameInstructionsEditor'
 
 export interface MyProps {
   //readonly test: string
@@ -68,6 +69,19 @@ class app extends React.Component<Props, any> {
         render: () => {
           return (
             <Guide/>
+          )
+        }
+      },
+      {
+        menuItem: <Menu.Item key="gameInstructionEditor"
+                             className={this.props.simulationState.simulationStatus !== null || this.props.simulationState.machineState !== null ? 'div-disabled' : ''}>
+          {
+            getI18n(this.props.langId, "Game Instruction Editor")
+          }
+        </Menu.Item>,
+        render: () => {
+          return (
+            <GameInstructionsEditor/>
           )
         }
       },

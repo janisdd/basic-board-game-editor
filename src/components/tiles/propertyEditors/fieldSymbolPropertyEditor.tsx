@@ -235,6 +235,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
               }
               <EditorWrapper
                 id={fieldSymbolCmdTextEditorId}
+                mode="bbgel"
                 readony={false}
                 value={fieldSymbol.cmdText || ''}
                 height={'100px'}

@@ -387,6 +387,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
               }
               <EditorWrapper
                 id={fieldCmdTextEditorId}
+                mode="bbgel"
                 readony={isBasedOnSymbol && fieldSymbol.overwriteCmdText}
                 value={(isBasedOnSymbol && fieldSymbol.overwriteCmdText
                   ? fieldSymbol.cmdText

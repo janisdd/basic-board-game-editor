@@ -20,6 +20,7 @@ export interface LangObj {
   "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 11, -1 to -11, 0 and -12": string
   //--- guide
   "Guide": string
+  "Game Instruction Editor": string
   //--- world editor
   "World editor": string
   "Undo the last tile placement": string

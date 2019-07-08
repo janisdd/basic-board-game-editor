@@ -4,18 +4,19 @@ import {notExhaustive} from "./_notExhausiveHelper";
 
 export enum AvailableAppTabs {
   guide = 0,
-  worldEditor = 1,
-  variableIndicator = 2,
-  tileEditor = 3
+  gameInstructionEditor ,
+  worldEditor,
+  variableIndicator,
+  tileEditor
 }
 
 export type State = {
-  
+
   readonly activeTabIndex: AvailableAppTabs
 }
 
 export const initial: State = {
-  activeTabIndex: AvailableAppTabs.worldEditor,
+  activeTabIndex: AvailableAppTabs.gameInstructionEditor, //TODO worldEditor
 }
 
 export interface ActionBase extends Action {

@@ -18,6 +18,7 @@ export const lang_en: LangObj = {
   "Reset to defaults": "Reset to defaults",
   "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 11, -1 to -11, 0 and -12" : "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 11, -1 to -11, 0 and -12",
   "Guide": "Guide",
+  "Game Instruction Editor" : "Game Instruction Editor",
   //--- world
   "World editor": "World editor",
   "Undo the last tile placement": "Undo the last tile placement",

@@ -58,6 +58,7 @@ import {
   reducer as tileEditorSelectionReducer,
   State as TileEditorSelectionState
 } from './reducers/tileEditorSelection/tileEditorSelectionReducer'
+import {reducer as gameInstructionsEditorReducer, State as GameInstructionsEditorState} from './reducers/gameInstructionsEditor/gameInstructionsEditorReducer'
 
 
 export interface RootState {
@@ -66,6 +67,8 @@ export interface RootState {
   readonly i18nState: I18nState
 
   readonly appState: AppState
+
+  readonly gameInstructionsEditorState: GameInstructionsEditorState
 
   readonly simulationState: SimulationState
 
@@ -100,6 +103,8 @@ export default combineReducers<RootState>({
   i18nState: i18nReducer,
 
   appState: appReducer,
+
+  gameInstructionsEditorState: gameInstructionsEditorReducer,
 
   simulationState: simulationReducer,
 
