@@ -1,4 +1,6 @@
 
+@import "../../styles/behaviors.styl"
+
 .game-instructions-site {
   height calc(100% - 55px) //the size of the header bar
   position relative
@@ -19,6 +21,20 @@
   .panel-content {
     padding 0.25em
     flex 1
+  }
+
+  .action-bar {
+    display inline-flex
+    margin-left 2em
+
+    .item {
+      @extend .clickable
+      margin-left 0.5em
+    }
+
+    .item:hover {
+      @extend .clickable:hover
+    }
   }
 }
 

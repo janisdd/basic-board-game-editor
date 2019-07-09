@@ -323,6 +323,16 @@ export interface LangObj {
   "Symbol library": string
   "No symbols": string
 
+  //--- game instruction editor
+  "Editor": string
+  "The editor uses markdown syntax. The editor content is part of the world and is also exported when you export the world.": string
+  "Creates the initial template for new game instructions with the current world settings (game init code)": string
+  "This will collect all used phrases from all fields in the world into a markdown list, so that you can explain each one manually": string
+  "Preview": string
+  "Copy modal": string
+  "Copy text to clipboard and close modal": string
+  "Close": string
+
 }
 
 

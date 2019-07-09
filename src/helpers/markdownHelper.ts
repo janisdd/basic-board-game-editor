@@ -18,4 +18,42 @@ mdRenderer.renderer.rules.link_open = (tokens, idx, options, env, self) => {
   return oldLinkRule(tokens, idx, options, env, self)
 }
 
+const oldCodeFenceRule = mdRenderer.renderer.rules.fence
+
+mdRenderer.renderer.rules.fence = (tokens, idx, options, env, self) => {
+
+  // const token = tokens[idx]
+
+  const preTag = oldCodeFenceRule(tokens, idx, options, env, self)
+
+  //handler is globally defined in index
+  const withCopyBtn = `<div class="markdown-fenced-code-block-wrapper">
+  ${preTag}
+</div>`
+
+  return withCopyBtn
+}
+
+const oldCodeRule = mdRenderer.renderer.rules.code_inline
+
+
+mdRenderer.renderer.rules.code_inline = (tokens, idx, options, env, self) => {
+
+  // const token = tokens[idx]
+
+  const codeTag = oldCodeRule(tokens, idx, options, env, self)
+
+  //handler is globally defined in index
+  const withCopyBtn = `<div class="markdown-inline-code-tag-wrapper">
+  ${codeTag}
+</div>`
+
+  return withCopyBtn
+}
+
+
 export default mdRenderer
+
+export function generateMarkdownPhraseDefinitionList(phrases: string[]): string {
+  return phrases.map(p => `- \`${p}\` - `).join('\n')
+}

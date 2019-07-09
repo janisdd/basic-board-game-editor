@@ -3,21 +3,25 @@ import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
+import {Icon} from "semantic-ui-react";
+import {set_gie_previewFontSize} from "../../state/reducers/gameInstructionsEditor/actions";
+import {defaultGameInstructionPreviewFontSize, maxZoomedFontSize, minZoomedFontSize} from "../../constants";
+import {PrintHtmlHelper} from "../../helpers/printHtmlHelper";
+import {Logger} from "../../helpers/logger";
 
 export interface MyProps {
-  //readonly test: string
+  readonly printDivId: string
 }
 
-const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
+const mapStateToProps = (rootState: RootState , props: MyProps) => {
   return {
-    //test0: rootState...
-    //test: props.test
+    ...props,
+    previewFontSize: rootState.gameInstructionsEditorState.previewFontSize,
   }
 }
 
 const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
-  //imported reducer funcs here
-
+  set_gie_previewFontSize,
 }, dispatch)
 
 
@@ -29,7 +33,41 @@ type Props = typeof stateProps & typeof dispatchProps;
 class PreviewActionsBar extends React.Component<Props, any> {
   render(): JSX.Element {
     return (
-      <div>
+      <div className="action-bar">
+
+        <div className="item" onClick={() => {
+
+          const el = document.getElementById(`${this.props.printDivId}`)
+
+          if (!el) {
+            Logger.log('found none or too many printable contents')
+            return
+          }
+
+          PrintHtmlHelper.printContent(el.innerHTML)
+
+        }}>
+          <Icon name="print"/>
+        </div>
+
+        <div className="item" style={{marginLeft: '1em'}} onClick={() => {
+          this.props.set_gie_previewFontSize(Math.min(maxZoomedFontSize, this.props.previewFontSize + 1))
+        }}>
+          <Icon name="zoom in"/>
+        </div>
+
+        <div className="item" onClick={() => {
+          this.props.set_gie_previewFontSize(defaultGameInstructionPreviewFontSize)
+        }}>
+          <Icon name="undo"/>
+        </div>
+
+        <div className="item" onClick={() => {
+          this.props.set_gie_previewFontSize(Math.max(minZoomedFontSize, this.props.previewFontSize - 1))
+        }}>
+          <Icon name="zoom out"/>
+        </div>
+
       </div>
     )
   }

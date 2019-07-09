@@ -4,6 +4,7 @@ import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
 import markdown from '../../helpers/markdownHelper'
+import {fontAwesomeMatchRegex} from "../../constants";
 
 export interface MyProps {
   /**
@@ -20,7 +21,20 @@ export interface MyProps {
 export default class markdownRenderer extends React.Component<MyProps, any> {
   render(): JSX.Element {
 
-    const content = markdown.render(this.props.markdown)
+
+    let markdownWithFontAwesomeIcons = this.props.markdown
+    const matchResults = markdownWithFontAwesomeIcons.match(fontAwesomeMatchRegex)
+
+    if (matchResults) {
+
+      for (let i = 0; i < matchResults.length; i++) {
+        const matchResult = matchResults[i]
+        const intVal = parseInt(matchResult.substr(1), 16)
+        markdownWithFontAwesomeIcons = markdownWithFontAwesomeIcons.replace(matchResult, String.fromCharCode(intVal))
+      }
+    }
+
+    const content = markdown.render(markdownWithFontAwesomeIcons)
 
     return (
       <div id={this.props.printId} className="fh fw">

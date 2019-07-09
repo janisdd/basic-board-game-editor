@@ -13,6 +13,7 @@ import {set_app_activeTabIndex} from "../state/reducers/actions";
 import {getI18n} from "../../i18n/i18nRoot";
 import Guide from './guide/guide'
 import GameInstructionsEditor from './gameInstructionsEditor/gameInstructionsEditor'
+import {tempPrintDivId} from "../constants";
 
 export interface MyProps {
   //readonly test: string
@@ -145,6 +146,11 @@ class app extends React.Component<Props, any> {
                }}
                panes={tabs}/>
         </AppContentWrapper>
+
+        {
+          //used temporarily for printing html
+        }
+        <div id={tempPrintDivId}></div>
 
       </div>
     )

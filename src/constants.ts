@@ -33,6 +33,11 @@ declare var process: {
 export const isProduction = (process.env.NODE_ENV === 'production')
 
 
+export const maxZoomedFontSize = 70
+export const defaultGameInstructionPreviewFontSize = 12
+export const defaultGameInstructionEditorFontSize = 12
+export const minZoomedFontSize = 6
+
 /**
  * we need this for the printing window
  */
@@ -87,6 +92,28 @@ export const changeLinesFromAllTilesInLibraryWhenChangingFieldSymbol = true
 
 export const exportPngImagesBgColor: string | null = 'white'
 
+/**
+ * we use a div for fronting where we insert the html to print
+ */
+export const tempPrintDivId = 'temp-print-div-id'
+
+/**
+ * we need this for printing... safari will not emit onafterprint
+ */
+export function browser_isSafari(): boolean {
+  //see https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser/9851769
+
+  // // Firefox 1.0+
+  // var isFirefox = typeof InstallTrigger !== 'undefined';
+
+  // Safari 3.0+ "[object HTMLElementConstructor]"
+  // @ts-ignore
+  const isSafari = /constructor/i.test(window.HTMLElement) || (function (p: any): any { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+
+  return isSafari
+}
+
+//for field and img shapes
 export const resizeDragHandleSize = 10
 export const resizeHandleFillColor = 'black'
 

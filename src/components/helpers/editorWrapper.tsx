@@ -25,6 +25,8 @@ export interface MyProps {
    * cannot be changed after the component did mount!
    */
   readonly throttleTimeInMs?: number
+
+  readonly fontSize?: number
 }
 
 export const editorInstancesMap: { [id: string]: Editor | undefined } = {}
@@ -53,6 +55,10 @@ export default class EditorWrapper extends React.Component<MyProps, any> {
     }
 
     this.editor.setSession(lastAceEditorEditSession)
+
+    if (this.props.fontSize && this.props.fontSize > 0) {
+      this.editor.setFontSize(`${this.props.fontSize}px`)
+    }
 
     this.editor.setReadOnly(this.props.readony)
 
@@ -97,6 +103,7 @@ export default class EditorWrapper extends React.Component<MyProps, any> {
     }
 
     this.editor.setReadOnly(this.props.readony)
+    this.editor.setFontSize(`${this.props.fontSize}px`)
   }
 
   componentWillUnmount() {

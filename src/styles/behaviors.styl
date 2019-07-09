@@ -41,9 +41,11 @@
   > i {
     color $accentColor
   }
+
   > a {
     color $accentColor
   }
+
   > a:hover {
     color $accentColor
   }
@@ -58,4 +60,59 @@
 .hoverable:hover {
   opacity 1 !important
   color $accentColor
+}
+
+// --- printing html ---
+
+.print-content-div {
+  display none
+}
+
+
+@media print {
+
+
+  //see https://davidwalsh.name/css-page-breaks
+  //Creating a simple DIV element with the page-break class is how you implement the page break.
+  //<div class="page-break"></div>
+  div.page-break {
+    display block;
+    page-break-before always;
+    page-break-inside: avoid;
+  }
+
+  //see tempPrintDivId js var for div with id
+  //we add this class on printing via button press
+  body.js-printing {
+    .print-content-div {
+      //color-adjust economy //e.g. for monokai theme it'S better to print dark text on white background
+      //-webkit-print-color-adjust economy
+      display block
+      z-index 9999 !important;
+      background-color: white;
+      height: 100%;
+      width: 100%;
+      //position: fixed; //if we use this then the page-break is not working...
+      top: 0;
+      left: 0;
+      margin: 0;
+      padding: 0 1em;
+      //font-size: 14px;
+      //line-height: 18px;
+    }
+
+    #app-content-wrapper {
+      display none !important
+    }
+
+    #app-bar {
+      display none !important
+    }
+
+    //add a rule [css rule].js-printing for everything that should be hidden when printing
+    //.site-header-bar{
+    //  display none !important
+    //}
+  }
+
 }

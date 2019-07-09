@@ -12,6 +12,9 @@ import {
   set_gie_markdown,
   set_gie_verticalGripperPositionInPercentage
 } from "../../state/reducers/gameInstructionsEditor/actions";
+import IconToolTip from "../helpers/IconToolTip";
+import {getI18n} from "../../../i18n/i18nRoot";
+import ActionResultCopyModal from './actionResultCopyModal'
 
 export interface MyProps {
   //readonly test: string
@@ -22,6 +25,10 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     //test0: rootState...
     //test: props.test
     markdown: rootState.gameInstructionsEditorState.markdown,
+    previewFontSize: rootState.gameInstructionsEditorState.previewFontSize,
+    editorFontSize: rootState.gameInstructionsEditorState.editorFontSize,
+
+    langId: rootState.i18nState.langId,
   }
 }
 
@@ -54,6 +61,8 @@ class GameInstructionsEditor extends React.Component<Props, any> {
     return (
       <div className="game-instructions-site flexed">
 
+        <ActionResultCopyModal/>
+
         <div className="fh left-side panel" style={{right: leftSideOffset}}>
 
 
@@ -62,11 +71,16 @@ class GameInstructionsEditor extends React.Component<Props, any> {
             <div>
               <Icon className="mar-left-half" name="write"/>
               <span>
-                Editor
+                {getI18n(this.props.langId, "Editor")}
               </span>
 
-              <a className="mar-left" href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">
-                <Icon name="external alternate" />
+              <IconToolTip
+                message={getI18n(this.props.langId, "The editor uses markdown syntax. The editor content is part of the world and is also exported when you export the world.")}
+              />
+
+              <a className="mar-left" href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet"
+                 target="_blank">
+                <Icon name="external alternate"/>
                 Markdown help
               </a>
             </div>
@@ -89,6 +103,7 @@ class GameInstructionsEditor extends React.Component<Props, any> {
                              this.props.set_gie_markdown(val)
                            }}
                            throttleTimeInMs={500}
+                           fontSize={this.props.editorFontSize}
             />
 
           </div>
@@ -104,12 +119,13 @@ class GameInstructionsEditor extends React.Component<Props, any> {
             <div>
               <Icon className="mar-left-half" name="align left"/>
               <span>
-                Preview
+                {getI18n(this.props.langId, "Preview")}
               </span>
 
             </div>
 
-            <PreviewActionsBar/>
+            <PreviewActionsBar printDivId={gameInstructionsEditorPrintId}
+            />
           </div>
 
           <div className="panel-content">
@@ -117,7 +133,7 @@ class GameInstructionsEditor extends React.Component<Props, any> {
             <MarkdownRenderer
               printId={gameInstructionsEditorPrintId}
               markdown={this.props.markdown}
-              fontSizeInPx={12}
+              fontSizeInPx={this.props.previewFontSize}
             />
 
           </div>
