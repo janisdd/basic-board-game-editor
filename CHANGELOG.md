@@ -7,7 +7,7 @@ already changed but version has not changed
 
 ## 1.3.3
 
-- added game instruction editor
+- added Game Instructions Editor
 - command editor state (undo, redo, cursor pos, ... ) is now saved for every field & field symbol
  
 

@@ -77,7 +77,7 @@ class app extends React.Component<Props, any> {
         menuItem: <Menu.Item key="gameInstructionEditor"
                              className={this.props.simulationState.simulationStatus !== null || this.props.simulationState.machineState !== null ? 'div-disabled' : ''}>
           {
-            getI18n(this.props.langId, "Game Instruction Editor")
+            getI18n(this.props.langId, "Game Instructions Editor")
           }
         </Menu.Item>,
         render: () => {

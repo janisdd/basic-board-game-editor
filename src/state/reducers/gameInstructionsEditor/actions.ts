@@ -3,12 +3,17 @@ import {
   ActionType,
   ResetAction,
   SET_actionResultCopyTextAction,
+  set_createFieldTextExplanationListAsAction,
+  SET_createFieldTextExplanationListReplaceNumbersAction,
+  SET_createFieldTextExplanationListReplacePostfixTextAction,
+  SET_createFieldTextExplanationListReplacePrefixTextAction, SET_createFieldTextExplanationListReplaceVarNameAction,
   SET_editorFontSizeAction,
-  SET_isActionResultCopyModalDisplayedAction,
+  SET_isActionResultCopyModalDisplayedAction, set_isGameInstructionsEditorSettingsModalDisplayedAction,
   SET_markdownAction,
   SET_previewFontSizeAction,
   SET_verticalGripperPositionInPercentageAction
 } from "./gameInstructionsEditorReducer";
+import {CreateFieldTextExplanationListType} from "../../../helpers/markdownHelper";
 
 
 export function set_gie_markdown(markdown: string): SET_markdownAction {
@@ -50,6 +55,48 @@ export function set_gie_actionResultCopyText(actionResultCopyText: string): SET_
   return {
     type: ActionType.SET_actionResultCopyText,
     actionResultCopyText
+  }
+}
+
+export function set_gie_isGameInstructionsEditorSettingsModalDisplayed(isGameInstructionsEditorSettingsModalDisplayed: boolean): set_isGameInstructionsEditorSettingsModalDisplayedAction {
+  return {
+    type: ActionType.SET_isGameInstructionsEditorSettingsModalDisplayed,
+    isGameInstructionsEditorSettingsModalDisplayed
+  }
+}
+
+export function set_gie_createFieldTextExplanationListAs(createFieldTextExplanationListAs: CreateFieldTextExplanationListType): set_createFieldTextExplanationListAsAction {
+  return {
+    type: ActionType.SET_createFieldTextExplanationListAs,
+    createFieldTextExplanationListAs
+  }
+}
+
+export function set_gie_createFieldTextExplanationListReplaceVarName(createFieldTextExplanationListReplaceVarName: string): SET_createFieldTextExplanationListReplaceVarNameAction {
+  return {
+    type: ActionType.SET_createFieldTextExplanationListReplaceVarName,
+    createFieldTextExplanationListReplaceVarName
+  }
+}
+
+export function set_gie_createFieldTextExplanationListReplaceNumbers(createFieldTextExplanationListReplaceNumbers: boolean): SET_createFieldTextExplanationListReplaceNumbersAction {
+  return {
+    type: ActionType.SET_createFieldTextExplanationListReplaceNumbers,
+    createFieldTextExplanationListReplaceNumbers
+  }
+}
+
+export function set_gie_createFieldTextExplanationListReplacePrefixText(createFieldTextExplanationListReplacePrefixText: string): SET_createFieldTextExplanationListReplacePrefixTextAction {
+  return {
+    type: ActionType.SET_createFieldTextExplanationListReplacePrefixText,
+    createFieldTextExplanationListReplacePrefixText
+  }
+}
+
+export function set_gie_createFieldTextExplanationListReplacePostfixText(createFieldTextExplanationListReplacePostfixText: string): SET_createFieldTextExplanationListReplacePostfixTextAction {
+  return {
+    type: ActionType.SET_createFieldTextExplanationListReplacePostfixText,
+    createFieldTextExplanationListReplacePostfixText
   }
 }
 

@@ -1,6 +1,7 @@
 import {Action} from "redux";
 import {notExhaustive} from "../_notExhausiveHelper";
 import {defaultGameInstructionEditorFontSize, defaultGameInstructionPreviewFontSize} from "../../../constants";
+import {CreateFieldTextExplanationListType} from "../../../helpers/markdownHelper";
 
 export type State = {
   readonly markdown: string
@@ -13,6 +14,35 @@ export type State = {
    * the text the user can copy in the modal
    */
   readonly actionResultCopyText: string
+
+  readonly isGameInstructionsEditorSettingsModalDisplayed: boolean
+
+  /**
+   * how to
+   */
+  readonly createFieldTextExplanationListAs: CreateFieldTextExplanationListType
+  /**
+   * true: replace numbers e.g. move 3 fields forward --> move [X] fields forward
+   * false: field text is not changed move 3 fields forward
+   */
+  readonly createFieldTextExplanationListReplaceNumbers: boolean
+
+  /**
+   * the var name to replace the number with
+   */
+  readonly createFieldTextExplanationListReplaceVarName: string
+  /**
+   * the text to prepend to vars if we
+   * @see createFieldTextExplanationListReplaceNumbers
+   */
+  readonly createFieldTextExplanationListReplacePrefixText: string
+
+  /**
+   * the text to append if we
+   * @see createFieldTextExplanationListReplaceNumbers
+   */
+  readonly createFieldTextExplanationListReplacePostfixText: string
+
 }
 
 
@@ -29,6 +59,14 @@ ende`,
 
   isActionResultCopyModalDisplayed: false,
   actionResultCopyText: '',
+
+  isGameInstructionsEditorSettingsModalDisplayed: false,
+
+  createFieldTextExplanationListAs: CreateFieldTextExplanationListType.definitionList,
+  createFieldTextExplanationListReplaceNumbers: true,
+  createFieldTextExplanationListReplaceVarName: 'X',
+  createFieldTextExplanationListReplacePrefixText: '[',
+  createFieldTextExplanationListReplacePostfixText: ']',
 }
 
 export interface ActionBase extends Action {
@@ -45,6 +83,15 @@ export enum ActionType {
 
   SET_isActionResultCopyModalDisplayed = 'gameInstructionsEditorReducer_SET_isActionResultCopyModalDisplayed',
   SET_actionResultCopyText = 'gameInstructionsEditorReducer_SET_actionResultCopyText',
+
+
+  SET_isGameInstructionsEditorSettingsModalDisplayed = 'gameInstructionsEditorReducer_SET_isGameInstructionsEditorSettingsModalDisplayed',
+
+  SET_createFieldTextExplanationListAs = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListAs',
+  SET_createFieldTextExplanationListReplaceNumbers = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListReplaceNumbers',
+  SET_createFieldTextExplanationListReplaceVarName = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListReplaceVarName',
+  SET_createFieldTextExplanationListReplacePrefixText = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListReplacePrefixText',
+  SET_createFieldTextExplanationListReplacePostfixText = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListReplacePostfixText',
 
   RESET = 'gameInstructionsEditorReducer_RESET',
 }
@@ -81,6 +128,36 @@ export interface SET_actionResultCopyTextAction extends ActionBase {
   readonly actionResultCopyText: string
 }
 
+export interface set_isGameInstructionsEditorSettingsModalDisplayedAction extends ActionBase {
+  readonly type: ActionType.SET_isGameInstructionsEditorSettingsModalDisplayed
+  readonly isGameInstructionsEditorSettingsModalDisplayed: boolean
+}
+
+export interface set_createFieldTextExplanationListAsAction extends ActionBase {
+  readonly type: ActionType.SET_createFieldTextExplanationListAs
+  readonly createFieldTextExplanationListAs: CreateFieldTextExplanationListType
+}
+
+export interface SET_createFieldTextExplanationListReplaceVarNameAction extends ActionBase {
+  readonly type: ActionType.SET_createFieldTextExplanationListReplaceVarName
+  readonly createFieldTextExplanationListReplaceVarName: string
+}
+
+export interface SET_createFieldTextExplanationListReplaceNumbersAction extends ActionBase {
+  readonly type: ActionType.SET_createFieldTextExplanationListReplaceNumbers
+  readonly createFieldTextExplanationListReplaceNumbers: boolean
+}
+
+export interface SET_createFieldTextExplanationListReplacePrefixTextAction extends ActionBase {
+  readonly type: ActionType.SET_createFieldTextExplanationListReplacePrefixText
+  readonly createFieldTextExplanationListReplacePrefixText: string
+}
+
+export interface SET_createFieldTextExplanationListReplacePostfixTextAction extends ActionBase {
+  readonly type: ActionType.SET_createFieldTextExplanationListReplacePostfixText
+  readonly createFieldTextExplanationListReplacePostfixText: string
+}
+
 
 export interface ResetAction extends ActionBase {
   readonly type: ActionType.RESET
@@ -95,6 +172,13 @@ export type AllActions =
 
   | SET_isActionResultCopyModalDisplayedAction
   | SET_actionResultCopyTextAction
+
+  | set_isGameInstructionsEditorSettingsModalDisplayedAction
+  | set_createFieldTextExplanationListAsAction
+  |SET_createFieldTextExplanationListReplaceVarNameAction
+  | SET_createFieldTextExplanationListReplaceNumbersAction
+  | SET_createFieldTextExplanationListReplacePrefixTextAction
+  | SET_createFieldTextExplanationListReplacePostfixTextAction
 
 
 export function reducer(state: State = initial, action: AllActions): State {
@@ -133,6 +217,38 @@ export function reducer(state: State = initial, action: AllActions): State {
       return {
         ...state,
         actionResultCopyText: action.actionResultCopyText
+      }
+    case ActionType.SET_isGameInstructionsEditorSettingsModalDisplayed:
+      return {
+        ...state,
+        isGameInstructionsEditorSettingsModalDisplayed: action.isGameInstructionsEditorSettingsModalDisplayed
+      }
+
+
+    case ActionType.SET_createFieldTextExplanationListAs:
+      return {
+        ...state,
+        createFieldTextExplanationListAs: action.createFieldTextExplanationListAs
+      }
+    case ActionType.SET_createFieldTextExplanationListReplaceVarName:
+      return {
+        ...state,
+        createFieldTextExplanationListReplaceVarName: action.createFieldTextExplanationListReplaceVarName
+      }
+    case ActionType.SET_createFieldTextExplanationListReplaceNumbers:
+      return {
+        ...state,
+        createFieldTextExplanationListReplaceNumbers: action.createFieldTextExplanationListReplaceNumbers
+      }
+    case ActionType.SET_createFieldTextExplanationListReplacePrefixText:
+      return {
+        ...state,
+        createFieldTextExplanationListReplacePrefixText: action.createFieldTextExplanationListReplacePrefixText
+      }
+    case ActionType.SET_createFieldTextExplanationListReplacePostfixText:
+      return {
+        ...state,
+        createFieldTextExplanationListReplacePostfixText: action.createFieldTextExplanationListReplacePostfixText
       }
 
     case ActionType.RESET:

@@ -20,7 +20,7 @@ export interface LangObj {
   "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 11, -1 to -11, 0 and -12": string
   //--- guide
   "Guide": string
-  "Game Instruction Editor": string
+  "Game Instructions Editor": string
   //--- world editor
   "World editor": string
   "Undo the last tile placement": string
@@ -323,7 +323,7 @@ export interface LangObj {
   "Symbol library": string
   "No symbols": string
 
-  //--- game instruction editor
+  //--- Game Instructions Editor
   "Editor": string
   "The editor uses markdown syntax. The editor content is part of the world and is also exported when you export the world.": string
   "Creates the initial template for new game instructions with the current world settings (game init code)": string
@@ -332,6 +332,16 @@ export interface LangObj {
   "Copy modal": string
   "Copy text to clipboard and close modal": string
   "Close": string
+
+  "Game instructions editor settings": string
+  "Create field text explanation": string
+  "List type": string
+  "Replace numbers with variables": string
+  "Replace number with variable name": string
+  "Replace variable prefix": string
+  "Replace variable postfix": string
+  "Normal list": string
+  "Definition list": string
 
 }
 

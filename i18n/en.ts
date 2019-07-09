@@ -18,7 +18,7 @@ export const lang_en: LangObj = {
   "Reset to defaults": "Reset to defaults",
   "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 11, -1 to -11, 0 and -12": "If your variable has a range of e.g. 11 then you need to input 11 * 2 + 2 = 24 because we can have 1 to 11, -1 to -11, 0 and -12",
   "Guide": "Guide",
-  "Game Instruction Editor": "Game Instruction Editor",
+  "Game Instructions Editor": "Game Instructions Editor",
   //--- world
   "World editor": "World editor",
   "Undo the last tile placement": "Undo the last tile placement",
@@ -321,13 +321,23 @@ export const lang_en: LangObj = {
   "Symbol library": "Symbol library",
   "No symbols": "No symbols",
 
-  //--- game instruction editor
+  //--- Game Instructions Editor
   "Editor": "Editor",
   "The editor uses markdown syntax. The editor content is part of the world and is also exported when you export the world.": "The editor uses markdown syntax. The editor content is part of the world and is also exported when you export the world.",
-  "Creates the initial template for new game instructions with the current world settings (game init code)" : "Creates the initial template for new game instructions with the current world settings (game init code)",
-  "This will collect all used phrases from all fields in the world into a markdown list, so that you can explain each one manually" : "This will collect all used phrases from all fields in the world into a markdown list, so that you can explain each one manually",
+  "Creates the initial template for new game instructions with the current world settings (game init code)": "Creates the initial template for new game instructions with the current world settings (game init code)",
+  "This will collect all used phrases from all fields in the world into a markdown list, so that you can explain each one manually": "This will collect all used phrases from all fields in the world into a markdown list, so that you can explain each one manually",
   "Preview": "Preview",
   "Copy modal": "Copy modal",
-  "Copy text to clipboard and close modal" : "Copy text to clipboard and close modal",
-  "Close" : "Close",
+  "Copy text to clipboard and close modal": "Copy text to clipboard and close modal",
+  "Close": "Close",
+
+  "Game instructions editor settings": "Game instructions editor settings",
+  "Create field text explanation": "Create field text explanation",
+  "List type": "List type",
+  "Replace numbers with variables": "Replace numbers with variables",
+  "Replace number with variable name" : "Replace number with variable name",
+  "Replace variable prefix": "Replace variable prefix",
+  "Replace variable postfix": "Replace variable postfix",
+  "Normal list": "Normal list",
+  "Definition list": "Definition list",
 }

@@ -44,6 +44,7 @@ import MouseEvent = createjs.MouseEvent;
 import Bitmap = createjs.Bitmap;
 import {GameUnit} from "../simulation/model/executionUnit";
 import {Compiler} from "../simulation/compiler/compiler";
+import {injectFontAwesomeIconsIfNecessary} from "../src/helpers/markdownHelper";
 
 const Bezier = require("bezier-js") //used to calculate the arrow head/tail degree
 
@@ -795,17 +796,7 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
 
     textShape.text = fieldText || ''
 
-    const matchResults = textShape.text.match(fontAwesomeMatchRegex)
-
-    if (matchResults) {
-
-      for (let i = 0; i < matchResults.length; i++) {
-        const matchResult = matchResults[i]
-        const intVal = parseInt(matchResult.substr(1), 16)
-        textShape.text = textShape.text.replace(matchResult, String.fromCharCode(intVal))
-      }
-    }
-
+    textShape.text  = injectFontAwesomeIconsIfNecessary(textShape.text )
 
     //vertical text align
     if ((symbolForShape !== null && symbolForShape.overwriteVerticalTextAlign ? symbolForShape.verticalTextAlign : field.verticalTextAlign) === VerticalAlign.center) {

@@ -31,6 +31,8 @@ const dispatchProps = returntypeof(mapDispatchToProps);
 type Props = typeof stateProps & typeof dispatchProps;
 
 
+const actionResultCopyModalCopyId = 'actionResultCopyModalCopyId'
+
 class ActionResultCopyModal extends React.Component<Props, any> {
   render(): JSX.Element {
     return (
@@ -46,7 +48,7 @@ class ActionResultCopyModal extends React.Component<Props, any> {
           <Modal.Header>{getI18n(this.props.langId, "Copy modal")}</Modal.Header>
           <Modal.Content>
 
-            <TextArea style={{width: '100%', resize: 'none'}} rows={30}
+            <TextArea id={actionResultCopyModalCopyId} style={{width: '100%', resize: 'none'}} rows={30}
                       value={this.props.actionResultCopyText}
             />
 
@@ -56,7 +58,13 @@ class ActionResultCopyModal extends React.Component<Props, any> {
 
           <Modal.Actions>
 
-            <Button icon labelPosition="left">
+            <Button icon labelPosition="left" onClick={() => {
+              const copyTextArea = document.getElementById(actionResultCopyModalCopyId) as HTMLTextAreaElement
+              copyTextArea.select()
+              document.execCommand("copy")
+
+              this.props.set_gie_isActionResultCopyModalDisplayed(false)
+            }}>
               <Icon name="clipboard outline"/>
               {getI18n(this.props.langId, "Copy text to clipboard and close modal")}
             </Button>

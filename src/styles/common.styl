@@ -373,7 +373,10 @@ html, body {
 #root {
 
   //make it more special
+
   .markdown-body {
+
+    padding 0.5em
 
     //from node_modules/github-markdown-css
     -ms-text-size-adjust: 100%;
@@ -385,6 +388,33 @@ html, body {
     line-height: 1.5;
     word-wrap: break-word;
 
+    //stolen from vue js guide ;)
+    .box {
+      position relative
+      border-left 4px solid
+      padding 12px 24px 12px 30px
+      margin-bottom 10px //from normal p
+
+      &:not(.no-indicator):before {
+        content: attr(data-content)
+        padding: 1px 0 0 1px;
+        position absolute
+        top 14px
+        left -12px
+        border-radius 100%
+        height 20px
+        min-width 20px
+        background-color: var(--box-indicator-color)
+        text-align center
+        color white
+        font-weight bold
+      }
+
+      p {
+        margin 0 !important
+      }
+    }
+
     .markdown-fenced-code-block-wrapper {
       pre {
         border 1px solid #d6d6d6
@@ -395,6 +425,7 @@ html, body {
 
     .markdown-inline-code-tag-wrapper {
       display inline-block
+
       code {
         border 1px solid #d6d6d6
         background-color transparent !important

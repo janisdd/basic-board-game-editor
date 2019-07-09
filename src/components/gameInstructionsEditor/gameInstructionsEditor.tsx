@@ -15,6 +15,7 @@ import {
 import IconToolTip from "../helpers/IconToolTip";
 import {getI18n} from "../../../i18n/i18nRoot";
 import ActionResultCopyModal from './actionResultCopyModal'
+import GameInstructionsEditorSettingsModal from './gameInstructionsEditorSettingsModal'
 import IEditSession = AceAjax.IEditSession;
 
 export interface MyProps {
@@ -68,6 +69,8 @@ class GameInstructionsEditor extends React.Component<Props, any> {
       <div className="game-instructions-site flexed">
 
         <ActionResultCopyModal/>
+
+        <GameInstructionsEditorSettingsModal />
 
         <div className="fh left-side panel" style={{right: leftSideOffset}}>
 

@@ -48,6 +48,8 @@
     "jison2json": "0.0.2",
     "lodash": "^4.17.11",
     "markdown-it": "^8.4.1",
+    "markdown-it-container": "^2.0.0",
+    "markdown-it-deflist": "^2.0.3",
     "mousetrap": "1.5.3",
     "postcss-import": "11.1.0",
     "postcss-url": "7.3.1",

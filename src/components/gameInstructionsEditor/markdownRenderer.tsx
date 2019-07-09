@@ -1,5 +1,5 @@
 import * as React from "react";
-import markdown from '../../helpers/markdownHelper'
+import markdown, {injectFontAwesomeIconsIfNecessary} from '../../helpers/markdownHelper'
 import {fontAwesomeMatchRegex} from "../../constants";
 
 export interface MyProps {
@@ -18,17 +18,7 @@ export default class markdownRenderer extends React.Component<MyProps, any> {
   render(): JSX.Element {
 
 
-    let markdownWithFontAwesomeIcons = this.props.markdown
-    const matchResults = markdownWithFontAwesomeIcons.match(fontAwesomeMatchRegex)
-
-    if (matchResults) {
-
-      for (let i = 0; i < matchResults.length; i++) {
-        const matchResult = matchResults[i]
-        const intVal = parseInt(matchResult.substr(1), 16)
-        markdownWithFontAwesomeIcons = markdownWithFontAwesomeIcons.replace(matchResult, String.fromCharCode(intVal))
-      }
-    }
+    let markdownWithFontAwesomeIcons = injectFontAwesomeIconsIfNecessary(this.props.markdown)
 
     const content = markdown.render(markdownWithFontAwesomeIcons)
 
