@@ -12,7 +12,10 @@ import {getI18n, getRawI18n} from "../../../../i18n/i18nRoot";
 import IconToolTip, {horizontalIconPopupOffsetInPx} from "../../helpers/IconToolTip";
 import {ChromePicker} from 'react-color';
 import ImageLibrary from '../imageLibrary/imageLibrary'
-import EditorWrapper, {editorInstancesMap} from "../../helpers/editorWrapper";
+import EditorWrapper, {
+  editor_wrapper_editorInstancesMap,
+  editor_wrapper_lastEditorSessionsMap
+} from "../../helpers/editorWrapper";
 import {Simulator} from "../../../../simulation/simulator";
 import {GameUnit} from "../../../../simulation/model/executionUnit";
 import {Logger} from "../../../helpers/logger";
@@ -136,10 +139,10 @@ class fieldPropertyEditor extends React.Component<Props, any> {
         if (Array.isArray(nextProps.fieldShape) && nextProps.fieldShape.length === 1) {
           const nextField = nextProps.fieldShape[0] as FieldShape
           if (field.id !== nextField.id) {
-            const editor = editorInstancesMap[fieldCmdTextEditorId]
+            const session = editor_wrapper_lastEditorSessionsMap[`${fieldCmdTextEditorId}-${field.id}`]
 
-            if (editor) {
-              this.props.setPropertyEditor_FieldCmdText(editor.getValue())
+            if (session) {
+              this.props.setPropertyEditor_FieldCmdText(session.getValue())
             }
           }
         }
@@ -337,7 +340,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                   icon="code"
                   onClick={() => {
 
-                    const editor = editorInstancesMap[fieldCmdTextEditorId]
+                    const editor = editor_wrapper_editorInstancesMap[fieldCmdTextEditorId]
 
                     if (!editor) {
                       Logger.fatal(`could not get editor instance`)
@@ -386,7 +389,7 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                 //componentWillReceiveProps also handles some updates
               }
               <EditorWrapper
-                id={fieldCmdTextEditorId}
+                id={`${fieldCmdTextEditorId}-${singleField.id}`}
                 mode="bbgel"
                 readony={isBasedOnSymbol && fieldSymbol.overwriteCmdText}
                 value={(isBasedOnSymbol && fieldSymbol.overwriteCmdText
@@ -398,6 +401,10 @@ class fieldPropertyEditor extends React.Component<Props, any> {
                 onLostFocus={val => {
                   this.props.setPropertyEditor_FieldCmdText(val)
                 }}
+                onDestroyed={val => {
+                  this.props.setPropertyEditor_FieldCmdText(val)
+                }}
+                throttleTimeInMs={2000}
               />
 
             </Form.Field>

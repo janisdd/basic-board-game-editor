@@ -70,7 +70,7 @@ import {CheckboxData} from "../../../types/ui";
 import IconToolTip, {horizontalIconPopupOffsetInPx} from "../../helpers/IconToolTip";
 import ToolTip from "../../helpers/ToolTip";
 import {AbstractMachine, SimulationTimes} from "../../../../simulation/machine/AbstractMachine";
-import EditorWrapper, {editorInstancesMap} from '../../helpers/editorWrapper'
+import EditorWrapper, {editor_wrapper_editorInstancesMap} from '../../helpers/editorWrapper'
 import {Simulator} from "../../../../simulation/simulator";
 import {Logger} from "../../../helpers/logger";
 import {GameUnit} from "../../../../simulation/model/executionUnit";
@@ -314,7 +314,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                               icon="code"
                               onClick={() => {
 
-                                const editor = editorInstancesMap[editorId]
+                                const editor = editor_wrapper_editorInstancesMap[editorId]
 
                                 if (!editor) {
                                   Logger.fatal(`could not get editor instance`)

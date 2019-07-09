@@ -12,7 +12,10 @@ import {getI18n, getRawI18n} from "../../../../i18n/i18nRoot";
 import IconToolTip, {horizontalIconPopupOffsetInPx} from "../../helpers/IconToolTip";
 import {ChromePicker} from 'react-color';
 import ImageLibrary from '../imageLibrary/imageLibrary'
-import EditorWrapper, {editorInstancesMap} from "../../helpers/editorWrapper";
+import EditorWrapper, {
+  editor_wrapper_editorInstancesMap,
+  editor_wrapper_lastEditorSessionsMap
+} from "../../helpers/editorWrapper";
 import {Simulator} from "../../../../simulation/simulator";
 import {GameUnit} from "../../../../simulation/model/executionUnit";
 import {Logger} from "../../../helpers/logger";
@@ -22,7 +25,7 @@ import {getNextShapeId} from "../../../state/reducers/tileEditor/fieldProperties
 
 export interface MyProps {
 
-  readonly fieldShape: FieldSymbol
+  readonly fieldShape: FieldSymbol | null
 
   readonly isChooseFieldShapeBackgroundImageLibraryDisplayed: boolean
 
@@ -37,25 +40,25 @@ export interface MyProps {
 
   readonly setPropertyEditor_FieldWidth: (oldWidth: number, newWidth: number) => void
   readonly setPropertyEditor_FieldHeight: (oldHeight: number, newHeight: number) => void
-  readonly setPropertyEditor_FieldColor: ( newColor: string) => void
-  readonly setPropertyEditor_FieldBgColor: ( newBgColor: string) => void
+  readonly setPropertyEditor_FieldColor: (newColor: string) => void
+  readonly setPropertyEditor_FieldBgColor: (newBgColor: string) => void
   readonly setPropertyEditor_FieldVerticalAlign: (verticalAlign: VerticalAlign) => void
   readonly setPropertyEditor_FieldHorizontalAlign: (horizontalAlign: HorizontalAlign) => void
   readonly setPropertyEditor_FieldCmdText: (cmdText: string) => void
   readonly setPropertyEditor_FieldAbsoluteZIndex: (zIndex: number) => void
   readonly setPropertyEditor_FieldCornerRadiusInPx: (newCornerRadiusInPx: number) => void
-  readonly setPropertyEditor_FieldPadding: ( newPaddingTop: number, newPaddingRight: number, newPaddingBottom: number,
+  readonly setPropertyEditor_FieldPadding: (newPaddingTop: number, newPaddingRight: number, newPaddingBottom: number,
                                             newPaddingLeft: number
   ) => void
 
   readonly setPropertyEditor_FieldBorderColor: (newColor: string) => void
   readonly setPropertyEditor_FieldBorderSizeInPx: (newBorderSizeInPx: number) => void
 
-  readonly setPropertyEditor_FieldFontName: ( newFontName: string) => void
+  readonly setPropertyEditor_FieldFontName: (newFontName: string) => void
   readonly setPropertyEditor_FieldFontSizeInPx: (newFontSizeInPx: number) => void
 
   readonly setPropertyEditor_FieldIsFontBold: (newIsFontBold: boolean) => void
-  readonly setPropertyEditor_FieldIsFontItalic: ( newIsFontItalic: boolean) => void
+  readonly setPropertyEditor_FieldIsFontItalic: (newIsFontItalic: boolean) => void
 
   readonly setPropertyEditor_FieldRotationInDegree: (oldRotationInDegree: number, newRotationInDegree: number) => void
 
@@ -71,20 +74,20 @@ export interface MyProps {
   readonly set_fieldSymbol_overwriteBackgroundImage: (overwrite: boolean) => void
   readonly set_fieldSymbol_overwriteRotationInDeg: (overwrite: boolean) => void
   readonly set_fieldSymbol_overwriteCornerRadius: (overwrite: boolean) => void
-  readonly set_fieldSymbol_overwritePadding:(overwrite: boolean) => void
-  readonly set_fieldSymbol_overwriteVerticalTextAlign:(overwrite: boolean) => void
-  readonly set_fieldSymbol_overwriteHorizontalTextAlign:(overwrite: boolean) => void
-  readonly set_fieldSymbol_overwriteHeight:(overwrite: boolean) => void
-  readonly set_fieldSymbol_overwriteWidth:(overwrite: boolean) => void
-  readonly set_fieldSymbol_overwriteColor:(overwrite: boolean) => void
-  readonly set_fieldSymbol_overwriteBgColor:(overwrite: boolean) => void
-  readonly set_fieldSymbol_overwriteBorderColor:(overwrite: boolean) => void
-  readonly set_fieldSymbol_overwriteBorderSizeInPx:(overwrite: boolean) => void
-  readonly set_fieldSymbol_overwriteFontName:(overwrite: boolean) => void
-  readonly set_fieldSymbol_overwriteFontSizeInPx:(overwrite: boolean) => void
-  readonly set_fieldSymbol_overwriteFontDecoration:(overwrite: boolean) => void
-  readonly set_fieldSymbol_overwriteText:(overwrite: boolean) => void
-  readonly set_fieldSymbol_overwriteCmdText:(overwrite: boolean) => void
+  readonly set_fieldSymbol_overwritePadding: (overwrite: boolean) => void
+  readonly set_fieldSymbol_overwriteVerticalTextAlign: (overwrite: boolean) => void
+  readonly set_fieldSymbol_overwriteHorizontalTextAlign: (overwrite: boolean) => void
+  readonly set_fieldSymbol_overwriteHeight: (overwrite: boolean) => void
+  readonly set_fieldSymbol_overwriteWidth: (overwrite: boolean) => void
+  readonly set_fieldSymbol_overwriteColor: (overwrite: boolean) => void
+  readonly set_fieldSymbol_overwriteBgColor: (overwrite: boolean) => void
+  readonly set_fieldSymbol_overwriteBorderColor: (overwrite: boolean) => void
+  readonly set_fieldSymbol_overwriteBorderSizeInPx: (overwrite: boolean) => void
+  readonly set_fieldSymbol_overwriteFontName: (overwrite: boolean) => void
+  readonly set_fieldSymbol_overwriteFontSizeInPx: (overwrite: boolean) => void
+  readonly set_fieldSymbol_overwriteFontDecoration: (overwrite: boolean) => void
+  readonly set_fieldSymbol_overwriteText: (overwrite: boolean) => void
+  readonly set_fieldSymbol_overwriteCmdText: (overwrite: boolean) => void
 
 
 }
@@ -125,22 +128,20 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
     //thus if we have field 1 focus e.g. command text xxx and we change it to yyy
     //then focus field 2 the editor never lost focus and we don't commit the changes to field 1
     //we only display the field 2 command text
-    if (nextProps.fieldShape) {
-      if (Array.isArray(this.props.fieldShape) && this.props.fieldShape.length === 1) { //!isSymbol && isSingleField
-        const field = this.props.fieldShape[0] as FieldShape
-        if (Array.isArray(nextProps.fieldShape) && nextProps.fieldShape.length === 1) {
-          const nextField = nextProps.fieldShape[0] as FieldShape
-          if (field.id !== nextField.id) {
-            const editor = editorInstancesMap[fieldSymbolCmdTextEditorId]
-            this.props.setPropertyEditor_FieldCmdText(editor.getValue())
-          }
+    if (nextProps.fieldShape && this.props.fieldShape) {
+
+      if (this.props.fieldShape.guid !== nextProps.fieldShape.guid) {
+        const session = editor_wrapper_lastEditorSessionsMap[`${fieldSymbolCmdTextEditorId}-${this.props.fieldShape.guid}`]
+
+        if (session) {
+          this.props.setPropertyEditor_FieldCmdText(session.getValue())
         }
       }
+
     }
   }
 
   render(): JSX.Element {
-
 
 
     const fieldSymbol = this.props.fieldShape
@@ -176,78 +177,83 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
         </Form.Field>
 
 
-          <div>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Command text")}
-                <IconToolTip
-                  message={'Click to validate the code syntactically'}
-                  icon="code"
-                  onClick={() => {
+        <div>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Command text")}
+              <IconToolTip
+                message={'Click to validate the code syntactically'}
+                icon="code"
+                onClick={() => {
 
-                    const editor = editorInstancesMap[fieldSymbolCmdTextEditorId]
+                  const editor = editor_wrapper_editorInstancesMap[fieldSymbolCmdTextEditorId]
 
-                    if (!editor) {
-                      Logger.fatal(`could not get editor instance`)
-                      return
-                    }
+                  if (!editor) {
+                    Logger.fatal(`could not get editor instance`)
+                    return
+                  }
 
-                    // let state = AbstractMachine.createNewMachineState()
-                    let unit: GameUnit
-                    try {
-                      unit = Simulator.compiler.parse(editor.getValue())
-                    } catch (err) {
-                      Logger.fatalSyntaxError(`field statements has errors: ${err}`)
-                      return
-                    }
+                  // let state = AbstractMachine.createNewMachineState()
+                  let unit: GameUnit
+                  try {
+                    unit = Simulator.compiler.parse(editor.getValue())
+                  } catch (err) {
+                    Logger.fatalSyntaxError(`field statements has errors: ${err}`)
+                    return
+                  }
 
-                    if (unit.game_def_stats.length > 0) {
-                      Logger.fatal(`field statements must not contain game setup statements`)
-                    }
+                  if (unit.game_def_stats.length > 0) {
+                    Logger.fatal(`field statements must not contain game setup statements`)
+                  }
 
-                    //TOOD
-                    //do not execute because we might use vars that are not defined yet (TODO if we allow on the fly vars? needed for funcs)
+                  //TOOD
+                  //do not execute because we might use vars that are not defined yet (TODO if we allow on the fly vars? needed for funcs)
 
-                    // try {
-                    //   for (const statement of unit.statements) {
-                    //     state = AbstractMachine.executeStatement(statement, state)
-                    //   }
-                    // } catch (err) {
-                    //   Logger.fatal(`error during statements: ${err}`)
-                    //   return
-                    // }
+                  // try {
+                  //   for (const statement of unit.statements) {
+                  //     state = AbstractMachine.executeStatement(statement, state)
+                  //   }
+                  // } catch (err) {
+                  //   Logger.fatal(`error during statements: ${err}`)
+                  //   return
+                  // }
 
-                    Logger.success('Field statements are syntactically valid')
+                  Logger.success('Field statements are syntactically valid')
 
-                  }}
-                >
-                </IconToolTip>
-
-                <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteCmdText}
-                          onChange={(event, data: CheckboxData) => {
-                            this.props.set_fieldSymbol_overwriteCmdText(data.checked)
-                          }}
-                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-                />
-
-              </label>
-              {
-                //componentWillReceiveProps also handles some updates
-              }
-              <EditorWrapper
-                id={fieldSymbolCmdTextEditorId}
-                mode="bbgel"
-                readony={false}
-                value={fieldSymbol.cmdText || ''}
-                height={'100px'}
-                onLostFocus={val => {
-                  this.props.setPropertyEditor_FieldCmdText(val)
                 }}
+              >
+              </IconToolTip>
+
+              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteCmdText}
+                        onChange={(event, data: CheckboxData) => {
+                          this.props.set_fieldSymbol_overwriteCmdText(data.checked)
+                        }}
+                        label={<label><IconToolTip icon="arrow down"
+                                                   message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
               />
 
-            </Form.Field>
+            </label>
+            {
+              //componentWillReceiveProps also handles some updates
+            }
+            <EditorWrapper
+              id={`${fieldSymbolCmdTextEditorId}-${fieldSymbol.guid}`}
+              mode="bbgel"
+              readony={false}
+              value={fieldSymbol.cmdText || ''}
+              height={'100px'}
+              onLostFocus={val => {
+                this.props.setPropertyEditor_FieldCmdText(val)
+              }}
+              onDestroyed={val => {
+                this.props.setPropertyEditor_FieldCmdText(val)
+              }}
+              throttleTimeInMs={2000}
+            />
+
+          </Form.Field>
 
 
-          </div>
+        </div>
 
         <Form.Field>
           <label>{getI18n(this.props.langId, "Name")}</label>
@@ -256,141 +262,102 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
           />
         </Form.Field>
 
-          <Form.Group widths='equal'>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Height")}
-                <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteHeight}
-                          onChange={(event, data: CheckboxData) => {
-                            this.props.set_fieldSymbol_overwriteHeight(data.checked)
-                          }}
-                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-                />
-              </label>
-              <input type="number"
-                     value={fieldSymbol.height}
-                     onChange={(e) => this.props.setPropertyEditor_FieldHeight(
-                       fieldSymbol.height,
-                       parseInt(e.currentTarget.value)
-                     )}
+        <Form.Group widths='equal'>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Height")}
+              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteHeight}
+                        onChange={(event, data: CheckboxData) => {
+                          this.props.set_fieldSymbol_overwriteHeight(data.checked)
+                        }}
+                        label={<label><IconToolTip icon="arrow down"
+                                                   message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
               />
-            </Form.Field>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Width")}
-                <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteWidth}
-                          onChange={(event, data: CheckboxData) => {
-                            this.props.set_fieldSymbol_overwriteWidth(data.checked)
-                          }}
-                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-                />
-              </label>
-              <input type="number"
-                     value={fieldSymbol.width}
-                     onChange={(e) => this.props.setPropertyEditor_FieldWidth(
-                       fieldSymbol.width,
-                       parseInt(e.currentTarget.value)
-                     )}
+            </label>
+            <input type="number"
+                   value={fieldSymbol.height}
+                   onChange={(e) => this.props.setPropertyEditor_FieldHeight(
+                     fieldSymbol.height,
+                     parseInt(e.currentTarget.value)
+                   )}
+            />
+          </Form.Field>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Width")}
+              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteWidth}
+                        onChange={(event, data: CheckboxData) => {
+                          this.props.set_fieldSymbol_overwriteWidth(data.checked)
+                        }}
+                        label={<label><IconToolTip icon="arrow down"
+                                                   message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
               />
-            </Form.Field>
-          </Form.Group>
+            </label>
+            <input type="number"
+                   value={fieldSymbol.width}
+                   onChange={(e) => this.props.setPropertyEditor_FieldWidth(
+                     fieldSymbol.width,
+                     parseInt(e.currentTarget.value)
+                   )}
+            />
+          </Form.Field>
+        </Form.Group>
 
-          <Form.Group widths='equal'>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Color")}
-                <IconToolTip message={getI18n(this.props.langId,
-                  "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
-                )}/>
-                <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteColor}
-                          onChange={(event, data: CheckboxData) => {
-                            this.props.set_fieldSymbol_overwriteColor(data.checked)
-                          }}
-                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-                />
-              </label>
-              {/*<input type="color"*/}
-              {/*value={*/}
-              {/*isSymbol*/}
-              {/*? fieldSymbol.color*/}
-              {/*: isSingleField ? singleField.color*/}
-              {/*: singleField.color*/}
-              {/*}*/}
-              {/*onChange={(e) => this.props.setPropertyEditor_FieldColor(*/}
-              {/*isSymbol ? fieldSymbol.color : singleField.color,*/}
-              {/*e.currentTarget.value)}*/}
-              {/*/>*/}
-              <Popup
-                trigger={<div className="hoverable">
-                  <Icon style={{
-                    'color': 'black' //use black... if we use the selected color e.g. white this is bad/not visible...
-                  }} name="paint brush"/>
-                </div>}
-                on="click"
-                offset={horizontalIconPopupOffsetInPx}
-                content={<ChromePicker
-                  color={fieldSymbol.color}
-                  onChangeComplete={color => {
-                    this.props.setPropertyEditor_FieldColor( color.hex)
-                  }}
-                />}
+        <Form.Group widths='equal'>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Color")}
+              <IconToolTip message={getI18n(this.props.langId,
+                "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
+              )}/>
+              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteColor}
+                        onChange={(event, data: CheckboxData) => {
+                          this.props.set_fieldSymbol_overwriteColor(data.checked)
+                        }}
+                        label={<label><IconToolTip icon="arrow down"
+                                                   message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
               />
+            </label>
+            {/*<input type="color"*/}
+            {/*value={*/}
+            {/*isSymbol*/}
+            {/*? fieldSymbol.color*/}
+            {/*: isSingleField ? singleField.color*/}
+            {/*: singleField.color*/}
+            {/*}*/}
+            {/*onChange={(e) => this.props.setPropertyEditor_FieldColor(*/}
+            {/*isSymbol ? fieldSymbol.color : singleField.color,*/}
+            {/*e.currentTarget.value)}*/}
+            {/*/>*/}
+            <Popup
+              trigger={<div className="hoverable">
+                <Icon style={{
+                  'color': 'black' //use black... if we use the selected color e.g. white this is bad/not visible...
+                }} name="paint brush"/>
+              </div>}
+              on="click"
+              offset={horizontalIconPopupOffsetInPx}
+              content={<ChromePicker
+                color={fieldSymbol.color}
+                onChangeComplete={color => {
+                  this.props.setPropertyEditor_FieldColor(color.hex)
+                }}
+              />}
+            />
 
-            </Form.Field>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Background color")}
-                <IconToolTip message={getI18n(this.props.langId,
-                  "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
-                )}/>
-                <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteBgColor}
-                          onChange={(event, data: CheckboxData) => {
-                            this.props.set_fieldSymbol_overwriteBgColor(data.checked)
-                          }}
-                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-                />
-              </label>
+          </Form.Field>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Background color")}
+              <IconToolTip message={getI18n(this.props.langId,
+                "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
+              )}/>
+              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteBgColor}
+                        onChange={(event, data: CheckboxData) => {
+                          this.props.set_fieldSymbol_overwriteBgColor(data.checked)
+                        }}
+                        label={<label><IconToolTip icon="arrow down"
+                                                   message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
+              />
+            </label>
 
-              <div className="flexed-well-spaced">
-                <Popup
-                  trigger={<div className="hoverable">
-                    <Icon style={{
-                      'color': 'black'
-                    }} name="paint brush"/>
-                  </div>}
-                  on="click"
-                  offset={horizontalIconPopupOffsetInPx}
-                  content={<ChromePicker
-                    color={fieldSymbol.bgColor}
-                    onChangeComplete={color => {
-                      this.props.setPropertyEditor_FieldBgColor( color.hex)
-                    }}
-                  />}
-                />
-
-                <div className="hoverable">
-                  <IconToolTip
-                    message={getI18n(this.props.langId, "Transparent color")}
-                    icon="circle outline"
-                    onClick={() => {
-                      this.props.setPropertyEditor_FieldBgColor( 'transparent')
-                    }}
-                  />
-                </div>
-              </div>
-
-            </Form.Field>
-          </Form.Group>
-
-          <Form.Group widths='equal'>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Border color")}
-                <IconToolTip message={getI18n(this.props.langId,
-                  "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
-                )}/>
-                <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteBorderColor}
-                          onChange={(event, data: CheckboxData) => {
-                            this.props.set_fieldSymbol_overwriteBorderColor(data.checked)
-                          }}
-                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-                />
-              </label>
+            <div className="flexed-well-spaced">
               <Popup
                 trigger={<div className="hoverable">
                   <Icon style={{
@@ -400,122 +367,171 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
                 on="click"
                 offset={horizontalIconPopupOffsetInPx}
                 content={<ChromePicker
-                  color={fieldSymbol.borderColor}
+                  color={fieldSymbol.bgColor}
                   onChangeComplete={color => {
-                    this.props.setPropertyEditor_FieldBorderColor( color.hex)
+                    this.props.setPropertyEditor_FieldBgColor(color.hex)
                   }}
                 />}
               />
-            </Form.Field>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Border size in px")}
-                <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteBorderSizeInPx}
-                          onChange={(event, data: CheckboxData) => {
-                            this.props.set_fieldSymbol_overwriteBorderSizeInPx(data.checked)
-                          }}
-                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
+
+              <div className="hoverable">
+                <IconToolTip
+                  message={getI18n(this.props.langId, "Transparent color")}
+                  icon="circle outline"
+                  onClick={() => {
+                    this.props.setPropertyEditor_FieldBgColor('transparent')
+                  }}
                 />
-              </label>
-              <input type="number"
-                     value={fieldSymbol.borderSizeInPx}
+              </div>
+            </div>
 
-                     onChange={(e) => this.props.setPropertyEditor_FieldBorderSizeInPx(
-                       parseInt(e.currentTarget.value)
-                     )}
-              />
-            </Form.Field>
-          </Form.Group>
+          </Form.Field>
+        </Form.Group>
 
-
-          <Form.Group widths='equal'>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Font name")}
-                <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteFontName}
-                          onChange={(event, data: CheckboxData) => {
-                            this.props.set_fieldSymbol_overwriteFontName(data.checked)
-                          }}
-                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-                />
-              </label>
-              <input type="text"
-                     value={fieldSymbol.fontName}
-                     onChange={(e) => this.props.setPropertyEditor_FieldFontName(
-                       e.currentTarget.value
-                     )}
-              />
-            </Form.Field>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Font size in px")}
-                <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteFontSizeInPx}
-                          onChange={(event, data: CheckboxData) => {
-                            this.props.set_fieldSymbol_overwriteFontSizeInPx(data.checked)
-                          }}
-                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-                />
-              </label>
-              <input type="number"
-                     value={fieldSymbol.fontSizeInPx}
-                     onChange={(e) => this.props.setPropertyEditor_FieldFontSizeInPx(
-                       parseInt(e.currentTarget.value)
-                     )}
-              />
-            </Form.Field>
-          </Form.Group>
-
-
+        <Form.Group widths='equal'>
           <Form.Field>
-            <label>{getI18n(this.props.langId, "Text decoration")}
-              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteFontDecoration}
+            <label>{getI18n(this.props.langId, "Border color")}
+              <IconToolTip message={getI18n(this.props.langId,
+                "To use transparent set the color to black (0, 0, 0) and then set alpha to 0"
+              )}/>
+              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteBorderColor}
                         onChange={(event, data: CheckboxData) => {
-                          this.props.set_fieldSymbol_overwriteFontDecoration(data.checked)
+                          this.props.set_fieldSymbol_overwriteBorderColor(data.checked)
                         }}
-                        label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
+                        label={<label><IconToolTip icon="arrow down"
+                                                   message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
               />
             </label>
-            <Button.Group>
-              <Button
-                active={fieldSymbol.isFontBold}
-                icon
-                onClick={() => {
-                  this.props.setPropertyEditor_FieldIsFontBold(!fieldSymbol.isFontBold)
+            <Popup
+              trigger={<div className="hoverable">
+                <Icon style={{
+                  'color': 'black'
+                }} name="paint brush"/>
+              </div>}
+              on="click"
+              offset={horizontalIconPopupOffsetInPx}
+              content={<ChromePicker
+                color={fieldSymbol.borderColor}
+                onChangeComplete={color => {
+                  this.props.setPropertyEditor_FieldBorderColor(color.hex)
                 }}
-              >
-                <Icon name='bold'/>
-              </Button>
-              <Button
-                active={fieldSymbol.isFontItalic}
-                icon
-                onClick={() => {
-
-                  this.props.setPropertyEditor_FieldIsFontItalic(!fieldSymbol.isFontItalic)
-                }}
-              >
-                <Icon name='italic'/>
-              </Button>
-              {/*<Button*/}
-              {/*active={*/}
-              {/*(isSymbol*/}
-              {/*? fieldSymbol.horizontalTextAlign*/}
-              {/*: isSingleField ? singleField.horizontalTextAlign*/}
-              {/*: singleField.horizontalTextAlign) === HorizontalAlign.right*/}
-              {/*}*/}
-              {/*icon*/}
-              {/*onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(*/}
-              {/*HorizontalAlign.right)}*/}
-              {/*>*/}
-              {/*<Icon name='underline'/>*/}
-              {/*</Button>*/}
-            </Button.Group>
+              />}
+            />
           </Form.Field>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Border size in px")}
+              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteBorderSizeInPx}
+                        onChange={(event, data: CheckboxData) => {
+                          this.props.set_fieldSymbol_overwriteBorderSizeInPx(data.checked)
+                        }}
+                        label={<label><IconToolTip icon="arrow down"
+                                                   message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
+              />
+            </label>
+            <input type="number"
+                   value={fieldSymbol.borderSizeInPx}
+
+                   onChange={(e) => this.props.setPropertyEditor_FieldBorderSizeInPx(
+                     parseInt(e.currentTarget.value)
+                   )}
+            />
+          </Form.Field>
+        </Form.Group>
+
+
+        <Form.Group widths='equal'>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Font name")}
+              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteFontName}
+                        onChange={(event, data: CheckboxData) => {
+                          this.props.set_fieldSymbol_overwriteFontName(data.checked)
+                        }}
+                        label={<label><IconToolTip icon="arrow down"
+                                                   message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
+              />
+            </label>
+            <input type="text"
+                   value={fieldSymbol.fontName}
+                   onChange={(e) => this.props.setPropertyEditor_FieldFontName(
+                     e.currentTarget.value
+                   )}
+            />
+          </Form.Field>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Font size in px")}
+              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteFontSizeInPx}
+                        onChange={(event, data: CheckboxData) => {
+                          this.props.set_fieldSymbol_overwriteFontSizeInPx(data.checked)
+                        }}
+                        label={<label><IconToolTip icon="arrow down"
+                                                   message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
+              />
+            </label>
+            <input type="number"
+                   value={fieldSymbol.fontSizeInPx}
+                   onChange={(e) => this.props.setPropertyEditor_FieldFontSizeInPx(
+                     parseInt(e.currentTarget.value)
+                   )}
+            />
+          </Form.Field>
+        </Form.Group>
+
+
+        <Form.Field>
+          <label>{getI18n(this.props.langId, "Text decoration")}
+            <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteFontDecoration}
+                      onChange={(event, data: CheckboxData) => {
+                        this.props.set_fieldSymbol_overwriteFontDecoration(data.checked)
+                      }}
+                      label={<label><IconToolTip icon="arrow down"
+                                                 message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
+            />
+          </label>
+          <Button.Group>
+            <Button
+              active={fieldSymbol.isFontBold}
+              icon
+              onClick={() => {
+                this.props.setPropertyEditor_FieldIsFontBold(!fieldSymbol.isFontBold)
+              }}
+            >
+              <Icon name='bold'/>
+            </Button>
+            <Button
+              active={fieldSymbol.isFontItalic}
+              icon
+              onClick={() => {
+
+                this.props.setPropertyEditor_FieldIsFontItalic(!fieldSymbol.isFontItalic)
+              }}
+            >
+              <Icon name='italic'/>
+            </Button>
+            {/*<Button*/}
+            {/*active={*/}
+            {/*(isSymbol*/}
+            {/*? fieldSymbol.horizontalTextAlign*/}
+            {/*: isSingleField ? singleField.horizontalTextAlign*/}
+            {/*: singleField.horizontalTextAlign) === HorizontalAlign.right*/}
+            {/*}*/}
+            {/*icon*/}
+            {/*onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(*/}
+            {/*HorizontalAlign.right)}*/}
+            {/*>*/}
+            {/*<Icon name='underline'/>*/}
+            {/*</Button>*/}
+          </Button.Group>
+        </Form.Field>
 
         <Form.Field>
           <label>{getI18n(this.props.langId, "Text")}
-              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteText}
-                        onChange={(event, data: CheckboxData) => {
-                          this.props.set_fieldSymbol_overwriteText(data.checked)
-              }}
-              label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-              />
+            <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteText}
+                      onChange={(event, data: CheckboxData) => {
+                        this.props.set_fieldSymbol_overwriteText(data.checked)
+                      }}
+                      label={<label><IconToolTip icon="arrow down"
+                                                 message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
+            />
           </label>
           <textarea rows={2}
                     value={fieldSymbol.text}
@@ -524,214 +540,219 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
         </Form.Field>
 
 
-          <Form.Group widths='equal'>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Horizontal text align")}
-                <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteHorizontalTextAlign}
-                          onChange={(event, data: CheckboxData) => {
-                            this.props.set_fieldSymbol_overwriteHorizontalTextAlign(data.checked)
-                          }}
-                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-                />
-              </label>
-              <Button.Group>
-                <Button
-                  active={fieldSymbol.horizontalTextAlign === HorizontalAlign.left}
-                  icon
-                  onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.left)}
-                >
-                  <Icon name='align left'/>
-                </Button>
-                <Button
-                  active={fieldSymbol.horizontalTextAlign === HorizontalAlign.center}
-                  icon
-                  onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.center)}
-                >
-                  <Icon name='align center'/>
-                </Button>
-                <Button
-                  active={ fieldSymbol.horizontalTextAlign === HorizontalAlign.right}
-                  icon
-                  onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.right)}
-                >
-                  <Icon name='align right'/>
-                </Button>
-              </Button.Group>
-            </Form.Field>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Vertical text align")}
-                <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteVerticalTextAlign}
-                          onChange={(event, data: CheckboxData) => {
-                            this.props.set_fieldSymbol_overwriteVerticalTextAlign(data.checked)
-                          }}
-                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-                />
-              </label>
-              <Button.Group>
-                <Button
-                  active={fieldSymbol.verticalTextAlign === VerticalAlign.top}
-                  icon
-                  onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.top)}
-                >
-                  <Icon name='caret up'/>
-                </Button>
-                <Button
-                  active={fieldSymbol.verticalTextAlign === VerticalAlign.center}
-                  icon
-                  onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.center)}
-                >
-                  <Icon name='align center'/>
-                </Button>
-                <Button
-                  active={fieldSymbol.verticalTextAlign === VerticalAlign.bottom}
-                  icon
-                  onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.bottom)}
-                >
-                  <Icon name='caret down'/>
-                </Button>
-              </Button.Group>
-            </Form.Field>
-          </Form.Group>
-
+        <Form.Group widths='equal'>
           <Form.Field>
-            <label>{getI18n(this.props.langId, "padding (for text align)")}
-              <Checkbox className="mar-left-half" checked={fieldSymbol.overwritePadding}
+            <label>{getI18n(this.props.langId, "Horizontal text align")}
+              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteHorizontalTextAlign}
                         onChange={(event, data: CheckboxData) => {
-                          this.props.set_fieldSymbol_overwritePadding(data.checked)
+                          this.props.set_fieldSymbol_overwriteHorizontalTextAlign(data.checked)
                         }}
-                        label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
+                        label={<label><IconToolTip icon="arrow down"
+                                                   message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
               />
             </label>
+            <Button.Group>
+              <Button
+                active={fieldSymbol.horizontalTextAlign === HorizontalAlign.left}
+                icon
+                onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.left)}
+              >
+                <Icon name='align left'/>
+              </Button>
+              <Button
+                active={fieldSymbol.horizontalTextAlign === HorizontalAlign.center}
+                icon
+                onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.center)}
+              >
+                <Icon name='align center'/>
+              </Button>
+              <Button
+                active={fieldSymbol.horizontalTextAlign === HorizontalAlign.right}
+                icon
+                onClick={() => this.props.setPropertyEditor_FieldHorizontalAlign(HorizontalAlign.right)}
+              >
+                <Icon name='align right'/>
+              </Button>
+            </Button.Group>
+          </Form.Field>
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Vertical text align")}
+              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteVerticalTextAlign}
+                        onChange={(event, data: CheckboxData) => {
+                          this.props.set_fieldSymbol_overwriteVerticalTextAlign(data.checked)
+                        }}
+                        label={<label><IconToolTip icon="arrow down"
+                                                   message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
+              />
+            </label>
+            <Button.Group>
+              <Button
+                active={fieldSymbol.verticalTextAlign === VerticalAlign.top}
+                icon
+                onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.top)}
+              >
+                <Icon name='caret up'/>
+              </Button>
+              <Button
+                active={fieldSymbol.verticalTextAlign === VerticalAlign.center}
+                icon
+                onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.center)}
+              >
+                <Icon name='align center'/>
+              </Button>
+              <Button
+                active={fieldSymbol.verticalTextAlign === VerticalAlign.bottom}
+                icon
+                onClick={() => this.props.setPropertyEditor_FieldVerticalAlign(VerticalAlign.bottom)}
+              >
+                <Icon name='caret down'/>
+              </Button>
+            </Button.Group>
+          </Form.Field>
+        </Form.Group>
 
-            <div className="padding-inputs">
+        <Form.Field>
+          <label>{getI18n(this.props.langId, "padding (for text align)")}
+            <Checkbox className="mar-left-half" checked={fieldSymbol.overwritePadding}
+                      onChange={(event, data: CheckboxData) => {
+                        this.props.set_fieldSymbol_overwritePadding(data.checked)
+                      }}
+                      label={<label><IconToolTip icon="arrow down"
+                                                 message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
+            />
+          </label>
+
+          <div className="padding-inputs">
+            <Input type="number"
+                   value={fieldSymbol.padding.left}
+
+                   onChange={(e) => this.props.setPropertyEditor_FieldPadding(fieldSymbol.padding.top,
+                     fieldSymbol.padding.right,
+                     fieldSymbol.padding.bottom,
+                     parseInt(e.currentTarget.value)
+                   )}
+            />
+
+            <div>
               <Input type="number"
-                     value={fieldSymbol.padding.left}
-
-                     onChange={(e) => this.props.setPropertyEditor_FieldPadding(fieldSymbol.padding.top,
+                     value={fieldSymbol.padding.top}
+                     onChange={(e) => this.props.setPropertyEditor_FieldPadding(parseInt(e.currentTarget.value),
                        fieldSymbol.padding.right,
                        fieldSymbol.padding.bottom,
-                       parseInt(e.currentTarget.value)
+                       fieldSymbol.padding.left
                      )}
               />
-
-              <div>
-                <Input type="number"
-                       value={fieldSymbol.padding.top}
-                       onChange={(e) => this.props.setPropertyEditor_FieldPadding(parseInt(e.currentTarget.value),
-                         fieldSymbol.padding.right,
-                         fieldSymbol.padding.bottom,
-                         fieldSymbol.padding.left
-                       )}
-                />
-                <br/>
-                <Input type="number"
-                       value={fieldSymbol.padding.bottom}
-                       onChange={(e) => this.props.setPropertyEditor_FieldPadding(fieldSymbol.padding.top,
-                         fieldSymbol.padding.right,
-                         parseInt(e.currentTarget.value),
-                         fieldSymbol.padding.left,
-                       )}
-                />
-              </div>
-
+              <br/>
               <Input type="number"
-                     value={fieldSymbol.padding.right}
+                     value={fieldSymbol.padding.bottom}
                      onChange={(e) => this.props.setPropertyEditor_FieldPadding(fieldSymbol.padding.top,
+                       fieldSymbol.padding.right,
                        parseInt(e.currentTarget.value),
-                       fieldSymbol.padding.bottom,
                        fieldSymbol.padding.left,
                      )}
               />
             </div>
 
-          </Form.Field>
+            <Input type="number"
+                   value={fieldSymbol.padding.right}
+                   onChange={(e) => this.props.setPropertyEditor_FieldPadding(fieldSymbol.padding.top,
+                     parseInt(e.currentTarget.value),
+                     fieldSymbol.padding.bottom,
+                     fieldSymbol.padding.left,
+                   )}
+            />
+          </div>
+
+        </Form.Field>
 
 
         <Form.Group widths='equal'>
-            <Form.Field>
-              <label>{getI18n(this.props.langId, "Corner radius in px")}
-                <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteCornerRadius}
-                          onChange={(event, data: CheckboxData) => {
-                            this.props.set_fieldSymbol_overwriteCornerRadius(data.checked)
-                          }}
-                          label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-                />
-              </label>
-              <input type="number"
-                     value={fieldSymbol.cornerRadiusInPx}
-                     onChange={(e) => this.props.setPropertyEditor_FieldCornerRadiusInPx(
-                       parseInt(e.currentTarget.value)
-                     )}
+          <Form.Field>
+            <label>{getI18n(this.props.langId, "Corner radius in px")}
+              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteCornerRadius}
+                        onChange={(event, data: CheckboxData) => {
+                          this.props.set_fieldSymbol_overwriteCornerRadius(data.checked)
+                        }}
+                        label={<label><IconToolTip icon="arrow down"
+                                                   message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
               />
-            </Form.Field>
+            </label>
+            <input type="number"
+                   value={fieldSymbol.cornerRadiusInPx}
+                   onChange={(e) => this.props.setPropertyEditor_FieldCornerRadiusInPx(
+                     parseInt(e.currentTarget.value)
+                   )}
+            />
+          </Form.Field>
 
         </Form.Group>
 
 
-
-          <Form.Field>
-            <label>{getI18n(this.props.langId, "Rotation in degree")}
-              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteRotationInDeg}
-                        onChange={(event, data: CheckboxData) => {
-                          this.props.set_fieldSymbol_overwriteRotationInDeg(data.checked)
-                        }}
-                        label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-              />
-            </label>
-            <Input
-              value={fieldSymbol.rotationInDegree}
-              type="number"
-              onChange={(e) => this.props.setPropertyEditor_FieldRotationInDegree(
-                fieldSymbol.rotationInDegree,
-                parseInt(e.currentTarget.value)
-              )}
-              label={<Button icon onClick={() => {
-                this.props.setPropertyEditor_FieldRotationInDegree(fieldSymbol.rotationInDegree, 0)
-              }}>
-                <Icon name="undo"/>
-              </Button>}
-              labelPosition='right'
+        <Form.Field>
+          <label>{getI18n(this.props.langId, "Rotation in degree")}
+            <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteRotationInDeg}
+                      onChange={(event, data: CheckboxData) => {
+                        this.props.set_fieldSymbol_overwriteRotationInDeg(data.checked)
+                      }}
+                      label={<label><IconToolTip icon="arrow down"
+                                                 message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
             />
-          </Form.Field>
+          </label>
+          <Input
+            value={fieldSymbol.rotationInDegree}
+            type="number"
+            onChange={(e) => this.props.setPropertyEditor_FieldRotationInDegree(
+              fieldSymbol.rotationInDegree,
+              parseInt(e.currentTarget.value)
+            )}
+            label={<Button icon onClick={() => {
+              this.props.setPropertyEditor_FieldRotationInDegree(fieldSymbol.rotationInDegree, 0)
+            }}>
+              <Icon name="undo"/>
+            </Button>}
+            labelPosition='right'
+          />
+        </Form.Field>
 
 
-          <Form.Field>
-            <label>{getI18n(this.props.langId, "Image")}
-              <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteBackgroundImage}
-                        onChange={(event, data: CheckboxData) => {
-                          this.props.set_fieldSymbol_overwriteBackgroundImage(data.checked)
-                        }}
-                        label={<label><IconToolTip icon="arrow down" message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
-              />
-            </label>
-
-            <Input labelPosition='right' type='text'>
-              <input
-                readOnly
-                value={fieldSymbol.backgroundImgGuid === null
-                  ? ''
-                  : fieldSymbol.backgroundImgGuid}
-              />
-              <Button icon onClick={() => {
-                this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(true)
-              }}>
-                <Icon name="write"/>
-              </Button>
-            </Input>
-            <ImageLibrary
-              isCreatingNewImgShape={false}
-              onImageTaken={(imgSurrogate) => {
-                this.props.setPropertyEditor_field_backgroundImgGuid(imgSurrogate.guid)
-
-                this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(false)
-              }}
-              isDisplayed={this.props.isChooseFieldShapeBackgroundImageLibraryDisplayed}
-              set_isDisplayed={(isDisplayed) => {
-                this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(isDisplayed)
-              }}
+        <Form.Field>
+          <label>{getI18n(this.props.langId, "Image")}
+            <Checkbox className="mar-left-half" checked={fieldSymbol.overwriteBackgroundImage}
+                      onChange={(event, data: CheckboxData) => {
+                        this.props.set_fieldSymbol_overwriteBackgroundImage(data.checked)
+                      }}
+                      label={<label><IconToolTip icon="arrow down"
+                                                 message={getI18n(this.props.langId, "Overwrite, if checked this symbol prop overwrites the shape prop, if not checked the shape props is used")}/></label>}
             />
+          </label>
 
-          </Form.Field>
+          <Input labelPosition='right' type='text'>
+            <input
+              readOnly
+              value={fieldSymbol.backgroundImgGuid === null
+                ? ''
+                : fieldSymbol.backgroundImgGuid}
+            />
+            <Button icon onClick={() => {
+              this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(true)
+            }}>
+              <Icon name="write"/>
+            </Button>
+          </Input>
+          <ImageLibrary
+            isCreatingNewImgShape={false}
+            onImageTaken={(imgSurrogate) => {
+              this.props.setPropertyEditor_field_backgroundImgGuid(imgSurrogate.guid)
+
+              this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(false)
+            }}
+            isDisplayed={this.props.isChooseFieldShapeBackgroundImageLibraryDisplayed}
+            set_isDisplayed={(isDisplayed) => {
+              this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(isDisplayed)
+            }}
+          />
+
+        </Form.Field>
 
 
         {

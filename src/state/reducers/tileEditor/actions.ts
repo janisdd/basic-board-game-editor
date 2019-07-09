@@ -55,7 +55,9 @@ import {__setNextShapeId} from "./fieldProperties/fieldPropertyReducer";
 import {clearHistory_shapeEditor, reset_shapeEditor} from "./shapesReducer/actions";
 import {getDefaultNewTile} from "../../../constants";
 import {renewAllZIndicesInTile} from "../../../helpers/someIndexHelper";
-import {adjustLinesFromAnchorPoints} from "../../../helpers/interactionHelper";
+import {
+  destroyAllEditorInstances,
+} from "../../../components/helpers/editorWrapper";
 
 //only used for import currently...
 export function setEditorTile(tile: Tile): SET_tileAction {
@@ -152,6 +154,10 @@ export function set_editor_isCreatingNewTile(isCreatingNewTile: boolean, tile: T
     //clear history
     dispatch(reset_shapeEditor()) //this is needed because we changed lines & ... to [] which will set the last edited shape type
     dispatch(clearHistory_shapeEditor()) //this only clears the history arrays but not reset the shape reducer state
+
+
+    //we need to clear else we might get old data in the editor because of old sessions
+    destroyAllEditorInstances()
 
     //todo center tile... but we need to available width...
     // dispatch(setEditor_stageOffset(tile.tileSettings.width / 2, tile.tileSettings.height / 2))

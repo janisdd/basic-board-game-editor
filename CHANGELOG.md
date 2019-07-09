@@ -4,6 +4,13 @@
 
 already changed but version has not changed
 
+
+## 1.3.3
+
+- added game instruction editor
+- command editor state (undo, redo, cursor pos, ... ) is now saved for every field & field symbol
+ 
+
 ## 1.3.2
 
 - printing now supports fontawesome icons

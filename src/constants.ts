@@ -83,6 +83,12 @@ export const fontAwesomeCssFontFaceDefForSvg = `<defs>
  */
 export const fontAwesomeMatchRegex = /\\f[0-9a-z]{3}/gim
 
+/**
+ * used to detect numbers in text
+ * e.g. duplication of fields
+ */
+export const numberRegex = new RegExp('[0-9]+', 'm')
+
 export const anchorPointConnectedColor = 'green'
 
 export const symbolPreviewWidth = 150

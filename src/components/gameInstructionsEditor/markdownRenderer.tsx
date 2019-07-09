@@ -1,8 +1,4 @@
 import * as React from "react";
-import {connect} from "react-redux";
-import {bindActionCreators, Dispatch} from "redux";
-import {returntypeof} from 'react-redux-typescript';
-import {RootState} from "../../state";
 import markdown from '../../helpers/markdownHelper'
 import {fontAwesomeMatchRegex} from "../../constants";
 

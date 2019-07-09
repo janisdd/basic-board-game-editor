@@ -41,6 +41,14 @@ export class WorldTilesHelper {
 
   }
 
+  /**
+   * @example
+   * const boundingBox = WorldTilesHelper.getWorldBoundingBox(tileSurrogates)
+   * const widthInTiles = boundingBox.maxX - boundingBox.minX + 1 //+1 max = min = 1 --> 0 but this is 1 tile
+   * const heightInTiles = boundingBox.maxY - boundingBox.minY + 1
+   *
+   * @param tileSurrogates
+   */
   public static getWorldBoundingBox(tileSurrogates: ReadonlyArray<WorldTileSurrogate>): {
     readonly minX: number
     readonly minY: number

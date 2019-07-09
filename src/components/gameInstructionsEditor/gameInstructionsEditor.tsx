@@ -15,6 +15,7 @@ import {
 import IconToolTip from "../helpers/IconToolTip";
 import {getI18n} from "../../../i18n/i18nRoot";
 import ActionResultCopyModal from './actionResultCopyModal'
+import IEditSession = AceAjax.IEditSession;
 
 export interface MyProps {
   //readonly test: string
@@ -50,9 +51,14 @@ const gameInstructionsEditorId = 'gameInstructionsEditorId'
 
 const gameInstructionsEditorPrintId = 'gameInstructionsEditorPrintId'
 
+let session: IEditSession | null = null
+
 class GameInstructionsEditor extends React.Component<Props, any> {
   render(): JSX.Element {
 
+    if (!session) {
+      session = ace.createEditSession(this.props.markdown, `ace/mode/markdown` as any)
+    }
 
     const leftSideOffset = `calc(100% - (50% - ${gripperWidthInPx}px))`
     const gripperOffset = `calc(50% - ${gripperWidthInPx}px)`
@@ -104,6 +110,7 @@ class GameInstructionsEditor extends React.Component<Props, any> {
                            }}
                            throttleTimeInMs={500}
                            fontSize={this.props.editorFontSize}
+                           editSession={session}
             />
 
           </div>

@@ -1,13 +1,11 @@
 import {BezierPoint, FieldShape, ImgShape, LineShape} from "../types/drawing";
 import {getNextShapeId} from "../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
-import {copyPastDiffXInPx, copyPastDiffYInPx} from "../constants";
+import {copyPastDiffXInPx, copyPastDiffYInPx, numberRegex} from "../constants";
 
 
 export class DuplicateHelper {
   private constructor() {
   }
-
-  private static numberRegex = new RegExp('[0-9]+', 'm')
 
   /**
    *
@@ -30,7 +28,7 @@ export class DuplicateHelper {
 
     if (autoIncrementFieldTextNumbersOnDuplicate) {
       for (const fieldShape of fieldShapes) {
-        const match = this.numberRegex.exec(fieldShape.text)
+        const match = numberRegex.exec(fieldShape.text)
 
         if (!match) {
           numbersInFieldsStrings.push(null)

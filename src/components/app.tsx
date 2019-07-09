@@ -87,19 +87,6 @@ class app extends React.Component<Props, any> {
         }
       },
       {
-        menuItem: <Menu.Item key="world editor"
-                             className={this.props.simulationState.simulationStatus !== null || this.props.simulationState.machineState !== null ? 'div-disabled' : ''}>
-          {
-            getI18n(this.props.langId, "World editor")
-          }
-        </Menu.Item>,
-        render: () => {
-          return (
-            <WorldEditor/>
-          )
-        }
-      },
-      {
         menuItem: <Menu.Item key="Variable
           indicator editor"
                              className={this.props.simulationState.simulationStatus !== null || this.props.simulationState.machineState !== null ? 'div-disabled' : ''}>
@@ -112,7 +99,21 @@ class app extends React.Component<Props, any> {
             <VariableIndicatorEditor/>
           )
         }
-      }
+      },
+      {
+        menuItem: <Menu.Item key="world editor"
+                             className={this.props.simulationState.simulationStatus !== null || this.props.simulationState.machineState !== null ? 'div-disabled' : ''}>
+          {
+            getI18n(this.props.langId, "World editor")
+          }
+        </Menu.Item>,
+        render: () => {
+          return (
+            <WorldEditor/>
+          )
+        }
+      },
+
     ]
 
 

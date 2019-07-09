@@ -2,6 +2,7 @@ import * as React from "react";
 import _ = require("lodash");
 import Editor = AceAjax.Editor;
 import IEditSession = AceAjax.IEditSession;
+import {Props} from "react";
 
 
 export interface MyProps {
@@ -27,12 +28,27 @@ export interface MyProps {
   readonly throttleTimeInMs?: number
 
   readonly fontSize?: number
+
+  /**
+   * use this edit session, not stored in here, cannot be cleared here.. use for special editors
+   */
+  readonly editSession?: IEditSession
 }
 
-export const editorInstancesMap: { [id: string]: Editor | undefined } = {}
+export let editor_wrapper_editorInstancesMap: { [id: string]: Editor | undefined } = {}
+
+export let editor_wrapper_lastEditorSessionsMap: { [id: string]: IEditSession | null } = {}
 
 
-let lastAceEditorEditSession: IEditSession | null = null
+export function destroyAllEditorInstances() {
+
+  editor_wrapper_editorInstancesMap = {}
+  editor_wrapper_lastEditorSessionsMap = {}
+}
+
+
+const useSoftWrapping = true
+const tabSize = 2
 
 export default class EditorWrapper extends React.Component<MyProps, any> {
 
@@ -40,21 +56,33 @@ export default class EditorWrapper extends React.Component<MyProps, any> {
   editor!: Editor
   editorHasChanged = false
 
+  isDestroyed = false
+
   debouncedOnChange: () => void = null
 
   componentDidMount() {
+
+    this.isDestroyed = false
+
     this.editor = ace.edit(this.hostDiv)
     this.editor.setTheme("ace/theme/chrome");
     this.editor.setShowFoldWidgets(true)
     //this mode is defined in libs/ace-editor/bbgel-mode.js
 
-    if (!lastAceEditorEditSession) {
-      lastAceEditorEditSession = ace.createEditSession(this.props.value, `ace/mode/${this.props.mode}` as any)
-      lastAceEditorEditSession.setUseWrapMode(true)
-      lastAceEditorEditSession.setTabSize(2)
+    let lastSession = editor_wrapper_lastEditorSessionsMap[this.props.id]
+
+    if (this.props.editSession) {
+      lastSession = this.props.editSession
     }
 
-    this.editor.setSession(lastAceEditorEditSession)
+
+    if (!lastSession) {
+      lastSession = this.createNewSession()
+
+      editor_wrapper_lastEditorSessionsMap[this.props.id] = lastSession
+    }
+
+    this.editor.setSession(lastSession)
 
     if (this.props.fontSize && this.props.fontSize > 0) {
       this.editor.setFontSize(`${this.props.fontSize}px`)
@@ -62,10 +90,10 @@ export default class EditorWrapper extends React.Component<MyProps, any> {
 
     this.editor.setReadOnly(this.props.readony)
 
-    editorInstancesMap[this.props.id] = this.editor
+    editor_wrapper_editorInstancesMap[this.props.id] = this.editor
 
-    const row = this.editor.session.getLength() - 1
-    this.editor.gotoLine(row+1, Infinity, false)
+    // const row = this.editor.session.getLength() - 1
+    // this.editor.gotoLine(row + 1, Infinity, false)
 
     let self = this
 
@@ -77,8 +105,8 @@ export default class EditorWrapper extends React.Component<MyProps, any> {
     }
 
     this.editor.on('blur', e => {
-      if (self.props.onLostFocus) {
-        self.props.onLostFocus(self.editor.getValue())
+      if (self.props.onLostFocus && !this.isDestroyed) {
+        self.onLostFocusHandler(self.editor.getValue())
       }
     })
 
@@ -88,18 +116,38 @@ export default class EditorWrapper extends React.Component<MyProps, any> {
     }
   }
 
-  componentDidUpdate() {
+  createNewSession(): IEditSession {
+    const session =  ace.createEditSession(this.props.value, `ace/mode/${this.props.mode}` as any)
+    session.setUseWrapMode(useSoftWrapping)
+    session.setTabSize(tabSize)
+    return session
+  }
+
+  componentDidUpdate(prevProps: MyProps) {
 
     //when we focus field1 and then focus field 2 changes are not committed --> no lost focus
     //in fieldPropertyEditor und fieldSymbolPropertyEditor we handle it via componentWillReceiveProps...
-    if (this.props.value !== this.editor.getValue()) {
-      this.editor.setValue(this.props.value)
+    if (this.props.value !== this.editor.getValue() && this.props.id !== prevProps.id && !this.props.editSession) {
+
+      let lastSession = editor_wrapper_lastEditorSessionsMap[this.props.id]
+
+      if (lastSession) {
+
+      } else {
+        //create new session
+        lastSession = this.createNewSession()
+
+        editor_wrapper_lastEditorSessionsMap[this.props.id] = lastSession
+      }
+
+      this.editor.setSession(lastSession)
 
       // this.editor.selection.moveCursorTo(0, 0, false)
-      const row = this.editor.session.getLength() - 1
-      this.editor.gotoLine(row+1, Infinity, false)
 
-      this.editor.getSession().getUndoManager().reset()
+      // const row = this.editor.session.getLength() - 1
+      // this.editor.gotoLine(row + 1, Infinity, false)
+
+      // this.editor.getSession().getUndoManager().reset()
     }
 
     this.editor.setReadOnly(this.props.readony)
@@ -108,14 +156,19 @@ export default class EditorWrapper extends React.Component<MyProps, any> {
 
   componentWillUnmount() {
 
+
     if (this.props.onDestroyed) {
-      this.props.onDestroyed(this.editor.getValue())
+      const val = this.editor.getValue()
+
+      this.props.onDestroyed(val)
     }
+
+    this.isDestroyed = true
 
     this.unsetSession()
 
     this.editor.destroy()
-    delete editorInstancesMap[this.props.id]
+    delete editor_wrapper_editorInstancesMap[this.props.id]
   }
 
   /**
@@ -138,13 +191,17 @@ export default class EditorWrapper extends React.Component<MyProps, any> {
   onChangeDebounce(): void {
 
     //if we make changes then fast unmount the editor then this gets called but editor is null
-    if ( this.editor === null) return
+    if (this.editor === null) return
 
     this.editor.$blockScrolling = Infinity
     const newVal = this.editor.getValue()
 
     if (!this.debouncedOnChange || !this.props.onLostFocus) return
 
+    this.onLostFocusHandler(newVal)
+  }
+
+  onLostFocusHandler(newVal: string) {
     this.props.onLostFocus(newVal)
   }
 

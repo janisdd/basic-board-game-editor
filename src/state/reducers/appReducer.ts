@@ -4,9 +4,9 @@ import {notExhaustive} from "./_notExhausiveHelper";
 
 export enum AvailableAppTabs {
   guide = 0,
-  gameInstructionEditor ,
-  worldEditor,
+  gameInstructionEditor,
   variableIndicator,
+  worldEditor,
   tileEditor
 }
 
