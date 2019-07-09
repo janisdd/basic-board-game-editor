@@ -109,6 +109,9 @@ const mdRenderer = markdownIt({
     }
   })
   .use(require('markdown-it-deflist'))
+  .use(require('markdown-it-footnote'))
+
+mdRenderer.renderer.rules.footnote_anchor = () => { return ''}
 
 
 //https://github.com/markdown-it/markdown-it/blob/master/docs/architecture.md
