@@ -33,6 +33,10 @@ declare var process: {
 export const isProduction = (process.env.NODE_ENV === 'production')
 
 
+
+export const markdownBoxInfoColor = '#4fc08d'
+export const markdownBoxInfoWarning = '#f66'
+
 export const maxZoomedFontSize = 70
 export const defaultGameInstructionPreviewFontSize = 12
 export const defaultGameInstructionEditorFontSize = 12

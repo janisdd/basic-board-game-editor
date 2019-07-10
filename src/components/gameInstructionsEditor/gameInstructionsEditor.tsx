@@ -9,14 +9,17 @@ import EditorWrapper from "../helpers/editorWrapper";
 import PreviewActionsBar from './previewActionsBar'
 import MarkdownRenderer from './markdownRenderer'
 import {
+  set_gie_isMarkdownHelpModalDisplayed,
   set_gie_markdown,
-  set_gie_verticalGripperPositionInPercentage
+  set_gie_verticalGripperPositionOffsetInPx
 } from "../../state/reducers/gameInstructionsEditor/actions";
 import IconToolTip from "../helpers/IconToolTip";
 import {getI18n} from "../../../i18n/i18nRoot";
 import ActionResultCopyModal from './actionResultCopyModal'
 import GameInstructionsEditorSettingsModal from './gameInstructionsEditorSettingsModal'
 import IEditSession = AceAjax.IEditSession;
+import MarkdownHelpModal from './markdownHelpModal'
+import _ = require("lodash");
 
 export interface MyProps {
   //readonly test: string
@@ -29,6 +32,7 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     markdown: rootState.gameInstructionsEditorState.markdown,
     previewFontSize: rootState.gameInstructionsEditorState.previewFontSize,
     editorFontSize: rootState.gameInstructionsEditorState.editorFontSize,
+    verticalGripperPositionOffsetInPx: rootState.gameInstructionsEditorState.verticalGripperPositionOffsetInPx,
 
     langId: rootState.i18nState.langId,
   }
@@ -38,7 +42,8 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   //imported reducer funcs here
 
   set_gie_markdown,
-  set_gie_verticalGripperPositionInPercentage,
+  set_gie_verticalGripperPositionOffsetInPx,
+  set_gie_isMarkdownHelpModalDisplayed,
 }, dispatch)
 
 
@@ -47,30 +52,54 @@ const dispatchProps = returntypeof(mapDispatchToProps);
 type Props = typeof stateProps & typeof dispatchProps;
 
 
-const gripperWidthInPx = 3
+const gripperWidthInPx = 5
 const gameInstructionsEditorId = 'gameInstructionsEditorId'
 
 const gameInstructionsEditorPrintId = 'gameInstructionsEditorPrintId'
 
 let session: IEditSession | null = null
 
+
 class GameInstructionsEditor extends React.Component<Props, any> {
+
+  gripperDownPoint: { x: number, y: number } | null = null
+  gripperDownDeltaX = 0
+
+
+  onMouseMoveThrottled = _.throttle((newX: number) => {
+    if (!this.gripperDownPoint) return
+
+    const deltaX = newX - this.gripperDownPoint.x
+    this.props.set_gie_verticalGripperPositionOffsetInPx(this.gripperDownDeltaX + deltaX)
+  }, 100)
+
   render(): JSX.Element {
 
     if (!session) {
       session = ace.createEditSession(this.props.markdown, `ace/mode/markdown` as any)
     }
 
-    const leftSideOffset = `calc(100% - (50% - ${gripperWidthInPx}px))`
-    const gripperOffset = `calc(50% - ${gripperWidthInPx}px)`
-    const rightSideOffset = `calc(50% - ${gripperWidthInPx}px)`
+    //normally we need to take into account the gripper size but margin is handling this
+    const leftSideOffset = `calc(50% - ${this.props.verticalGripperPositionOffsetInPx}px)`
+    const gripperOffset = `calc(50% - 2px + ${this.props.verticalGripperPositionOffsetInPx}px)`
+    const rightSideOffset = `calc(50% + ${this.props.verticalGripperPositionOffsetInPx}px)`
 
     return (
-      <div className="game-instructions-site flexed">
+      <div className="game-instructions-site flexed"
+           onMouseUp={() => {
+             this.gripperDownPoint = null
+           }}
+           // onMouseLeave={() => {
+           //   this.gripperDownPoint = null
+           // }}
+           onMouseMove={(e) => this.onMouseMoveThrottled(e.clientX)}
+      >
 
         <ActionResultCopyModal/>
 
-        <GameInstructionsEditorSettingsModal />
+        <GameInstructionsEditorSettingsModal/>
+
+        <MarkdownHelpModal/>
 
         <div className="fh left-side panel" style={{right: leftSideOffset}}>
 
@@ -84,14 +113,12 @@ class GameInstructionsEditor extends React.Component<Props, any> {
               </span>
 
               <IconToolTip
-                message={getI18n(this.props.langId, "The editor uses markdown syntax. The editor content is part of the world and is also exported when you export the world.")}
+                message={getI18n(this.props.langId, "The editor uses markdown syntax. The editor content is part of the world and is also exported when you export the world. Click to get more information about markdown and the supported syntax.")}
+                onClick={() => {
+                  this.props.set_gie_isMarkdownHelpModalDisplayed(true)
+                }}
               />
 
-              <a className="mar-left" href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet"
-                 target="_blank">
-                <Icon name="external alternate"/>
-                Markdown help
-              </a>
             </div>
 
             <EditorActionsBar
@@ -120,7 +147,15 @@ class GameInstructionsEditor extends React.Component<Props, any> {
 
         </div>
 
-        <div className="vertical-gripper" style={{width: gripperWidthInPx, left: gripperOffset}}></div>
+        <div className="vertical-gripper" style={{width: gripperWidthInPx, left: gripperOffset}}
+             onMouseDown={(e) => {
+               this.gripperDownPoint = {
+                 x: e.clientX,
+                 y: e.clientY
+               }
+               this.gripperDownDeltaX =this.props.verticalGripperPositionOffsetInPx
+             }}
+        ></div>
 
         <div className="fh right-side panel" style={{left: rightSideOffset}}>
 

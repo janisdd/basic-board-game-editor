@@ -6,12 +6,15 @@ import {
   set_createFieldTextExplanationListAsAction,
   SET_createFieldTextExplanationListReplaceNumbersAction,
   SET_createFieldTextExplanationListReplacePostfixTextAction,
-  SET_createFieldTextExplanationListReplacePrefixTextAction, SET_createFieldTextExplanationListReplaceVarNameAction,
+  SET_createFieldTextExplanationListReplacePrefixTextAction,
+  SET_createFieldTextExplanationListReplaceVarNameAction,
   SET_editorFontSizeAction,
-  SET_isActionResultCopyModalDisplayedAction, set_isGameInstructionsEditorSettingsModalDisplayedAction,
+  SET_isActionResultCopyModalDisplayedAction,
+  Set_isGameInstructionsEditorSettingsModalDisplayedAction,
+  SET_isMarkdownHelpModalDisplayedAction,
   SET_markdownAction,
   SET_previewFontSizeAction,
-  SET_verticalGripperPositionInPercentageAction
+  SET_verticalGripperPositionOffsetInPxAction
 } from "./gameInstructionsEditorReducer";
 import {CreateFieldTextExplanationListType} from "../../../helpers/markdownHelper";
 
@@ -23,10 +26,10 @@ export function set_gie_markdown(markdown: string): SET_markdownAction {
   }
 }
 
-export function set_gie_verticalGripperPositionInPercentage(verticalGripperPositionInPercentage: number): SET_verticalGripperPositionInPercentageAction {
+export function set_gie_verticalGripperPositionOffsetInPx(verticalGripperPositionOffsetInPx: number): SET_verticalGripperPositionOffsetInPxAction {
   return {
-    type: ActionType.SET_verticalGripperPositionInPercentage,
-    verticalGripperPositionInPercentage
+    type: ActionType.SET_verticalGripperPositionOffsetInPx,
+    verticalGripperPositionOffsetInPx
   }
 }
 
@@ -58,10 +61,16 @@ export function set_gie_actionResultCopyText(actionResultCopyText: string): SET_
   }
 }
 
-export function set_gie_isGameInstructionsEditorSettingsModalDisplayed(isGameInstructionsEditorSettingsModalDisplayed: boolean): set_isGameInstructionsEditorSettingsModalDisplayedAction {
+export function set_gie_isGameInstructionsEditorSettingsModalDisplayed(isGameInstructionsEditorSettingsModalDisplayed: boolean): Set_isGameInstructionsEditorSettingsModalDisplayedAction {
   return {
     type: ActionType.SET_isGameInstructionsEditorSettingsModalDisplayed,
     isGameInstructionsEditorSettingsModalDisplayed
+  }
+}
+export function set_gie_isMarkdownHelpModalDisplayed(isMarkdownHelpModalDisplayed: boolean): SET_isMarkdownHelpModalDisplayedAction {
+  return {
+    type: ActionType.SET_isMarkdownHelpModalDisplayed,
+    isMarkdownHelpModalDisplayed
   }
 }
 

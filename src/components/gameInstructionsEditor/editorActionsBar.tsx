@@ -7,7 +7,7 @@ import {
   set_gie_actionResultCopyText,
   set_gie_editorFontSize,
   set_gie_isActionResultCopyModalDisplayed,
-  set_gie_isGameInstructionsEditorSettingsModalDisplayed
+  set_gie_isGameInstructionsEditorSettingsModalDisplayed, set_gie_isMarkdownHelpModalDisplayed
 } from "../../state/reducers/gameInstructionsEditor/actions";
 import {defaultGameInstructionEditorFontSize, maxZoomedFontSize, minZoomedFontSize, numberRegex} from "../../constants";
 import {Icon} from "semantic-ui-react";
@@ -50,6 +50,8 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_gie_actionResultCopyText,
   set_gie_isActionResultCopyModalDisplayed,
   set_gie_isGameInstructionsEditorSettingsModalDisplayed,
+
+  set_gie_isMarkdownHelpModalDisplayed,
 }, dispatch)
 
 

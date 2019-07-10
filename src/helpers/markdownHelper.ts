@@ -1,5 +1,5 @@
 import * as markdownIt from 'markdown-it'
-import {fontAwesomeMatchRegex} from "../constants";
+import {fontAwesomeMatchRegex, markdownBoxInfoColor, markdownBoxInfoWarning} from "../constants";
 import {notExhaustiveThrow} from "../state/reducers/_notExhausiveHelper";
 
 
@@ -48,7 +48,7 @@ const customContainer = function (tokens: any[], idx: number): string {
   if (tokens[idx].nesting === 1) { //opening tab
 
     let fontAwesomeIcon = ''
-    let cssColorOrConstant = '#4fc08d'
+    let cssColorOrConstant = markdownBoxInfoColor
 
     if (match) {
       const args = (match[1] as string).split(' ')
@@ -57,10 +57,10 @@ const customContainer = function (tokens: any[], idx: number): string {
       if (args.length > 0) {
 
         if (args[curr] === 'info') {
-          cssColorOrConstant = '#4fc08d'
+          cssColorOrConstant = markdownBoxInfoColor
 
         } else if (args[curr] === 'warning') {
-          cssColorOrConstant = '#f66'
+          cssColorOrConstant = markdownBoxInfoWarning
 
         } else {
           //default

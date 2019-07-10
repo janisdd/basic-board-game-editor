@@ -325,7 +325,7 @@ export interface LangObj {
 
   //--- Game Instructions Editor
   "Editor": string
-  "The editor uses markdown syntax. The editor content is part of the world and is also exported when you export the world.": string
+  "The editor uses markdown syntax. The editor content is part of the world and is also exported when you export the world. Click to get more information about markdown and the supported syntax.": string
   "Creates the initial template for new game instructions with the current world settings (game init code)": string
   "This will collect all used phrases from all fields in the world into a markdown list, so that you can explain each one manually": string
   "Preview": string
@@ -342,6 +342,9 @@ export interface LangObj {
   "Replace variable postfix": string
   "Normal list": string
   "Definition list": string
+
+  "Markdown help": string
+  "Cheatsheet": string
 
 }
 

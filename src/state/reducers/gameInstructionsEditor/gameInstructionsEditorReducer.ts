@@ -5,7 +5,8 @@ import {CreateFieldTextExplanationListType} from "../../../helpers/markdownHelpe
 
 export type State = {
   readonly markdown: string
-  readonly verticalGripperPositionInPercentage: number
+  readonly verticalGripperPositionOffsetInPx
+    : number
   readonly previewFontSize: number
   readonly editorFontSize: number
 
@@ -16,6 +17,8 @@ export type State = {
   readonly actionResultCopyText: string
 
   readonly isGameInstructionsEditorSettingsModalDisplayed: boolean
+
+  readonly isMarkdownHelpModalDisplayed: boolean
 
   /**
    * how to
@@ -52,7 +55,7 @@ export const initial: State = {
 das ist ein test....
 
 ende`,
-  verticalGripperPositionInPercentage: 50,
+  verticalGripperPositionOffsetInPx: 0,
 
   previewFontSize: defaultGameInstructionPreviewFontSize,
   editorFontSize: defaultGameInstructionEditorFontSize,
@@ -61,6 +64,7 @@ ende`,
   actionResultCopyText: '',
 
   isGameInstructionsEditorSettingsModalDisplayed: false,
+  isMarkdownHelpModalDisplayed: false,
 
   createFieldTextExplanationListAs: CreateFieldTextExplanationListType.definitionList,
   createFieldTextExplanationListReplaceNumbers: true,
@@ -76,7 +80,7 @@ export interface ActionBase extends Action {
 
 export enum ActionType {
   SET_markdown = 'gameInstructionsEditorReducer_SET_markdown',
-  SET_verticalGripperPositionInPercentage = 'gameInstructionsEditorReducer_SET_verticalGripperPositionInPercentage',
+  SET_verticalGripperPositionOffsetInPx = 'gameInstructionsEditorReducer_SET_verticalGripperPositionOffsetInPx',
 
   SET_previewFontSize = 'gameInstructionsEditorReducer_SET_previewFontSize',
   SET_editorFontSize = 'gameInstructionsEditorReducer_SET_editorFontSize',
@@ -86,6 +90,7 @@ export enum ActionType {
 
 
   SET_isGameInstructionsEditorSettingsModalDisplayed = 'gameInstructionsEditorReducer_SET_isGameInstructionsEditorSettingsModalDisplayed',
+  SET_isMarkdownHelpModalDisplayed = 'gameInstructionsEditorReducer_SET_isMarkdownHelpModalDisplayed',
 
   SET_createFieldTextExplanationListAs = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListAs',
   SET_createFieldTextExplanationListReplaceNumbers = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListReplaceNumbers',
@@ -102,9 +107,9 @@ export interface SET_markdownAction extends ActionBase {
   readonly markdown: string
 }
 
-export interface SET_verticalGripperPositionInPercentageAction extends ActionBase {
-  readonly type: ActionType.SET_verticalGripperPositionInPercentage
-  readonly verticalGripperPositionInPercentage: number
+export interface SET_verticalGripperPositionOffsetInPxAction extends ActionBase {
+  readonly type: ActionType.SET_verticalGripperPositionOffsetInPx
+  readonly verticalGripperPositionOffsetInPx: number
 }
 
 
@@ -128,10 +133,16 @@ export interface SET_actionResultCopyTextAction extends ActionBase {
   readonly actionResultCopyText: string
 }
 
-export interface set_isGameInstructionsEditorSettingsModalDisplayedAction extends ActionBase {
+export interface Set_isGameInstructionsEditorSettingsModalDisplayedAction extends ActionBase {
   readonly type: ActionType.SET_isGameInstructionsEditorSettingsModalDisplayed
   readonly isGameInstructionsEditorSettingsModalDisplayed: boolean
 }
+
+export interface SET_isMarkdownHelpModalDisplayedAction extends ActionBase {
+  readonly type: ActionType.SET_isMarkdownHelpModalDisplayed
+  readonly isMarkdownHelpModalDisplayed: boolean
+}
+
 
 export interface set_createFieldTextExplanationListAsAction extends ActionBase {
   readonly type: ActionType.SET_createFieldTextExplanationListAs
@@ -166,16 +177,18 @@ export interface ResetAction extends ActionBase {
 export type AllActions =
   ResetAction
   | SET_markdownAction
-  | SET_verticalGripperPositionInPercentageAction
+  | SET_verticalGripperPositionOffsetInPxAction
   | SET_previewFontSizeAction
   | SET_editorFontSizeAction
 
   | SET_isActionResultCopyModalDisplayedAction
   | SET_actionResultCopyTextAction
 
-  | set_isGameInstructionsEditorSettingsModalDisplayedAction
+  | Set_isGameInstructionsEditorSettingsModalDisplayedAction
+ | SET_isMarkdownHelpModalDisplayedAction
+
   | set_createFieldTextExplanationListAsAction
-  |SET_createFieldTextExplanationListReplaceVarNameAction
+  | SET_createFieldTextExplanationListReplaceVarNameAction
   | SET_createFieldTextExplanationListReplaceNumbersAction
   | SET_createFieldTextExplanationListReplacePrefixTextAction
   | SET_createFieldTextExplanationListReplacePostfixTextAction
@@ -190,10 +203,10 @@ export function reducer(state: State = initial, action: AllActions): State {
         ...state,
         markdown: action.markdown
       }
-    case ActionType.SET_verticalGripperPositionInPercentage:
+    case ActionType.SET_verticalGripperPositionOffsetInPx:
       return {
         ...state,
-        verticalGripperPositionInPercentage: action.verticalGripperPositionInPercentage
+        verticalGripperPositionOffsetInPx: action.verticalGripperPositionOffsetInPx
       }
 
     case ActionType.SET_previewFontSize:
@@ -222,6 +235,11 @@ export function reducer(state: State = initial, action: AllActions): State {
       return {
         ...state,
         isGameInstructionsEditorSettingsModalDisplayed: action.isGameInstructionsEditorSettingsModalDisplayed
+      }
+    case ActionType.SET_isMarkdownHelpModalDisplayed:
+      return {
+        ...state,
+        isMarkdownHelpModalDisplayed: action.isMarkdownHelpModalDisplayed
       }
 
 

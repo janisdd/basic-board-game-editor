@@ -42,7 +42,7 @@ class ActionResultCopyModal extends React.Component<Props, any> {
                onClose={() => {
                  this.props.set_gie_isActionResultCopyModalDisplayed(false)
                }}
-               size="large"
+               size="small"
         >
 
           <Modal.Header>{getI18n(this.props.langId, "Copy modal")}</Modal.Header>

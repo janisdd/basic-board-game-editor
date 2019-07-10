@@ -323,7 +323,7 @@ export const lang_en: LangObj = {
 
   //--- Game Instructions Editor
   "Editor": "Editor",
-  "The editor uses markdown syntax. The editor content is part of the world and is also exported when you export the world.": "The editor uses markdown syntax. The editor content is part of the world and is also exported when you export the world.",
+  "The editor uses markdown syntax. The editor content is part of the world and is also exported when you export the world. Click to get more information about markdown and the supported syntax.": "The editor uses markdown syntax. The editor content is part of the world and is also exported when you export the world. Click to get more information about markdown and the supported syntax.",
   "Creates the initial template for new game instructions with the current world settings (game init code)": "Creates the initial template for new game instructions with the current world settings (game init code)",
   "This will collect all used phrases from all fields in the world into a markdown list, so that you can explain each one manually": "This will collect all used phrases from all fields in the world into a markdown list, so that you can explain each one manually",
   "Preview": "Preview",
@@ -340,4 +340,7 @@ export const lang_en: LangObj = {
   "Replace variable postfix": "Replace variable postfix",
   "Normal list": "Normal list",
   "Definition list": "Definition list",
+
+  "Markdown help" : "Markdown help",
+  "Cheatsheet": "Cheatsheet",
 }
