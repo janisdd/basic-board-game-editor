@@ -1,15 +1,14 @@
-import {
-  BorderPoint,
-  ConnectedLinesThroughAnchorPointsMap,
-  FieldShape,
-  ImgShape,
-  LineShape,
-  PlainPoint
-} from "../types/drawing";
+import {BorderPoint, FieldShape, ImgShape, LineShape, PlainPoint} from "../types/drawing";
 import {WorldTileSurrogate} from "../../simulation/machine/machineState";
 import {Tile} from "../types/world";
 import {Logger} from "./logger";
 import {getGuid} from "./guid";
+import {
+  absoluteFieldIdentifierGlobal,
+  absoluteFieldIdentifierSingle,
+  absoluteTileIdentifierGlobal,
+  absoluteTileIdentifierSingle
+} from "../constants";
 
 
 export class WorldTilesHelper {
@@ -77,7 +76,7 @@ export class WorldTilesHelper {
 
     //make a real, deep copy
     const _copy = JSON.parse(JSON.stringify(tile))
-    const copy:Tile = {
+    const copy: Tile = {
       ..._copy,
       guid: getGuid()
     }
@@ -162,7 +161,6 @@ export class WorldTilesHelper {
         }
 
 
-
         const changedLineMapping: ChangedLineMapping = {}
 
         for (const lineShape of tile.lineShapes) {
@@ -239,7 +237,7 @@ export class WorldTilesHelper {
                   const oldTuple = changedLineMapping[value.lineId]
 
                   if (!oldTuple) {
-                      throw new Error(`old line id not found: ${value.lineId} on tile: ${tile.guid} (${tile.tileSettings.displayName})`)
+                    throw new Error(`old line id not found: ${value.lineId} on tile: ${tile.guid} (${tile.tileSettings.displayName})`)
                   }
 
                   const oldPointIdTuple = oldTuple.changedLinePoints.find(p => p[0] === value.pointId)
@@ -320,4 +318,106 @@ interface ChangedLineMappingEntry {
    * a tuple for every line point [0] is the old id, [1] is the new id
    */
   readonly changedLinePoints: ReadonlyArray<[number, number]>
+}
+
+
+export type FieldAbsolutePosition = {
+  tileGuid: string
+  fieldId: number
+}
+
+
+/**
+ * returns all field absolute position in the text
+ * @param text
+ */
+export function parseAllFieldAbsolutePositions(text: string): ReadonlyArray<FieldAbsolutePosition> {
+
+  let matchResults: RegExpExecArray
+
+  let regex = new RegExp(absoluteFieldIdentifierGlobal) //create a new obj to keep track of the index else we might have an infinite loop
+
+  let absPositions: FieldAbsolutePosition[] = []
+
+  while ((matchResults = regex.exec(text)) !== null) {
+
+    const absPos = parseFieldAbsolutePosition(matchResults[0])
+
+    if (!absPos) continue
+
+    absPositions.push(absPos)
+
+  }
+
+  return absPositions
+}
+
+/**
+ * parses a field absolute position [tile guid].[field id]
+ *
+ * can return null
+ * @param text
+ */
+export function parseFieldAbsolutePosition(text: string): FieldAbsolutePosition | null {
+
+  const matchResult = absoluteFieldIdentifierSingle.exec(text)
+
+  if (!matchResult) return null
+
+  if (matchResult.length !== 3) return null
+
+  const tileGuid = matchResult[1]
+  const fieldIdString = matchResult[2]
+
+  const fieldId = parseInt(fieldIdString)
+
+  if (isNaN(fieldId)) return null
+
+  return {
+    tileGuid,
+    fieldId
+  }
+}
+
+
+export function parseAllTileGuids(text: string): ReadonlyArray<string> {
+
+  let matchResults: RegExpExecArray
+
+  let regex = new RegExp(absoluteTileIdentifierGlobal) //create a new obj to keep track of the index else we might have an infinite loop
+
+  let absPositions: string[] = []
+
+  while ((matchResults = regex.exec(text)) !== null) {
+
+    const absPos = parseTileGuid(matchResults[0])
+
+    if (!absPos) continue
+
+    absPositions.push(absPos)
+
+  }
+
+  return absPositions
+}
+
+
+/**
+ * parses a tile absolute position [tile guid]
+ *
+ * can return null
+ * @param text
+ */
+export function parseTileGuid(text: string): string | null {
+
+  const matchResult = absoluteTileIdentifierSingle.exec(text)
+
+  if (!matchResult) return null
+
+  if (matchResult.length !== 2) return null
+
+  const tileGuid = matchResult[1]
+
+
+  return tileGuid
 }

@@ -1,6 +1,8 @@
 import * as React from "react";
 import markdown, {injectFontAwesomeIconsIfNecessary} from '../../helpers/markdownHelper'
 import {fontAwesomeMatchRegex} from "../../constants";
+import {parseAllFieldAbsolutePositions, parseFieldAbsolutePosition} from "../../helpers/worldTilesHelper";
+import {WorldUnitAsImgBlobStorage} from "../../externalStorage/WorldUnitAsImgBlobStorage";
 
 export interface MyProps {
   /**
@@ -15,7 +17,7 @@ export interface MyProps {
 
 
 export default class markdownRenderer extends React.Component<MyProps, any> {
-  render(): JSX.Element {
+  render() {
 
 
     let markdownWithFontAwesomeIcons = injectFontAwesomeIconsIfNecessary(this.props.markdown)

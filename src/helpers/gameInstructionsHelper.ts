@@ -1,10 +1,22 @@
 import {Tile} from "../types/world";
 import {Logger} from "./logger";
 import {numberRegex} from "../constants";
-import {FieldSymbol} from "../types/drawing";
+import {FieldSymbol, ImgSymbol, LineSymbol} from "../types/drawing";
 import {notExhaustiveThrow} from "../state/reducers/_notExhausiveHelper";
-import {CreateFieldTextExplanationListType} from "./markdownHelper";
+import {
+  absoluteFieldPositionInjectionAttribute, tileGuidInjectionAttribute,
+  CreateFieldTextExplanationListType,
+  singleFieldRendererClass, singleTileRendererClass
+} from "./markdownHelper";
 import _ = require("lodash");
+import {
+  parseAllFieldAbsolutePositions,
+  parseAllTileGuids,
+  parseFieldAbsolutePosition, parseTileGuid
+} from "./worldTilesHelper";
+import {WorldUnitToImgHelper} from "./worldUnitToImgHelper";
+import {WorldUnitAsImgBlobStorage} from "../externalStorage/WorldUnitAsImgBlobStorage";
+import {WorldSettings} from "../state/reducers/world/worldSettings/worldSettingsReducer";
 
 
 /**
@@ -139,7 +151,7 @@ export interface MarkdownPlaceholderVarTemplateDictionary {
 export interface MarkdownPlaceholderDictionary {
 
   /**
-   * the global list
+   * global vars list
    */
     ['globalVarsList']: null | (() => string)
   /**
@@ -147,13 +159,12 @@ export interface MarkdownPlaceholderDictionary {
    */
     ['playerLocalVarsList']: null | (() => string)
   /**
-   * all local vars that can be captured when executing field cmds
-   * so this excludes playerLocalVarsList
+   * all local vars that can be captured when executing field cmds (so this excludes playerLocalVarsList)
    */
     ['localVarsList']: null | (() => string)
 
   /**
-   * the max dice value
+   * max dice value
    */
     ['maxDiceValue']: null | number
 
@@ -179,7 +190,7 @@ export interface MarkdownPlaceholderDictionary {
     ['totalNumVars']: null | number
 
   /**
-   * the section header for field text explanation
+   * section header for field text explanation
    */
     ['markdownGameInstructionsFieldTextExplanationHeader']: null | string
 
@@ -276,4 +287,106 @@ export function generateReplacedMarkdown(gameInstructionTemplate: string,
 
 
   return replaced
+}
+
+
+export async function injectFieldImgsIntoMarkdown(markdownBodySelector: string,
+                                                  markdown: string,
+                                                  allPossibleTiles: ReadonlyArray<Tile>,
+                                                  fieldSymbols: ReadonlyArray<FieldSymbol>,
+                                                  worldSettings: WorldSettings,
+                                                  document: Document
+) {
+
+  WorldUnitAsImgBlobStorage.clearFieldStorage()
+
+  const allPositions = parseAllFieldAbsolutePositions(markdown)
+
+  for (let i = 0; i < allPositions.length; i++) {
+    const absolutePosition = allPositions[i];
+
+    const canvas = document.createElement('canvas')
+    let resultCanvas = WorldUnitToImgHelper.fieldByAbsPosToImg(absolutePosition, allPossibleTiles, fieldSymbols, worldSettings, canvas)
+
+    if (!resultCanvas) continue
+
+    let url: string = ''
+
+    try {
+      url = await WorldUnitAsImgBlobStorage.addFieldImg(absolutePosition, resultCanvas)
+      // console.log(url)
+    } catch (err) {
+
+    }
+  }
+
+  const allImgs = document.querySelectorAll(`${markdownBodySelector} img.${singleFieldRendererClass}`)
+
+  for (let i = 0; i < allImgs.length; i++) {
+    const img = allImgs.item(i) as HTMLImageElement
+
+    const absolutePositionString = img.getAttribute(absoluteFieldPositionInjectionAttribute)
+
+    const absolutePosition = parseFieldAbsolutePosition(absolutePositionString)
+
+    if (!absolutePosition) continue
+
+    img.src = WorldUnitAsImgBlobStorage.getImgByAbsolutePosition(absolutePosition)
+  }
+}
+
+
+export async function injectTileImgsIntoMarkdown(markdownBodySelector: string,
+                                                 markdown: string,
+                                                 allPossibleTiles: ReadonlyArray<Tile>,
+                                                 fieldSymbols: ReadonlyArray<FieldSymbol>,
+                                                 imgSymbols: ReadonlyArray<ImgSymbol>,
+                                                 lineSymbols: ReadonlyArray<LineSymbol>,
+                                                 worldSettings: WorldSettings,
+                                                 document: Document
+) {
+
+  WorldUnitAsImgBlobStorage.clearTileStorage()
+
+  const tileGuids = parseAllTileGuids(markdown)
+
+  for (let i = 0; i < tileGuids.length; i++) {
+    const tileGuid = tileGuids[i];
+
+    const canvas = document.createElement('canvas')
+
+    let resultCanvas = WorldUnitToImgHelper.tileByGuidToImg(tileGuid,
+      allPossibleTiles,
+      fieldSymbols,
+      imgSymbols,
+      lineSymbols,
+      worldSettings,
+      canvas
+    )
+
+    if (!resultCanvas) continue
+
+    let url: string = ''
+
+    try {
+      url = await WorldUnitAsImgBlobStorage.addTileImg(tileGuid, resultCanvas)
+      // console.log(url)
+    } catch (err) {
+
+    }
+  }
+
+  const allImgs = document.querySelectorAll(`${markdownBodySelector} img.${singleTileRendererClass}`)
+
+  for (let i = 0; i < allImgs.length; i++) {
+    const img = allImgs.item(i) as HTMLImageElement
+
+    const tileGuidString = img.getAttribute(tileGuidInjectionAttribute)
+
+    const tileGuid = parseTileGuid(tileGuidString)
+
+    if (!tileGuid) continue
+
+    img.src = WorldUnitAsImgBlobStorage.getImgByTileGuid(tileGuid)
+  }
 }

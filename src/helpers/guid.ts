@@ -8,3 +8,13 @@ export function getGuid() {
     return v.toString(16);
   });
 }
+
+export const guidRegex = /[\w]{8}-[\w]{4}-4[\w]{3}-[\w]{4}-[\w]{12}/i
+
+/**
+ * checks if the given text could be a guid
+ * @param text
+ */
+export function isGuid(text: string): boolean {
+  return text.match(guidRegex) !== null
+}

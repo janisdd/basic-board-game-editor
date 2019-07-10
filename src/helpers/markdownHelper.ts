@@ -1,6 +1,7 @@
 import * as markdownIt from 'markdown-it'
 import {fontAwesomeMatchRegex, markdownBoxInfoColor, markdownBoxInfoWarning} from "../constants";
 import {notExhaustiveThrow} from "../state/reducers/_notExhausiveHelper";
+import {escapeHtml} from "./stringHelper";
 
 
 export enum CreateFieldTextExplanationListType {
@@ -88,6 +89,78 @@ const customContainer = function (tokens: any[], idx: number): string {
 
 }
 
+
+
+export const absoluteFieldPositionInjectionAttribute = `data-url`
+export const singleFieldRendererClass = 'single-field-renderer'
+/**
+ * @example
+ *
+ * ::: field (tile guid).(field id)
+ * :::
+ *
+ * (...) is mandatory
+ *
+ * @param tokens
+ * @param idx
+ *
+ * regex is a modified version of
+ * @see absoluteFieldIdentifierSingle
+ */
+const singleFieldRenderer = function (tokens: any[], idx: number): string {
+
+
+  const match = tokens[idx].info.trim().match(/^field ([\w]{8}-[\w]{4}-4[\w]{3}-[\w]{4}-[\w]{12}.[0-9]*)$/)
+
+  if (tokens[idx].nesting === 1) { //opening tab
+
+    if (match) {
+
+      return `<div><img class="${singleFieldRendererClass}" alt="img of field ${escapeHtml(match[1])}" ${absoluteFieldPositionInjectionAttribute}="${escapeHtml(match[1])}" src="#" />`
+    }
+
+    return `<div><img alt="not found" src="#" />`
+  }
+
+
+  return `</div>`
+}
+
+export const tileGuidInjectionAttribute = `data-url`
+export const singleTileRendererClass = 'single-tile-renderer'
+/**
+ * @example
+ *
+ * ::: tile (tile guid)
+ * :::
+ *
+ * (...) is mandatory
+ *
+ * @param tokens
+ * @param idx
+ *
+ * regex is a modified version of
+ * @see absoluteFieldIdentifierSingle
+ */
+const singleTileRenderer = function (tokens: any[], idx: number): string {
+
+
+  const match = tokens[idx].info.trim().match(/^tile ([\w]{8}-[\w]{4}-4[\w]{3}-[\w]{4}-[\w]{12})$/)
+
+  if (tokens[idx].nesting === 1) { //opening tab
+
+    if (match) {
+
+      return `<div><img class="${singleTileRendererClass}" alt="img of tile ${escapeHtml(match[1])}" ${tileGuidInjectionAttribute}="${escapeHtml(match[1])}" src="#" />`
+    }
+
+    return `<div><img alt="not found" src="#" />`
+  }
+
+
+  return `</div>`
+}
+
 const mdRenderer = markdownIt({
   html: false,
   breaks: true,
@@ -108,10 +181,26 @@ const mdRenderer = markdownIt({
       return !!test
     }
   })
+  .use(require('markdown-it-container'), 'field', { //see https://github.com/markdown-it/markdown-it-container
+    render: singleFieldRenderer,
+    validate: function (params: string): boolean {
+      const test = params.trim().match(/^field\s*(.*)$/)
+      return !!test
+    }
+  })
+  .use(require('markdown-it-container'), 'tile', { //see https://github.com/markdown-it/markdown-it-container
+    render: singleTileRenderer,
+    validate: function (params: string): boolean {
+      const test = params.trim().match(/^tile\s*(.*)$/)
+      return !!test
+    }
+  })
   .use(require('markdown-it-deflist'))
   .use(require('markdown-it-footnote'))
 
-mdRenderer.renderer.rules.footnote_anchor = () => { return ''}
+mdRenderer.renderer.rules.footnote_anchor = () => {
+  return ''
+}
 
 
 //https://github.com/markdown-it/markdown-it/blob/master/docs/architecture.md

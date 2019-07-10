@@ -23,15 +23,18 @@ import {WorldTilesHelper} from "../../helpers/worldTilesHelper";
 import {Logger} from "../../helpers/logger";
 import {Tile} from "../../types/world";
 import {
-  createEmptyReplacementDictWithAllKnownPlaceholders, createEmptyReplacementVarDictWithAllKnownPlaceholders,
+  createEmptyReplacementDictWithAllKnownPlaceholders,
+  createEmptyReplacementVarDictWithAllKnownPlaceholders,
   generateFieldTextExplanationListMarkdown,
   generateMarkdownPhraseDefinitionList,
   generateReplacedMarkdown,
-  MarkdownPlaceholderDictionary, MarkdownPlaceholderVarTemplateDictionary
+  injectFieldImgsIntoMarkdown, injectTileImgsIntoMarkdown,
+  MarkdownPlaceholderDictionary
 } from "../../helpers/gameInstructionsHelper";
 import {LangHelper} from "../../helpers/langHelper";
 import {AbstractMachine} from "../../../simulation/machine/AbstractMachine";
 import {ExpressionUnit} from "../../../simulation/model/executionUnit";
+import {gameInstructionsEditorPrintId} from "./gameInstructionsEditor";
 
 const langCompiler = require('../../../simulation/compiler/langCompiler').parser
 
@@ -45,9 +48,12 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
 
     worldCmdText: rootState.worldSettingsState.worldCmdText,
 
+    worldSettings: rootState.worldSettingsState,
     allPossibleTiles: rootState.tileLibraryState.possibleTiles,
     worldTilesSurrogates: rootState.tileSurrogateState.present,
     fieldSymbols: rootState.fieldSymbolState.present,
+    imgSymbols: rootState.imgSymbolState.present,
+    lineSymbols: rootState.lineSymbolState.present,
 
     createFieldTextExplanationListAs: rootState.gameInstructionsEditorState.createFieldTextExplanationListAs,
     createFieldTextExplanationListReplaceNumbers: rootState.gameInstructionsEditorState.createFieldTextExplanationListReplaceNumbers,
@@ -59,6 +65,8 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     endFieldAutoPrefixText: rootState.worldSettingsState.endFieldAutoPrefixText,
     forcedFieldAutoPrefixText: rootState.worldSettingsState.forcedFieldAutoPrefixText,
     branchIfPrefixText: rootState.worldSettingsState.branchIfPrefixText,
+
+    markdown: rootState.gameInstructionsEditorState.markdown,
 
 
     langId: rootState.i18nState.langId,
@@ -290,6 +298,29 @@ class EditorActionsBar extends React.Component<Props, any> {
   }
 
 
+  async forceRegenerateFieldAndTileIms() {
+
+    await injectFieldImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
+      this.props.markdown,
+      this.props.allPossibleTiles,
+      this.props.fieldSymbols,
+      this.props.worldSettings,
+      document
+    )
+
+
+    await injectTileImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
+      this.props.markdown,
+      this.props.allPossibleTiles,
+      this.props.fieldSymbols,
+      this.props.imgSymbols,
+      this.props.lineSymbols,
+      this.props.worldSettings,
+      document
+    )
+
+  }
+
   render(): JSX.Element {
     return (
       <div className="action-bar">
@@ -334,6 +365,12 @@ class EditorActionsBar extends React.Component<Props, any> {
           this.props.set_gie_isGameInstructionsEditorSettingsModalDisplayed(true)
         }}>
           <Icon name="setting"/>
+        </div>
+
+        <div className="item" onClick={() => {
+          this.forceRegenerateFieldAndTileIms()
+        }}>
+          <Icon name="settings"/>
         </div>
 
 

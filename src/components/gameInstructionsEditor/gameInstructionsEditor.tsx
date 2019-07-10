@@ -20,6 +20,7 @@ import GameInstructionsEditorSettingsModal from './gameInstructionsEditorSetting
 import IEditSession = AceAjax.IEditSession;
 import MarkdownHelpModal from './markdownHelpModal'
 import _ = require("lodash");
+import {injectFieldImgsIntoMarkdown, injectTileImgsIntoMarkdown} from "../../helpers/gameInstructionsHelper";
 
 export interface MyProps {
   //readonly test: string
@@ -33,6 +34,12 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     previewFontSize: rootState.gameInstructionsEditorState.previewFontSize,
     editorFontSize: rootState.gameInstructionsEditorState.editorFontSize,
     verticalGripperPositionOffsetInPx: rootState.gameInstructionsEditorState.verticalGripperPositionOffsetInPx,
+
+    worldSettings: rootState.worldSettingsState,
+    allPossibleTiles: rootState.tileLibraryState.possibleTiles,
+    fieldSymbols: rootState.fieldSymbolState.present,
+    imgSymbols: rootState.imgSymbolState.present,
+    lineSymbols: rootState.lineSymbolState.present,
 
     langId: rootState.i18nState.langId,
   }
@@ -55,7 +62,7 @@ type Props = typeof stateProps & typeof dispatchProps;
 const gripperWidthInPx = 5
 export const gameInstructionsEditorId = 'gameInstructionsEditorId'
 
-const gameInstructionsEditorPrintId = 'gameInstructionsEditorPrintId'
+export const gameInstructionsEditorPrintId = 'gameInstructionsEditorPrintId'
 
 export let gameInstructionsEditorAceSession: IEditSession | null = null
 
@@ -73,6 +80,33 @@ class GameInstructionsEditor extends React.Component<Props, any> {
     this.props.set_gie_verticalGripperPositionOffsetInPx(this.gripperDownDeltaX + deltaX)
   }, 100)
 
+
+  async onMarkdownChanged(val: string, rerenderFieldAndTileImgs: boolean) {
+    this.props.set_gie_markdown(val)
+
+
+    if (!rerenderFieldAndTileImgs) return
+
+    await injectFieldImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
+      this.props.markdown,
+      this.props.allPossibleTiles,
+      this.props.fieldSymbols,
+      this.props.worldSettings,
+      document
+    )
+
+    await injectTileImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
+      this.props.markdown,
+      this.props.allPossibleTiles,
+      this.props.fieldSymbols,
+      this.props.imgSymbols,
+      this.props.lineSymbols,
+      this.props.worldSettings,
+      document
+    )
+
+  }
+
   render(): JSX.Element {
 
     if (!gameInstructionsEditorAceSession) {
@@ -89,9 +123,9 @@ class GameInstructionsEditor extends React.Component<Props, any> {
            onMouseUp={() => {
              this.gripperDownPoint = null
            }}
-           // onMouseLeave={() => {
-           //   this.gripperDownPoint = null
-           // }}
+        // onMouseLeave={() => {
+        //   this.gripperDownPoint = null
+        // }}
            onMouseMove={(e) => this.onMouseMoveThrottled(e.clientX)}
       >
 
@@ -133,10 +167,10 @@ class GameInstructionsEditor extends React.Component<Props, any> {
                            readony={false}
                            mode="markdown"
                            onLostFocus={(val) => {
-                             this.props.set_gie_markdown(val)
+                             this.onMarkdownChanged(val, true)
                            }}
                            onDestroyed={(val) => {
-                             this.props.set_gie_markdown(val)
+                             this.onMarkdownChanged(val, false)
                            }}
                            throttleTimeInMs={500}
                            fontSize={this.props.editorFontSize}
@@ -153,7 +187,7 @@ class GameInstructionsEditor extends React.Component<Props, any> {
                  x: e.clientX,
                  y: e.clientY
                }
-               this.gripperDownDeltaX =this.props.verticalGripperPositionOffsetInPx
+               this.gripperDownDeltaX = this.props.verticalGripperPositionOffsetInPx
              }}
         ></div>
 
