@@ -22,6 +22,8 @@ export default class markdownRenderer extends React.Component<MyProps, any> {
 
     const content = markdown.render(markdownWithFontAwesomeIcons)
 
+    console.log(content)
+
     return (
       <div id={this.props.printId} className="fh fw">
         <div className="markdown-body" dangerouslySetInnerHTML={{__html: content}} style={{fontSize: this.props.fontSizeInPx}}></div>

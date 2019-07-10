@@ -726,17 +726,17 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
 
   let fieldText = (symbolForShape !== null && symbolForShape.overwriteText ? symbolForShape.text : field.text)
 
-  if (isBranchIf && worldSettings.branchIfPrependText !== '') {
-    fieldText = worldSettings.branchIfPrependText + ' ' + fieldText
+  if (isBranchIf && worldSettings.branchIfPrefixText !== '') {
+    fieldText = worldSettings.branchIfPrefixText + ' ' + fieldText
 
-  } else if (isStartField && worldSettings.startFieldAutoPrependText) {
-    fieldText = worldSettings.startFieldAutoPrependText + ' ' + fieldText
+  } else if (isStartField && worldSettings.startFieldAutoPrefixText) {
+    fieldText = worldSettings.startFieldAutoPrefixText + ' ' + fieldText
 
-  } else if (isEndField && worldSettings.endFieldAutoPrependText) {
-    fieldText = worldSettings.endFieldAutoPrependText + ' ' + fieldText
+  } else if (isEndField && worldSettings.endFieldAutoPrefixText) {
+    fieldText = worldSettings.endFieldAutoPrefixText + ' ' + fieldText
 
-  } else if (isForceOrImplicitlyForced && worldSettings.forcedFieldAutoPrependText !== '') {
-    fieldText = worldSettings.forcedFieldAutoPrependText + ' ' + fieldText
+  } else if (isForceOrImplicitlyForced && worldSettings.forcedFieldAutoPrefixText !== '') {
+    fieldText = worldSettings.forcedFieldAutoPrefixText + ' ' + fieldText
   }
 
 

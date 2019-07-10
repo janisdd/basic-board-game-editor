@@ -7,24 +7,33 @@ import {
   set_gie_actionResultCopyText,
   set_gie_editorFontSize,
   set_gie_isActionResultCopyModalDisplayed,
-  set_gie_isGameInstructionsEditorSettingsModalDisplayed, set_gie_isMarkdownHelpModalDisplayed
+  set_gie_isGameInstructionsEditorSettingsModalDisplayed,
+  set_gie_isMarkdownHelpModalDisplayed
 } from "../../state/reducers/gameInstructionsEditor/actions";
 import {
   defaultGameInstructionEditorFontSize,
   markdownGameInstructionsFieldTextExplanationHeader,
   maxZoomedFontSize,
-  minZoomedFontSize,
-  numberRegex
+  minZoomedFontSize
 } from "../../constants";
 import {Icon} from "semantic-ui-react";
 import IconToolTip from "../helpers/IconToolTip";
-import ToolTip from "../helpers/ToolTip";
 import {getI18n} from "../../../i18n/i18nRoot";
-import {generateMarkdownPhraseDefinitionList} from "../../helpers/markdownHelper";
 import {WorldTilesHelper} from "../../helpers/worldTilesHelper";
 import {Logger} from "../../helpers/logger";
 import {Tile} from "../../types/world";
-import _ = require("lodash");
+import {
+  createEmptyReplacementDictWithAllKnownPlaceholders, createEmptyReplacementVarDictWithAllKnownPlaceholders,
+  generateFieldTextExplanationListMarkdown,
+  generateMarkdownPhraseDefinitionList,
+  generateReplacedMarkdown,
+  MarkdownPlaceholderDictionary, MarkdownPlaceholderVarTemplateDictionary
+} from "../../helpers/gameInstructionsHelper";
+import {LangHelper} from "../../helpers/langHelper";
+import {AbstractMachine} from "../../../simulation/machine/AbstractMachine";
+import {ExpressionUnit} from "../../../simulation/model/executionUnit";
+
+const langCompiler = require('../../../simulation/compiler/langCompiler').parser
 
 export interface MyProps {
   // readonly test: string
@@ -46,6 +55,12 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     createFieldTextExplanationListReplacePrefixText: rootState.gameInstructionsEditorState.createFieldTextExplanationListReplacePrefixText,
     createFieldTextExplanationListReplacePostfixText: rootState.gameInstructionsEditorState.createFieldTextExplanationListReplacePostfixText,
 
+    startFieldAutoPrefixText: rootState.worldSettingsState.startFieldAutoPrefixText,
+    endFieldAutoPrefixText: rootState.worldSettingsState.endFieldAutoPrefixText,
+    forcedFieldAutoPrefixText: rootState.worldSettingsState.forcedFieldAutoPrefixText,
+    branchIfPrefixText: rootState.worldSettingsState.branchIfPrefixText,
+
+
     langId: rootState.i18nState.langId,
   }
 }
@@ -66,10 +81,13 @@ const dispatchProps = returntypeof(mapDispatchToProps);
 type Props = typeof stateProps & typeof dispatchProps;
 
 
+const gameInstructionsTemplate = require('./generalGameInstructions/de/game.md')
+const varListElementTemplate = require('./generalGameInstructions/de/varListElement.md')
+
 class EditorActionsBar extends React.Component<Props, any> {
 
 
-  generateFieldTextExplanationList() {
+  getAllUsedUniqueTiles(): ReadonlyArray<Tile> {
 
     //we could iterate over the bounding box but all world tile surrogates are actually used...
 
@@ -86,7 +104,6 @@ class EditorActionsBar extends React.Component<Props, any> {
     // })
     //   .filter(p => p !== null)
 
-    //iterate column by column
     const boundingBox = WorldTilesHelper.getWorldBoundingBox(this.props.worldTilesSurrogates)
     const widthInTiles = boundingBox.maxX - boundingBox.minX + 1 //+1 max = min = 1 --> 0 but this is 1 tile
     const heightInTiles = boundingBox.maxY - boundingBox.minY + 1
@@ -110,74 +127,20 @@ class EditorActionsBar extends React.Component<Props, any> {
       }
     }
 
+    return allUsedTiles
+  }
 
-    const uniqueTiles = _.unionBy<Tile>(allUsedTiles, (tile) => tile.guid)
+  generateFieldTextExplanation() {
 
-    let phrases: string[] = []
+    const allUsedTiles = this.getAllUsedUniqueTiles()
 
-    for (let i = 0; i < uniqueTiles.length; i++) {
-      const uniqueTile = uniqueTiles[i];
-
-      for (let j = 0; j < uniqueTile.fieldShapes.length; j++) {
-        const fieldShape = uniqueTile.fieldShapes[j];
-
-        let fieldText = fieldShape.text === null ? '' : fieldShape.text
-
-        if (fieldShape.createdFromSymbolGuid !== null) {
-          const fieldSymbol = this.props.fieldSymbols.find(p => p.guid === fieldShape.createdFromSymbolGuid)
-
-          if (!fieldSymbol) {
-
-            Logger.fatal(`could not find field symbol with guid ${fieldShape.createdFromSymbolGuid} for field id: ${fieldShape.id} on tile '${uniqueTile.tileSettings.displayName}', tile guid: ${uniqueTile.guid}`)
-
-            continue
-          }
-
-          if (fieldSymbol.overwriteText) {
-            fieldText = fieldSymbol.text === null ? '' : fieldSymbol.text
-          }
-        }
-
-        phrases.push(fieldText)
-      }
-    }
-
-    //--- some cleanup ---
-
-    //replace only empty or trimmed just whitespace texts
-    phrases = phrases.filter(p => p !== null && p.trim() !== '')
-
-    //replace new lines with a single whitespace character because this is better for markdown lists...
-
-    phrases = phrases.map(p => p.replace(/\n/gm, ' '))
-
-    if (this.props.createFieldTextExplanationListReplaceNumbers) {
-
-      //replace concrete numbers with placeholders
-      //note that every number needs its own placeholder e.g. ... 3 do ... 3 --> ... X do ... Y
-
-      for (let i = 0; i < phrases.length; i++) {
-        let phrase = phrases[i];
-
-        const matchResults = phrase.match(numberRegex)
-
-        if (matchResults) {
-
-          for (let i = 0; i < matchResults.length; i++) {
-            const matchResult = matchResults[i]
-            phrase = phrase.replace(matchResult, matchResults.length === 1
-              //e.g. [X] or [X1]
-              ? `${this.props.createFieldTextExplanationListReplacePrefixText}${this.props.createFieldTextExplanationListReplaceVarName}${this.props.createFieldTextExplanationListReplacePostfixText}`
-              : `${this.props.createFieldTextExplanationListReplacePrefixText}${this.props.createFieldTextExplanationListReplaceVarName}${i + 1}${this.props.createFieldTextExplanationListReplacePostfixText}`)
-          }
-
-          phrases[i] = phrase
-        }
-      }
-
-    }
-
-    const uniquePhrases = _.unionBy(phrases, (p) => p)
+    const uniquePhrases = generateFieldTextExplanationListMarkdown(allUsedTiles,
+      this.props.fieldSymbols,
+      this.props.createFieldTextExplanationListReplaceNumbers,
+      this.props.createFieldTextExplanationListReplacePrefixText,
+      this.props.createFieldTextExplanationListReplaceVarName,
+      this.props.createFieldTextExplanationListReplacePostfixText
+    )
 
     // if (uniquePhrases.length === 0) {
     //   return
@@ -185,13 +148,147 @@ class EditorActionsBar extends React.Component<Props, any> {
 
     let markdown = generateMarkdownPhraseDefinitionList(uniquePhrases, this.props.createFieldTextExplanationListAs)
 
-    markdown = `${markdownGameInstructionsFieldTextExplanationHeader}
-
-${markdown}`
-
     this.props.set_gie_actionResultCopyText(markdown)
     this.props.set_gie_isActionResultCopyModalDisplayed(true)
   }
+
+
+  execExpr(expr: ExpressionUnit): string {
+
+    try {
+      const tmp = AbstractMachine.execExpression(expr, AbstractMachine.createNewMachineState())
+
+      const strValue = tmp.val !== null
+        ? `${tmp.val}`
+        : tmp.boolVal !== null
+          ? (tmp.boolVal ? `true` : `false`)
+          : 'ERROR'
+
+      return strValue
+    } catch (err) {
+      Logger.fatal(err)
+      return `ERROR`
+    }
+  }
+
+  generateGeneralGameInstructions() {
+
+    const allUsedTiles = this.getAllUsedUniqueTiles()
+
+
+    const tmpState = LangHelper.executeGameInitCode(this.props.worldCmdText)
+
+    const allVarDefs = LangHelper.getAllVarDefiningStatements(this.props.worldCmdText, allUsedTiles)
+    const replacementDict: MarkdownPlaceholderDictionary = createEmptyReplacementDictWithAllKnownPlaceholders()
+
+
+    const globalVarListReplacement = () => {
+
+      let markdownList = ''
+
+      for (let i = 0; i < allVarDefs.globalVars.length; i++) {
+        const varDeclUnit = allVarDefs.globalVars[i];
+
+        const template = varListElementTemplate
+
+        const replacementDict = createEmptyReplacementVarDictWithAllKnownPlaceholders()
+
+        replacementDict['ident'] = varDeclUnit.ident
+
+        const testValue = this.execExpr(varDeclUnit.expr)
+
+        replacementDict['defaultValue'] = testValue
+
+        const listEntry = generateReplacedMarkdown(template, replacementDict)
+        markdownList += `${listEntry}\n`
+      }
+
+      return markdownList
+    }
+
+    const playerLocalVarListReplacement = () => {
+
+      let markdownList = ''
+
+      for (let i = 0; i < allVarDefs.playerVars.length; i++) {
+        const varDeclUnit = allVarDefs.playerVars[i];
+
+        const template = varListElementTemplate
+
+        const replacementDict = createEmptyReplacementVarDictWithAllKnownPlaceholders()
+
+        replacementDict['ident'] = varDeclUnit.ident
+
+        const testValue = this.execExpr(varDeclUnit.expr)
+
+        replacementDict['defaultValue'] = testValue
+
+        const listEntry = generateReplacedMarkdown(template, replacementDict)
+        markdownList += `${listEntry}\n`
+      }
+
+      return markdownList
+    }
+
+    const localVarListReplacement = () => {
+
+      let markdownList = ''
+
+      const template = varListElementTemplate
+
+      for (let i = 0; i < allVarDefs.localVars.length; i++) {
+        const localVarScope = allVarDefs.localVars[i];
+
+        for (let j = 0; j < localVarScope.localVars.length; j++) {
+          const localVar = localVarScope.localVars[j];
+
+          const replacementDict = createEmptyReplacementVarDictWithAllKnownPlaceholders()
+
+          replacementDict['ident'] = localVar.ident
+
+          const testValue = this.execExpr(localVar.expr)
+
+          replacementDict['defaultValue'] = testValue
+
+          const listEntry = generateReplacedMarkdown(template, replacementDict)
+          markdownList += `${listEntry}\n`
+
+        }
+
+      }
+
+      return markdownList
+    }
+
+    const numAllLocalVars = allVarDefs.localVars.reduce<number>((previousValue, currentValue) => previousValue + currentValue.localVars.length, 0)
+
+    replacementDict['globalVarsList'] = globalVarListReplacement
+    replacementDict['playerLocalVarsList'] = playerLocalVarListReplacement
+    replacementDict['localVarsList'] = localVarListReplacement
+
+
+    replacementDict['maxDiceValue'] = tmpState.maxDiceValue
+
+    replacementDict['numLocalVars'] = numAllLocalVars
+    replacementDict['numPlayerLocalVars'] = allVarDefs.playerVars.length
+    replacementDict['totalLocalVars'] = allVarDefs.playerVars.length + numAllLocalVars
+    replacementDict['numGlobalVars'] = allVarDefs.globalVars.length
+    replacementDict['totalNumVars'] = allVarDefs.globalVars.length + allVarDefs.playerVars.length + numAllLocalVars
+
+    replacementDict['markdownGameInstructionsFieldTextExplanationHeader'] = markdownGameInstructionsFieldTextExplanationHeader
+
+    replacementDict['startFieldPrefix'] = this.props.startFieldAutoPrefixText
+    replacementDict['endFieldPrefix'] = this.props.endFieldAutoPrefixText
+    replacementDict['forcedFieldPrefix'] = this.props.forcedFieldAutoPrefixText
+    replacementDict['branchIfFieldPrefix'] = this.props.branchIfPrefixText
+
+
+    const gameInstructions = generateReplacedMarkdown(gameInstructionsTemplate, replacementDict)
+
+    this.props.set_gie_actionResultCopyText(gameInstructions)
+    this.props.set_gie_isActionResultCopyModalDisplayed(true)
+  }
+
 
   render(): JSX.Element {
     return (
@@ -221,9 +318,7 @@ ${markdown}`
           <IconToolTip
             message={getI18n(this.props.langId, "Creates the initial template for new game instructions with the current world settings (game init code)")}
             icon="asterisk"
-            onClick={() => {
-
-            }}
+            onClick={() => this.generateGeneralGameInstructions()}
           />
         </div>
 
@@ -231,7 +326,7 @@ ${markdown}`
           <IconToolTip
             message={getI18n(this.props.langId, "This will collect all used phrases from all fields in the world into a markdown list, so that you can explain each one manually")}
             icon="list"
-            onClick={() => this.generateFieldTextExplanationList()}
+            onClick={() => this.generateFieldTextExplanation()}
           />
         </div>
 

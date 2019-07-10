@@ -33,7 +33,7 @@ import {
   set_world_printScale,
   set_world_additionalBorderWidthInPx,
   set_world_alwaysInsertArrowHeadsWhenAutoConnectingFields,
-  set_world_forcedFieldAutoPrependText,
+  set_world_forcedFieldAutoPrefixText,
   set_world_forcedFieldBorderColor,
   set_world_branchIfIsFontBold,
   set_world_forcedFieldAutoBorderSizeInPx,
@@ -42,7 +42,7 @@ import {
   set_world_forcedFieldIsFontItalic,
   set_world_branchIfAutoBorderSizeInPx,
   set_world_branchIfBorderColor,
-  set_world_branchIfPrependText,
+  set_world_branchIfPrefixText,
   set_world_forcedFieldBgColor,
   set_world_branchIfColor,
   set_world_branchIfBgColor,
@@ -51,14 +51,14 @@ import {
   set_world_startFieldIsFontBold,
   set_world_startFieldBorderColor,
   set_world_startFieldColor,
-  set_world_startFieldAutoPrependText,
+  set_world_startFieldAutoPrefixText,
   set_world_startFieldAutoBorderSizeInPx,
   set_world_startFieldIsFontItalic,
   set_world_endFieldBgColor,
   set_world_endFieldBorderColor,
   set_world_endFieldIsFontItalic,
   set_world_endFieldColor,
-  set_world_endFieldAutoPrependText,
+  set_world_endFieldAutoPrefixText,
   set_world_endFieldIsFontBold, set_world_endFieldAutoBorderSizeInPx
 
 } from "../../../state/reducers/world/worldSettings/actions";
@@ -128,7 +128,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_world_timeInS_expr_factorAction,
 
   set_world_alwaysInsertArrowHeadsWhenAutoConnectingFields,
-  set_world_forcedFieldAutoPrependText,
+  set_world_forcedFieldAutoPrefixText,
   set_world_forcedFieldBorderColor,
   set_world_forcedFieldAutoBorderSizeInPx,
   set_world_forcedFieldIsFontBold,
@@ -136,7 +136,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_world_forcedFieldColor,
   set_world_forcedFieldBgColor,
 
-  set_world_startFieldAutoPrependText,
+  set_world_startFieldAutoPrefixText,
   set_world_startFieldColor,
   set_world_startFieldBgColor,
   set_world_startFieldAutoBorderSizeInPx,
@@ -144,7 +144,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_world_startFieldIsFontBold,
   set_world_startFieldIsFontItalic,
 
-  set_world_endFieldAutoPrependText,
+  set_world_endFieldAutoPrefixText,
   set_world_endFieldColor,
   set_world_endFieldBgColor,
   set_world_endFieldAutoBorderSizeInPx,
@@ -152,7 +152,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_world_endFieldIsFontBold,
   set_world_endFieldIsFontItalic,
 
-  set_world_branchIfPrependText,
+  set_world_branchIfPrefixText,
   set_world_branchIfAutoBorderSizeInPx,
   set_world_branchIfBorderColor,
   set_world_branchIfIsFontBold,
@@ -373,7 +373,7 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                 },
                 {
-                  menuItem: `${getI18n(this.props.langId, "TilesGlobal tiles settings")}`,
+                  menuItem: `${getI18n(this.props.langId, "Global tiles settings")}`,
                   render: () => {
                     return (
                       <Form as="div">
@@ -409,17 +409,17 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                         <Form.Group widths='equal'>
                           <Form.Field>
                             <label>
-                              {getI18n(this.props.langId, "Auto prepend text")}
+                              {getI18n(this.props.langId, "Auto prefix text")}
                               <IconToolTip
                                 message={getI18n(this.props.langId,
-                                  "Auto prepend text")}
+                                  "Auto prefix text")}
                               />
                             </label>
-                            <Input value={this.props.worldSettings.forcedFieldAutoPrependText}
+                            <Input value={this.props.worldSettings.forcedFieldAutoPrefixText}
 
                                    style={{width: '100px'}}
                                    onChange={(e: SyntheticEvent<HTMLInputElement>) => {
-                                     this.props.set_world_forcedFieldAutoPrependText(e.currentTarget.value)
+                                     this.props.set_world_forcedFieldAutoPrefixText(e.currentTarget.value)
                                    }}
                             />
                           </Form.Field>
@@ -602,13 +602,13 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                         <Form.Group widths='equal'>
                           <Form.Field>
                             <label>
-                              {getI18n(this.props.langId, "Auto prepend text")}
+                              {getI18n(this.props.langId, "Auto prefix text")}
                             </label>
-                            <Input value={this.props.worldSettings.startFieldAutoPrependText}
+                            <Input value={this.props.worldSettings.startFieldAutoPrefixText}
 
                                    style={{width: '100px'}}
                                    onChange={(e: SyntheticEvent<HTMLInputElement>) => {
-                                     this.props.set_world_startFieldAutoPrependText(e.currentTarget.value)
+                                     this.props.set_world_startFieldAutoPrefixText(e.currentTarget.value)
                                    }}
                             />
                           </Form.Field>
@@ -791,13 +791,13 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                         <Form.Group widths='equal'>
                           <Form.Field>
                             <label>
-                              {getI18n(this.props.langId, "Auto prepend text")}
+                              {getI18n(this.props.langId, "Auto prefix text")}
                             </label>
-                            <Input value={this.props.worldSettings.endFieldAutoPrependText}
+                            <Input value={this.props.worldSettings.endFieldAutoPrefixText}
 
                                    style={{width: '100px'}}
                                    onChange={(e: SyntheticEvent<HTMLInputElement>) => {
-                                     this.props.set_world_endFieldAutoPrependText(e.currentTarget.value)
+                                     this.props.set_world_endFieldAutoPrefixText(e.currentTarget.value)
                                    }}
                             />
                           </Form.Field>
@@ -980,13 +980,13 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                           <Form.Field>
                             <label>
-                              {getI18n(this.props.langId, "Auto prepend text")}
+                              {getI18n(this.props.langId, "Auto prefix text")}
                             </label>
-                            <Input value={this.props.worldSettings.branchIfPrependText}
+                            <Input value={this.props.worldSettings.branchIfPrefixText}
 
                                    style={{width: '100px'}}
                                    onChange={(e: SyntheticEvent<HTMLInputElement>) => {
-                                     this.props.set_world_branchIfPrependText(e.currentTarget.value)
+                                     this.props.set_world_branchIfPrefixText(e.currentTarget.value)
                                    }}
                             />
                           </Form.Field>

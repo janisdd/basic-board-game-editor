@@ -33,7 +33,7 @@ declare var process: {
 export const isProduction = (process.env.NODE_ENV === 'production')
 
 
-export const markdownGameInstructionsFieldTextExplanationHeader = `## Texte auf Feldern erklärt`
+export const markdownGameInstructionsFieldTextExplanationHeader = `Texte auf Feldern erklärt`
 
 export const markdownBoxInfoColor = '#4fc08d'
 export const markdownBoxInfoWarning = '#f66'

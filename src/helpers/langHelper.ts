@@ -14,7 +14,7 @@ import {Logger} from "./logger";
 import {AbstractMachine} from "../../simulation/machine/AbstractMachine";
 import {Compiler} from "../../simulation/compiler/compiler";
 import {notExhaustive} from "../state/reducers/_notExhausiveHelper";
-import {WorldSimulationPosition} from "../../simulation/machine/machineState";
+import {MachineState, WorldSimulationPosition} from "../../simulation/machine/machineState";
 
 const langCompiler = require('../../simulation/compiler/langCompiler').parser
 
@@ -34,10 +34,20 @@ interface LocalVarPair {
 }
 
 interface AllDefinitionsObj {
+  /**
+   * the var definitions found in the game init code
+   */
   globalVars: VarDeclUnit[]
+  /**
+   * the var definitions found in the player section (in game init code)
+   */
   playerVars: VarDeclUnit[]
+
   /**
    * store all scopes we every found in the game
+   * this excludes
+   * @see globalVars and
+   * @see playerVars
    */
   localVars: LocalVarDefs[]
 }
@@ -46,8 +56,20 @@ interface AllDefinitionsObj {
  * stores only the current visible vars
  */
 export interface ChangingDefinitionsObj {
+  /**
+   * the var definitions found in the game init code
+   */
   globalVars: VarDeclUnit[]
+  /**
+   * the var definitions found in the player section (in game init code)
+   */
   playerVars: VarDeclUnit[]
+  /**
+   * store all scopes we every found in the game
+   * this excludes
+   * @see globalVars and
+   * @see playerVars
+   */
   localVars: LocalVarPair[]
 
   currentScopeIndex: number
@@ -62,6 +84,26 @@ export class LangHelper {
   private constructor() {
   }
 
+
+  public static executeGameInitCode(gameInitCode: string): MachineState {
+
+    let state = AbstractMachine.createNewMachineState()
+
+    let game: GameUnit = null
+
+    try {
+      game = this.compiler.parse(gameInitCode)
+    } catch (err) {
+      Logger.fatalSyntaxError(`game init code has parse errors: ${err}`)
+      return
+    }
+
+    for (const stat of game.game_def_stats) {
+      state = AbstractMachine.executeGameDefinitionStatement(stat, state)
+    }
+
+    return state
+  }
 
   public static getAllVarDefiningStatements(gameInitCode: string, tiles: ReadonlyArray<Tile>): AllDefinitionsObj {
 
@@ -109,7 +151,10 @@ export class LangHelper {
     this.getAllDefinitions(result, lastScopes, game.statements)
 
 
-    //check that all variables are defined
+    //check that all variables are defined is not done here...
+
+    //get all local var definitions we can discover when executing every single field
+
     let unit: GameUnit
     for (let i = 0; i < tiles.length; i++) {
       const tile = tiles[i]
@@ -135,8 +180,16 @@ export class LangHelper {
   }
 
 
-  private static getAllDefinitions(
-    result: AllDefinitionsObj, lastScopes: LocalVarDefs[], statements: ReadonlyArray<StatementUnit>) {
+  /**
+   * captures all var declaration in result in the given statements
+   * begin and end scopes are respected properly
+   * @param result
+   * @param lastScopes
+   * @param statements
+   */
+  private static getAllDefinitions(result: AllDefinitionsObj,
+                                   lastScopes: LocalVarDefs[],
+                                   statements: ReadonlyArray<StatementUnit>) {
 
     let currentScope = lastScopes[lastScopes.length - 1]
 
@@ -144,9 +197,7 @@ export class LangHelper {
 
       if (statement.type === "var_decl") {
         currentScope.localVars.push(statement)
-      }
-
-      else if (statement.type === "begin_scope") {
+      } else if (statement.type === "begin_scope") {
         currentScope = {
           scopeLevel: lastScopes.length,
           localVars: []
@@ -157,12 +208,11 @@ export class LangHelper {
 
       } else if (statement.type === "end_scope") {
         currentScope = lastScopes.pop()
+
       } else if (statement.type === "if") {
 
         this.getAllDefinitions(result, lastScopes, statement.trueUnits)
-      }
-
-      else if (statement.type === "ifElse") {
+      } else if (statement.type === "ifElse") {
 
         this.getAllDefinitions(result, lastScopes, statement.trueUnits)
         this.getAllDefinitions(result, lastScopes, statement.falseUnits)
@@ -173,6 +223,12 @@ export class LangHelper {
 
 
   //we need to respect the scopes!!
+  /**
+   *
+   * @param changingDefs the current definition table
+   * @param statement
+   * @param fieldPosition
+   */
   public static checkAllVarUsagesInStatement(
     changingDefs: ChangingDefinitionsObj, statement: StatementUnit, fieldPosition: WorldSimulationPosition): void {
 
@@ -289,9 +345,7 @@ export class LangHelper {
         }
 
         this.checkAllVarUsagesInExpression(changingDefs, treeNode.expr, fieldPosition)
-      }
-
-      else if (treeNode.type === "player_var_assign") {
+      } else if (treeNode.type === "player_var_assign") {
 
         const isDefined = changingDefs.playerVars.find(p => p.ident === treeNode.ident)
 
@@ -307,8 +361,7 @@ export class LangHelper {
 
         if (treeNode.disjunction) {
           //not a ternary expr but normal pass through
-        }
-        else {
+        } else {
 
           this.checkAllVarUsagesInExpression(changingDefs, treeNode.trueExpression, fieldPosition)
           this.checkAllVarUsagesInExpression(changingDefs, treeNode.falseExpression, fieldPosition)
@@ -337,9 +390,7 @@ export class LangHelper {
           Logger.fatal(
             `player var '${treeNode.ident}' is used but not defined, on field with id '${fieldPosition.fieldId}', on tile '${fieldPosition.tileGuid}'`)
         }
-      }
-
-      else if (treeNode.type === "primary_increment" || treeNode.type === "primary_decrement") {
+      } else if (treeNode.type === "primary_increment" || treeNode.type === "primary_decrement") {
 
         if (treeNode.player !== null) {
           const isDefined = changingDefs.playerVars.find(p => p.ident === treeNode.ident)

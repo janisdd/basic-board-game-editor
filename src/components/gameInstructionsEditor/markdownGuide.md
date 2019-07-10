@@ -80,6 +80,27 @@ Term 2
 :  must be at least 1 space indented
 
 
+## Font Awesome icons
+
+You can use font awesome icons via unicode
+
+```text
+search the icon you want at https://fontawesome.com/icons?d=gallery&m=free
+and copy the unicode
+
+a \ followed by the unicode e.g. f1d8 (a plane)
+
+for solid icons you need to make the font bold
+
+**\ f1d8** a filled plane
+```
+
+\f1d8 a plane
+
+for solid icons you need to make the font bold
+
+**\f1d8** a filled plane
+
 ## Footnotes
 
 

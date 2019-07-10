@@ -5,16 +5,16 @@
 
 - Mindestens ein Würfel mit @@@maxDiceValue@@@ Seiten
 - Eine farbige Spielfigur pro Spieler
-  - Außerdem @@@numLokalVars@@@ gleichfarbige Spielfiguren pro Spieler (für lokale Variablen)
+  - Außerdem @@@totalLocalVars@@@ gleichfarbige Spielfiguren pro Spieler für lokale Variablen
 
-- @@@numGlobalVars@@@ Spielfigure(n) (für globale Variablen)
+- @@@numGlobalVars@@@ Spielfigure(n) für globale Variablen
 
 
 ### Hinweise
 
 Wenn in der Anleitung von **ausführen**, **Text ausführen** oder **Feld ausführen** die Rede ist, dann ist damit gemeint, dass man das tut, was auf dem Feld als Text beschrieben ist.
 
-Für eine nähere beschreibung kann der Abschnitt `@@@markdownGameInstructionsFieldTextExplanationHeader@@@`.
+Näheres dazu im Abschnitt **@@@markdownGameInstructionsFieldTextExplanationHeader@@@**.
 
 
 ## Variablen
@@ -23,7 +23,7 @@ Es gibt @@@totalNumVars@@@ Variablen.
 
 Für jede lokale Variable braucht man einen Variablenanzeiger (Scheibe) mit dem entsprechenden Namen der Variablen. Die Felder am Rand des Variablenanzeigers geben den Wert der Variablen wieder.
 
-Wenn eine Variable über ihr Maxium erhöht wird, fängt sie wieder beim maximalen Minimum an, analog für das Minimum.
+Wenn eine Variable über ihr Maximum erhöht wird, fängt sie wieder beim maximalen Minimum an, analog für das Minimum.
 
 Als Faustregel kann man sich merken:
 
@@ -33,28 +33,30 @@ Als Faustregel kann man sich merken:
 
 ### Globale Variablen
 
-Es gibt @@@numGlobalVars@@@ Variablen, alle starten mit dem Wert 0. ??
+Es gibt @@@numGlobalVars@@@ Variable(n).
+
+@@@globalVarsList@@@
 
 Auf jede globalen Variable darf nur eine Spielfigur für alle Spieler stehen.
 Der Wert für globale Variablen ist für alle Spieler gleich.
 
 
-?? alle aufzählen mit default werden
-
 
 ### Lokale Variablen
 
-Es gibt @@@numLokalVars@@@ Variablen, alle starten mit dem Wert 0. ??
+Es gibt @@@totalLocalVars@@@ Variable(n) 
+
+**(@@@numPlayerLocalVars@@@ Spieler-Variable(n) + @@@numLocalVars@@@ lokale Variable(n))**
+
+@@@playerLocalVarsList@@@@@@localVarsList@@@
 
 Auf jede lokale Variable muss eine Spielfigur von jedem Spieler stehen.
 Der Wert für lokale Variablen ist für jeden Spieler unterschiedlich.
 
 
-?? alle aufzählen mit default werden
-
 ### Ablauf
 
-Alle Spieler starten mit ihren Figuren vor dem Feld mit dem Symbol/Text **@@@startFeldPrefix@@@**.
+Alle Spieler starten mit ihren Figuren vor dem Feld mit dem Symbol/Text **@@@startFieldPrefix@@@**.
 
 Die spieler einigen sich untereinander wer beginnt.
 
@@ -78,4 +80,5 @@ Ein Spielzug läuft folgendermaßen ab:
 Wenn man auf einem Feld mit dem Symbol/text **@@@branchIfFieldPrefix@@@** stehen bleibt, wird der Text erst zu Beginn der nächsten Runde ausgeführt
 
 
+### @@@markdownGameInstructionsFieldTextExplanationHeader@@@
 

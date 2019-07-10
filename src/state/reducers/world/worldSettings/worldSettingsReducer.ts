@@ -138,7 +138,7 @@ export interface WorldSettings {
    * text to prepend when we have a forced field (also implicitly forced)
    * can be a font awesome unicode icon \fxxx
    */
-  readonly forcedFieldAutoPrependText: string
+  readonly forcedFieldAutoPrefixText: string
 
   /**
    * don't allow null, use transparent
@@ -160,7 +160,7 @@ export interface WorldSettings {
    * text to prepend when we have a forced field (also implicitly forced)
    * can be a font awesome unicode icon \fxxx
    */
-  readonly startFieldAutoPrependText: string
+  readonly startFieldAutoPrefixText: string
 
   /**
    * don't allow null, use transparent
@@ -182,7 +182,7 @@ export interface WorldSettings {
    * text to prepend when we have a forced field (also implicitly forced)
    * can be a font awesome unicode icon \fxxx
    */
-  readonly endFieldAutoPrependText: string
+  readonly endFieldAutoPrefixText: string
 
   /**
    * don't allow null, use transparent
@@ -205,7 +205,7 @@ export interface WorldSettings {
    * text to prepend when we have a control if statement ... if we have multiple ways (2) with a condition
    * can be a font awesome unicode icon \fxxx
    */
-  readonly branchIfPrependText: string
+  readonly branchIfPrefixText: string
 
   readonly branchIfAutoBorderSizeInPx: number
   readonly branchIfBorderColor: string
@@ -292,7 +292,7 @@ export const initial: State = {
 
   alwaysInsertArrowHeadsWhenAutoConnectingFields: true,
 
-  forcedFieldAutoPrependText: '\\f071',
+  forcedFieldAutoPrefixText: '\\f071',
   forcedFieldAutoBorderSizeInPx: 2,
   forcedFieldBorderColor: 'black',
   forcedFieldIsFontBold: true,
@@ -300,7 +300,7 @@ export const initial: State = {
   forcedFieldColor: 'black',
   forcedFieldBgColor: '#DDDDDD',
 
-  startFieldAutoPrependText: '\\f35a',
+  startFieldAutoPrefixText: '\\f35a',
   startFieldColor: 'black',
   startFieldBgColor: '#DDDDDD',
   startFieldAutoBorderSizeInPx: 2,
@@ -308,7 +308,7 @@ export const initial: State = {
   startFieldIsFontBold: true,
   startFieldIsFontItalic: false,
 
-  endFieldAutoPrependText: '\\f11e',
+  endFieldAutoPrefixText: '\\f11e',
   endFieldColor: 'black',
   endFieldBgColor: '#DDDDDD',
   endFieldAutoBorderSizeInPx: 2,
@@ -316,7 +316,7 @@ export const initial: State = {
   endFieldIsFontBold: true,
   endFieldIsFontItalic: false,
 
-  branchIfPrependText: '\\f126',
+  branchIfPrefixText: '\\f126',
   branchIfAutoBorderSizeInPx: 2,
   branchIfBorderColor: 'black',
   branchIfIsFontBold: true,
@@ -393,7 +393,7 @@ export enum ActionType {
 
   SET_alwaysInsertArrowHeadsWhenAutoConnectingFields = 'worldSettingsReducer_SET_alwaysInsertArrowHeadsWhenAutoConnectingFields',
 
-  SET_forcedFieldAutoPrependText = 'worldSettingsReducer_SET_forcedFieldAutoPrependText',
+  SET_forcedFieldAutoPrefixText = 'worldSettingsReducer_SET_forcedFieldAutoPrefixText',
   SET_forcedFieldAutoBorderSizeInPx = 'worldSettingsReducer_SET_forcedFieldAutoBorderSizeInPx',
   SET_forcedFieldBorderColor = 'worldSettingsReducer_SET_forcedFieldBorderColor',
   SET_forcedFieldIsFontBold = 'worldSettingsReducer_SET_forcedFieldIsFontBold',
@@ -402,7 +402,7 @@ export enum ActionType {
   SET_forcedFieldBgColor = 'worldSettingsReducer_SET_forcedFieldBgColor',
 
 
-  SET_startFieldAutoPrependText = 'worldSettingsReducer_SET_startFieldAutoPrependText',
+  SET_startFieldAutoPrefixText = 'worldSettingsReducer_SET_startFieldAutoPrefixText',
   SET_startFieldColor = 'worldSettingsReducer_SET_startFieldColor',
   SET_startFieldBgColor = 'worldSettingsReducer_SET_startFieldBgColor',
   SET_startFieldAutoBorderSizeInPx = 'worldSettingsReducer_SET_startFieldAutoBorderSizeInPx',
@@ -410,7 +410,7 @@ export enum ActionType {
   SET_startFieldIsFontBold = 'worldSettingsReducer_SET_startFieldIsFontBold',
   SET_startFieldIsFontItalic = 'worldSettingsReducer_SET_startFieldIsFontItalic',
 
-  SET_endFieldAutoPrependText = 'worldSettingsReducer_SET_endFieldAutoPrependText',
+  SET_endFieldAutoPrefixText = 'worldSettingsReducer_SET_endFieldAutoPrefixText',
   SET_endFieldColor = 'worldSettingsReducer_SET_endFieldColor',
   SET_endFieldBgColor = 'worldSettingsReducer_SET_endFieldBgColor',
   SET_endFieldAutoBorderSizeInPx = 'worldSettingsReducer_SET_endFieldAutoBorderSizeInPx',
@@ -418,7 +418,7 @@ export enum ActionType {
   SET_endFieldIsFontBold = 'worldSettingsReducer_SET_endFieldIsFontBold',
   SET_endFieldIsFontItalic = 'worldSettingsReducer_SET_endFieldIsFontItalic',
 
-  SET_branchIfPrependText = 'worldSettingsReducer_SET_branchIfPrependText',
+  SET_branchIfPrefixText = 'worldSettingsReducer_SET_branchIfPrefixText',
   SET_branchIfAutoBorderSizeInPx = 'worldSettingsReducer_SET_branchIfAutoBorderSizeInPx',
   SET_branchIfBorderColor = 'worldSettingsReducer_SET_branchIfBorderColor',
   SET_branchIfIsFontBold = 'worldSettingsReducer_SET_branchIfIsFontBold',
@@ -698,9 +698,9 @@ export interface SET_alwaysInsertArrowHeadsWhenAutoConnectingFieldsAction extend
 
 //--- forced field style
 
-export interface SET_forcedFieldAutoPrependTextAction extends ActionBase {
-  readonly type: ActionType.SET_forcedFieldAutoPrependText
-  readonly forcedFieldAutoPrependText: string
+export interface SET_forcedFieldAutoPrefixTextAction extends ActionBase {
+  readonly type: ActionType.SET_forcedFieldAutoPrefixText
+  readonly forcedFieldAutoPrefixText: string
 }
 
 export interface SET_forcedFieldAutoBorderSizeInPxAction extends ActionBase {
@@ -735,9 +735,9 @@ export interface SET_forcedFieldBgColorAction extends ActionBase {
 
 //--- start field style
 
-export interface SET_startFieldAutoPrependTextAction extends ActionBase {
-  readonly type: ActionType.SET_startFieldAutoPrependText
-  readonly startFieldAutoPrependText: string
+export interface SET_startFieldAutoPrefixTextAction extends ActionBase {
+  readonly type: ActionType.SET_startFieldAutoPrefixText
+  readonly startFieldAutoPrefixText: string
 }
 
 export interface SET_startFieldColorAction extends ActionBase {
@@ -773,9 +773,9 @@ export interface SET_startFieldIsFontItalicAction extends ActionBase {
 
 //--- end field style
 
-export interface SET_endFieldAutoPrependTextAction extends ActionBase {
-  readonly type: ActionType.SET_endFieldAutoPrependText
-  readonly endFieldAutoPrependText: string
+export interface SET_endFieldAutoPrefixTextAction extends ActionBase {
+  readonly type: ActionType.SET_endFieldAutoPrefixText
+  readonly endFieldAutoPrefixText: string
 }
 export interface SET_endFieldColorAction extends ActionBase {
   readonly type: ActionType.SET_endFieldColor
@@ -804,9 +804,9 @@ export interface SET_endFieldIsFontItalicAction extends ActionBase {
 
 //--- branch if field style
 
-export interface SET_branchIfPrependTextAction extends ActionBase {
-  readonly type: ActionType.SET_branchIfPrependText
-  readonly branchIfPrependText: string
+export interface SET_branchIfPrefixTextAction extends ActionBase {
+  readonly type: ActionType.SET_branchIfPrefixText
+  readonly branchIfPrefixText: string
 }
 
 export interface SET_branchIfAutoBorderSizeInPxAction extends ActionBase {
@@ -902,7 +902,7 @@ export type AllActions =
   | SET_world_timeInS_expr_factorAction
   | SET_alwaysInsertArrowHeadsWhenAutoConnectingFieldsAction
 
-  | SET_forcedFieldAutoPrependTextAction
+  | SET_forcedFieldAutoPrefixTextAction
   | SET_forcedFieldAutoBorderSizeInPxAction
   | SET_forcedFieldBorderColorAction
   | SET_forcedFieldIsFontItalicAction
@@ -910,7 +910,7 @@ export type AllActions =
   | SET_forcedFieldColorAction
   | SET_forcedFieldBgColorAction
 
-  | SET_startFieldAutoPrependTextAction
+  | SET_startFieldAutoPrefixTextAction
   | SET_startFieldColorAction
   | SET_startFieldBgColorAction
   | SET_startFieldAutoBorderSizeInPxAction
@@ -918,7 +918,7 @@ export type AllActions =
   | SET_startFieldIsFontBoldAction
   | SET_startFieldIsFontItalicAction
 
- | SET_endFieldAutoPrependTextAction
+ | SET_endFieldAutoPrefixTextAction
  | SET_endFieldColorAction
  | SET_endFieldBgColorAction
  | SET_endFieldAutoBorderSizeInPxAction
@@ -926,7 +926,7 @@ export type AllActions =
  | SET_endFieldIsFontBoldAction
  | SET_endFieldIsFontItalicAction
 
-  | SET_branchIfPrependTextAction
+  | SET_branchIfPrefixTextAction
   | SET_branchIfAutoBorderSizeInPxAction
   | SET_branchIfBorderColorAction
   | SET_branchIfIsFontBoldAction
@@ -1246,10 +1246,10 @@ export function reducer(state: State = initial, action: AllActions): State {
       }
 
 
-    case ActionType.SET_forcedFieldAutoPrependText:
+    case ActionType.SET_forcedFieldAutoPrefixText:
       return {
         ...state,
-        forcedFieldAutoPrependText: action.forcedFieldAutoPrependText
+        forcedFieldAutoPrefixText: action.forcedFieldAutoPrefixText
       }
     case ActionType.SET_forcedFieldAutoBorderSizeInPx:
       return {
@@ -1287,10 +1287,10 @@ export function reducer(state: State = initial, action: AllActions): State {
       }
 
 
-    case ActionType.SET_startFieldAutoPrependText:
+    case ActionType.SET_startFieldAutoPrefixText:
       return {
         ...state,
-        startFieldAutoPrependText: action.startFieldAutoPrependText
+        startFieldAutoPrefixText: action.startFieldAutoPrefixText
       }
     case ActionType.SET_startFieldColor:
       return {
@@ -1324,10 +1324,10 @@ export function reducer(state: State = initial, action: AllActions): State {
       }
 
 
-    case ActionType.SET_endFieldAutoPrependText:
+    case ActionType.SET_endFieldAutoPrefixText:
       return {
         ...state,
-        endFieldAutoPrependText: action.endFieldAutoPrependText
+        endFieldAutoPrefixText: action.endFieldAutoPrefixText
       }
     case ActionType.SET_endFieldColor:
       return {
@@ -1361,10 +1361,10 @@ export function reducer(state: State = initial, action: AllActions): State {
       }
 
 
-    case ActionType.SET_branchIfPrependText:
+    case ActionType.SET_branchIfPrefixText:
       return {
         ...state,
-        branchIfPrependText: action.branchIfPrependText
+        branchIfPrefixText: action.branchIfPrefixText
       }
     case ActionType.SET_branchIfAutoBorderSizeInPx:
       return {

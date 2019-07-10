@@ -52,10 +52,10 @@ import {
   SET_world_printScaleAction,
   SET_world_additionalBorderWidthInPxAction,
   SET_alwaysInsertArrowHeadsWhenAutoConnectingFieldsAction,
-  SET_forcedFieldAutoPrependTextAction,
+  SET_forcedFieldAutoPrefixTextAction,
   SET_forcedFieldAutoBorderSizeInPxAction,
   SET_forcedFieldBorderColorAction,
-  SET_branchIfPrependTextAction,
+  SET_branchIfPrefixTextAction,
   SET_forcedFieldIsFontBoldAction,
   SET_forcedFieldIsFontItalicAction,
   SET_branchIfIsFontBoldAction,
@@ -66,14 +66,14 @@ import {
   SET_forcedFieldBgColorAction,
   SET_branchIfColorAction,
   SET_branchIfBgColorAction,
-  SET_startFieldAutoPrependTextAction,
+  SET_startFieldAutoPrefixTextAction,
   SET_startFieldColorAction,
   SET_startFieldBgColorAction,
   SET_startFieldAutoBorderSizeInPxAction,
   SET_startFieldBorderColorAction,
   SET_startFieldIsFontBoldAction,
   SET_startFieldIsFontItalicAction,
-  SET_endFieldAutoPrependTextAction,
+  SET_endFieldAutoPrefixTextAction,
   SET_endFieldColorAction,
   SET_endFieldBgColorAction,
   SET_endFieldAutoBorderSizeInPxAction,
@@ -449,10 +449,10 @@ export function set_world_alwaysInsertArrowHeadsWhenAutoConnectingFields(alwaysI
 
 //--- force field style
 
-export function set_world_forcedFieldAutoPrependText(forcedFieldAutoPrependText: string): SET_forcedFieldAutoPrependTextAction {
+export function set_world_forcedFieldAutoPrefixText(forcedFieldAutoPrefixText: string): SET_forcedFieldAutoPrefixTextAction {
   return {
-    type: ActionType.SET_forcedFieldAutoPrependText,
-    forcedFieldAutoPrependText
+    type: ActionType.SET_forcedFieldAutoPrefixText,
+    forcedFieldAutoPrefixText
   }
 }
 
@@ -502,10 +502,10 @@ export function set_world_forcedFieldBgColor(forcedFieldBgColor: string): SET_fo
 
 //--- start field style
 
-export function set_world_startFieldAutoPrependText(startFieldAutoPrependText: string) : SET_startFieldAutoPrependTextAction {
+export function set_world_startFieldAutoPrefixText(startFieldAutoPrefixText: string) : SET_startFieldAutoPrefixTextAction {
   return {
-    type: ActionType.SET_startFieldAutoPrependText,
-    startFieldAutoPrependText
+    type: ActionType.SET_startFieldAutoPrefixText,
+    startFieldAutoPrefixText
   }
 }
 export function set_world_startFieldColor(startFieldColor: string) : SET_startFieldColorAction {
@@ -547,10 +547,10 @@ export function set_world_startFieldIsFontItalic(startFieldIsFontItalic: boolean
 
 //--- end field style
 
-export function set_world_endFieldAutoPrependText(endFieldAutoPrependText: string): SET_endFieldAutoPrependTextAction {
+export function set_world_endFieldAutoPrefixText(endFieldAutoPrefixText: string): SET_endFieldAutoPrefixTextAction {
   return {
-    type: ActionType.SET_endFieldAutoPrependText,
-    endFieldAutoPrependText
+    type: ActionType.SET_endFieldAutoPrefixText,
+    endFieldAutoPrefixText
   }
 }
 export function set_world_endFieldColor(endFieldColor: string): SET_endFieldColorAction {
@@ -592,10 +592,10 @@ export function set_world_endFieldIsFontItalic(endFieldIsFontItalic: boolean): S
 
 //--- branch if field style
 
-export function set_world_branchIfPrependText(branchIfPrependText: string): SET_branchIfPrependTextAction {
+export function set_world_branchIfPrefixText(branchIfPrefixText: string): SET_branchIfPrefixTextAction {
   return {
-    type: ActionType.SET_branchIfPrependText,
-    branchIfPrependText
+    type: ActionType.SET_branchIfPrefixText,
+    branchIfPrefixText
   }
 }
 

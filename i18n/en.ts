@@ -42,7 +42,7 @@ export const lang_en: LangObj = {
   "Edit tile in the selected area": "Edit tile in the selected area",
   "Remove tile from the selected area": "Remove tile from the selected area",
   "Zoom": "Zoom",
-  "TilesGlobal tiles settings": "TilesGlobal tiles settings",
+  "Global tiles settings": "Global tiles settings",
   //--- tile //--- til,
   "Add tile to world": "Add tile to world",
   "Edit tile. This will also change all instances of this the in the map. If you want to change only 1 instance then create a clone first and exchange the tile with the clone": "Edit tile. This will also change all instances of this the in the map. If you want to change only 1 instance then create a clone first and exchange the tile with the clone",
@@ -307,7 +307,7 @@ export const lang_en: LangObj = {
 
   "End field style": "End field style",
   "An end field is a field with the command text containing the game end command": "An end field is a field with the command text containing the game end command",
-  "Auto prepend text": "Auto prepend text",
+  "Auto prefix text": "Auto prefix text",
   "Auto border size in px": "Auto border size in px",
   "Is font bold": "Is font bold",
   "Is font italic": "Is font italic",

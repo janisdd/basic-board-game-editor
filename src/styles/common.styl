@@ -388,6 +388,15 @@ body {
     line-height: 1.5;
     word-wrap: break-word;
 
+
+    p,
+    ul {
+      code {
+        border 1px solid #d6d6d6 !important
+        background-color transparent !important
+      }
+    }
+
     //stolen from vue js guide ;)
     .box {
       position relative
@@ -417,16 +426,6 @@ body {
 
     .markdown-fenced-code-block-wrapper {
       pre {
-        border 1px solid #d6d6d6
-        background-color transparent !important
-      }
-    }
-
-
-    .markdown-inline-code-tag-wrapper {
-      display inline-block
-
-      code {
         border 1px solid #d6d6d6
         background-color transparent !important
       }

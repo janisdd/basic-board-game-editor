@@ -23,6 +23,9 @@ export interface WorldSimulationPosition {
 
 export interface MachineState {
 
+  /**
+   * global variables (defined in game init code)
+   */
   readonly globalDefTable: DefinitionTable
 
   /**
@@ -109,6 +112,8 @@ export interface PlayerObj {
    * when we use this.X we use this prop when we just use X we check the local scopes first
    * also see simulation/__tests__/semantic/statements/builtInFuncs/scopes.ts (in tests for the difference between local and player vars
    * player vars are like this.X (cp.X) where normal X is a local var for the player in the current scope
+   *
+   * these vars are defined in the game init code in the player section
    */
   readonly defTable: DefinitionTable
 
@@ -116,12 +121,14 @@ export interface PlayerObj {
    * if we open a new scope we push a new def table here
    * if we close a scope pop the last def table
    *
-   * the current scope is always the last def table
+   * the current scope is always the last def table in the array
    * note that we have a default function scope
    *  @see AbstractMachine.createNewMachineState
    *  if we are in the default (0) scope vars can be in
    *  @see localDefTables or
    *  @see defTable
+   *
+   *  these vars are discovered after the game init code (section)
    */
   readonly localDefTables: ReadonlyArray<DefinitionTableWrapper>
 

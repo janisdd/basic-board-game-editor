@@ -141,43 +141,8 @@ mdRenderer.renderer.rules.fence = (tokens, idx, options, env, self) => {
   return withCopyBtn
 }
 
-const oldCodeRule = mdRenderer.renderer.rules.code_inline
-
-
-mdRenderer.renderer.rules.code_inline = (tokens, idx, options, env, self) => {
-
-  // const token = tokens[idx]
-
-  const codeTag = oldCodeRule(tokens, idx, options, env, self)
-
-  //handler is globally defined in index
-  const withCopyBtn = `<div class="markdown-inline-code-tag-wrapper">
-  ${codeTag}
-</div>`
-
-  return withCopyBtn
-}
-
-
 export default mdRenderer
 
-export function generateMarkdownPhraseDefinitionList(phrases: string[], listType: CreateFieldTextExplanationListType): string {
-
-  switch (listType) {
-    case CreateFieldTextExplanationListType.list: {
-
-      return phrases.map(p => `- \`${p}\` - `).join('\n')
-    }
-
-    case CreateFieldTextExplanationListType.definitionList: {
-
-      return phrases.map(p => `${p}\n: todo\n`).join('\n')
-    }
-    default:
-      notExhaustiveThrow(listType)
-
-  }
-}
 
 /**
  * replaces \fxxx font awesome unicode with the proper unicode \ufxxx

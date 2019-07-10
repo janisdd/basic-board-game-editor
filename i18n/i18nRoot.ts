@@ -44,7 +44,7 @@ export interface LangObj {
   "Edit tile in the selected area": string
   "Remove tile from the selected area": string
   "Zoom": string
-  "TilesGlobal tiles settings": string
+  "Global tiles settings": string
   //--- tile library
   "Add tile to world": string
   "Edit tile. This will also change all instances of this the in the map. If you want to change only 1 instance then create a clone first and exchange the tile with the clone": string
@@ -309,7 +309,7 @@ export interface LangObj {
 
   "End field style": string
   "An end field is a field with the command text containing the game end command": string
-  "Auto prepend text": string
+  "Auto prefix text": string
   "Auto border size in px": string
   "Is font bold": string
   "Is font italic": string

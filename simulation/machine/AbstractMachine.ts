@@ -2483,7 +2483,7 @@ export class AbstractMachine {
 }
 
 
-interface ExprTuple {
+export interface ExprTuple {
   readonly state: MachineState
   readonly val: number | null
   readonly boolVal: boolean | null
