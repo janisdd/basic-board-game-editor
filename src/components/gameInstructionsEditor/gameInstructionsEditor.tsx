@@ -20,7 +20,8 @@ import GameInstructionsEditorSettingsModal from './gameInstructionsEditorSetting
 import IEditSession = AceAjax.IEditSession;
 import MarkdownHelpModal from './markdownHelpModal'
 import _ = require("lodash");
-import {injectFieldImgsIntoMarkdown, injectTileImgsIntoMarkdown} from "../../helpers/gameInstructionsHelper";
+import {GameInstructionsHelper} from "../../helpers/gameInstructionsHelper";
+import {WorldUnitAsImgBlobStorage} from "../../externalStorage/WorldUnitAsImgBlobStorage";
 
 export interface MyProps {
   //readonly test: string
@@ -73,6 +74,16 @@ class GameInstructionsEditor extends React.Component<Props, any> {
   gripperDownDeltaX = 0
 
 
+  componentDidMount(): void {
+    this.forceRegenerateFieldAndTileIms()
+  }
+
+  componentWillUnmount(): void {
+    //clear old imgs
+    WorldUnitAsImgBlobStorage.clearFieldStorage()
+    WorldUnitAsImgBlobStorage.clearTileStorage()
+  }
+
   onMouseMoveThrottled = _.throttle((newX: number) => {
     if (!this.gripperDownPoint) return
 
@@ -87,7 +98,13 @@ class GameInstructionsEditor extends React.Component<Props, any> {
 
     if (!rerenderFieldAndTileImgs) return
 
-    await injectFieldImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
+    await this.forceRegenerateFieldAndTileIms()
+
+  }
+
+  async forceRegenerateFieldAndTileIms() {
+
+    await GameInstructionsHelper.injectFieldImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
       this.props.markdown,
       this.props.allPossibleTiles,
       this.props.fieldSymbols,
@@ -95,7 +112,7 @@ class GameInstructionsEditor extends React.Component<Props, any> {
       document
     )
 
-    await injectTileImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
+    await GameInstructionsHelper.injectTileImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
       this.props.markdown,
       this.props.allPossibleTiles,
       this.props.fieldSymbols,

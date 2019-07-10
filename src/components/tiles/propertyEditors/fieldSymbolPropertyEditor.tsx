@@ -750,6 +750,7 @@ class fieldSymbolPropertyEditor extends React.Component<Props, any> {
             set_isDisplayed={(isDisplayed) => {
               this.props.setEditor_IsChooseFieldShapeBackgroundImageLibraryDisplayed(isDisplayed)
             }}
+            displayGenericImg={true}
           />
 
         </Form.Field>

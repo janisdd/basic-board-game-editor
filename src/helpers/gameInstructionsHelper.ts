@@ -19,121 +19,6 @@ import {WorldUnitAsImgBlobStorage} from "../externalStorage/WorldUnitAsImgBlobSt
 import {WorldSettings} from "../state/reducers/world/worldSettings/worldSettingsReducer";
 
 
-/**
- * captures all phrases from all fields and optionally replaces numbers with placeholders (variables)
- * this will process tiles only once (distinct/unique) resulting phrases list is also made unique
- * @param allUsedTiles all tiles
- * @param fieldSymbols all field symbols
- * @param createFieldTextExplanationListReplaceNumbers true: replace numbers with vars, false: not
- * @param createFieldTextExplanationListReplacePrefixText e.g. [
- * @param createFieldTextExplanationListReplaceVarName e.g. X
- * @param createFieldTextExplanationListReplacePostfixText e.g. ]
- */
-export function generateFieldTextExplanationListMarkdown(allUsedTiles: ReadonlyArray<Tile>,
-                                                         fieldSymbols: ReadonlyArray<FieldSymbol>,
-                                                         createFieldTextExplanationListReplaceNumbers: boolean,
-                                                         createFieldTextExplanationListReplacePrefixText: string,
-                                                         createFieldTextExplanationListReplaceVarName: string,
-                                                         createFieldTextExplanationListReplacePostfixText: string
-): string[] {
-
-  const uniqueTiles = _.uniqWith<Tile>(allUsedTiles, (tile1, tile2) => tile1.guid === tile2.guid)
-
-  let phrases: string[] = []
-
-  for (let i = 0; i < uniqueTiles.length; i++) {
-    const uniqueTile = uniqueTiles[i];
-
-    for (let j = 0; j < uniqueTile.fieldShapes.length; j++) {
-      const fieldShape = uniqueTile.fieldShapes[j];
-
-      let fieldText = fieldShape.text === null ? '' : fieldShape.text
-
-      if (fieldShape.createdFromSymbolGuid !== null) {
-        const fieldSymbol = fieldSymbols.find(p => p.guid === fieldShape.createdFromSymbolGuid)
-
-        if (!fieldSymbol) {
-
-          Logger.fatal(`could not find field symbol with guid ${fieldShape.createdFromSymbolGuid} for field id: ${fieldShape.id} on tile '${uniqueTile.tileSettings.displayName}', tile guid: ${uniqueTile.guid}`)
-
-          continue
-        }
-
-        if (fieldSymbol.overwriteText) {
-          fieldText = fieldSymbol.text === null ? '' : fieldSymbol.text
-        }
-      }
-
-      phrases.push(fieldText)
-    }
-  }
-
-  //--- some cleanup ---
-
-  //replace only empty or trimmed just whitespace texts
-  phrases = phrases.filter(p => p !== null && p.trim() !== '')
-
-  //replace new lines with a single whitespace character because this is better for markdown lists...
-
-  phrases = phrases.map(p => p.replace(/\n/gm, ' '))
-
-  if (createFieldTextExplanationListReplaceNumbers) {
-
-    //replace concrete numbers with placeholders
-    //note that every number needs its own placeholder e.g. ... 3 do ... 3 --> ... X do ... Y
-
-    for (let i = 0; i < phrases.length; i++) {
-      let phrase = phrases[i];
-
-      const matchResults = phrase.match(numberRegex)
-
-      if (matchResults) {
-
-        for (let i = 0; i < matchResults.length; i++) {
-          const matchResult = matchResults[i]
-          phrase = phrase.replace(matchResult, matchResults.length === 1
-            //e.g. [X] or [X1]
-            ? `${createFieldTextExplanationListReplacePrefixText}${createFieldTextExplanationListReplaceVarName}${createFieldTextExplanationListReplacePostfixText}`
-            : `${createFieldTextExplanationListReplacePrefixText}${createFieldTextExplanationListReplaceVarName}${i + 1}${createFieldTextExplanationListReplacePostfixText}`)
-        }
-
-        phrases[i] = phrase
-      }
-    }
-
-  }
-
-  const uniquePhrases = _.uniqWith(phrases, (p1, p2) => p1 === p2)
-
-  return uniquePhrases
-
-}
-
-
-/**
- * generates a markdown list from phrases
- * @param phrases
- * @param listType
- */
-export function generateMarkdownPhraseDefinitionList(phrases: string[], listType: CreateFieldTextExplanationListType): string {
-
-  switch (listType) {
-    case CreateFieldTextExplanationListType.list: {
-
-      return phrases.map(p => `- \`${p}\` - `).join('\n')
-    }
-
-    case CreateFieldTextExplanationListType.definitionList: {
-
-      return phrases.map(p => `${p}\n: todo\n`).join('\n')
-    }
-    default:
-      notExhaustiveThrow(listType)
-
-  }
-}
-
-
 export interface MarkdownPlaceholderVarTemplateDictionary {
   /**
    * var identifier (name)
@@ -207,186 +92,311 @@ export const markdownPlaceholderStringPrefixAndPostfix = '@@@'
 export const markdownPlaceholderRegex = /@@@([\w]*)@@@/ig
 
 
-/**
- * create an empty replacement dict
- */
-export function createEmptyReplacementDictWithAllKnownPlaceholders(): MarkdownPlaceholderDictionary {
-
-  const replacementDict: MarkdownPlaceholderDictionary = {
-    globalVarsList: null,
-    playerLocalVarsList: null,
-    localVarsList: null,
-    maxDiceValue: null,
-    numLocalVars: null,
-    numPlayerLocalVars: null,
-    totalLocalVars: null,
-    numGlobalVars: null,
-    totalNumVars: null,
-    markdownGameInstructionsFieldTextExplanationHeader: null,
-    startFieldPrefix: null,
-    endFieldPrefix: null,
-    forcedFieldPrefix: null,
-    branchIfFieldPrefix: null,
+export class GameInstructionsHelper {
+  private constructor() {
   }
 
-  replacementDict.globalVarsList
-
-  return replacementDict
-}
-
-export function createEmptyReplacementVarDictWithAllKnownPlaceholders(): MarkdownPlaceholderVarTemplateDictionary {
-
-  const replacementDict: MarkdownPlaceholderVarTemplateDictionary = {
-    ident: null,
-    defaultValue: null
-  }
-
-  return replacementDict
-}
-
-/**
- * replaces the placeholders in gameInstructionTemplate and returns the resulting game instructions
- * @param gameInstructionTemplate
- * @param placeholderValues
- */
-export function generateReplacedMarkdown(gameInstructionTemplate: string,
-                                         placeholderValues: MarkdownPlaceholderDictionary | MarkdownPlaceholderVarTemplateDictionary): string {
-
-
-  // do not work directly on gameInstructionTemplate because markdownPlaceholderRegex keeps track of the last index
-  //and when we replace a long placeholder we might skip the next one because the string got shorter...
-  let replaced = gameInstructionTemplate
-
-  //see https://stackoverflow.com/questions/432493/how-do-you-access-the-matched-groups-in-a-javascript-regular-expression
-  //regex must have /g (global flag)
-  let matchResults: RegExpExecArray
-
-  let regex = new RegExp(markdownPlaceholderRegex) //create a new obj to keep track of the index else we might have an infinite loop
-
-  while ((matchResults = regex.exec(gameInstructionTemplate)) !== null) {
-
-    const fullMatch = matchResults[0]
-
-    const placeholderName = matchResults[1] //the real placeholder
-
-    let replacement = placeholderValues[placeholderName]
-
-    if (replacement === null || replacement === undefined) {
-
-      Logger.fatal(`Could not find replacement for placeholder: ${placeholderName}`)
-
-      return ''
-    }
-
-    if (typeof replacement === "function") {
-      replacement = replacement()
-    }
-
-    replaced = replaced.replace(fullMatch, `${replacement}`)
-  }
-
-
-  return replaced
-}
-
-
-export async function injectFieldImgsIntoMarkdown(markdownBodySelector: string,
-                                                  markdown: string,
-                                                  allPossibleTiles: ReadonlyArray<Tile>,
+  /**
+   * captures all phrases from all fields and optionally replaces numbers with placeholders (variables)
+   * this will process tiles only once (distinct/unique) resulting phrases list is also made unique
+   * @param allUsedTiles all tiles
+   * @param fieldSymbols all field symbols
+   * @param createFieldTextExplanationListReplaceNumbers true: replace numbers with vars, false: not
+   * @param createFieldTextExplanationListReplacePrefixText e.g. [
+   * @param createFieldTextExplanationListReplaceVarName e.g. X
+   * @param createFieldTextExplanationListReplacePostfixText e.g. ]
+   */
+  static generateFieldTextExplanationListMarkdown(allUsedTiles: ReadonlyArray<Tile>,
                                                   fieldSymbols: ReadonlyArray<FieldSymbol>,
-                                                  worldSettings: WorldSettings,
-                                                  document: Document
-) {
+                                                  createFieldTextExplanationListReplaceNumbers: boolean,
+                                                  createFieldTextExplanationListReplacePrefixText: string,
+                                                  createFieldTextExplanationListReplaceVarName: string,
+                                                  createFieldTextExplanationListReplacePostfixText: string
+  ): string[] {
 
-  WorldUnitAsImgBlobStorage.clearFieldStorage()
+    const uniqueTiles = _.uniqWith<Tile>(allUsedTiles, (tile1, tile2) => tile1.guid === tile2.guid)
 
-  const allPositions = parseAllFieldAbsolutePositions(markdown)
+    let phrases: string[] = []
 
-  for (let i = 0; i < allPositions.length; i++) {
-    const absolutePosition = allPositions[i];
+    for (let i = 0; i < uniqueTiles.length; i++) {
+      const uniqueTile = uniqueTiles[i];
 
-    const canvas = document.createElement('canvas')
-    let resultCanvas = WorldUnitToImgHelper.fieldByAbsPosToImg(absolutePosition, allPossibleTiles, fieldSymbols, worldSettings, canvas)
+      for (let j = 0; j < uniqueTile.fieldShapes.length; j++) {
+        const fieldShape = uniqueTile.fieldShapes[j];
 
-    if (!resultCanvas) continue
+        let fieldText = fieldShape.text === null ? '' : fieldShape.text
 
-    let url: string = ''
+        if (fieldShape.createdFromSymbolGuid !== null) {
+          const fieldSymbol = fieldSymbols.find(p => p.guid === fieldShape.createdFromSymbolGuid)
 
-    try {
-      url = await WorldUnitAsImgBlobStorage.addFieldImg(absolutePosition, resultCanvas)
-      // console.log(url)
-    } catch (err) {
+          if (!fieldSymbol) {
+
+            Logger.fatal(`could not find field symbol with guid ${fieldShape.createdFromSymbolGuid} for field id: ${fieldShape.id} on tile '${uniqueTile.tileSettings.displayName}', tile guid: ${uniqueTile.guid}`)
+
+            continue
+          }
+
+          if (fieldSymbol.overwriteText) {
+            fieldText = fieldSymbol.text === null ? '' : fieldSymbol.text
+          }
+        }
+
+        phrases.push(fieldText)
+      }
+    }
+
+    //--- some cleanup ---
+
+    //replace only empty or trimmed just whitespace texts
+    phrases = phrases.filter(p => p !== null && p.trim() !== '')
+
+    //replace new lines with a single whitespace character because this is better for markdown lists...
+
+    phrases = phrases.map(p => p.replace(/\n/gm, ' '))
+
+    if (createFieldTextExplanationListReplaceNumbers) {
+
+      //replace concrete numbers with placeholders
+      //note that every number needs its own placeholder e.g. ... 3 do ... 3 --> ... X do ... Y
+
+      for (let i = 0; i < phrases.length; i++) {
+        let phrase = phrases[i];
+
+        const matchResults = phrase.match(numberRegex)
+
+        if (matchResults) {
+
+          for (let i = 0; i < matchResults.length; i++) {
+            const matchResult = matchResults[i]
+            phrase = phrase.replace(matchResult, matchResults.length === 1
+              //e.g. [X] or [X1]
+              ? `${createFieldTextExplanationListReplacePrefixText}${createFieldTextExplanationListReplaceVarName}${createFieldTextExplanationListReplacePostfixText}`
+              : `${createFieldTextExplanationListReplacePrefixText}${createFieldTextExplanationListReplaceVarName}${i + 1}${createFieldTextExplanationListReplacePostfixText}`)
+          }
+
+          phrases[i] = phrase
+        }
+      }
+
+    }
+
+    const uniquePhrases = _.uniqWith(phrases, (p1, p2) => p1 === p2)
+
+    return uniquePhrases
+
+  }
+
+
+  /**
+   * generates a markdown list from phrases
+   * @param phrases
+   * @param listType
+   */
+  static generateMarkdownPhraseDefinitionList(phrases: string[], listType: CreateFieldTextExplanationListType): string {
+
+    switch (listType) {
+      case CreateFieldTextExplanationListType.list: {
+
+        return phrases.map(p => `- \`${p}\` - `).join('\n')
+      }
+
+      case CreateFieldTextExplanationListType.definitionList: {
+
+        return phrases.map(p => `${p}\n: todo\n`).join('\n')
+      }
+      default:
+        notExhaustiveThrow(listType)
 
     }
   }
 
-  const allImgs = document.querySelectorAll(`${markdownBodySelector} img.${singleFieldRendererClass}`)
 
-  for (let i = 0; i < allImgs.length; i++) {
-    const img = allImgs.item(i) as HTMLImageElement
+  /**
+   * create an empty replacement dict
+   */
+  static createEmptyReplacementDictWithAllKnownPlaceholders(): MarkdownPlaceholderDictionary {
 
-    const absolutePositionString = img.getAttribute(absoluteFieldPositionInjectionAttribute)
+    const replacementDict: MarkdownPlaceholderDictionary = {
+      globalVarsList: null,
+      playerLocalVarsList: null,
+      localVarsList: null,
+      maxDiceValue: null,
+      numLocalVars: null,
+      numPlayerLocalVars: null,
+      totalLocalVars: null,
+      numGlobalVars: null,
+      totalNumVars: null,
+      markdownGameInstructionsFieldTextExplanationHeader: null,
+      startFieldPrefix: null,
+      endFieldPrefix: null,
+      forcedFieldPrefix: null,
+      branchIfFieldPrefix: null,
+    }
 
-    const absolutePosition = parseFieldAbsolutePosition(absolutePositionString)
+    replacementDict.globalVarsList
 
-    if (!absolutePosition) continue
-
-    img.src = WorldUnitAsImgBlobStorage.getImgByAbsolutePosition(absolutePosition)
+    return replacementDict
   }
-}
+
+  /**
+   * an empty replacement var dict
+   */
+  static createEmptyReplacementVarDictWithAllKnownPlaceholders(): MarkdownPlaceholderVarTemplateDictionary {
+
+    const replacementDict: MarkdownPlaceholderVarTemplateDictionary = {
+      ident: null,
+      defaultValue: null
+    }
+
+    return replacementDict
+  }
+
+  /**
+   * replaces the placeholders in gameInstructionTemplate and returns the resulting game instructions
+   * @param gameInstructionTemplate
+   * @param placeholderValues
+   */
+  static generateReplacedMarkdown(gameInstructionTemplate: string,
+                                  placeholderValues: MarkdownPlaceholderDictionary | MarkdownPlaceholderVarTemplateDictionary): string {
 
 
-export async function injectTileImgsIntoMarkdown(markdownBodySelector: string,
-                                                 markdown: string,
-                                                 allPossibleTiles: ReadonlyArray<Tile>,
-                                                 fieldSymbols: ReadonlyArray<FieldSymbol>,
-                                                 imgSymbols: ReadonlyArray<ImgSymbol>,
-                                                 lineSymbols: ReadonlyArray<LineSymbol>,
-                                                 worldSettings: WorldSettings,
-                                                 document: Document
-) {
+    // do not work directly on gameInstructionTemplate because markdownPlaceholderRegex keeps track of the last index
+    //and when we replace a long placeholder we might skip the next one because the string got shorter...
+    let replaced = gameInstructionTemplate
 
-  WorldUnitAsImgBlobStorage.clearTileStorage()
+    //see https://stackoverflow.com/questions/432493/how-do-you-access-the-matched-groups-in-a-javascript-regular-expression
+    //regex must have /g (global flag)
+    let matchResults: RegExpExecArray
 
-  const tileGuids = parseAllTileGuids(markdown)
+    let regex = new RegExp(markdownPlaceholderRegex) //create a new obj to keep track of the index else we might have an infinite loop
 
-  for (let i = 0; i < tileGuids.length; i++) {
-    const tileGuid = tileGuids[i];
+    while ((matchResults = regex.exec(gameInstructionTemplate)) !== null) {
 
-    const canvas = document.createElement('canvas')
+      const fullMatch = matchResults[0]
 
-    let resultCanvas = WorldUnitToImgHelper.tileByGuidToImg(tileGuid,
-      allPossibleTiles,
-      fieldSymbols,
-      imgSymbols,
-      lineSymbols,
-      worldSettings,
-      canvas
-    )
+      const placeholderName = matchResults[1] //the real placeholder
 
-    if (!resultCanvas) continue
+      let replacement = placeholderValues[placeholderName]
 
-    let url: string = ''
+      if (replacement === null || replacement === undefined) {
 
-    try {
-      url = await WorldUnitAsImgBlobStorage.addTileImg(tileGuid, resultCanvas)
-      // console.log(url)
-    } catch (err) {
+        Logger.fatal(`Could not find replacement for placeholder: ${placeholderName}`)
 
+        return ''
+      }
+
+      if (typeof replacement === "function") {
+        replacement = replacement()
+      }
+
+      replaced = replaced.replace(fullMatch, `${replacement}`)
+    }
+
+
+    return replaced
+  }
+
+
+  static async injectFieldImgsIntoMarkdown(markdownBodySelector: string,
+                                           markdown: string,
+                                           allPossibleTiles: ReadonlyArray<Tile>,
+                                           fieldSymbols: ReadonlyArray<FieldSymbol>,
+                                           worldSettings: WorldSettings,
+                                           document: Document
+  ) {
+
+    WorldUnitAsImgBlobStorage.clearFieldStorage()
+
+    const allPositions = parseAllFieldAbsolutePositions(markdown)
+
+    for (let i = 0; i < allPositions.length; i++) {
+      const absolutePosition = allPositions[i];
+
+      const canvas = document.createElement('canvas')
+      let resultCanvas = WorldUnitToImgHelper.fieldByAbsPosToImg(absolutePosition, allPossibleTiles, fieldSymbols, worldSettings, canvas)
+
+      if (!resultCanvas) continue
+
+      let url: string = ''
+
+      try {
+        url = await WorldUnitAsImgBlobStorage.addFieldImg(absolutePosition, resultCanvas)
+        // console.log(url)
+      } catch (err) {
+
+      }
+    }
+
+    const allImgs = document.querySelectorAll(`${markdownBodySelector} img.${singleFieldRendererClass}`)
+
+    for (let i = 0; i < allImgs.length; i++) {
+      const img = allImgs.item(i) as HTMLImageElement
+
+      const absolutePositionString = img.getAttribute(absoluteFieldPositionInjectionAttribute)
+
+      const absolutePosition = parseFieldAbsolutePosition(absolutePositionString)
+
+      if (!absolutePosition) continue
+
+      img.src = WorldUnitAsImgBlobStorage.getImgByAbsolutePosition(absolutePosition)
     }
   }
 
-  const allImgs = document.querySelectorAll(`${markdownBodySelector} img.${singleTileRendererClass}`)
+  static async injectTileImgsIntoMarkdown(markdownBodySelector: string,
+                                          markdown: string,
+                                          allPossibleTiles: ReadonlyArray<Tile>,
+                                          fieldSymbols: ReadonlyArray<FieldSymbol>,
+                                          imgSymbols: ReadonlyArray<ImgSymbol>,
+                                          lineSymbols: ReadonlyArray<LineSymbol>,
+                                          worldSettings: WorldSettings,
+                                          document: Document
+  ) {
 
-  for (let i = 0; i < allImgs.length; i++) {
-    const img = allImgs.item(i) as HTMLImageElement
+    WorldUnitAsImgBlobStorage.clearTileStorage()
 
-    const tileGuidString = img.getAttribute(tileGuidInjectionAttribute)
+    const tileGuids = parseAllTileGuids(markdown)
 
-    const tileGuid = parseTileGuid(tileGuidString)
+    for (let i = 0; i < tileGuids.length; i++) {
+      const tileGuid = tileGuids[i];
 
-    if (!tileGuid) continue
+      const canvas = document.createElement('canvas')
 
-    img.src = WorldUnitAsImgBlobStorage.getImgByTileGuid(tileGuid)
+      let resultCanvas = WorldUnitToImgHelper.tileByGuidToImg(tileGuid,
+        allPossibleTiles,
+        fieldSymbols,
+        imgSymbols,
+        lineSymbols,
+        worldSettings,
+        canvas
+      )
+
+      if (!resultCanvas) continue
+
+      let url: string = ''
+
+      try {
+        url = await WorldUnitAsImgBlobStorage.addTileImg(tileGuid, resultCanvas)
+        // console.log(url)
+      } catch (err) {
+
+      }
+    }
+
+    const allImgs = document.querySelectorAll(`${markdownBodySelector} img.${singleTileRendererClass}`)
+
+    for (let i = 0; i < allImgs.length; i++) {
+      const img = allImgs.item(i) as HTMLImageElement
+
+      const tileGuidString = img.getAttribute(tileGuidInjectionAttribute)
+
+      const tileGuid = parseTileGuid(tileGuidString)
+
+      if (!tileGuid) continue
+
+      img.src = WorldUnitAsImgBlobStorage.getImgByTileGuid(tileGuid)
+    }
   }
+
 }
+
+

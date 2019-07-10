@@ -30,10 +30,16 @@ export interface MyProps {
   readonly set_isDisplayed: (isDisplayed: boolean) => void
 
   /**
-   * true: we select the img to create a new img shape,
+   * true: we select the img to create a new img shape (display other icon)
    * false: not
    */
   readonly isCreatingNewImgShape: boolean
+
+  /**
+   * true: user can select the generic img
+   * false: hide generic img
+   */
+  readonly displayGenericImg: boolean
 
 }
 
@@ -172,9 +178,9 @@ class imageLibrary extends React.Component<Props, any> {
     e.persist()
 
     const imgFilesIds = this.getValidFilesIds(e)
-    for(const id of imgFilesIds) {
+    for (const id of imgFilesIds) {
 
-      const file =  e.dataTransfer.files.item(id)
+      const file = e.dataTransfer.files.item(id)
       await this.readImgAssetFile(file)
     }
     e.preventDefault()
@@ -250,7 +256,8 @@ class imageLibrary extends React.Component<Props, any> {
                     <div className="img-library-img-wrapper-inner">
                       <div className="img-library-img">
                         <Icon name="add" size="big"/>
-                        <p dangerouslySetInnerHTML={getRawI18n(this.props.langId, "Drop image(s) or <br /> click to select image(s)")}></p>
+                        <p
+                          dangerouslySetInnerHTML={getRawI18n(this.props.langId, "Drop image(s) or <br /> click to select image(s)")}></p>
                       </div>
                     </div>
                   </div>
@@ -262,31 +269,35 @@ class imageLibrary extends React.Component<Props, any> {
               {
                 //generic icon / no img
               }
-              <div>
-                <div className="img-library-img-wrapper"
-                     onClick={() => {
-                       this.props.onImageTaken({
-                         guid: null,
-                         height: -1,
-                         width: -1,
-                         displayIndex: -1,
-                         displayName: 'no img',
-                         mimeType: '',
-                         originalName: 'no img',
-                         sizeInByte: -1
-                       })
-                     }}
-                >
-                  <div className=" img-library-generic-img-div">
-                    <div className="img-library-img-wrapper-inner">
-                      <div className="img-library-img">
-                        <Icon name="image" size="massive"/>
-                        <p>{getI18n(this.props.langId, "No/Generic image")}</p>
+              {
+                this.props.displayGenericImg &&
+                <div>
+                  <div className="img-library-img-wrapper"
+                       onClick={() => {
+                         this.props.onImageTaken({
+                           guid: null,
+                           height: -1,
+                           width: -1,
+                           displayIndex: -1,
+                           displayName: 'no img',
+                           mimeType: '',
+                           originalName: 'no img',
+                           sizeInByte: -1
+                         })
+                       }}
+                  >
+                    <div className=" img-library-generic-img-div">
+                      <div className="img-library-img-wrapper-inner">
+                        <div className="img-library-img">
+                          <Icon name="image" size="massive"/>
+                          <p>{getI18n(this.props.langId, "No/Generic image")}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              }
+
 
               {
                 images.map((p, index) => {
@@ -295,51 +306,51 @@ class imageLibrary extends React.Component<Props, any> {
                       <DisplayImageControl
                         isCreatingNewImgShape={this.props.isCreatingNewImgShape}
                         imgSurrogate={p}
-                                           onImgTaken={this.props.onImageTaken}
-                                           onImgDisplayIndexDecrease={(imgSurrogate) => {
-                                             swapDisplayIndexWithGuid(
-                                               imgSurrogate,
-                                               imgSurrogate.displayIndex - 1,
-                                               false,
-                                               false,
-                                               this.props.images.length,
-                                               this.props.images,
-                                               this.props.imgLibrary_set_imgDisplayIndexAction
-                                             )
-                                           }}
-                                           onImgDisplayIndexIncrease={(imgSurrogate) => {
-                                             swapDisplayIndexWithGuid(
-                                               imgSurrogate,
-                                               imgSurrogate.displayIndex + 1,
-                                               false,
-                                               false,
-                                               this.props.images.length,
-                                               this.props.images,
-                                               this.props.imgLibrary_set_imgDisplayIndexAction
-                                             )
-                                           }}
-                                           onImgDisplayIndexAbsoluteFirst={(imgSurrogate) => {
-                                             swapDisplayIndexWithGuid(
-                                               imgSurrogate,
-                                               imgSurrogate.displayIndex - 1,
-                                               true,
-                                               false,
-                                               this.props.images.length,
-                                               this.props.images,
-                                               this.props.imgLibrary_set_imgDisplayIndexAction
-                                             )
-                                           }}
-                                           onImgDisplayIndexSetAbsoluteLast={(imgSurrogate) => {
-                                             swapDisplayIndexWithGuid(
-                                               imgSurrogate,
-                                               imgSurrogate.displayIndex + 1,
-                                               false,
-                                               true,
-                                               this.props.images.length,
-                                               this.props.images,
-                                               this.props.imgLibrary_set_imgDisplayIndexAction
-                                             )
-                                           }}
+                        onImgTaken={this.props.onImageTaken}
+                        onImgDisplayIndexDecrease={(imgSurrogate) => {
+                          swapDisplayIndexWithGuid(
+                            imgSurrogate,
+                            imgSurrogate.displayIndex - 1,
+                            false,
+                            false,
+                            this.props.images.length,
+                            this.props.images,
+                            this.props.imgLibrary_set_imgDisplayIndexAction
+                          )
+                        }}
+                        onImgDisplayIndexIncrease={(imgSurrogate) => {
+                          swapDisplayIndexWithGuid(
+                            imgSurrogate,
+                            imgSurrogate.displayIndex + 1,
+                            false,
+                            false,
+                            this.props.images.length,
+                            this.props.images,
+                            this.props.imgLibrary_set_imgDisplayIndexAction
+                          )
+                        }}
+                        onImgDisplayIndexAbsoluteFirst={(imgSurrogate) => {
+                          swapDisplayIndexWithGuid(
+                            imgSurrogate,
+                            imgSurrogate.displayIndex - 1,
+                            true,
+                            false,
+                            this.props.images.length,
+                            this.props.images,
+                            this.props.imgLibrary_set_imgDisplayIndexAction
+                          )
+                        }}
+                        onImgDisplayIndexSetAbsoluteLast={(imgSurrogate) => {
+                          swapDisplayIndexWithGuid(
+                            imgSurrogate,
+                            imgSurrogate.displayIndex + 1,
+                            false,
+                            true,
+                            this.props.images.length,
+                            this.props.images,
+                            this.props.imgLibrary_set_imgDisplayIndexAction
+                          )
+                        }}
                       />
                     </div>
                   )

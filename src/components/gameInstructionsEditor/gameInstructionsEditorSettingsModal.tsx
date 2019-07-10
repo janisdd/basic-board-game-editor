@@ -147,6 +147,10 @@ class GameInstructionsEditorSettingsModal extends React.Component<Props, any> {
                 </Form.Field>
               </Form.Group>
 
+
+
+
+
             </Form>
 
 

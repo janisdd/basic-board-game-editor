@@ -28,6 +28,7 @@ export interface LangObj {
   "Selected tile": string
   "Tile": string
   "Tile library": string
+  "Copy tile guid to clipboard": string
   "Start step by step simulation": string
   "Pause the running simulation": string
   "Do 1 simulation step": string
@@ -287,6 +288,7 @@ export interface LangObj {
   "Add image": string
   //--- image library
   "Image library": string
+  "Copy image guid to clipboard": string
   "Drop image(s) or <br /> click to select image(s)": string
   "No/Generic image": string
   "All image (shapes) that use this image will remain but display the generic image": string
@@ -342,6 +344,8 @@ export interface LangObj {
   "Replace variable postfix": string
   "Normal list": string
   "Definition list": string
+  "Disable automatic preview refresh": string
+  "Refresh preview": string
 
   "Markdown help": string
   "Cheatsheet": string

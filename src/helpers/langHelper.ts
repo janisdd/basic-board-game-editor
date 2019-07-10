@@ -183,8 +183,9 @@ export class LangHelper {
   /**
    * captures all var declaration in result in the given statements
    * begin and end scopes are respected properly
-   * @param result
-   * @param lastScopes
+   * @param result store all scopes we every found in the game
+   * @param lastScopes the current working scopes (e.g. if we have 2 level 2 scopes we would precess the first then pop it then process the next
+   *   where the result will contain both scopes)
    * @param statements
    */
   private static getAllDefinitions(result: AllDefinitionsObj,
@@ -196,8 +197,11 @@ export class LangHelper {
     for (const statement of statements) {
 
       if (statement.type === "var_decl") {
+
         currentScope.localVars.push(statement)
+
       } else if (statement.type === "begin_scope") {
+
         currentScope = {
           scopeLevel: lastScopes.length,
           localVars: []
@@ -207,11 +211,13 @@ export class LangHelper {
         result.localVars.push(currentScope)
 
       } else if (statement.type === "end_scope") {
+
         currentScope = lastScopes.pop()
 
       } else if (statement.type === "if") {
 
         this.getAllDefinitions(result, lastScopes, statement.trueUnits)
+
       } else if (statement.type === "ifElse") {
 
         this.getAllDefinitions(result, lastScopes, statement.trueUnits)

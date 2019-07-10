@@ -9,6 +9,8 @@ import {imgLibrary_removeImg} from "../../../state/reducers/imgLibrary/actions";
 import {getI18n} from "../../../../i18n/i18nRoot";
 import ToolTip from '../../helpers/ToolTip'
 import {ImageAssetSurrogate} from "../../../types/world";
+import {copyToClipboard} from "../../../helpers/clipboardHelper";
+import IconToolTip from "../../helpers/IconToolTip";
 
 //const css = require('./styles.styl');
 
@@ -48,7 +50,6 @@ type Props = typeof stateProps & typeof dispatchProps;
 
 class displayImageControl extends React.Component<Props, any> {
 
-
   render(): JSX.Element {
 
     const img = ImgStorage.getImgFromGuid(this.props.imgSurrogate.guid)
@@ -61,9 +62,16 @@ class displayImageControl extends React.Component<Props, any> {
           </div>
           <Card.Content>
             <Card.Header className="img-caption" title={this.props.imgSurrogate.displayName}>
-              {
-                this.props.imgSurrogate.displayName
-              }
+              <span>{this.props.imgSurrogate.displayName}</span>
+
+              <IconToolTip
+                message={getI18n(this.props.langId, "Copy image guid to clipboard")}
+                icon="copy"
+                onClick={() => {
+                  copyToClipboard(this.props.imgSurrogate.guid)
+                }}
+              />
+
             </Card.Header>
             {/*<Card.Meta>*/}
             {/*<span>*/}
@@ -98,13 +106,13 @@ class displayImageControl extends React.Component<Props, any> {
                 <ToolTip
                   message={getI18n(this.props.langId, "All image (shapes) that use this image will remain but display the generic image")}
                 >
-                <Button icon color='red'
-                        onClick={() => {
-                          this.props.imgLibrary_removeImg(this.props.imgSurrogate.guid)
-                        }}
-                >
-                  <Icon name="trash"/>
-                </Button>
+                  <Button icon color='red'
+                          onClick={() => {
+                            this.props.imgLibrary_removeImg(this.props.imgSurrogate.guid)
+                          }}
+                  >
+                    <Icon name="trash"/>
+                  </Button>
                 </ToolTip>
               </div>
             </div>

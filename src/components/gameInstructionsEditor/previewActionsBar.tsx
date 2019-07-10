@@ -8,14 +8,26 @@ import {set_gie_previewFontSize} from "../../state/reducers/gameInstructionsEdit
 import {defaultGameInstructionPreviewFontSize, maxZoomedFontSize, minZoomedFontSize} from "../../constants";
 import {PrintHtmlHelper} from "../../helpers/printHtmlHelper";
 import {Logger} from "../../helpers/logger";
+import {GameInstructionsHelper} from "../../helpers/gameInstructionsHelper";
+import {gameInstructionsEditorPrintId} from "./gameInstructionsEditor";
 
 export interface MyProps {
   readonly printDivId: string
 }
 
-const mapStateToProps = (rootState: RootState , props: MyProps) => {
+const mapStateToProps = (rootState: RootState, props: MyProps) => {
   return {
     ...props,
+
+
+    markdown: rootState.gameInstructionsEditorState.markdown,
+    worldSettings: rootState.worldSettingsState,
+    allPossibleTiles: rootState.tileLibraryState.possibleTiles,
+    worldTilesSurrogates: rootState.tileSurrogateState.present,
+    fieldSymbols: rootState.fieldSymbolState.present,
+    imgSymbols: rootState.imgSymbolState.present,
+    lineSymbols: rootState.lineSymbolState.present,
+
     previewFontSize: rootState.gameInstructionsEditorState.previewFontSize,
   }
 }
@@ -31,11 +43,33 @@ type Props = typeof stateProps & typeof dispatchProps;
 
 
 class PreviewActionsBar extends React.Component<Props, any> {
+
+  async forceRegenerateFieldAndTileIms() {
+    await GameInstructionsHelper.injectFieldImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
+      this.props.markdown,
+      this.props.allPossibleTiles,
+      this.props.fieldSymbols,
+      this.props.worldSettings,
+      document
+    )
+
+
+    await GameInstructionsHelper.injectTileImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
+      this.props.markdown,
+      this.props.allPossibleTiles,
+      this.props.fieldSymbols,
+      this.props.imgSymbols,
+      this.props.lineSymbols,
+      this.props.worldSettings,
+      document
+    )
+  }
+
   render(): JSX.Element {
     return (
       <div className="action-bar">
 
-        <div className="item" onClick={() => {
+        <div className="item" onClick={async () => {
 
           const el = document.getElementById(`${this.props.printDivId}`)
 
@@ -43,8 +77,11 @@ class PreviewActionsBar extends React.Component<Props, any> {
             Logger.log('found none or too many printable contents')
             return
           }
-
-          PrintHtmlHelper.printContent(el.innerHTML)
+          
+          await PrintHtmlHelper.printContentAsync(el.innerHTML, async () => {
+            //make sure we insert tile and field images in the new html...
+            await this.forceRegenerateFieldAndTileIms()
+          })
 
         }}>
           <Icon name="print"/>

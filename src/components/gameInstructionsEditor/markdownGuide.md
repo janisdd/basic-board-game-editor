@@ -101,6 +101,58 @@ for solid icons you need to make the font bold
 
 **\f1d8** a filled plane
 
+
+## Single Fields & Tiles
+
+You can also render single fields and tiles as images
+
+
+```text
+::: field (tile guid).(field id)
+:::
+
+::: tile (tile guid)
+:::
+
+e.g.
+
+:::field 5c1e10f9-2404-4298-ac6e-d2090f53f4ba.5
+:::
+
+::: tile 5c1e10f9-2404-4298-ac6e-d2090f53f4ba
+:::
+```
+
+Note that you need the tile you want to render in your tiles library
+
+
+Also note that the auto preview update (preview refresh) will cause the images to flicker.
+This is because the images are newly generated on every render (so they are always up-to-date with your fields & tiles).
+
+
+## My Images
+
+When creating tiles you maybe uploaded (into the browser) images to use them
+
+You can use these images also in the game instructions editor
+
+```text
+::: image (image guid)
+:::
+
+e.g. the default ladder image
+
+::: image a28d750900ffc60db2c415b2e9cf41eb
+:::
+```
+
+
+::: image a28d750900ffc60db2c415b2e9cf41eb
+:::
+
+You don't need to copy the image guid in the image library manually, you can use the appropriate button to insert the whole block for you
+
+
 ## Footnotes
 
 

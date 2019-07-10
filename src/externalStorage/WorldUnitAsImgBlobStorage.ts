@@ -23,8 +23,6 @@ export class WorldUnitAsImgBlobStorage {
 
   public static clearFieldStorage() {
 
-    console.log('clearing 1')
-
     const keys = Object.keys(this.storageFieldImgs)
 
     for (let i = 0; i < keys.length; i++) {
@@ -39,7 +37,6 @@ export class WorldUnitAsImgBlobStorage {
 
   public static clearTileStorage() {
 
-    console.log('clearing 2')
     const keys = Object.keys(this.storageTileImgs)
 
     for (let i = 0; i < keys.length; i++) {

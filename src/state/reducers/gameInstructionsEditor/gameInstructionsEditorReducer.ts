@@ -50,6 +50,8 @@ export type State = {
 
   readonly isMarkdownHelpModalDisplayed: boolean
 
+  readonly isImageLibraryDisplayed: boolean
+
 } & GameInstructionsSettings
 
 
@@ -71,6 +73,8 @@ export const initial: State = {
   createFieldTextExplanationListReplaceVarName: 'X',
   createFieldTextExplanationListReplacePrefixText: '[',
   createFieldTextExplanationListReplacePostfixText: ']',
+
+  isImageLibraryDisplayed: false,
 }
 
 export interface ActionBase extends Action {
@@ -91,6 +95,7 @@ export enum ActionType {
 
   SET_isGameInstructionsEditorSettingsModalDisplayed = 'gameInstructionsEditorReducer_SET_isGameInstructionsEditorSettingsModalDisplayed',
   SET_isMarkdownHelpModalDisplayed = 'gameInstructionsEditorReducer_SET_isMarkdownHelpModalDisplayed',
+  SET_isImageLibraryDisplayed = 'gameInstructionsEditorReducer_SET_isImageLibraryDisplayed',
 
   SET_createFieldTextExplanationListAs = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListAs',
   SET_createFieldTextExplanationListReplaceNumbers = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListReplaceNumbers',
@@ -144,6 +149,10 @@ export interface SET_isMarkdownHelpModalDisplayedAction extends ActionBase {
   readonly isMarkdownHelpModalDisplayed: boolean
 }
 
+export interface SET_isImageLibraryDisplayedAction extends ActionBase {
+  readonly type: ActionType.SET_isImageLibraryDisplayed
+  readonly isImageLibraryDisplayed: boolean
+}
 
 export interface set_createFieldTextExplanationListAsAction extends ActionBase {
   readonly type: ActionType.SET_createFieldTextExplanationListAs
@@ -193,12 +202,15 @@ export type AllActions =
 
   | Set_isGameInstructionsEditorSettingsModalDisplayedAction
   | SET_isMarkdownHelpModalDisplayedAction
+  | SET_isImageLibraryDisplayedAction
 
   | set_createFieldTextExplanationListAsAction
   | SET_createFieldTextExplanationListReplaceVarNameAction
   | SET_createFieldTextExplanationListReplaceNumbersAction
   | SET_createFieldTextExplanationListReplacePrefixTextAction
   | SET_createFieldTextExplanationListReplacePostfixTextAction
+
+
 
 
 export function reducer(state: State = initial, action: AllActions): State {
@@ -249,6 +261,12 @@ export function reducer(state: State = initial, action: AllActions): State {
         isMarkdownHelpModalDisplayed: action.isMarkdownHelpModalDisplayed
       }
 
+    case ActionType.SET_isImageLibraryDisplayed:
+      return {
+        ...state,
+        isImageLibraryDisplayed: action.isImageLibraryDisplayed
+      }
+
 
     case ActionType.SET_createFieldTextExplanationListAs:
       return {
@@ -293,14 +311,14 @@ export function reducer(state: State = initial, action: AllActions): State {
 
 
 export function getGameInstructionsSettings(state: State): GameInstructionsSettings {
-    return {
-      createFieldTextExplanationListAs: state.createFieldTextExplanationListAs,
-      createFieldTextExplanationListReplaceNumbers: state.createFieldTextExplanationListReplaceNumbers,
-      createFieldTextExplanationListReplacePostfixText: state.createFieldTextExplanationListReplacePostfixText,
-      createFieldTextExplanationListReplacePrefixText: state.createFieldTextExplanationListReplacePrefixText,
-      createFieldTextExplanationListReplaceVarName: state.createFieldTextExplanationListReplaceVarName,
-      editorFontSize: state.editorFontSize,
-      markdown: state.markdown,
-      previewFontSize: state.previewFontSize
-    }
+  return {
+    createFieldTextExplanationListAs: state.createFieldTextExplanationListAs,
+    createFieldTextExplanationListReplaceNumbers: state.createFieldTextExplanationListReplaceNumbers,
+    createFieldTextExplanationListReplacePostfixText: state.createFieldTextExplanationListReplacePostfixText,
+    createFieldTextExplanationListReplacePrefixText: state.createFieldTextExplanationListReplacePrefixText,
+    createFieldTextExplanationListReplaceVarName: state.createFieldTextExplanationListReplaceVarName,
+    editorFontSize: state.editorFontSize,
+    markdown: state.markdown,
+    previewFontSize: state.previewFontSize,
+  }
 }

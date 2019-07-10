@@ -2,6 +2,7 @@ import * as markdownIt from 'markdown-it'
 import {fontAwesomeMatchRegex, markdownBoxInfoColor, markdownBoxInfoWarning} from "../constants";
 import {notExhaustiveThrow} from "../state/reducers/_notExhausiveHelper";
 import {escapeHtml} from "./stringHelper";
+import {ImgStorage} from "../externalStorage/imgStorage";
 
 
 export enum CreateFieldTextExplanationListType {
@@ -90,7 +91,6 @@ const customContainer = function (tokens: any[], idx: number): string {
 }
 
 
-
 export const absoluteFieldPositionInjectionAttribute = `data-url`
 export const singleFieldRendererClass = 'single-field-renderer'
 /**
@@ -116,14 +116,14 @@ const singleFieldRenderer = function (tokens: any[], idx: number): string {
 
     if (match) {
 
-      return `<div><img class="${singleFieldRendererClass}" alt="img of field ${escapeHtml(match[1])}" ${absoluteFieldPositionInjectionAttribute}="${escapeHtml(match[1])}" src="#" />`
+      return `<p><img class="${singleFieldRendererClass}" alt="img of field ${escapeHtml(match[1])}" ${absoluteFieldPositionInjectionAttribute}="${escapeHtml(match[1])}" src="#" />`
     }
 
-    return `<div><img alt="not found" src="#" />`
+    return `<p><img alt="not found" src="#" />`
   }
 
 
-  return `</div>`
+  return `</p>`
 }
 
 export const tileGuidInjectionAttribute = `data-url`
@@ -151,14 +151,51 @@ const singleTileRenderer = function (tokens: any[], idx: number): string {
 
     if (match) {
 
-      return `<div><img class="${singleTileRendererClass}" alt="img of tile ${escapeHtml(match[1])}" ${tileGuidInjectionAttribute}="${escapeHtml(match[1])}" src="#" />`
+      return `<p><img class="${singleTileRendererClass}" alt="img of tile ${escapeHtml(match[1])}" ${tileGuidInjectionAttribute}="${escapeHtml(match[1])}" src="#" />`
     }
 
-    return `<div><img alt="not found" src="#" />`
+    return `<p><img alt="not found" src="#" />`
   }
 
 
-  return `</div>`
+  return `</p>`
+}
+
+/**
+ * @example
+ *
+ * ::: image (img guid)
+ * :::
+ *
+ * (...) is mandatory
+ *
+ * @param tokens
+ * @param idx
+ *
+ */
+const singleImgAssetRenderer = function (tokens: any[], idx: number): string {
+
+  const match = tokens[idx].info.trim().match(/^image ([\w]{32})$/)
+
+  if (tokens[idx].nesting === 1) { //opening tab
+
+    if (match) {
+
+      const asset = ImgStorage.getImgFromGuid(match[1])
+
+      return `<p><img class="${singleTileRendererClass}" alt="img with guid ${escapeHtml(match[1])}" src="${escapeHtml(asset.base64)}" />`
+    }
+
+    return `<p><img alt="not found" src="#" />`
+  }
+
+  return `</p>`
+}
+
+export function getImageMarkdownBlock(guid: string): string {
+  return `::: image ${guid}
+:::`
+
 }
 
 const mdRenderer = markdownIt({
@@ -192,6 +229,13 @@ const mdRenderer = markdownIt({
     render: singleTileRenderer,
     validate: function (params: string): boolean {
       const test = params.trim().match(/^tile\s*(.*)$/)
+      return !!test
+    }
+  })
+  .use(require('markdown-it-container'), 'image', { //see https://github.com/markdown-it/markdown-it-container
+    render: singleImgAssetRenderer,
+    validate: function (params: string): boolean {
+      const test = params.trim().match(/^image\s*(.*)$/)
       return !!test
     }
   })

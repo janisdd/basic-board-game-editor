@@ -400,6 +400,7 @@ class imagePropertyEditor extends React.Component<Props, any> {
               set_isDisplayed={(isDisplayed) => {
                 this.props.setEditor_IsChooseImgShapeImageLibraryDisplayed(isDisplayed)
               }}
+              displayGenericImg={true}
             />
 
           </Form.Field>

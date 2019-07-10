@@ -16,6 +16,8 @@ import {Logger} from "../../helpers/logger";
 import {set_world_tiles} from "../../state/reducers/world/tileSurrogates/actions";
 import {AvailableAppTabs} from "../../state/reducers/appReducer";
 import {Tile} from "../../types/world";
+import IconToolTip from "../helpers/IconToolTip";
+import {copyToClipboard} from "../../helpers/clipboardHelper";
 
 
 //const css = require('./styles.styl');
@@ -147,8 +149,16 @@ class worldTileActions extends React.Component<Props, any> {
               </span>
               <span className="mar-left-2x">
                 {
-                  `(guid: ${tileSurrogate.tileGuid})`
+                  `(guid: ${tileSurrogate.tileGuid}`
                 }
+                <IconToolTip
+                  message={getI18n(this.props.langId, "Copy tile guid to clipboard")}
+                  icon="copy"
+                  onClick={() => {
+                    copyToClipboard(tileSurrogate.tileGuid)
+                  }}
+                  />
+                )
               </span>
             </div>
 

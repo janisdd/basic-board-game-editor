@@ -316,6 +316,7 @@ export class IoHelper {
     }
 
     //TODO only export used imgs??
+    //but note that the game instruction editor markdown can also use images...
 
     const value = JSON.stringify(exportWorld, null, "\t")
 

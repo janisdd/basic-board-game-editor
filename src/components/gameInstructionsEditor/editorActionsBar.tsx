@@ -7,11 +7,11 @@ import {
   set_gie_actionResultCopyText,
   set_gie_editorFontSize,
   set_gie_isActionResultCopyModalDisplayed,
-  set_gie_isGameInstructionsEditorSettingsModalDisplayed,
+  set_gie_isGameInstructionsEditorSettingsModalDisplayed, set_gie_isImageLibraryDisplayed,
   set_gie_isMarkdownHelpModalDisplayed
 } from "../../state/reducers/gameInstructionsEditor/actions";
 import {
-  defaultGameInstructionEditorFontSize,
+  defaultGameInstructionEditorFontSize, defaultImgShapeProps,
   markdownGameInstructionsFieldTextExplanationHeader,
   maxZoomedFontSize,
   minZoomedFontSize
@@ -22,21 +22,24 @@ import {getI18n} from "../../../i18n/i18nRoot";
 import {WorldTilesHelper} from "../../helpers/worldTilesHelper";
 import {Logger} from "../../helpers/logger";
 import {Tile} from "../../types/world";
-import {
-  createEmptyReplacementDictWithAllKnownPlaceholders,
-  createEmptyReplacementVarDictWithAllKnownPlaceholders,
-  generateFieldTextExplanationListMarkdown,
-  generateMarkdownPhraseDefinitionList,
-  generateReplacedMarkdown,
-  injectFieldImgsIntoMarkdown, injectTileImgsIntoMarkdown,
-  MarkdownPlaceholderDictionary
-} from "../../helpers/gameInstructionsHelper";
 import {LangHelper} from "../../helpers/langHelper";
 import {AbstractMachine} from "../../../simulation/machine/AbstractMachine";
 import {ExpressionUnit} from "../../../simulation/model/executionUnit";
-import {gameInstructionsEditorPrintId} from "./gameInstructionsEditor";
+import {
+  gameInstructionsEditorAceSession,
+  gameInstructionsEditorId,
+  gameInstructionsEditorPrintId
+} from "./gameInstructionsEditor";
+import {GameInstructionsHelper} from "../../helpers/gameInstructionsHelper";
+import ImageLibrary from "../tiles/imageLibrary/imageLibrary";
+import {PlainPoint} from "../../types/drawing";
+import {CoordHelper} from "../../helpers/CoordHelper";
+import {getNextShapeId} from "../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
+import {renewAllZIndicesInTile} from "../../helpers/someIndexHelper";
+import {editor_wrapper_editorInstancesMap} from "../helpers/editorWrapper";
+import guide from "../guide/guide";
+import {getImageMarkdownBlock} from "../../helpers/markdownHelper";
 
-const langCompiler = require('../../../simulation/compiler/langCompiler').parser
 
 export interface MyProps {
   // readonly test: string
@@ -66,6 +69,8 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     forcedFieldAutoPrefixText: rootState.worldSettingsState.forcedFieldAutoPrefixText,
     branchIfPrefixText: rootState.worldSettingsState.branchIfPrefixText,
 
+    isImageLibraryDisplayed: rootState.gameInstructionsEditorState.isImageLibraryDisplayed,
+
     markdown: rootState.gameInstructionsEditorState.markdown,
 
 
@@ -81,6 +86,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_gie_isGameInstructionsEditorSettingsModalDisplayed,
 
   set_gie_isMarkdownHelpModalDisplayed,
+  set_gie_isImageLibraryDisplayed,
 }, dispatch)
 
 
@@ -142,7 +148,7 @@ class EditorActionsBar extends React.Component<Props, any> {
 
     const allUsedTiles = this.getAllUsedUniqueTiles()
 
-    const uniquePhrases = generateFieldTextExplanationListMarkdown(allUsedTiles,
+    const uniquePhrases = GameInstructionsHelper.generateFieldTextExplanationListMarkdown(allUsedTiles,
       this.props.fieldSymbols,
       this.props.createFieldTextExplanationListReplaceNumbers,
       this.props.createFieldTextExplanationListReplacePrefixText,
@@ -154,7 +160,7 @@ class EditorActionsBar extends React.Component<Props, any> {
     //   return
     // }
 
-    let markdown = generateMarkdownPhraseDefinitionList(uniquePhrases, this.props.createFieldTextExplanationListAs)
+    let markdown = GameInstructionsHelper.generateMarkdownPhraseDefinitionList(uniquePhrases, this.props.createFieldTextExplanationListAs)
 
     this.props.set_gie_actionResultCopyText(markdown)
     this.props.set_gie_isActionResultCopyModalDisplayed(true)
@@ -187,7 +193,7 @@ class EditorActionsBar extends React.Component<Props, any> {
     const tmpState = LangHelper.executeGameInitCode(this.props.worldCmdText)
 
     const allVarDefs = LangHelper.getAllVarDefiningStatements(this.props.worldCmdText, allUsedTiles)
-    const replacementDict: MarkdownPlaceholderDictionary = createEmptyReplacementDictWithAllKnownPlaceholders()
+    const replacementDict = GameInstructionsHelper.createEmptyReplacementDictWithAllKnownPlaceholders()
 
 
     const globalVarListReplacement = () => {
@@ -199,7 +205,7 @@ class EditorActionsBar extends React.Component<Props, any> {
 
         const template = varListElementTemplate
 
-        const replacementDict = createEmptyReplacementVarDictWithAllKnownPlaceholders()
+        const replacementDict = GameInstructionsHelper.createEmptyReplacementVarDictWithAllKnownPlaceholders()
 
         replacementDict['ident'] = varDeclUnit.ident
 
@@ -207,7 +213,7 @@ class EditorActionsBar extends React.Component<Props, any> {
 
         replacementDict['defaultValue'] = testValue
 
-        const listEntry = generateReplacedMarkdown(template, replacementDict)
+        const listEntry = GameInstructionsHelper.generateReplacedMarkdown(template, replacementDict)
         markdownList += `${listEntry}\n`
       }
 
@@ -223,7 +229,7 @@ class EditorActionsBar extends React.Component<Props, any> {
 
         const template = varListElementTemplate
 
-        const replacementDict = createEmptyReplacementVarDictWithAllKnownPlaceholders()
+        const replacementDict = GameInstructionsHelper.createEmptyReplacementVarDictWithAllKnownPlaceholders()
 
         replacementDict['ident'] = varDeclUnit.ident
 
@@ -231,7 +237,7 @@ class EditorActionsBar extends React.Component<Props, any> {
 
         replacementDict['defaultValue'] = testValue
 
-        const listEntry = generateReplacedMarkdown(template, replacementDict)
+        const listEntry = GameInstructionsHelper.generateReplacedMarkdown(template, replacementDict)
         markdownList += `${listEntry}\n`
       }
 
@@ -250,7 +256,7 @@ class EditorActionsBar extends React.Component<Props, any> {
         for (let j = 0; j < localVarScope.localVars.length; j++) {
           const localVar = localVarScope.localVars[j];
 
-          const replacementDict = createEmptyReplacementVarDictWithAllKnownPlaceholders()
+          const replacementDict = GameInstructionsHelper.createEmptyReplacementVarDictWithAllKnownPlaceholders()
 
           replacementDict['ident'] = localVar.ident
 
@@ -258,7 +264,7 @@ class EditorActionsBar extends React.Component<Props, any> {
 
           replacementDict['defaultValue'] = testValue
 
-          const listEntry = generateReplacedMarkdown(template, replacementDict)
+          const listEntry = GameInstructionsHelper.generateReplacedMarkdown(template, replacementDict)
           markdownList += `${listEntry}\n`
 
         }
@@ -291,7 +297,7 @@ class EditorActionsBar extends React.Component<Props, any> {
     replacementDict['branchIfFieldPrefix'] = this.props.branchIfPrefixText
 
 
-    const gameInstructions = generateReplacedMarkdown(gameInstructionsTemplate, replacementDict)
+    const gameInstructions = GameInstructionsHelper.generateReplacedMarkdown(gameInstructionsTemplate, replacementDict)
 
     this.props.set_gie_actionResultCopyText(gameInstructions)
     this.props.set_gie_isActionResultCopyModalDisplayed(true)
@@ -299,8 +305,7 @@ class EditorActionsBar extends React.Component<Props, any> {
 
 
   async forceRegenerateFieldAndTileIms() {
-
-    await injectFieldImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
+    await GameInstructionsHelper.injectFieldImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
       this.props.markdown,
       this.props.allPossibleTiles,
       this.props.fieldSymbols,
@@ -309,7 +314,7 @@ class EditorActionsBar extends React.Component<Props, any> {
     )
 
 
-    await injectTileImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
+    await GameInstructionsHelper.injectTileImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
       this.props.markdown,
       this.props.allPossibleTiles,
       this.props.fieldSymbols,
@@ -318,13 +323,32 @@ class EditorActionsBar extends React.Component<Props, any> {
       this.props.worldSettings,
       document
     )
-
   }
 
   render(): JSX.Element {
     return (
       <div className="action-bar">
 
+        <ImageLibrary
+          isCreatingNewImgShape={true}
+          onImageTaken={(imgSurrogate) => {
+
+            const gameInstructionEditorInstance = editor_wrapper_editorInstancesMap[gameInstructionsEditorId]
+
+            if (gameInstructionEditorInstance) {
+              // const pos = gameInstructionEditorInstance.getCursorPosition()
+              // gameInstructionsEditorAceSession.insert()
+              gameInstructionEditorInstance.insert(getImageMarkdownBlock(imgSurrogate.guid))
+            }
+
+            this.props.set_gie_isImageLibraryDisplayed(false)
+          }}
+          isDisplayed={this.props.isImageLibraryDisplayed}
+          set_isDisplayed={(isDisplayed) => {
+            this.props.set_gie_isImageLibraryDisplayed(isDisplayed)
+          }}
+          displayGenericImg={false}
+        />
 
         <div className="item" style={{marginLeft: '1em'}} onClick={() => {
           this.props.set_gie_editorFontSize(Math.min(maxZoomedFontSize, this.props.editorFontSize + 1))
@@ -362,15 +386,15 @@ class EditorActionsBar extends React.Component<Props, any> {
         </div>
 
         <div className="item" onClick={() => {
-          this.props.set_gie_isGameInstructionsEditorSettingsModalDisplayed(true)
+          this.props.set_gie_isImageLibraryDisplayed(true)
         }}>
-          <Icon name="setting"/>
+          <Icon name="image"/>
         </div>
 
         <div className="item" onClick={() => {
-          this.forceRegenerateFieldAndTileIms()
+          this.props.set_gie_isGameInstructionsEditorSettingsModalDisplayed(true)
         }}>
-          <Icon name="settings"/>
+          <Icon name="setting"/>
         </div>
 
 
