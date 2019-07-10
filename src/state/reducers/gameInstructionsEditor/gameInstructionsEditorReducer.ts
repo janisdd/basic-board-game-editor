@@ -3,22 +3,8 @@ import {notExhaustive} from "../_notExhausiveHelper";
 import {defaultGameInstructionEditorFontSize, defaultGameInstructionPreviewFontSize} from "../../../constants";
 import {CreateFieldTextExplanationListType} from "../../../helpers/markdownHelper";
 
-export type State = {
+export type GameInstructionsSettings = {
   readonly markdown: string
-  readonly verticalGripperPositionOffsetInPx
-    : number
-  readonly previewFontSize: number
-  readonly editorFontSize: number
-
-  readonly isActionResultCopyModalDisplayed: boolean
-  /**
-   * the text the user can copy in the modal
-   */
-  readonly actionResultCopyText: string
-
-  readonly isGameInstructionsEditorSettingsModalDisplayed: boolean
-
-  readonly isMarkdownHelpModalDisplayed: boolean
 
   /**
    * how to
@@ -46,15 +32,29 @@ export type State = {
    */
   readonly createFieldTextExplanationListReplacePostfixText: string
 
+  readonly previewFontSize: number
+  readonly editorFontSize: number
 }
+
+export type State = {
+
+  readonly verticalGripperPositionOffsetInPx: number
+
+  readonly isActionResultCopyModalDisplayed: boolean
+  /**
+   * the text the user can copy in the modal
+   */
+  readonly actionResultCopyText: string
+
+  readonly isGameInstructionsEditorSettingsModalDisplayed: boolean
+
+  readonly isMarkdownHelpModalDisplayed: boolean
+
+} & GameInstructionsSettings
 
 
 export const initial: State = {
-  markdown: `# 123
-
-das ist ein test....
-
-ende`,
+  markdown: ``,
   verticalGripperPositionOffsetInPx: 0,
 
   previewFontSize: defaultGameInstructionPreviewFontSize,
@@ -98,6 +98,7 @@ export enum ActionType {
   SET_createFieldTextExplanationListReplacePrefixText = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListReplacePrefixText',
   SET_createFieldTextExplanationListReplacePostfixText = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListReplacePostfixText',
 
+  SET_replaceGameInstructionsState = 'gameInstructionsEditorReducer_SET_replaceGameInstructionsState',
   RESET = 'gameInstructionsEditorReducer_RESET',
 }
 
@@ -170,12 +171,18 @@ export interface SET_createFieldTextExplanationListReplacePostfixTextAction exte
 }
 
 
+export interface SET_replaceGameInstructionsStateAction extends ActionBase {
+  readonly type: ActionType.SET_replaceGameInstructionsState
+  readonly replaceGameInstructionsState: GameInstructionsSettings
+}
+
 export interface ResetAction extends ActionBase {
   readonly type: ActionType.RESET
 }
 
 export type AllActions =
   ResetAction
+  | SET_replaceGameInstructionsStateAction
   | SET_markdownAction
   | SET_verticalGripperPositionOffsetInPxAction
   | SET_previewFontSizeAction
@@ -185,7 +192,7 @@ export type AllActions =
   | SET_actionResultCopyTextAction
 
   | Set_isGameInstructionsEditorSettingsModalDisplayedAction
- | SET_isMarkdownHelpModalDisplayedAction
+  | SET_isMarkdownHelpModalDisplayedAction
 
   | set_createFieldTextExplanationListAsAction
   | SET_createFieldTextExplanationListReplaceVarNameAction
@@ -269,6 +276,12 @@ export function reducer(state: State = initial, action: AllActions): State {
         createFieldTextExplanationListReplacePostfixText: action.createFieldTextExplanationListReplacePostfixText
       }
 
+    case ActionType.SET_replaceGameInstructionsState:
+      return {
+        ...state,
+        ...action.replaceGameInstructionsState
+      }
+
     case ActionType.RESET:
       return initial
 
@@ -278,3 +291,16 @@ export function reducer(state: State = initial, action: AllActions): State {
   }
 }
 
+
+export function getGameInstructionsSettings(state: State): GameInstructionsSettings {
+    return {
+      createFieldTextExplanationListAs: state.createFieldTextExplanationListAs,
+      createFieldTextExplanationListReplaceNumbers: state.createFieldTextExplanationListReplaceNumbers,
+      createFieldTextExplanationListReplacePostfixText: state.createFieldTextExplanationListReplacePostfixText,
+      createFieldTextExplanationListReplacePrefixText: state.createFieldTextExplanationListReplacePrefixText,
+      createFieldTextExplanationListReplaceVarName: state.createFieldTextExplanationListReplaceVarName,
+      editorFontSize: state.editorFontSize,
+      markdown: state.markdown,
+      previewFontSize: state.previewFontSize
+    }
+}

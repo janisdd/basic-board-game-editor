@@ -14,6 +14,17 @@ import {Logger} from "./logger";
 import {replace_worldSettings} from "../state/reducers/world/worldSettings/actions";
 import {WorldSettings} from "../state/reducers/world/worldSettings/worldSettingsReducer";
 import fileSaver = require("file-saver");
+import {
+  set_gie_markdown,
+  set_gie_replaceGameInstructionsState,
+  set_gie_reset
+} from "../state/reducers/gameInstructionsEditor/actions";
+import {getGameInstructionsSettings} from "../state/reducers/gameInstructionsEditor/gameInstructionsEditorReducer";
+import {editor_wrapper_lastEditorSessionsMap} from "../components/helpers/editorWrapper";
+import {
+  gameInstructionsEditorAceSession,
+  gameInstructionsEditorId
+} from "../components/gameInstructionsEditor/gameInstructionsEditor";
 
 
 export class IoHelper {
@@ -300,6 +311,8 @@ export class IoHelper {
       worldTiles: globalState.getState().tileSurrogateState.present,
 
       imgStorage: ImgStorage.images,
+
+      gameInstructionsSettings: getGameInstructionsSettings(globalState.getState().gameInstructionsEditorState)
     }
 
     //TODO only export used imgs??
@@ -343,6 +356,14 @@ export class IoHelper {
 
     globalState.dispatch(set_world_tiles(exportedWorld.worldTiles))
 
+    globalState.dispatch(set_gie_reset())
+    globalState.dispatch(set_gie_replaceGameInstructionsState(exportedWorld.gameInstructionsSettings))
+
+    //we also need to set the session value because else the markdown gets overwritten by the session value
+    if (gameInstructionsEditorAceSession) {
+      //set content
+      gameInstructionsEditorAceSession.setValue(exportedWorld.gameInstructionsSettings.markdown)
+    }
 
   }
 

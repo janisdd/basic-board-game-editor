@@ -1,6 +1,6 @@
 import {
   ActionBase,
-  ActionType,
+  ActionType, GameInstructionsSettings,
   ResetAction,
   SET_actionResultCopyTextAction,
   set_createFieldTextExplanationListAsAction,
@@ -13,7 +13,7 @@ import {
   Set_isGameInstructionsEditorSettingsModalDisplayedAction,
   SET_isMarkdownHelpModalDisplayedAction,
   SET_markdownAction,
-  SET_previewFontSizeAction,
+  SET_previewFontSizeAction, SET_replaceGameInstructionsStateAction,
   SET_verticalGripperPositionOffsetInPxAction
 } from "./gameInstructionsEditorReducer";
 import {CreateFieldTextExplanationListType} from "../../../helpers/markdownHelper";
@@ -109,6 +109,14 @@ export function set_gie_createFieldTextExplanationListReplacePostfixText(createF
   }
 }
 
+
+
+export function set_gie_replaceGameInstructionsState(replaceGameInstructionsState: GameInstructionsSettings): SET_replaceGameInstructionsStateAction {
+  return {
+    type: ActionType.SET_replaceGameInstructionsState,
+    replaceGameInstructionsState
+  }
+}
 
 export function set_gie_reset(): ResetAction {
   return {

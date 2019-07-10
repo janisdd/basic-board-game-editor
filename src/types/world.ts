@@ -9,6 +9,7 @@ import {
 } from "./drawing";
 import {WorldTileSurrogate} from "../../simulation/machine/machineState";
 import {WorldSettings} from "../state/reducers/world/worldSettings/worldSettingsReducer";
+import {GameInstructionsSettings} from "../state/reducers/gameInstructionsEditor/gameInstructionsEditorReducer";
 
 /**
  * a surrogate for a real img
@@ -220,6 +221,11 @@ export interface ExportWorld extends SomeExport {
   readonly fieldSymbols: ReadonlyArray<FieldSymbol>
   readonly imgSymbols: ReadonlyArray<ImgSymbol>
   readonly lineSymbols: ReadonlyArray<LineSymbol>
+
+  /**
+   * for the game instructions editor
+   */
+  readonly gameInstructionsSettings: GameInstructionsSettings
 }
 
 

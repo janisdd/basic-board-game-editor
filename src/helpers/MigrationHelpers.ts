@@ -1,8 +1,8 @@
-import {ExportTile, ExportWorld, MajorLineDirection, Tile} from "../types/world";
+import {ExportTile, ExportWorld, MajorLineDirection} from "../types/world";
 import {Logger} from "./logger";
 import {FieldShape, FieldSymbol, ImgShape, ImgSymbol, LineShape, LineSymbol} from "../types/drawing";
-import {appProperties, defaultGameInitCode, defaultTileHeight, defaultTileWidth, getDefaultNewTile} from "../constants";
-import {DialogHelper} from "./dialogHelper";
+import {appProperties, defaultGameInitCode, getDefaultNewTile} from "../constants";
+import {CreateFieldTextExplanationListType} from "./markdownHelper";
 
 
 interface MigrationClass {
@@ -98,7 +98,17 @@ class Migration_1_0_0__to__1_0_1 implements MigrationClass {
             }
           })
         }
-      })
+      }),
+      gameInstructionsSettings: {
+        previewFontSize: 12,
+        markdown: '',
+        editorFontSize: 12,
+        createFieldTextExplanationListReplaceVarName: 'X',
+        createFieldTextExplanationListReplacePrefixText: '[',
+        createFieldTextExplanationListReplacePostfixText: ']',
+        createFieldTextExplanationListReplaceNumbers: true,
+        createFieldTextExplanationListAs: CreateFieldTextExplanationListType.definitionList
+      },
     }
 
     return copy
@@ -811,7 +821,7 @@ class Migration_1_2_3__to__1_3_0 implements MigrationClass {
 class Migration_1_3_1__to__1_3_2 implements MigrationClass {
   oldVersion = '1.3.1'
   newVersion = '1.3.2'
-  warningMsg: string;
+  warningMsg = '';
 
   migrateTile(exportTile: ExportTile): ExportTile {
     return {
@@ -868,6 +878,40 @@ class Migration_1_3_1__to__1_3_2 implements MigrationClass {
 }
 
 /**
+ * we migrate to a new line connection system --> drop all old
+ */
+class Migration_1_3_2__to__1_3_3 implements MigrationClass {
+  oldVersion = '1.3.2';
+  newVersion = '1.3.3';
+  warningMsg = '';
+
+  migrateTile(exportTile: ExportTile): ExportTile {
+    return {
+      ...exportTile,
+      editorVersion: this.newVersion
+    }
+  }
+
+  migrateWorld(exportWorld: ExportWorld): ExportWorld {
+    return {
+      ...exportWorld,
+      editorVersion: this.newVersion,
+      gameInstructionsSettings: {
+        previewFontSize: 12,
+        markdown: '',
+        editorFontSize: 12,
+        createFieldTextExplanationListReplaceVarName: 'X',
+        createFieldTextExplanationListReplacePrefixText: '[',
+        createFieldTextExplanationListReplacePostfixText: ']',
+        createFieldTextExplanationListReplaceNumbers: true,
+        createFieldTextExplanationListAs: CreateFieldTextExplanationListType.definitionList
+      },
+    }
+  }
+
+}
+
+/**
  * a helper to create a shallow migration (no field/img/line props are changed, model) only ui stuff
  * @param {string} oldVersion
  * @param {string} newVersion
@@ -917,6 +961,7 @@ export class MigrationHelper {
     new Migration_1_2_3__to__1_3_0(),
     createVersionShallowMigration('1.3.0', '1.3.1'),
     new Migration_1_3_1__to__1_3_2(),
+    new Migration_1_3_2__to__1_3_3(),
   ]
 
   /**

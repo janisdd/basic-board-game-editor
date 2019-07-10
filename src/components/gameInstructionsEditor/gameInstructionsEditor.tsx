@@ -53,11 +53,11 @@ type Props = typeof stateProps & typeof dispatchProps;
 
 
 const gripperWidthInPx = 5
-const gameInstructionsEditorId = 'gameInstructionsEditorId'
+export const gameInstructionsEditorId = 'gameInstructionsEditorId'
 
 const gameInstructionsEditorPrintId = 'gameInstructionsEditorPrintId'
 
-let session: IEditSession | null = null
+export let gameInstructionsEditorAceSession: IEditSession | null = null
 
 
 class GameInstructionsEditor extends React.Component<Props, any> {
@@ -75,8 +75,8 @@ class GameInstructionsEditor extends React.Component<Props, any> {
 
   render(): JSX.Element {
 
-    if (!session) {
-      session = ace.createEditSession(this.props.markdown, `ace/mode/markdown` as any)
+    if (!gameInstructionsEditorAceSession) {
+      gameInstructionsEditorAceSession = ace.createEditSession(this.props.markdown, `ace/mode/markdown` as any)
     }
 
     //normally we need to take into account the gripper size but margin is handling this
@@ -140,7 +140,7 @@ class GameInstructionsEditor extends React.Component<Props, any> {
                            }}
                            throttleTimeInMs={500}
                            fontSize={this.props.editorFontSize}
-                           editSession={session}
+                           editSession={gameInstructionsEditorAceSession}
             />
 
           </div>
