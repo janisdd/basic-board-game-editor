@@ -9,7 +9,13 @@ import {
   set_gie_isActionResultCopyModalDisplayed,
   set_gie_isGameInstructionsEditorSettingsModalDisplayed, set_gie_isMarkdownHelpModalDisplayed
 } from "../../state/reducers/gameInstructionsEditor/actions";
-import {defaultGameInstructionEditorFontSize, maxZoomedFontSize, minZoomedFontSize, numberRegex} from "../../constants";
+import {
+  defaultGameInstructionEditorFontSize,
+  markdownGameInstructionsFieldTextExplanationHeader,
+  maxZoomedFontSize,
+  minZoomedFontSize,
+  numberRegex
+} from "../../constants";
 import {Icon} from "semantic-ui-react";
 import IconToolTip from "../helpers/IconToolTip";
 import ToolTip from "../helpers/ToolTip";
@@ -179,7 +185,7 @@ class EditorActionsBar extends React.Component<Props, any> {
 
     let markdown = generateMarkdownPhraseDefinitionList(uniquePhrases, this.props.createFieldTextExplanationListAs)
 
-    markdown = `## Texte auf Feldern erklärt
+    markdown = `${markdownGameInstructionsFieldTextExplanationHeader}
 
 ${markdown}`
 
