@@ -25,6 +25,11 @@ export interface MarkdownPlaceholderFieldTextExplanationTemplateDictionary {
    * field text
    */
   text: null | string
+
+  /**
+   * field command text
+   */
+  cmdText: null | string
 }
 
 export interface MarkdownPlaceholderVarTemplateDictionary {
@@ -96,6 +101,11 @@ export const markdownPlaceholderRegex = /@@@([\w]*)@@@/ig
 export const markdownPlaceholderStringPrefixAndPostfix = '@@@'
 
 
+export interface FieldTextTuple {
+  readonly text: string
+  readonly cmdText: string
+}
+
 export class GameInstructionsHelper {
   private constructor() {
   }
@@ -116,11 +126,11 @@ export class GameInstructionsHelper {
                                                   createFieldTextExplanationListReplacePrefixText: string,
                                                   createFieldTextExplanationListReplaceVarName: string,
                                                   createFieldTextExplanationListReplacePostfixText: string
-  ): string[] {
+  ): FieldTextTuple[] {
 
     const uniqueTiles = _.uniqWith<Tile>(allUsedTiles, (tile1, tile2) => tile1.guid === tile2.guid)
 
-    let phrases: string[] = []
+    let phrases: FieldTextTuple[] = []
 
     for (let i = 0; i < uniqueTiles.length; i++) {
       const uniqueTile = uniqueTiles[i];
@@ -129,6 +139,7 @@ export class GameInstructionsHelper {
         const fieldShape = uniqueTile.fieldShapes[j];
 
         let fieldText = fieldShape.text === null ? '' : fieldShape.text
+        let fieldCmdText = fieldShape.cmdText === null ? '' : fieldShape.cmdText
 
         if (fieldShape.createdFromSymbolGuid !== null) {
           const fieldSymbol = fieldSymbols.find(p => p.guid === fieldShape.createdFromSymbolGuid)
@@ -143,20 +154,31 @@ export class GameInstructionsHelper {
           if (fieldSymbol.overwriteText) {
             fieldText = fieldSymbol.text === null ? '' : fieldSymbol.text
           }
+
+          if (fieldSymbol.overwriteCmdText) {
+            fieldCmdText = fieldSymbol.cmdText === null ? '' : fieldSymbol.cmdText
+          }
+
         }
 
-        phrases.push(fieldText)
+        phrases.push({
+          text: fieldText,
+          cmdText: fieldCmdText
+        })
       }
     }
 
     //--- some cleanup ---
 
     //replace only empty or trimmed just whitespace texts
-    phrases = phrases.filter(p => p !== null && p.trim() !== '')
+    phrases = phrases.filter(p => p.text !== null && p.text.trim() !== '')
 
     //replace new lines with a single whitespace character because this is better for markdown lists...
 
-    phrases = phrases.map(p => p.replace(/\n/gm, ' '))
+    phrases = phrases.map(p => ({
+      ...p,
+      text: p.text.replace(/\n/gm, ' ')
+    }))
 
     if (createFieldTextExplanationListReplaceNumbers) {
 
@@ -164,7 +186,7 @@ export class GameInstructionsHelper {
       //note that every number needs its own placeholder e.g. ... 3 do ... 3 --> ... X do ... Y
 
       for (let i = 0; i < phrases.length; i++) {
-        let phrase = phrases[i];
+        let phrase = phrases[i].text;
 
         const matchResults = phrase.match(numberRegex)
 
@@ -178,13 +200,16 @@ export class GameInstructionsHelper {
               : `${createFieldTextExplanationListReplacePrefixText}${createFieldTextExplanationListReplaceVarName}${i + 1}${createFieldTextExplanationListReplacePostfixText}`)
           }
 
-          phrases[i] = phrase
+          phrases[i] = {
+            ...phrases[i],
+            text: phrase
+          }
         }
       }
 
     }
 
-    const uniquePhrases = _.uniqWith(phrases, (p1, p2) => p1 === p2)
+    const uniquePhrases = _.uniqWith(phrases, (p1, p2) => p1.text === p2.text)
 
     return uniquePhrases
 
@@ -234,6 +259,7 @@ export class GameInstructionsHelper {
 
     const replacementDict: MarkdownPlaceholderFieldTextExplanationTemplateDictionary = {
       text: null,
+      cmdText: null,
     }
 
     return replacementDict

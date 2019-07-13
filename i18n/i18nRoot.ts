@@ -357,7 +357,9 @@ export interface LangObj {
   "Placeholder": string
   "Substitution": string
 
+  "Field text new lines are removed and duplicate field texts are skipped": string
   "The field text": string
+  "The field field command text": string
 
   "The list of global variables (uses the variable list template)": string
   "The list of player local variables (from game init code) (uses the variable list template)": string

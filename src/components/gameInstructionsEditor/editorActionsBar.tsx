@@ -153,7 +153,8 @@ class EditorActionsBar extends React.Component<Props, any> {
       const uniquePhrase = uniquePhrases[i];
 
       const replacemantDict = GameInstructionsHelper.createEmptyReplacementFieldTextExplanationDictWithAllKnownPlaceholders()
-      replacemantDict.text = uniquePhrase
+      replacemantDict.text = uniquePhrase.text
+      replacemantDict.cmdText = uniquePhrase.cmdText
 
       const listEntry = GameInstructionsHelper.generateReplacedMarkdown(this.props.generalGameInstructionsFieldTextExplanationListElementTemplate, replacemantDict)
 

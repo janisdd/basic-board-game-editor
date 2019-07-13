@@ -355,7 +355,9 @@ export const lang_en: LangObj = {
   "Placeholder": "Placeholder",
   "Substitution": "Substitution",
 
+  "Field text new lines are removed and duplicate field texts are skipped" : "Field text new lines are removed and duplicate field texts are skipped",
   "The field text" : "The field text",
+  "The field field command text" : "The field field command text",
 
   "The list of global variables (uses the variable list template)": "The list of global variables (uses the variable list template)",
   "The list of player local variables (from game init code) (uses the variable list template)": "The list of player local variables (from game init code) (uses the variable list template)",

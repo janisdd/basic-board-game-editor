@@ -366,6 +366,7 @@ class GameInstructionsEditorSettingsModal extends React.Component<Props, any> {
                            <Icon className="mar-left-half hoverable" name="help circle"/>
                          }
                          content={<div>
+                           <span>{getI18n(this.props.langId, "Field text new lines are removed and duplicate field texts are skipped")}</span> <br />
                            <span>{getI18n(this.props.langId, "You can use the following placeholders")}</span>
                            <Table basic='very' celled collapsing>
                              <Table.Header>
@@ -384,6 +385,15 @@ class GameInstructionsEditorSettingsModal extends React.Component<Props, any> {
                                    {getI18n(this.props.langId, "The field text")}
                                  </Table.Cell>
                                </Table.Row>
+                               <Table.Row>
+                                 <Table.Cell>
+                                   {`${markdownPlaceholderStringPrefixAndPostfix}cmdText${markdownPlaceholderStringPrefixAndPostfix}`}
+                                 </Table.Cell>
+                                 <Table.Cell>
+                                   {getI18n(this.props.langId, "The field field command text")}
+                                 </Table.Cell>
+                               </Table.Row>
+
                              </Table.Body>
                            </Table>
 
