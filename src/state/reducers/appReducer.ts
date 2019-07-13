@@ -16,7 +16,7 @@ export type State = {
 }
 
 export const initial: State = {
-  activeTabIndex: AvailableAppTabs.gameInstructionEditor, //TODO worldEditor
+  activeTabIndex: AvailableAppTabs.worldEditor,
 }
 
 export interface ActionBase extends Action {
