@@ -311,6 +311,15 @@ export class GameInstructionsHelper {
   }
 
 
+  /**
+   *
+   * @param markdownBodySelector
+   * @param markdown
+   * @param allPossibleTiles
+   * @param fieldSymbols
+   * @param worldSettings  print and export scale is set to 1
+   * @param document
+   */
   static async injectFieldImgsIntoMarkdown(markdownBodySelector: string,
                                            markdown: string,
                                            allPossibleTiles: ReadonlyArray<Tile>,
@@ -327,7 +336,14 @@ export class GameInstructionsHelper {
       const absolutePosition = allPositions[i];
 
       const canvas = document.createElement('canvas')
-      let resultCanvas = WorldUnitToImgHelper.fieldByAbsPosToImg(absolutePosition, allPossibleTiles, fieldSymbols, worldSettings, canvas)
+      let resultCanvas = WorldUnitToImgHelper.fieldByAbsPosToImg(absolutePosition,
+        allPossibleTiles,
+        fieldSymbols,
+        {
+          ...worldSettings,
+          printAndExportScale: 1
+        },
+        canvas)
 
       if (!resultCanvas) continue
 
@@ -356,6 +372,17 @@ export class GameInstructionsHelper {
     }
   }
 
+  /**
+   *
+   * @param markdownBodySelector
+   * @param markdown
+   * @param allPossibleTiles
+   * @param fieldSymbols
+   * @param imgSymbols
+   * @param lineSymbols
+   * @param worldSettings print and export scale is set to 1
+   * @param document
+   */
   static async injectTileImgsIntoMarkdown(markdownBodySelector: string,
                                           markdown: string,
                                           allPossibleTiles: ReadonlyArray<Tile>,
@@ -380,7 +407,10 @@ export class GameInstructionsHelper {
         fieldSymbols,
         imgSymbols,
         lineSymbols,
-        worldSettings,
+        {
+          ...worldSettings,
+          printAndExportScale: 1
+        },
         canvas
       )
 
