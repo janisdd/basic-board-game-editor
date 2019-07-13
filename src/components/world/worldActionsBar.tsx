@@ -29,6 +29,8 @@ import {Simulator} from "../../../simulation/simulator";
 import {WorldTilesHelper} from "../../helpers/worldTilesHelper";
 import {set_tileLibrary_possibleTiles} from "../../state/reducers/world/tileLibrary/actions";
 import {DialogHelper} from "../../helpers/dialogHelper";
+import {WorldTileSurrogate} from "../../../simulation/machine/machineState";
+import {WorldUnitToImgHelper} from "../../helpers/worldUnitToImgHelper";
 import ImageLibrary from "../tiles/imageLibrary/imageLibrary";
 import {editor_wrapper_editorInstancesMap} from "../helpers/editorWrapper";
 import {gameInstructionsEditorId} from "../gameInstructionsEditor/gameInstructionsEditor";
@@ -404,6 +406,39 @@ class worldActionsBar extends React.Component<Props, any> {
           </Button>
         </ToolTip>
 
+        <Button disabled={this.props.tileSurrogatesState.present.length === 0} icon onClick={async () => {
+          // this.props.world_tileSurrogates_redo()
+
+          console.log('aaaaaaaaaaaa')
+
+          const tileImgs: string[] = []
+
+          const canvas = document.createElement('canvas')
+
+          for (let i = 0; i < this.props.tileSurrogatesState.present.length; i++) {
+            const tileSurrogate = this.props.tileSurrogatesState.present[i];
+
+            let resultCanvas = WorldUnitToImgHelper.tileByGuidToImg(tileSurrogate.tileGuid,
+              this.props.allTiles,
+              this.props.fieldSymbols,
+              this.props.imgSymbols,
+              this.props.lineSymbols,
+              {
+                ...this.props.worldSettings,
+                printAndExportScale: 2
+              },
+              canvas
+            )
+            tileImgs.push(resultCanvas.toDataURL())
+          }
+
+          const aFrameHGtml = getAFrame(this.props.tileSurrogatesState.present, this.props.allTiles, tileImgs)
+
+          console.log(aFrameHGtml)
+
+        }}>
+          <Icon name="camera"/>
+        </Button>
       </div>
 
 
@@ -412,3 +447,67 @@ class worldActionsBar extends React.Component<Props, any> {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(worldActionsBar)
+
+
+function getAFrame(tileSurrogates: ReadonlyArray<WorldTileSurrogate>, tiles: ReadonlyArray<Tile>, tileImgs: string[]): string {
+
+
+  const tileSize = 10
+  const backgroundImgNames = 'plane'
+
+
+  const backgroundImgsString = tileImgs.map((p, index) => `<img id="${backgroundImgNames}-${index}" src="${p}">`)
+
+  const tilePlanesString = tileSurrogates.map((p, index) => {
+
+    const tile = tiles.find(k => k.guid === p.tileGuid)
+
+    return `<a-plane src="#${backgroundImgNames}-${index}" width="${tileSize}" height="${tileSize}" rotation="-90 0 0" position="${p.x * tileSize} 0 ${p.y * tileSize}"></a-plane>`
+  })
+
+  const aFrameTemplate = `
+<html>
+  <head>
+    <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+    
+    <a-asset>
+        ${backgroundImgsString.join('\n')}
+    </a-asset>
+    
+      <a-sky color="#ECECEC"></a-sky>
+      
+      ${tilePlanesString.join('\n')}            
+      
+      <a-entity id="cam" camera look-controls wasd-controls position="0 10 0"></a-entity>
+    </a-scene>
+    
+    <!-- from https://stackoverflow.com/questions/44459356/a-frame-zoom-on-wheel-scroll --> 
+    <script>
+    window.addEventListener("wheel", event => {
+    const delta = Math.sign(event.wheelDelta);
+    //getting the mouse wheel change (120 or -120 and normalizing it to 1 or -1)
+    var mycam=document.getElementById('cam').getAttribute('camera');
+    var finalZoom=document.getElementById('cam').getAttribute('camera').zoom+delta;
+    //limiting the zoom so it doesnt zoom too much in or out
+    if(finalZoom<1)
+      finalZoom=1;
+    if(finalZoom>5)
+      finalZoom=5;  
+
+    mycam.zoom=finalZoom;
+    //setting the camera element
+    document.getElementById('cam').setAttribute('camera',mycam);
+  });
+</script>
+  </body>
+</html>
+`
+
+  return aFrameTemplate
+}
+
+
+
