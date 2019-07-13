@@ -49,7 +49,7 @@ import {
   SET_world_timeInS_expr_factorAction,
   WorldSettings,
   replace_worldSettingsAction,
-  SET_world_printScaleAction,
+  SET_world_printAndExportScaleAction,
   SET_world_additionalBorderWidthInPxAction,
   SET_alwaysInsertArrowHeadsWhenAutoConnectingFieldsAction,
   SET_forcedFieldAutoPrefixTextAction,
@@ -287,10 +287,10 @@ export function set_world_printGameAsOneImageAction(printGameAsOneImage: boolean
   }
 }
 
-export function set_world_printScale(printScale: number): SET_world_printScaleAction {
+export function set_world_printAndExportScale(printAndExportScale: number): SET_world_printAndExportScaleAction {
   return {
-    type: ActionType.SET_world_printScale,
-    printScale
+    type: ActionType.SET_world_printAndExportScale,
+    printAndExportScale
   }
 }
 

@@ -114,6 +114,10 @@ class Migration_1_0_0__to__1_0_1 implements MigrationClass {
         generalGameInstructionsVariableListElementTemplate: varListElementTemplate,
         generalGameInstructionsFieldTextExplanationListElementTemplate: fieldTextListElementTemplate,
       },
+      worldSettings: {
+        ...exportWorld.worldSettings,
+        printAndExportScale: 1,
+      }
     }
 
     return copy
@@ -282,7 +286,7 @@ class Migration_1_0_3__to__1_1_0 implements MigrationClass {
 
         worldCmdText: defaultGameInitCode,
         printGameAsOneImage: false,
-        printScale: 1,
+        printAndExportScale: 1,
         additionalBorderWidthInPx: 5,
 
         timeInS_rollDice: 2,
@@ -484,7 +488,7 @@ class Migration_1_2_0__to__1_2_1 implements MigrationClass {
       editorVersion: this.newVersion,
       worldSettings: {
         ...exportWorld.worldSettings,
-        printScale: 1
+        printAndExportScale: 1
       },
       fieldSymbols: exportWorld.fieldSymbols.map<FieldSymbol>(fieldSymbol => {
         return {
@@ -898,7 +902,9 @@ class Migration_1_3_2__to__1_3_3 implements MigrationClass {
   }
 
   migrateWorld(exportWorld: ExportWorld): ExportWorld {
-    return {
+
+
+    let newVar = {
       ...exportWorld,
       editorVersion: this.newVersion,
       gameInstructionsSettings: {
@@ -913,7 +919,15 @@ class Migration_1_3_2__to__1_3_3 implements MigrationClass {
         generalGameInstructionsVariableListElementTemplate: varListElementTemplate,
         generalGameInstructionsFieldTextExplanationListElementTemplate: fieldTextListElementTemplate,
       },
-    }
+      worldSettings: {
+        ...exportWorld.worldSettings,
+        printAndExportScale: 1,
+      }
+    };
+
+    delete newVar.worldSettings['printAndExportScale']
+
+    return newVar
   }
 
 }

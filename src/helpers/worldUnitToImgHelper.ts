@@ -145,7 +145,7 @@ export class WorldUnitToImgHelper {
       worldSettings.gridStrokeColor,
       worldSettings,
       null,
-      worldSettings.printScale,
+      worldSettings.printAndExportScale,
       worldSettings.additionalBorderWidthInPx
     )
 

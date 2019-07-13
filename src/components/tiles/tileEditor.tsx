@@ -476,7 +476,7 @@ class tileEditor extends React.Component<Props, any> {
       this.props.worldSettings,
       exportPngImagesBgColor,
       format,
-      this.props.worldSettings.printScale,
+      this.props.worldSettings.printAndExportScale,
       this.props.worldSettings.additionalBorderWidthInPx
     )
 
@@ -858,7 +858,7 @@ class tileEditor extends React.Component<Props, any> {
                     this.props.settings.tileProps.tileSettings.splitLargeTileForPrint,
                     this.props.langId,
                     null,
-                    this.props.worldSettings.printScale,
+                    this.props.worldSettings.printAndExportScale,
                     this.props.worldSettings.additionalBorderWidthInPx
                   )
                 }}>

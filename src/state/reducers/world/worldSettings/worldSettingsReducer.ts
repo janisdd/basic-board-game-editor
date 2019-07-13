@@ -84,10 +84,12 @@ export interface WorldSettings {
   readonly printGameAsOneImage: boolean
 
   /**
-   *  the scale e.g. to print one tile on A4
+   *  the scale for printing and exporting e.g. to print one tile on A4
    * (default should be 1)
+   * less than 1 is smaller
+   * more than 1 is larger
    */
-  readonly printScale: number
+  readonly printAndExportScale: number
 
   /**
    * the width of the additional black border (e.g. for printing/exporting)
@@ -264,7 +266,7 @@ export const initial: State = {
 
   worldCmdText: defaultGameInitCode,
   printGameAsOneImage: false,
-  printScale: 1.0,
+  printAndExportScale: 1.0,
   additionalBorderWidthInPx: 5,
 
 
@@ -368,7 +370,7 @@ export enum ActionType {
 
   SET_world_worldCmdText = 'worldSettingsReducer_SET_world_worldCmdText',
   SET_world_printGameAsOneImage = 'worldSettingsReducer_SET_world_printGameAsOneImage',
-  SET_world_printScale = 'worldSettingsReducer_SET_world_printScale',
+  SET_world_printAndExportScale = 'worldSettingsReducer_SET_world_printAndExportScale',
   SET_world_additionalBorderWidthInPx = 'worldSettingsReducer_SET_world_additionalBorderWidthInPx',
 
 
@@ -587,9 +589,9 @@ export interface SET_world_printGameAsOneImageAction extends ActionBase {
   readonly printGameAsOneImage: boolean
 }
 
-export interface SET_world_printScaleAction extends ActionBase {
-  readonly type: ActionType.SET_world_printScale
-  readonly printScale: number
+export interface SET_world_printAndExportScaleAction extends ActionBase {
+  readonly type: ActionType.SET_world_printAndExportScale
+  readonly printAndExportScale: number
 }
 
 export interface SET_world_additionalBorderWidthInPxAction extends ActionBase {
@@ -878,7 +880,7 @@ export type AllActions =
   | SET_world_expectedTileHeightAction
   | SET_world_worldCmdTextAction
   | SET_world_printGameAsOneImageAction
-  | SET_world_printScaleAction
+  | SET_world_printAndExportScaleAction
   | SET_world_additionalBorderWidthInPxAction
 
   | SET_world_timeInS_rollDiceAction
@@ -1106,10 +1108,10 @@ export function reducer(state: State = initial, action: AllActions): State {
         ...state,
         printGameAsOneImage: action.printGameAsOneImage
       }
-    case ActionType.SET_world_printScale:
+    case ActionType.SET_world_printAndExportScale:
       return {
         ...state,
-        printScale: action.printScale
+        printAndExportScale: action.printAndExportScale
       }
     case ActionType.SET_world_additionalBorderWidthInPx:
       return {

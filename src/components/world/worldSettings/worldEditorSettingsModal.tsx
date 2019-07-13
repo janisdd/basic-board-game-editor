@@ -30,7 +30,7 @@ import {
   set_world_timeInS_expr_sumAction,
   set_world_timeInS_expr_termAction,
   set_world_timeInS_expr_factorAction,
-  set_world_printScale,
+  set_world_printAndExportScale,
   set_world_additionalBorderWidthInPx,
   set_world_alwaysInsertArrowHeadsWhenAutoConnectingFields,
   set_world_forcedFieldAutoPrefixText,
@@ -104,7 +104,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_world_isWorldSettingsModalDisplayed,
   set_world_worldCmdTextAction,
   set_world_printGameAsOneImageAction,
-  set_world_printScale,
+  set_world_printAndExportScale,
   set_world_additionalBorderWidthInPx,
 
 
@@ -266,20 +266,20 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                           </Form.Field>
 
                           <Form.Field>
-                            <label>{getI18n(this.props.langId, "Print scale")}
+                            <label>{getI18n(this.props.langId, "Print and export scale")}
                               <IconToolTip
                                 message={getI18n(this.props.langId,
-                                  "The images will be scaled by this factor. If it is less than 1 then the images will be larger, if is more than 1 the images will be smaller")}
+                                  "The created tile images will be scaled by this factor. If it is more than 1 then the images will be larger, if is less than 1 the images will be smaller. Scaling is not applied to svg export")}
                               />
                             </label>
 
-                            <Input type="number" placeholder='1' value={this.props.worldSettings.printScale}
+                            <Input type="number" placeholder='1' value={this.props.worldSettings.printAndExportScale}
                                    step='0.1'
                                    style={{width: '100px'}}
                                    onChange={(e: SyntheticEvent<HTMLInputElement>) => {
                                      const val = parseFloat(e.currentTarget.value)
                                      if (isNaN(val) || val < 0) return
-                                     this.props.set_world_printScale(val)
+                                     this.props.set_world_printAndExportScale(val)
                                    }}
                             />
                           </Form.Field>

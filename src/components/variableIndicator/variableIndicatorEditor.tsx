@@ -117,7 +117,8 @@ class variableIndicatorEditor extends React.Component<Props, any> {
       this.props.state.fontName,
       printVariableIndicatorStrokeThickness,
       exportPngImagesBgColor,
-      this.props.state.drawQrCode
+      this.props.state.drawQrCode,
+      1, //the editor is only a preview... we only scale when printing/exporting
     )
 
     this.renderStage.update()
@@ -126,8 +127,8 @@ class variableIndicatorEditor extends React.Component<Props, any> {
   async exportVarIndicatorAs(format: 'svg' | 'png') {
 
     await PrintHelper.exportVariableIndicator(
-      this.props.worldSettings.expectedTileWidth,
-      this.props.worldSettings.expectedTileHeight,
+      this.props.state.outerCircleDiameterInPx,
+      this.props.state.outerCircleDiameterInPx,
       this.props.state.outerCircleDiameterInPx,
       this.props.state.innerCircleDiameterInPx,
       this.props.state.numOfFields,
@@ -139,6 +140,7 @@ class variableIndicatorEditor extends React.Component<Props, any> {
       printVariableIndicatorStrokeThickness,
       exportPngImagesBgColor,
       this.props.state.drawQrCode,
+      this.props.worldSettings.printAndExportScale,
       format
     )
 
@@ -165,7 +167,8 @@ class variableIndicatorEditor extends React.Component<Props, any> {
                       this.props.state.fontName,
                       printVariableIndicatorStrokeThickness,
                       exportPngImagesBgColor,
-                      this.props.state.drawQrCode
+                      this.props.state.drawQrCode,
+                      this.props.worldSettings.printAndExportScale,
                     )
                   }}
           >

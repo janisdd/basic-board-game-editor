@@ -264,7 +264,7 @@ class worldActionsBar extends React.Component<Props, any> {
                       printVariableIndicatorStrokeThickness,
                       this.props.variableIndicatorState.drawQrCode,
                       null,
-                      this.props.worldSettings.printScale,
+                      this.props.worldSettings.printAndExportScale,
                       this.props.worldSettings.additionalBorderWidthInPx
                     )
                   }}>
@@ -303,7 +303,7 @@ class worldActionsBar extends React.Component<Props, any> {
               this.props.imgSymbols, this.props.lineSymbols, this.props.allTiles, false, //TODO maybe set to hardcoded to false ??
               10, this.props.worldSettings.gridStrokeThicknessInPx, this.props.worldSettings.gridStrokeColor,
               this.props.worldSettings, exportPngImagesBgColor, 'svg',
-              this.props.worldSettings.printScale,
+              this.props.worldSettings.printAndExportScale,
               this.props.worldSettings.additionalBorderWidthInPx
             )
 
@@ -347,7 +347,7 @@ class worldActionsBar extends React.Component<Props, any> {
               this.props.imgSymbols, this.props.lineSymbols, this.props.allTiles, false, //TODO maybe set to hardcoded to false ??
               10, this.props.worldSettings.gridStrokeThicknessInPx, this.props.worldSettings.gridStrokeColor,
               this.props.worldSettings, exportPngImagesBgColor, 'png',
-              this.props.worldSettings.printScale,
+              this.props.worldSettings.printAndExportScale,
               this.props.worldSettings.additionalBorderWidthInPx
             )
 

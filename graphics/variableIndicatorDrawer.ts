@@ -25,6 +25,7 @@ export class VariableIndicatorDrawer {
    * @param strokeThickness
    * @param fillBackgroundColor
    * @param drawQrCode
+   * @param printAndExportScale
    */
   public static async drawVariableIndicator(stage: createjs.Stage,
                                             stageWidth: number,
@@ -38,10 +39,14 @@ export class VariableIndicatorDrawer {
                                             fontName: string,
                                             strokeThickness: number,
                                             fillBackgroundColor: string | null,
-                                            drawQrCode: boolean
+                                            drawQrCode: boolean,
+                                            printAndExportScale: number,
   ): Promise<void> {
 
     const color = 'black'
+
+    stage.scaleX = printAndExportScale
+    stage.scaleY = printAndExportScale
 
     const centerPoint: PlainPoint = {
       x: stageWidth / 2,
