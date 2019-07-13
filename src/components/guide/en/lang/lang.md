@@ -362,6 +362,7 @@ end_scope()
 
 **all statements in the same field will be always executed (field is implicit forced)!**
 
+
 ```bbgel
 return 3
 /* or */
@@ -372,6 +373,11 @@ result 3
 ```bbgel
 end_scope()
 ```
+
+**Also note that the editor has currently no support for return statement**
+**This means that the it will not introduce a new variable**
+**This is because one could use recursion and there is no easy way to represent that visually...**
+
 
 `limit_scope()` or `scope_limit()` or `scope_fence()` this will limit the interpreter to search for local variables only inside the scopes and nested scopes (outer scopes are excluded from the lookup)
 

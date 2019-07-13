@@ -73,6 +73,9 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
 
     markdown: rootState.gameInstructionsEditorState.markdown,
 
+    generalGameInstructionsTemplate: rootState.gameInstructionsEditorState.generalGameInstructionsTemplate,
+    generalGameInstructionsVariableListElementTemplate: rootState.gameInstructionsEditorState.generalGameInstructionsVariableListElementTemplate,
+
 
     langId: rootState.i18nState.langId,
   }
@@ -95,8 +98,7 @@ const dispatchProps = returntypeof(mapDispatchToProps);
 type Props = typeof stateProps & typeof dispatchProps;
 
 
-const gameInstructionsTemplate = require('./generalGameInstructions/de/game.md')
-const varListElementTemplate = require('./generalGameInstructions/de/varListElement.md')
+
 
 class EditorActionsBar extends React.Component<Props, any> {
 
@@ -203,7 +205,7 @@ class EditorActionsBar extends React.Component<Props, any> {
       for (let i = 0; i < allVarDefs.globalVars.length; i++) {
         const varDeclUnit = allVarDefs.globalVars[i];
 
-        const template = varListElementTemplate
+        const template = this.props.generalGameInstructionsVariableListElementTemplate
 
         const replacementDict = GameInstructionsHelper.createEmptyReplacementVarDictWithAllKnownPlaceholders()
 
@@ -227,7 +229,7 @@ class EditorActionsBar extends React.Component<Props, any> {
       for (let i = 0; i < allVarDefs.playerVars.length; i++) {
         const varDeclUnit = allVarDefs.playerVars[i];
 
-        const template = varListElementTemplate
+        const template = this.props.generalGameInstructionsVariableListElementTemplate
 
         const replacementDict = GameInstructionsHelper.createEmptyReplacementVarDictWithAllKnownPlaceholders()
 
@@ -248,7 +250,7 @@ class EditorActionsBar extends React.Component<Props, any> {
 
       let markdownList = ''
 
-      const template = varListElementTemplate
+      const template = this.props.generalGameInstructionsVariableListElementTemplate
 
       for (let i = 0; i < allVarDefs.localVars.length; i++) {
         const localVarScope = allVarDefs.localVars[i];
@@ -297,33 +299,12 @@ class EditorActionsBar extends React.Component<Props, any> {
     replacementDict['branchIfFieldPrefix'] = this.props.branchIfPrefixText
 
 
-    const gameInstructions = GameInstructionsHelper.generateReplacedMarkdown(gameInstructionsTemplate, replacementDict)
+    const gameInstructions = GameInstructionsHelper.generateReplacedMarkdown(this.props.generalGameInstructionsTemplate, replacementDict)
 
     this.props.set_gie_actionResultCopyText(gameInstructions)
     this.props.set_gie_isActionResultCopyModalDisplayed(true)
   }
 
-
-  async forceRegenerateFieldAndTileIms() {
-    await GameInstructionsHelper.injectFieldImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
-      this.props.markdown,
-      this.props.allPossibleTiles,
-      this.props.fieldSymbols,
-      this.props.worldSettings,
-      document
-    )
-
-
-    await GameInstructionsHelper.injectTileImgsIntoMarkdown(`#${gameInstructionsEditorPrintId}`,
-      this.props.markdown,
-      this.props.allPossibleTiles,
-      this.props.fieldSymbols,
-      this.props.imgSymbols,
-      this.props.lineSymbols,
-      this.props.worldSettings,
-      document
-    )
-  }
 
   render(): JSX.Element {
     return (
@@ -385,10 +366,14 @@ class EditorActionsBar extends React.Component<Props, any> {
           />
         </div>
 
-        <div className="item" onClick={() => {
-          this.props.set_gie_isImageLibraryDisplayed(true)
-        }}>
-          <Icon name="image"/>
+        <div className="item">
+          <IconToolTip
+            message={getI18n(this.props.langId, "Insert image from library")}
+            icon="image"
+            onClick={() => {
+              this.props.set_gie_isImageLibraryDisplayed(true)
+            }}
+          />
         </div>
 
         <div className="item" onClick={() => {

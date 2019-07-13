@@ -3,6 +3,10 @@ import {notExhaustive} from "../_notExhausiveHelper";
 import {defaultGameInstructionEditorFontSize, defaultGameInstructionPreviewFontSize} from "../../../constants";
 import {CreateFieldTextExplanationListType} from "../../../helpers/markdownHelper";
 
+const gameInstructionsTemplate = require('../../../components/gameInstructionsEditor/generalGameInstructionsTemplates/de/game.md')
+const varListElementTemplate = require('../../../components/gameInstructionsEditor/generalGameInstructionsTemplates/de/varListElement.md')
+const fieldTextExplanationElementTemplate = require('../../../components/gameInstructionsEditor/generalGameInstructionsTemplates/de/fieldTextExplanationListElement.md')
+
 export type GameInstructionsSettings = {
   readonly markdown: string
 
@@ -34,6 +38,23 @@ export type GameInstructionsSettings = {
 
   readonly previewFontSize: number
   readonly editorFontSize: number
+
+  /**
+   * template for the general game instructions where we replace known placeholders...
+   */
+  readonly generalGameInstructionsTemplate: string
+
+  /**
+   * in general game instruction one will likely explain used variables via a list
+   * this is the template for the list elements
+   */
+  readonly generalGameInstructionsVariableListElementTemplate: string
+
+  /**
+   * in general game instruction one will likely explain field texts via a list
+   * this is the template for the list elements
+   */
+  readonly generalGameInstructionsFieldTextExplanationListElementTemplate: string
 }
 
 export type State = {
@@ -75,6 +96,9 @@ export const initial: State = {
   createFieldTextExplanationListReplacePostfixText: ']',
 
   isImageLibraryDisplayed: false,
+  generalGameInstructionsTemplate: gameInstructionsTemplate,
+  generalGameInstructionsVariableListElementTemplate: varListElementTemplate,
+  generalGameInstructionsFieldTextExplanationListElementTemplate: fieldTextExplanationElementTemplate,
 }
 
 export interface ActionBase extends Action {
@@ -102,6 +126,11 @@ export enum ActionType {
   SET_createFieldTextExplanationListReplaceVarName = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListReplaceVarName',
   SET_createFieldTextExplanationListReplacePrefixText = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListReplacePrefixText',
   SET_createFieldTextExplanationListReplacePostfixText = 'gameInstructionsEditorReducer_SET_createFieldTextExplanationListReplacePostfixText',
+
+  SET_generalGameInstructionsTemplate = 'gameInstructionsEditorReducer_SET_generalGameInstructionsTemplate',
+  SET_generalGameInstructionsVariableListElementTemplate = 'gameInstructionsEditorReducer_SET_generalGameInstructionsVariableListElementTemplate',
+  SET_generalGameInstructionsFieldTextExplanationListElementTemplate = 'gameInstructionsEditorReducer_SET_generalGameInstructionsFieldTextExplanationListElementTemplate',
+
 
   SET_replaceGameInstructionsState = 'gameInstructionsEditorReducer_SET_replaceGameInstructionsState',
   RESET = 'gameInstructionsEditorReducer_RESET',
@@ -180,6 +209,22 @@ export interface SET_createFieldTextExplanationListReplacePostfixTextAction exte
 }
 
 
+export interface SET_generalGameInstructionsTemplateAction extends ActionBase {
+  readonly type: ActionType.SET_generalGameInstructionsTemplate
+  readonly generalGameInstructionsTemplate: string
+}
+
+export interface SET_generalGameInstructionsVariableListElementTemplateAction extends ActionBase {
+  readonly type: ActionType.SET_generalGameInstructionsVariableListElementTemplate
+  readonly generalGameInstructionsVariableListElementTemplate: string
+}
+
+export interface SET_generalGameInstructionsFieldTextExplanationListElementTemplateAction extends ActionBase {
+  readonly type: ActionType.SET_generalGameInstructionsFieldTextExplanationListElementTemplate
+  readonly generalGameInstructionsFieldTextExplanationListElementTemplate: string
+}
+
+
 export interface SET_replaceGameInstructionsStateAction extends ActionBase {
   readonly type: ActionType.SET_replaceGameInstructionsState
   readonly replaceGameInstructionsState: GameInstructionsSettings
@@ -209,8 +254,9 @@ export type AllActions =
   | SET_createFieldTextExplanationListReplaceNumbersAction
   | SET_createFieldTextExplanationListReplacePrefixTextAction
   | SET_createFieldTextExplanationListReplacePostfixTextAction
-
-
+  | SET_generalGameInstructionsTemplateAction
+  | SET_generalGameInstructionsVariableListElementTemplateAction
+  | SET_generalGameInstructionsFieldTextExplanationListElementTemplateAction
 
 
 export function reducer(state: State = initial, action: AllActions): State {
@@ -294,6 +340,24 @@ export function reducer(state: State = initial, action: AllActions): State {
         createFieldTextExplanationListReplacePostfixText: action.createFieldTextExplanationListReplacePostfixText
       }
 
+    case ActionType.SET_generalGameInstructionsTemplate:
+      return {
+        ...state,
+        generalGameInstructionsTemplate: action.generalGameInstructionsTemplate
+      }
+
+    case ActionType.SET_generalGameInstructionsVariableListElementTemplate:
+      return {
+        ...state,
+        generalGameInstructionsVariableListElementTemplate: action.generalGameInstructionsVariableListElementTemplate
+      }
+    case ActionType.SET_generalGameInstructionsFieldTextExplanationListElementTemplate:
+      return {
+        ...state,
+        generalGameInstructionsFieldTextExplanationListElementTemplate: action.generalGameInstructionsFieldTextExplanationListElementTemplate
+      }
+
+
     case ActionType.SET_replaceGameInstructionsState:
       return {
         ...state,
@@ -320,5 +384,8 @@ export function getGameInstructionsSettings(state: State): GameInstructionsSetti
     editorFontSize: state.editorFontSize,
     markdown: state.markdown,
     previewFontSize: state.previewFontSize,
+    generalGameInstructionsTemplate: state.generalGameInstructionsTemplate,
+    generalGameInstructionsVariableListElementTemplate: state.generalGameInstructionsVariableListElementTemplate,
+    generalGameInstructionsFieldTextExplanationListElementTemplate: state.generalGameInstructionsFieldTextExplanationListElementTemplate,
   }
 }

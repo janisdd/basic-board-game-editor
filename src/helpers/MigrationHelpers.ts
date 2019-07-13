@@ -107,7 +107,10 @@ class Migration_1_0_0__to__1_0_1 implements MigrationClass {
         createFieldTextExplanationListReplacePrefixText: '[',
         createFieldTextExplanationListReplacePostfixText: ']',
         createFieldTextExplanationListReplaceNumbers: true,
-        createFieldTextExplanationListAs: CreateFieldTextExplanationListType.definitionList
+        createFieldTextExplanationListAs: CreateFieldTextExplanationListType.definitionList,
+        generalGameInstructionsVariableListElementTemplate: '',
+        generalGameInstructionsTemplate: '',
+        generalGameInstructionsFieldTextExplanationListElementTemplate: '',
       },
     }
 
@@ -904,7 +907,10 @@ class Migration_1_3_2__to__1_3_3 implements MigrationClass {
         createFieldTextExplanationListReplacePrefixText: '[',
         createFieldTextExplanationListReplacePostfixText: ']',
         createFieldTextExplanationListReplaceNumbers: true,
-        createFieldTextExplanationListAs: CreateFieldTextExplanationListType.definitionList
+        createFieldTextExplanationListAs: CreateFieldTextExplanationListType.definitionList,
+        generalGameInstructionsTemplate: '',
+        generalGameInstructionsVariableListElementTemplate: '',
+        generalGameInstructionsFieldTextExplanationListElementTemplate: '',
       },
     }
   }

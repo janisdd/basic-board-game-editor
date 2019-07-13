@@ -1,6 +1,7 @@
 import {
   ActionBase,
-  ActionType, GameInstructionsSettings,
+  ActionType,
+  GameInstructionsSettings,
   ResetAction,
   SET_actionResultCopyTextAction,
   set_createFieldTextExplanationListAsAction,
@@ -8,12 +9,16 @@ import {
   SET_createFieldTextExplanationListReplacePostfixTextAction,
   SET_createFieldTextExplanationListReplacePrefixTextAction,
   SET_createFieldTextExplanationListReplaceVarNameAction,
-  SET_editorFontSizeAction,
+  SET_editorFontSizeAction, SET_generalGameInstructionsFieldTextExplanationListElementTemplateAction,
+  SET_generalGameInstructionsTemplateAction,
+  SET_generalGameInstructionsVariableListElementTemplateAction,
   SET_isActionResultCopyModalDisplayedAction,
-  Set_isGameInstructionsEditorSettingsModalDisplayedAction, SET_isImageLibraryDisplayedAction,
+  Set_isGameInstructionsEditorSettingsModalDisplayedAction,
+  SET_isImageLibraryDisplayedAction,
   SET_isMarkdownHelpModalDisplayedAction,
   SET_markdownAction,
-  SET_previewFontSizeAction, SET_replaceGameInstructionsStateAction,
+  SET_previewFontSizeAction,
+  SET_replaceGameInstructionsStateAction,
   SET_verticalGripperPositionOffsetInPxAction
 } from "./gameInstructionsEditorReducer";
 import {CreateFieldTextExplanationListType} from "../../../helpers/markdownHelper";
@@ -67,6 +72,7 @@ export function set_gie_isGameInstructionsEditorSettingsModalDisplayed(isGameIns
     isGameInstructionsEditorSettingsModalDisplayed
   }
 }
+
 export function set_gie_isMarkdownHelpModalDisplayed(isMarkdownHelpModalDisplayed: boolean): SET_isMarkdownHelpModalDisplayedAction {
   return {
     type: ActionType.SET_isMarkdownHelpModalDisplayed,
@@ -113,6 +119,28 @@ export function set_gie_createFieldTextExplanationListReplacePostfixText(createF
   return {
     type: ActionType.SET_createFieldTextExplanationListReplacePostfixText,
     createFieldTextExplanationListReplacePostfixText
+  }
+}
+
+
+export function set_gie_generalGameInstructionsTemplate(generalGameInstructionsTemplate: string): SET_generalGameInstructionsTemplateAction {
+  return {
+    type: ActionType.SET_generalGameInstructionsTemplate,
+    generalGameInstructionsTemplate
+  }
+}
+
+export function set_gie_generalGameInstructionsVariableListElementTemplate(generalGameInstructionsVariableListElementTemplate: string): SET_generalGameInstructionsVariableListElementTemplateAction {
+  return {
+    type: ActionType.SET_generalGameInstructionsVariableListElementTemplate,
+    generalGameInstructionsVariableListElementTemplate
+  }
+}
+
+export function set_gie_generalGameInstructionsFieldTextExplanationListElementTemplate(generalGameInstructionsFieldTextExplanationListElementTemplate: string): SET_generalGameInstructionsFieldTextExplanationListElementTemplateAction {
+  return {
+    type: ActionType.SET_generalGameInstructionsFieldTextExplanationListElementTemplate,
+    generalGameInstructionsFieldTextExplanationListElementTemplate
   }
 }
 

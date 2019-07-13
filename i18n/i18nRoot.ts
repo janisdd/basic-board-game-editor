@@ -334,10 +334,11 @@ export interface LangObj {
   "Copy modal": string
   "Copy text to clipboard and close modal": string
   "Close": string
+  "Insert image from library": string
 
   "Game instructions editor settings": string
   "Create field text explanation": string
-  "List type": string
+  "List element template": string
   "Replace numbers with variables": string
   "Replace number with variable name": string
   "Replace variable prefix": string
@@ -346,6 +347,9 @@ export interface LangObj {
   "Definition list": string
   "Disable automatic preview refresh": string
   "Refresh preview": string
+  "General game instructions template": string
+  "Variable explanation list element template": string
+  "This is the list entry template used when replacing the variable list placeholders": string
 
   "Markdown help": string
   "Cheatsheet": string

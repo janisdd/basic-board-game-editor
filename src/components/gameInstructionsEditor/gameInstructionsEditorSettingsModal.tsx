@@ -4,7 +4,7 @@ import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
-import {Checkbox, Dropdown, DropdownItemProps, Form, Input, Modal} from "semantic-ui-react";
+import {Checkbox, Dropdown, DropdownItemProps, Form, Input, Modal, TextArea} from "semantic-ui-react";
 import {getI18n} from "../../../i18n/i18nRoot";
 import {
   set_gie_createFieldTextExplanationListAs,
@@ -13,9 +13,12 @@ import {
   set_gie_createFieldTextExplanationListReplaceNumbers,
   set_gie_createFieldTextExplanationListReplacePrefixText,
   set_gie_createFieldTextExplanationListReplacePostfixText,
+  set_gie_generalGameInstructionsVariableListElementTemplate,
+  set_gie_generalGameInstructionsTemplate, set_gie_generalGameInstructionsFieldTextExplanationListElementTemplate,
 } from "../../state/reducers/gameInstructionsEditor/actions";
 import {CheckboxData} from "../../types/ui";
 import {CreateFieldTextExplanationListType} from "../../helpers/markdownHelper";
+import IconToolTip from "../helpers/IconToolTip";
 
 export interface MyProps {
   //readonly test: string
@@ -31,6 +34,10 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     createFieldTextExplanationListReplacePrefixText: rootState.gameInstructionsEditorState.createFieldTextExplanationListReplacePrefixText,
     createFieldTextExplanationListReplacePostfixText: rootState.gameInstructionsEditorState.createFieldTextExplanationListReplacePostfixText,
 
+    generalGameInstructionsTemplate: rootState.gameInstructionsEditorState.generalGameInstructionsTemplate,
+    generalGameInstructionsVariableListElementTemplate: rootState.gameInstructionsEditorState.generalGameInstructionsVariableListElementTemplate,
+    generalGameInstructionsFieldTextExplanationListElementTemplate: rootState.gameInstructionsEditorState.generalGameInstructionsFieldTextExplanationListElementTemplate,
+
     langId: rootState.i18nState.langId,
   }
 }
@@ -42,6 +49,10 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_gie_createFieldTextExplanationListReplaceNumbers,
   set_gie_createFieldTextExplanationListReplacePrefixText,
   set_gie_createFieldTextExplanationListReplacePostfixText,
+
+  set_gie_generalGameInstructionsTemplate,
+  set_gie_generalGameInstructionsVariableListElementTemplate,
+  set_gie_generalGameInstructionsFieldTextExplanationListElementTemplate,
 }, dispatch)
 
 
@@ -49,6 +60,10 @@ const stateProps = returntypeof(mapStateToProps);
 const dispatchProps = returntypeof(mapDispatchToProps);
 type Props = typeof stateProps & typeof dispatchProps;
 
+
+const gameInstructionsTemplate = require('./generalGameInstructionsTemplates/de/game.md')
+const varListElementTemplate = require('./generalGameInstructionsTemplates/de/varListElement.md')
+const fieldTextListElementTemplate = require('./generalGameInstructionsTemplates/de/fieldTextExplanationListElement.md')
 
 class GameInstructionsEditorSettingsModal extends React.Component<Props, any> {
   render(): JSX.Element {
@@ -97,23 +112,6 @@ class GameInstructionsEditorSettingsModal extends React.Component<Props, any> {
               </Form.Field>
 
               <Form.Group widths='equal'>
-                <Form.Field>
-                  <label>{getI18n(this.props.langId, "List type")}
-                  </label>
-                  <Dropdown placeholder='Select Friend' fluid selection options={createFieldTextExplanationListType}
-                            value={this.props.createFieldTextExplanationListAs}
-                            onChange={(event: SyntheticEvent<HTMLSelectElement>, data: { value: string }) => {
-
-                              if (data.value === CreateFieldTextExplanationListType.list) {
-                                this.props.set_gie_createFieldTextExplanationListAs(data.value)
-
-                              } else if (data.value === CreateFieldTextExplanationListType.definitionList) {
-                                this.props.set_gie_createFieldTextExplanationListAs(data.value)
-                              }
-
-                            }}
-                  />
-                </Form.Field>
 
                 <Form.Field>
                   <label>{getI18n(this.props.langId, "Replace number with variable name")}</label>
@@ -147,8 +145,84 @@ class GameInstructionsEditorSettingsModal extends React.Component<Props, any> {
                 </Form.Field>
               </Form.Group>
 
+              <Form.Field>
+
+                <Dropdown placeholder='Select Friend' fluid selection options={createFieldTextExplanationListType}
+                          value={this.props.createFieldTextExplanationListAs}
+                          onChange={(event: SyntheticEvent<HTMLSelectElement>, data: { value: string }) => {
+
+                            if (data.value === CreateFieldTextExplanationListType.list) {
+                              this.props.set_gie_createFieldTextExplanationListAs(data.value)
+
+                            } else if (data.value === CreateFieldTextExplanationListType.definitionList) {
+                              this.props.set_gie_createFieldTextExplanationListAs(data.value)
+                            }
+
+                          }}
+                />
+              </Form.Field>
+
+              <Form.Field>
+                <label>
+                  {getI18n(this.props.langId, "List element template")}
+                  <IconToolTip
+                    message={getI18n(this.props.langId, "Reset to defaults")}
+                    icon="undo"
+                    onClick={() => {
+                      this.props.set_gie_generalGameInstructionsFieldTextExplanationListElementTemplate(fieldTextListElementTemplate)
+                    }}
+                  />
+                </label>
+                <TextArea value={this.props.generalGameInstructionsFieldTextExplanationListElementTemplate}
+                          onChange={(e) => {
+                            this.props.set_gie_generalGameInstructionsFieldTextExplanationListElementTemplate(e.currentTarget.value)
+                          }}
+                />
+              </Form.Field>
 
 
+
+
+              <h3 className="ui dividing header">
+                {getI18n(this.props.langId, "General game instructions template")}
+              </h3>
+
+              <Form.Field>
+                <label>
+                  <IconToolTip
+                    message={getI18n(this.props.langId, "Reset to defaults")}
+                    icon="undo"
+                    onClick={() => {
+                      this.props.set_gie_generalGameInstructionsTemplate(gameInstructionsTemplate)
+                    }}
+                  />
+                </label>
+                <TextArea value={this.props.generalGameInstructionsTemplate}
+                          onChange={(e) => {
+                            this.props.set_gie_generalGameInstructionsTemplate(e.currentTarget.value)
+                          }}
+                />
+              </Form.Field>
+
+              <Form.Field>
+                <label>{getI18n(this.props.langId, "Variable explanation list element template")}
+                  <IconToolTip
+                    message={getI18n(this.props.langId, "This is the list entry template used when replacing the variable list placeholders")}/>
+
+                  <IconToolTip
+                    message={getI18n(this.props.langId, "Reset to defaults")}
+                    icon="undo"
+                    onClick={() => {
+                      this.props.set_gie_generalGameInstructionsVariableListElementTemplate(varListElementTemplate)
+                    }}
+                  />
+                </label>
+                <TextArea value={this.props.generalGameInstructionsVariableListElementTemplate}
+                          onChange={(e) => {
+                            this.props.set_gie_generalGameInstructionsVariableListElementTemplate(e.currentTarget.value)
+                          }}
+                />
+              </Form.Field>
 
 
             </Form>

@@ -17,7 +17,7 @@ Wenn in der Anleitung von **ausführen**, **Text ausführen** oder **Feld ausfü
 Näheres dazu im Abschnitt **@@@markdownGameInstructionsFieldTextExplanationHeader@@@**.
 
 
-## Variablen
+### Variablen
 
 Es gibt @@@totalNumVars@@@ Variablen.
 

@@ -77,7 +77,7 @@ class PreviewActionsBar extends React.Component<Props, any> {
             Logger.log('found none or too many printable contents')
             return
           }
-          
+
           await PrintHtmlHelper.printContentAsync(el.innerHTML, async () => {
             //make sure we insert tile and field images in the new html...
             await this.forceRegenerateFieldAndTileIms()
