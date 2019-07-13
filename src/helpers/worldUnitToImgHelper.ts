@@ -132,11 +132,11 @@ export class WorldUnitToImgHelper {
                           canvas: HTMLCanvasElement): HTMLCanvasElement | null {
 
 
-    canvas.style.width = `${tile.tileSettings.width}px`
-    canvas.style.height = `${tile.tileSettings.height}px`
+    canvas.style.width = `${tile.tileSettings.width * worldSettings.printAndExportScale}px`
+    canvas.style.height = `${tile.tileSettings.height * worldSettings.printAndExportScale}px`
 
-    canvas.width = tile.tileSettings.width
-    canvas.height = tile.tileSettings.height
+    canvas.width = tile.tileSettings.width * worldSettings.printAndExportScale
+    canvas.height = tile.tileSettings.height * worldSettings.printAndExportScale
 
     PrintHelper.printFullTile(tile, fieldSymbols, imgSymbols, lineSymbols, canvas,
       false,

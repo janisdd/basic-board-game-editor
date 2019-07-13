@@ -11,13 +11,15 @@ import ToolTip from '../../helpers/ToolTip'
 import {ImageAssetSurrogate} from "../../../types/world";
 import {copyToClipboard} from "../../../helpers/clipboardHelper";
 import IconToolTip from "../../helpers/IconToolTip";
+import fileSaver = require("file-saver");
+import {Logger} from "../../../helpers/logger";
 
 //const css = require('./styles.styl');
 
 export interface MyProps {
   readonly imgSurrogate: ImageAssetSurrogate
 
-  readonly onImgTaken: (imgSurrogate: ImageAssetSurrogate) => void
+  readonly onImgTaken: ((imgSurrogate: ImageAssetSurrogate) => void) | null
 
   readonly onImgDisplayIndexIncrease: (imgSurrogate: ImageAssetSurrogate) => void
   readonly onImgDisplayIndexDecrease: (imgSurrogate: ImageAssetSurrogate) => void
@@ -88,20 +90,41 @@ class displayImageControl extends React.Component<Props, any> {
 
             <div>
               <div className="flexed-well-spaced">
+                {
+                  this.props.onImgTaken !== null &&
+                  <Button icon
+                          onClick={() => {
+                            this.props.onImgTaken(this.props.imgSurrogate)
+                          }}
+                  >
+                    {
+                      this.props.isCreatingNewImgShape &&
+                      <Icon name="add"/>
+                    }
+                    {
+                      !this.props.isCreatingNewImgShape &&
+                      <Icon name="checkmark"/>
+                    }
+
+                  </Button>
+                }
+
                 <Button icon
                         onClick={() => {
-                          this.props.onImgTaken(this.props.imgSurrogate)
+
+                          const imgData = ImgStorage.getAsBlobData(this.props.imgSurrogate.guid)
+
+                          if (!imgData) {
+                            Logger.fatal(`could not find img with guid: ${this.props.imgSurrogate.guid}`)
+                            return
+                          }
+
+                          const blob = new Blob([imgData], {type: img.mimeType});
+                          fileSaver.saveAs(blob, img.originalName)
+
                         }}
                 >
-                  {
-                    this.props.isCreatingNewImgShape &&
-                    <Icon name="add"/>
-                  }
-                  {
-                    !this.props.isCreatingNewImgShape &&
-                    <Icon name="checkmark"/>
-                  }
-
+                  <Icon name="download"/>
                 </Button>
                 <ToolTip
                   message={getI18n(this.props.langId, "All image (shapes) that use this image will remain but display the generic image")}
@@ -160,7 +183,3 @@ class displayImageControl extends React.Component<Props, any> {
 
 export default connect(mapStateToProps, mapDispatchToProps)(displayImageControl)
 
-// angle left
-// angle right
-// angle double left
-// angle double right

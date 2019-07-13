@@ -145,6 +145,9 @@ export class PrintHelper {
 
     let canvas = document.createElement('canvas')
 
+    canvas.style.width = `${tile.tileSettings.width * printAndExportScale}px`
+    canvas.style.height = `${tile.tileSettings.height * printAndExportScale}px`
+
     canvas.width = tile.tileSettings.width * printAndExportScale
     canvas.height = tile.tileSettings.height * printAndExportScale
 
@@ -243,6 +246,9 @@ export class PrintHelper {
     const fullGameHeight = heightInTiles * tilesHeight
 
     const fullGameCanvas = document.createElement('canvas') as HTMLCanvasElement
+
+    fullGameCanvas.style.width = `${fullGameWidth * printAndExportScale}px`
+    fullGameCanvas.style.height = `${fullGameWidth * printAndExportScale}px`
 
     fullGameCanvas.width = fullGameWidth * printAndExportScale
     fullGameCanvas.height = fullGameHeight * printAndExportScale
@@ -531,8 +537,8 @@ export class PrintHelper {
       canvas.style.width = `${fullTileWidth * printAndExportScale}px`
       canvas.style.height = `${fillTileHeight * printAndExportScale}px`
 
-      canvas.width = Math.ceil(fullTileWidth * scaleFactor);
-      canvas.height = Math.ceil(fillTileHeight * scaleFactor);
+      canvas.width = fullTileWidth * scaleFactor
+      canvas.height = fillTileHeight * scaleFactor
 
       if (!drawGrid) {
         //we only draw border
@@ -598,9 +604,6 @@ export class PrintHelper {
           pieceCanvas.width = preferredSubTileWidth * scaleFactor
           pieceCanvas.height = preferredSubTileHeight * scaleFactor
 
-          // pieceCanvas.width = Math.ceil(preferredSubTileWidth * scaleFactor)
-          // pieceCanvas.height = Math.ceil(preferredSubTileHeight * scaleFactor)
-          //
           // pieceBitmap.scaleX = pieceBitmap.scaleY = scaleFactor
 
           // const dpiHelper = new CanvasDpiHelper(stage)
@@ -843,8 +846,8 @@ export class PrintHelper {
     canvas.style.width = `${stageWidth * printAndExportScale}px`
     canvas.style.height = `${stageHeight * printAndExportScale}px`
 
-    canvas.width = Math.ceil(stageWidth * scaleFactor);
-    canvas.height = Math.ceil(stageHeight * scaleFactor);
+    canvas.width = stageWidth * scaleFactor
+    canvas.height = stageHeight * scaleFactor
 
     const stage = new createjs.Stage(canvas)
 
@@ -971,8 +974,9 @@ export class PrintHelper {
 
         fullGameCanvas.style.width = `${fullGameWidth * printAndExportScale}px`
         fullGameCanvas.style.height = `${fullGameHeight * printAndExportScale}px`
-        fullGameCanvas.width = Math.ceil(fullGameWidth * scaleFactor);
-        fullGameCanvas.height = Math.ceil(fullGameHeight * scaleFactor);
+
+        fullGameCanvas.width = fullGameWidth * scaleFactor
+        fullGameCanvas.height = fullGameHeight * scaleFactor
 
         const zIndexCache: ZIndexCache = {}
 
@@ -1189,8 +1193,8 @@ export class PrintHelper {
           canvas.style.width = `${fullTileWidth * printAndExportScale}px`
           canvas.style.height = `${fillTileHeight * printAndExportScale}px`
 
-          canvas.width = Math.ceil(fullTileWidth * scaleFactor);
-          canvas.height = Math.ceil(fillTileHeight * scaleFactor);
+          canvas.width = fullTileWidth * scaleFactor
+          canvas.height =fillTileHeight * scaleFactor
 
           if (!drawGrid) {
             //we only draw border
@@ -1409,8 +1413,8 @@ export class PrintHelper {
     canvas.style.width = `${width * printAndExportScale}px`
     canvas.style.height = `${height * printAndExportScale}px`
 
-    canvas.width = Math.ceil(width * scaleFactor);
-    canvas.height = Math.ceil(height * scaleFactor);
+    canvas.width = width * scaleFactor
+    canvas.height = height * scaleFactor
 
 
     const stage = new createjs.Stage(canvas)

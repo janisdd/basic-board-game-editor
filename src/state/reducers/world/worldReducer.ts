@@ -15,6 +15,8 @@ export type State = {
   readonly isTileEditorDisplayed: boolean
 
   readonly isWorldSettingsModalDisplayed: boolean
+
+  readonly isImageLibraryDisplayed: boolean
 }
 
 
@@ -23,6 +25,7 @@ export const initial: State = {
   isTileLibraryModalDisplayed: false,
   isTileEditorDisplayed: false,
   isWorldSettingsModalDisplayed: false,
+  isImageLibraryDisplayed: false,
 }
 
 export interface ActionBase extends Action {
@@ -37,6 +40,7 @@ export enum ActionType {
 
   SET_world_isTileEditorDisplayed = 'worldReducer_SET_world_isTileEditorDisplayed',
   SET_world_isWorldSettingsModalDisplayed = 'worldReducer_SET_world_isWorldSettingsModalDisplayed',
+  SET_world_isImageLibraryDisplayed = 'worldReducer_SET_world_isImageLibraryDisplayed',
 
 
   RESET = 'worldReducer_RESET',
@@ -62,6 +66,11 @@ export interface SET_world_isWorldSettingsModalDisplayedAction extends ActionBas
   readonly isWorldSettingsModalDisplayed: boolean
 }
 
+export interface SET_world_isImageLibraryDisplayedAction extends ActionBase {
+  readonly type: ActionType.SET_world_isImageLibraryDisplayed
+  readonly isImageLibraryDisplayed: boolean
+}
+
 export interface ResetAction extends ActionBase {
   readonly type: ActionType.RESET
 }
@@ -73,6 +82,7 @@ export type AllActions =
   | SET_world_isTileLibraryModalDisplayedAction
   | SET_world_isTileEditorDisplayedAction
   | SET_world_isWorldSettingsModalDisplayedAction
+  | SET_world_isImageLibraryDisplayedAction
 
 
 export function reducer(state: State = initial, action: AllActions): State {
@@ -98,6 +108,11 @@ export function reducer(state: State = initial, action: AllActions): State {
       return {
         ...state,
         isWorldSettingsModalDisplayed: action.isWorldSettingsModalDisplayed
+      }
+    case ActionType.SET_world_isImageLibraryDisplayed:
+      return {
+        ...state,
+        isImageLibraryDisplayed: action.isImageLibraryDisplayed
       }
 
     case ActionType.RESET:

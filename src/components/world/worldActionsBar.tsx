@@ -10,6 +10,7 @@ import {
 } from "../../constants";
 import {Button, Icon} from "semantic-ui-react";
 import {
+  set_world_isImageLibraryDisplayed,
   set_world_isTileEditorDisplayed, set_world_isTileLibraryModalDisplayed
 } from "../../state/reducers/world/actions";
 import {set_app_activeTabIndex} from "../../state/reducers/actions";
@@ -28,6 +29,10 @@ import {Simulator} from "../../../simulation/simulator";
 import {WorldTilesHelper} from "../../helpers/worldTilesHelper";
 import {set_tileLibrary_possibleTiles} from "../../state/reducers/world/tileLibrary/actions";
 import {DialogHelper} from "../../helpers/dialogHelper";
+import ImageLibrary from "../tiles/imageLibrary/imageLibrary";
+import {editor_wrapper_editorInstancesMap} from "../helpers/editorWrapper";
+import {gameInstructionsEditorId} from "../gameInstructionsEditor/gameInstructionsEditor";
+import {getImageMarkdownBlock} from "../../helpers/markdownHelper";
 
 //const css = require('./styles.styl');
 
@@ -40,6 +45,7 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     //test0: rootState...
     //test: props.test
     isTileEditorDisplayed: rootState.worldState.isTileEditorDisplayed,
+    isImageLibraryDisplayed: rootState.worldState.isImageLibraryDisplayed,
     worldCmdText: rootState.worldSettingsState.worldCmdText,
 
     tileSurrogatesState: rootState.tileSurrogateState,
@@ -72,6 +78,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   world_tileSurrogates_redo,
 
   set_tileLibrary_possibleTiles,
+  set_world_isImageLibraryDisplayed,
 }, dispatch)
 
 
@@ -125,6 +132,16 @@ class worldActionsBar extends React.Component<Props, any> {
 
     return (<div className="flexed">
 
+      <ImageLibrary
+        isCreatingNewImgShape={false}
+        onImageTaken={null}
+        isDisplayed={this.props.isImageLibraryDisplayed}
+        set_isDisplayed={(isDisplayed) => {
+          this.props.set_world_isImageLibraryDisplayed(isDisplayed)
+        }}
+        displayGenericImg={false}
+      />
+
       <div
         className={['flexed',
           this.props.simulationState.simulationStatus !== null || this.props.simulationState.machineState !== null
@@ -151,6 +168,13 @@ class worldActionsBar extends React.Component<Props, any> {
                 }}>
           <Icon name='lab'/>
           {getI18n(this.props.langId, "Tile library")}
+        </Button>
+
+        <Button icon
+                onClick={() => {
+                  this.props.set_world_isImageLibraryDisplayed(true)
+                }}>
+          <Icon name='image'/>
         </Button>
 
       </div>

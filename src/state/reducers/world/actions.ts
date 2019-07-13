@@ -1,5 +1,6 @@
 import {
-  ActionType,
+  ActionBase,
+  ActionType, SET_world_isImageLibraryDisplayedAction,
   SET_world_isTileEditorDisplayedAction,
   SET_world_isTileLibraryModalDisplayedAction, SET_world_isWorldSettingsModalDisplayedAction,
   SET_world_selectedTilePosAction,
@@ -34,3 +35,11 @@ export function set_world_isWorldSettingsModalDisplayed(isWorldSettingsModalDisp
     isWorldSettingsModalDisplayed
   }
 }
+
+export function set_world_isImageLibraryDisplayed(isImageLibraryDisplayed: boolean): SET_world_isImageLibraryDisplayedAction {
+  return {
+    type: ActionType.SET_world_isImageLibraryDisplayed,
+    isImageLibraryDisplayed
+  }
+}
+

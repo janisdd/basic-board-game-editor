@@ -23,7 +23,7 @@ import {Logger} from "../../../helpers/logger";
 
 export interface MyProps {
   //readonly test: string
-  readonly onImageTaken: (imgSurrogate: ImageAssetSurrogate) => void
+  readonly onImageTaken: ((imgSurrogate: ImageAssetSurrogate) => void) | null
 
   readonly isDisplayed: boolean
 
@@ -274,6 +274,9 @@ class imageLibrary extends React.Component<Props, any> {
                 <div>
                   <div className="img-library-img-wrapper"
                        onClick={() => {
+
+                         if (!this.props.onImageTaken) return
+
                          this.props.onImageTaken({
                            guid: null,
                            height: -1,
