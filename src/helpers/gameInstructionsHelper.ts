@@ -2,32 +2,40 @@ import {Tile} from "../types/world";
 import {Logger} from "./logger";
 import {numberRegex} from "../constants";
 import {FieldSymbol, ImgSymbol, LineSymbol} from "../types/drawing";
-import {notExhaustiveThrow} from "../state/reducers/_notExhausiveHelper";
 import {
-  absoluteFieldPositionInjectionAttribute, tileGuidInjectionAttribute,
-  CreateFieldTextExplanationListType,
-  singleFieldRendererClass, singleTileRendererClass
+  absoluteFieldPositionInjectionAttribute,
+  singleFieldRendererClass,
+  singleTileRendererClass,
+  tileGuidInjectionAttribute
 } from "./markdownHelper";
-import _ = require("lodash");
 import {
   parseAllFieldAbsolutePositions,
   parseAllTileGuids,
-  parseFieldAbsolutePosition, parseTileGuid
+  parseFieldAbsolutePosition,
+  parseTileGuid
 } from "./worldTilesHelper";
 import {WorldUnitToImgHelper} from "./worldUnitToImgHelper";
 import {WorldUnitAsImgBlobStorage} from "../externalStorage/WorldUnitAsImgBlobStorage";
 import {WorldSettings} from "../state/reducers/world/worldSettings/worldSettingsReducer";
+import _ = require("lodash");
 
+
+export interface MarkdownPlaceholderFieldTextExplanationTemplateDictionary {
+  /**
+   * field text
+   */
+  text: null | string
+}
 
 export interface MarkdownPlaceholderVarTemplateDictionary {
   /**
    * var identifier (name)
    */
-    ['ident']: null | string
+  ident: null | string
   /**
    * the default value of the var
    */
-    ['defaultValue']: null | string
+  defaultValue: null | string
 }
 
 /**
@@ -38,58 +46,54 @@ export interface MarkdownPlaceholderDictionary {
   /**
    * global vars list
    */
-    ['globalVarsList']: null | (() => string)
+  globalVarsList: null | (() => string)
   /**
    * player local vars (from game init code)
    */
-    ['playerLocalVarsList']: null | (() => string)
+  playerLocalVarsList: null | (() => string)
   /**
    * all local vars that can be captured when executing field cmds (so this excludes playerLocalVarsList)
    */
-    ['localVarsList']: null | (() => string)
+  localVarsList: null | (() => string)
 
   /**
    * max dice value
    */
-    ['maxDiceValue']: null | number
+  maxDiceValue: null | number
 
   /**
    * number of local vars
    */
-    ['numLocalVars']: null | number
+  numLocalVars: null | number
   /**
    * number of player local vars
    */
-    ['numPlayerLocalVars']: null | number
+  numPlayerLocalVars: null | number
   /**
    * total number of local vars (local + player local)
    */
-    ['totalLocalVars']: null | number
+  totalLocalVars: null | number
   /**
    * number of global vars
    */
-    ['numGlobalVars']: null | number
+  numGlobalVars: null | number
   /**
    * total number of vars
    */
-    ['totalNumVars']: null | number
+  totalNumVars: null | number
 
-  /**
-   * section header for field text explanation
-   */
-    ['markdownGameInstructionsFieldTextExplanationHeader']: null | string
-
-  ['startFieldPrefix']: null | string
-  ['endFieldPrefix']: null | string
-  ['forcedFieldPrefix']: null | string
-  ['branchIfFieldPrefix']: null | string
+  startFieldPrefix: null | string
+  endFieldPrefix: null | string
+  forcedFieldPrefix: null | string
+  branchIfFieldPrefix: null | string
 
   // [placeholderName: string]: string | number | null | (() => string)
 }
 
 
-export const markdownPlaceholderStringPrefixAndPostfix = '@@@'
+//we don't need an extra var for @@@ because when we match this we use the matching group to extract the var name
 export const markdownPlaceholderRegex = /@@@([\w]*)@@@/ig
+export const markdownPlaceholderStringPrefixAndPostfix = '@@@'
 
 
 export class GameInstructionsHelper {
@@ -188,30 +192,6 @@ export class GameInstructionsHelper {
 
 
   /**
-   * generates a markdown list from phrases
-   * @param phrases
-   * @param listType
-   */
-  static generateMarkdownPhraseDefinitionList(phrases: string[], listType: CreateFieldTextExplanationListType): string {
-
-    switch (listType) {
-      case CreateFieldTextExplanationListType.list: {
-
-        return phrases.map(p => `- \`${p}\` - `).join('\n')
-      }
-
-      case CreateFieldTextExplanationListType.definitionList: {
-
-        return phrases.map(p => `${p}\n: todo\n`).join('\n')
-      }
-      default:
-        notExhaustiveThrow(listType)
-
-    }
-  }
-
-
-  /**
    * create an empty replacement dict
    */
   static createEmptyReplacementDictWithAllKnownPlaceholders(): MarkdownPlaceholderDictionary {
@@ -226,7 +206,6 @@ export class GameInstructionsHelper {
       totalLocalVars: null,
       numGlobalVars: null,
       totalNumVars: null,
-      markdownGameInstructionsFieldTextExplanationHeader: null,
       startFieldPrefix: null,
       endFieldPrefix: null,
       forcedFieldPrefix: null,
@@ -251,13 +230,22 @@ export class GameInstructionsHelper {
     return replacementDict
   }
 
+  static createEmptyReplacementFieldTextExplanationDictWithAllKnownPlaceholders(): MarkdownPlaceholderFieldTextExplanationTemplateDictionary {
+
+    const replacementDict: MarkdownPlaceholderFieldTextExplanationTemplateDictionary = {
+      text: null,
+    }
+
+    return replacementDict
+  }
+
   /**
    * replaces the placeholders in gameInstructionTemplate and returns the resulting game instructions
    * @param gameInstructionTemplate
    * @param placeholderValues
    */
   static generateReplacedMarkdown(gameInstructionTemplate: string,
-                                  placeholderValues: MarkdownPlaceholderDictionary | MarkdownPlaceholderVarTemplateDictionary): string {
+                                  placeholderValues: MarkdownPlaceholderDictionary | MarkdownPlaceholderVarTemplateDictionary | MarkdownPlaceholderFieldTextExplanationTemplateDictionary): string {
 
 
     // do not work directly on gameInstructionTemplate because markdownPlaceholderRegex keeps track of the last index

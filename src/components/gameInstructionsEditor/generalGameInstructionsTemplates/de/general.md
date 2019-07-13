@@ -7,14 +7,14 @@
 - Eine farbige Spielfigur pro Spieler
   - Außerdem @@@totalLocalVars@@@ gleichfarbige Spielfiguren pro Spieler für lokale Variablen
 
-- @@@numGlobalVars@@@ Spielfigure(n) für globale Variablen
+- @@@numGlobalVars@@@ Spielfigur(en) für globale Variablen
 
 
 ### Hinweise
 
 Wenn in der Anleitung von **ausführen**, **Text ausführen** oder **Feld ausführen** die Rede ist, dann ist damit gemeint, dass man das tut, was auf dem Feld als Text beschrieben ist.
 
-Näheres dazu im Abschnitt **@@@markdownGameInstructionsFieldTextExplanationHeader@@@**.
+Näheres dazu im Abschnitt **Texte auf Feldern erklärt**.
 
 
 ### Variablen
@@ -80,5 +80,5 @@ Ein Spielzug läuft folgendermaßen ab:
 Wenn man auf einem Feld mit dem Symbol/text **@@@branchIfFieldPrefix@@@** stehen bleibt, wird der Text erst zu Beginn der nächsten Runde ausgeführt
 
 
-### @@@markdownGameInstructionsFieldTextExplanationHeader@@@
+### Texte auf Feldern erklärt
 

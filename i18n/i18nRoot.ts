@@ -336,6 +336,9 @@ export interface LangObj {
   "Close": string
   "Insert image from library": string
 
+  "Markdown help": string
+  "Cheatsheet": string
+
   "Game instructions editor settings": string
   "Create field text explanation": string
   "List element template": string
@@ -350,9 +353,28 @@ export interface LangObj {
   "General game instructions template": string
   "Variable explanation list element template": string
   "This is the list entry template used when replacing the variable list placeholders": string
+  "You can use the following placeholders": string
+  "Placeholder": string
+  "Substitution": string
 
-  "Markdown help": string
-  "Cheatsheet": string
+  "The field text": string
+
+  "The list of global variables (uses the variable list template)": string
+  "The list of player local variables (from game init code) (uses the variable list template)": string
+  "The list of local variables (declared during the game) (uses the variable list template)": string
+  "The number of global variables": string
+  "The number of player local variables": string
+  "The number of local variables": string
+  "The total number of local variables (local + player local)": string
+  "The total number of variables": string
+  "The max number of pips the dice can show": string
+  "The start field prefix text you configured": string
+  "The end field prefix text you configured": string
+  "The forced field prefix text you configured": string
+  "The branch if field prefix text you configured": string
+
+  "The variable name (identifier)": string
+  "The variable default value": string
 
 }
 

@@ -2,8 +2,11 @@ import {ExportTile, ExportWorld, MajorLineDirection} from "../types/world";
 import {Logger} from "./logger";
 import {FieldShape, FieldSymbol, ImgShape, ImgSymbol, LineShape, LineSymbol} from "../types/drawing";
 import {appProperties, defaultGameInitCode, getDefaultNewTile} from "../constants";
-import {CreateFieldTextExplanationListType} from "./markdownHelper";
 
+
+const gameInstructionsTemplate = require('../../src/components/gameInstructionsEditor/generalGameInstructionsTemplates/de/general.md')
+const varListElementTemplate = require('../../src/components/gameInstructionsEditor/generalGameInstructionsTemplates/de/varListElement.md')
+const fieldTextListElementTemplate = require('../../src/components/gameInstructionsEditor/generalGameInstructionsTemplates/de/fieldTextExplanationListElement.md')
 
 interface MigrationClass {
 
@@ -107,10 +110,9 @@ class Migration_1_0_0__to__1_0_1 implements MigrationClass {
         createFieldTextExplanationListReplacePrefixText: '[',
         createFieldTextExplanationListReplacePostfixText: ']',
         createFieldTextExplanationListReplaceNumbers: true,
-        createFieldTextExplanationListAs: CreateFieldTextExplanationListType.definitionList,
-        generalGameInstructionsVariableListElementTemplate: '',
-        generalGameInstructionsTemplate: '',
-        generalGameInstructionsFieldTextExplanationListElementTemplate: '',
+        generalGameInstructionsTemplate: gameInstructionsTemplate,
+        generalGameInstructionsVariableListElementTemplate: varListElementTemplate,
+        generalGameInstructionsFieldTextExplanationListElementTemplate: fieldTextListElementTemplate,
       },
     }
 
@@ -907,10 +909,9 @@ class Migration_1_3_2__to__1_3_3 implements MigrationClass {
         createFieldTextExplanationListReplacePrefixText: '[',
         createFieldTextExplanationListReplacePostfixText: ']',
         createFieldTextExplanationListReplaceNumbers: true,
-        createFieldTextExplanationListAs: CreateFieldTextExplanationListType.definitionList,
-        generalGameInstructionsTemplate: '',
-        generalGameInstructionsVariableListElementTemplate: '',
-        generalGameInstructionsFieldTextExplanationListElementTemplate: '',
+        generalGameInstructionsTemplate: gameInstructionsTemplate,
+        generalGameInstructionsVariableListElementTemplate: varListElementTemplate,
+        generalGameInstructionsFieldTextExplanationListElementTemplate: fieldTextListElementTemplate,
       },
     }
   }

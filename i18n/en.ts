@@ -333,6 +333,9 @@ export const lang_en: LangObj = {
   "Copy text to clipboard and close modal": "Copy text to clipboard and close modal",
   "Close": "Close",
   "Insert image from library": "Insert image from library",
+  "Markdown help" : "Markdown help",
+  "Cheatsheet": "Cheatsheet",
+
   "General game instructions template" : "General game instructions template",
   "Variable explanation list element template" : "Variable explanation list element template",
   "This is the list entry template used when replacing the variable list placeholders" : "This is the list entry template used when replacing the variable list placeholders",
@@ -348,7 +351,28 @@ export const lang_en: LangObj = {
   "Definition list": "Definition list",
   "Disable automatic preview refresh" : "Disable automatic preview refresh",
   "Refresh preview" : "Refresh preview",
+  "You can use the following placeholders" : "You can use the following placeholders",
+  "Placeholder": "Placeholder",
+  "Substitution": "Substitution",
 
-  "Markdown help" : "Markdown help",
-  "Cheatsheet": "Cheatsheet",
+  "The field text" : "The field text",
+
+  "The list of global variables (uses the variable list template)": "The list of global variables (uses the variable list template)",
+  "The list of player local variables (from game init code) (uses the variable list template)": "The list of player local variables (from game init code) (uses the variable list template)",
+  "The list of local variables (declared during the game) (uses the variable list template)": "The list of local variables (declared during the game) (uses the variable list template)",
+  "The number of global variables": "The number of global variables",
+  "The number of player local variables": "The number of player local variables",
+  "The number of local variables": "The number of local variables",
+  "The total number of local variables (local + player local)": "The total number of local variables (local + player local)",
+  "The total number of variables": "The total number of variables",
+  "The max number of pips the dice can show": "The max number of pips the dice can show",
+  "The start field prefix text you configured": "The start field prefix text you configured",
+  "The end field prefix text you configured": "The end field prefix text you configured",
+  "The forced field prefix text you configured": "The forced field prefix text you configured",
+  "The branch if field prefix text you configured": "The branch if field prefix text you configured",
+
+  "The variable name (identifier)": "The variable name (identifier)",
+  "The variable default value": "The variable default value",
+
+
 }

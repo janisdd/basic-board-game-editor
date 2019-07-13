@@ -1,19 +1,14 @@
 import {Action} from "redux";
 import {notExhaustive} from "../_notExhausiveHelper";
 import {defaultGameInstructionEditorFontSize, defaultGameInstructionPreviewFontSize} from "../../../constants";
-import {CreateFieldTextExplanationListType} from "../../../helpers/markdownHelper";
 
-const gameInstructionsTemplate = require('../../../components/gameInstructionsEditor/generalGameInstructionsTemplates/de/game.md')
+const gameInstructionsTemplate = require('../../../components/gameInstructionsEditor/generalGameInstructionsTemplates/de/general.md')
 const varListElementTemplate = require('../../../components/gameInstructionsEditor/generalGameInstructionsTemplates/de/varListElement.md')
 const fieldTextExplanationElementTemplate = require('../../../components/gameInstructionsEditor/generalGameInstructionsTemplates/de/fieldTextExplanationListElement.md')
 
 export type GameInstructionsSettings = {
   readonly markdown: string
 
-  /**
-   * how to
-   */
-  readonly createFieldTextExplanationListAs: CreateFieldTextExplanationListType
   /**
    * true: replace numbers e.g. move 3 fields forward --> move [X] fields forward
    * false: field text is not changed move 3 fields forward
@@ -89,7 +84,6 @@ export const initial: State = {
   isGameInstructionsEditorSettingsModalDisplayed: false,
   isMarkdownHelpModalDisplayed: false,
 
-  createFieldTextExplanationListAs: CreateFieldTextExplanationListType.definitionList,
   createFieldTextExplanationListReplaceNumbers: true,
   createFieldTextExplanationListReplaceVarName: 'X',
   createFieldTextExplanationListReplacePrefixText: '[',
@@ -183,11 +177,6 @@ export interface SET_isImageLibraryDisplayedAction extends ActionBase {
   readonly isImageLibraryDisplayed: boolean
 }
 
-export interface set_createFieldTextExplanationListAsAction extends ActionBase {
-  readonly type: ActionType.SET_createFieldTextExplanationListAs
-  readonly createFieldTextExplanationListAs: CreateFieldTextExplanationListType
-}
-
 export interface SET_createFieldTextExplanationListReplaceVarNameAction extends ActionBase {
   readonly type: ActionType.SET_createFieldTextExplanationListReplaceVarName
   readonly createFieldTextExplanationListReplaceVarName: string
@@ -249,7 +238,6 @@ export type AllActions =
   | SET_isMarkdownHelpModalDisplayedAction
   | SET_isImageLibraryDisplayedAction
 
-  | set_createFieldTextExplanationListAsAction
   | SET_createFieldTextExplanationListReplaceVarNameAction
   | SET_createFieldTextExplanationListReplaceNumbersAction
   | SET_createFieldTextExplanationListReplacePrefixTextAction
@@ -313,12 +301,6 @@ export function reducer(state: State = initial, action: AllActions): State {
         isImageLibraryDisplayed: action.isImageLibraryDisplayed
       }
 
-
-    case ActionType.SET_createFieldTextExplanationListAs:
-      return {
-        ...state,
-        createFieldTextExplanationListAs: action.createFieldTextExplanationListAs
-      }
     case ActionType.SET_createFieldTextExplanationListReplaceVarName:
       return {
         ...state,
@@ -376,7 +358,6 @@ export function reducer(state: State = initial, action: AllActions): State {
 
 export function getGameInstructionsSettings(state: State): GameInstructionsSettings {
   return {
-    createFieldTextExplanationListAs: state.createFieldTextExplanationListAs,
     createFieldTextExplanationListReplaceNumbers: state.createFieldTextExplanationListReplaceNumbers,
     createFieldTextExplanationListReplacePostfixText: state.createFieldTextExplanationListReplacePostfixText,
     createFieldTextExplanationListReplacePrefixText: state.createFieldTextExplanationListReplacePrefixText,

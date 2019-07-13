@@ -7,15 +7,11 @@ import {
   set_gie_actionResultCopyText,
   set_gie_editorFontSize,
   set_gie_isActionResultCopyModalDisplayed,
-  set_gie_isGameInstructionsEditorSettingsModalDisplayed, set_gie_isImageLibraryDisplayed,
+  set_gie_isGameInstructionsEditorSettingsModalDisplayed,
+  set_gie_isImageLibraryDisplayed,
   set_gie_isMarkdownHelpModalDisplayed
 } from "../../state/reducers/gameInstructionsEditor/actions";
-import {
-  defaultGameInstructionEditorFontSize, defaultImgShapeProps,
-  markdownGameInstructionsFieldTextExplanationHeader,
-  maxZoomedFontSize,
-  minZoomedFontSize
-} from "../../constants";
+import {defaultGameInstructionEditorFontSize, maxZoomedFontSize, minZoomedFontSize} from "../../constants";
 import {Icon} from "semantic-ui-react";
 import IconToolTip from "../helpers/IconToolTip";
 import {getI18n} from "../../../i18n/i18nRoot";
@@ -25,19 +21,10 @@ import {Tile} from "../../types/world";
 import {LangHelper} from "../../helpers/langHelper";
 import {AbstractMachine} from "../../../simulation/machine/AbstractMachine";
 import {ExpressionUnit} from "../../../simulation/model/executionUnit";
-import {
-  gameInstructionsEditorAceSession,
-  gameInstructionsEditorId,
-  gameInstructionsEditorPrintId
-} from "./gameInstructionsEditor";
+import {gameInstructionsEditorId} from "./gameInstructionsEditor";
 import {GameInstructionsHelper} from "../../helpers/gameInstructionsHelper";
 import ImageLibrary from "../tiles/imageLibrary/imageLibrary";
-import {PlainPoint} from "../../types/drawing";
-import {CoordHelper} from "../../helpers/CoordHelper";
-import {getNextShapeId} from "../../state/reducers/tileEditor/fieldProperties/fieldPropertyReducer";
-import {renewAllZIndicesInTile} from "../../helpers/someIndexHelper";
 import {editor_wrapper_editorInstancesMap} from "../helpers/editorWrapper";
-import guide from "../guide/guide";
 import {getImageMarkdownBlock} from "../../helpers/markdownHelper";
 
 
@@ -58,7 +45,6 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
     imgSymbols: rootState.imgSymbolState.present,
     lineSymbols: rootState.lineSymbolState.present,
 
-    createFieldTextExplanationListAs: rootState.gameInstructionsEditorState.createFieldTextExplanationListAs,
     createFieldTextExplanationListReplaceNumbers: rootState.gameInstructionsEditorState.createFieldTextExplanationListReplaceNumbers,
     createFieldTextExplanationListReplaceVarName: rootState.gameInstructionsEditorState.createFieldTextExplanationListReplaceVarName,
     createFieldTextExplanationListReplacePrefixText: rootState.gameInstructionsEditorState.createFieldTextExplanationListReplacePrefixText,
@@ -75,6 +61,7 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
 
     generalGameInstructionsTemplate: rootState.gameInstructionsEditorState.generalGameInstructionsTemplate,
     generalGameInstructionsVariableListElementTemplate: rootState.gameInstructionsEditorState.generalGameInstructionsVariableListElementTemplate,
+    generalGameInstructionsFieldTextExplanationListElementTemplate: rootState.gameInstructionsEditorState.generalGameInstructionsFieldTextExplanationListElementTemplate,
 
 
     langId: rootState.i18nState.langId,
@@ -96,8 +83,6 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
 const stateProps = returntypeof(mapStateToProps);
 const dispatchProps = returntypeof(mapDispatchToProps);
 type Props = typeof stateProps & typeof dispatchProps;
-
-
 
 
 class EditorActionsBar extends React.Component<Props, any> {
@@ -162,7 +147,18 @@ class EditorActionsBar extends React.Component<Props, any> {
     //   return
     // }
 
-    let markdown = GameInstructionsHelper.generateMarkdownPhraseDefinitionList(uniquePhrases, this.props.createFieldTextExplanationListAs)
+    let markdown = ''
+
+    for (let i = 0; i < uniquePhrases.length; i++) {
+      const uniquePhrase = uniquePhrases[i];
+
+      const replacemantDict = GameInstructionsHelper.createEmptyReplacementFieldTextExplanationDictWithAllKnownPlaceholders()
+      replacemantDict.text = uniquePhrase
+
+      const listEntry = GameInstructionsHelper.generateReplacedMarkdown(this.props.generalGameInstructionsFieldTextExplanationListElementTemplate, replacemantDict)
+
+      markdown += `${listEntry}\n`
+    }
 
     this.props.set_gie_actionResultCopyText(markdown)
     this.props.set_gie_isActionResultCopyModalDisplayed(true)
@@ -209,11 +205,11 @@ class EditorActionsBar extends React.Component<Props, any> {
 
         const replacementDict = GameInstructionsHelper.createEmptyReplacementVarDictWithAllKnownPlaceholders()
 
-        replacementDict['ident'] = varDeclUnit.ident
+        replacementDict.ident = varDeclUnit.ident
 
         const testValue = this.execExpr(varDeclUnit.expr)
 
-        replacementDict['defaultValue'] = testValue
+        replacementDict.defaultValue = testValue
 
         const listEntry = GameInstructionsHelper.generateReplacedMarkdown(template, replacementDict)
         markdownList += `${listEntry}\n`
@@ -233,11 +229,11 @@ class EditorActionsBar extends React.Component<Props, any> {
 
         const replacementDict = GameInstructionsHelper.createEmptyReplacementVarDictWithAllKnownPlaceholders()
 
-        replacementDict['ident'] = varDeclUnit.ident
+        replacementDict.ident = varDeclUnit.ident
 
         const testValue = this.execExpr(varDeclUnit.expr)
 
-        replacementDict['defaultValue'] = testValue
+        replacementDict.defaultValue = testValue
 
         const listEntry = GameInstructionsHelper.generateReplacedMarkdown(template, replacementDict)
         markdownList += `${listEntry}\n`
@@ -260,11 +256,11 @@ class EditorActionsBar extends React.Component<Props, any> {
 
           const replacementDict = GameInstructionsHelper.createEmptyReplacementVarDictWithAllKnownPlaceholders()
 
-          replacementDict['ident'] = localVar.ident
+          replacementDict.ident = localVar.ident
 
           const testValue = this.execExpr(localVar.expr)
 
-          replacementDict['defaultValue'] = testValue
+          replacementDict.defaultValue = testValue
 
           const listEntry = GameInstructionsHelper.generateReplacedMarkdown(template, replacementDict)
           markdownList += `${listEntry}\n`
@@ -278,25 +274,23 @@ class EditorActionsBar extends React.Component<Props, any> {
 
     const numAllLocalVars = allVarDefs.localVars.reduce<number>((previousValue, currentValue) => previousValue + currentValue.localVars.length, 0)
 
-    replacementDict['globalVarsList'] = globalVarListReplacement
-    replacementDict['playerLocalVarsList'] = playerLocalVarListReplacement
-    replacementDict['localVarsList'] = localVarListReplacement
+    replacementDict.globalVarsList = globalVarListReplacement
+    replacementDict.playerLocalVarsList = playerLocalVarListReplacement
+    replacementDict.localVarsList = localVarListReplacement
 
 
-    replacementDict['maxDiceValue'] = tmpState.maxDiceValue
+    replacementDict.maxDiceValue = tmpState.maxDiceValue
 
-    replacementDict['numLocalVars'] = numAllLocalVars
-    replacementDict['numPlayerLocalVars'] = allVarDefs.playerVars.length
-    replacementDict['totalLocalVars'] = allVarDefs.playerVars.length + numAllLocalVars
-    replacementDict['numGlobalVars'] = allVarDefs.globalVars.length
-    replacementDict['totalNumVars'] = allVarDefs.globalVars.length + allVarDefs.playerVars.length + numAllLocalVars
+    replacementDict.numLocalVars = numAllLocalVars
+    replacementDict.numPlayerLocalVars = allVarDefs.playerVars.length
+    replacementDict.totalLocalVars = allVarDefs.playerVars.length + numAllLocalVars
+    replacementDict.numGlobalVars = allVarDefs.globalVars.length
+    replacementDict.totalNumVars = allVarDefs.globalVars.length + allVarDefs.playerVars.length + numAllLocalVars
 
-    replacementDict['markdownGameInstructionsFieldTextExplanationHeader'] = markdownGameInstructionsFieldTextExplanationHeader
-
-    replacementDict['startFieldPrefix'] = this.props.startFieldAutoPrefixText
-    replacementDict['endFieldPrefix'] = this.props.endFieldAutoPrefixText
-    replacementDict['forcedFieldPrefix'] = this.props.forcedFieldAutoPrefixText
-    replacementDict['branchIfFieldPrefix'] = this.props.branchIfPrefixText
+    replacementDict.startFieldPrefix = this.props.startFieldAutoPrefixText
+    replacementDict.endFieldPrefix = this.props.endFieldAutoPrefixText
+    replacementDict.forcedFieldPrefix = this.props.forcedFieldAutoPrefixText
+    replacementDict.branchIfFieldPrefix = this.props.branchIfPrefixText
 
 
     const gameInstructions = GameInstructionsHelper.generateReplacedMarkdown(this.props.generalGameInstructionsTemplate, replacementDict)

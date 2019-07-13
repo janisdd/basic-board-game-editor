@@ -5,11 +5,6 @@ import {escapeHtml} from "./stringHelper";
 import {ImgStorage} from "../externalStorage/imgStorage";
 
 
-export enum CreateFieldTextExplanationListType {
-  list = 'list',
-  definitionList = 'definitionList'
-}
-
 
 /**
  * @example

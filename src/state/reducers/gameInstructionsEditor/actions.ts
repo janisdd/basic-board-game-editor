@@ -1,15 +1,14 @@
 import {
-  ActionBase,
   ActionType,
   GameInstructionsSettings,
   ResetAction,
   SET_actionResultCopyTextAction,
-  set_createFieldTextExplanationListAsAction,
   SET_createFieldTextExplanationListReplaceNumbersAction,
   SET_createFieldTextExplanationListReplacePostfixTextAction,
   SET_createFieldTextExplanationListReplacePrefixTextAction,
   SET_createFieldTextExplanationListReplaceVarNameAction,
-  SET_editorFontSizeAction, SET_generalGameInstructionsFieldTextExplanationListElementTemplateAction,
+  SET_editorFontSizeAction,
+  SET_generalGameInstructionsFieldTextExplanationListElementTemplateAction,
   SET_generalGameInstructionsTemplateAction,
   SET_generalGameInstructionsVariableListElementTemplateAction,
   SET_isActionResultCopyModalDisplayedAction,
@@ -21,7 +20,6 @@ import {
   SET_replaceGameInstructionsStateAction,
   SET_verticalGripperPositionOffsetInPxAction
 } from "./gameInstructionsEditorReducer";
-import {CreateFieldTextExplanationListType} from "../../../helpers/markdownHelper";
 
 
 export function set_gie_markdown(markdown: string): SET_markdownAction {
@@ -84,13 +82,6 @@ export function set_gie_isImageLibraryDisplayed(isImageLibraryDisplayed: boolean
   return {
     type: ActionType.SET_isImageLibraryDisplayed,
     isImageLibraryDisplayed
-  }
-}
-
-export function set_gie_createFieldTextExplanationListAs(createFieldTextExplanationListAs: CreateFieldTextExplanationListType): set_createFieldTextExplanationListAsAction {
-  return {
-    type: ActionType.SET_createFieldTextExplanationListAs,
-    createFieldTextExplanationListAs
   }
 }
 

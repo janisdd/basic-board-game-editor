@@ -44,8 +44,6 @@ export const absoluteFieldIdentifierSingle = /([\w]{8}-[\w]{4}-4[\w]{3}-[\w]{4}-
 export const absoluteTileIdentifierGlobal = /([\w]{8}-[\w]{4}-4[\w]{3}-[\w]{4}-[\w]{12})/ig
 export const absoluteTileIdentifierSingle = /([\w]{8}-[\w]{4}-4[\w]{3}-[\w]{4}-[\w]{12})/i
 
-export const markdownGameInstructionsFieldTextExplanationHeader = `Texte auf Feldern erklärt`
-
 export const markdownBoxInfoColor = '#4fc08d'
 export const markdownBoxInfoWarning = '#f66'
 
