@@ -1,5 +1,13 @@
 # TODO
 
+
+- MAYBE auto game instruction editor for field command texts...
+  - can we automate this?
+  e.g. gold = gold + 1 -->
+  + 1 --> increment by 1
+  gold --> variable gold
+  
+
 - add more dev docs
 
 - MAYBE migrate to mobx? performance should be better... but a lot of work
