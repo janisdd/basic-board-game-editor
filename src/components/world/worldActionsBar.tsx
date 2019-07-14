@@ -1,23 +1,26 @@
 import * as React from "react";
+import {SyntheticEvent} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {returntypeof} from 'react-redux-typescript';
 import {RootState} from "../../state";
 import {
-  exportPngImagesBgColor, fontAwesomeSolidIconsFontFileLink, fontAwesomeLink,
+  exportPngImagesBgColor,
+  fontAwesomeRegularIconsFontFileLink,
+  fontAwesomeSolidIconsFontFileLink,
   printVariableIndicatorStrokeThickness,
-  worldFileExtensionWithoutDot, fontAwesomeRegularIconsFontFileLink
+  worldFileExtensionWithoutDot
 } from "../../constants";
 import {Button, Icon} from "semantic-ui-react";
 import {
   set_world_isImageLibraryDisplayed,
-  set_world_isTileEditorDisplayed, set_world_isTileLibraryModalDisplayed
+  set_world_isTileEditorDisplayed,
+  set_world_isTileLibraryModalDisplayed
 } from "../../state/reducers/world/actions";
 import {set_app_activeTabIndex} from "../../state/reducers/actions";
 import {set_editor_isCreatingNewTile} from "../../state/reducers/tileEditor/actions";
 import {Tile} from "../../types/world";
 import {IoHelper} from "../../helpers/ioHelper";
-import {SyntheticEvent} from "react";
 import ControlSimulationBar from '../tiles/controlSimulationBar'
 import {Logger} from "../../helpers/logger";
 import ToolTip from '../helpers/ToolTip'
@@ -29,15 +32,10 @@ import {Simulator} from "../../../simulation/simulator";
 import {WorldTilesHelper} from "../../helpers/worldTilesHelper";
 import {set_tileLibrary_possibleTiles} from "../../state/reducers/world/tileLibrary/actions";
 import {DialogHelper} from "../../helpers/dialogHelper";
-import {WorldTileSurrogate} from "../../../simulation/machine/machineState";
-import {WorldUnitToImgHelper} from "../../helpers/worldUnitToImgHelper";
-import ImageLibrary from "../tiles/imageLibrary/imageLibrary";
-import {editor_wrapper_editorInstancesMap} from "../helpers/editorWrapper";
-import {gameInstructionsEditorId} from "../gameInstructionsEditor/gameInstructionsEditor";
-import {getImageMarkdownBlock} from "../../helpers/markdownHelper";
 import {MachineState, PlayerToken, WorldTileSurrogate} from "../../../simulation/machine/machineState";
 import {WorldUnitToImgHelper} from "../../helpers/worldUnitToImgHelper";
-import {FieldShape, FieldSymbol, ImgSymbol, LineSymbol, PlainPoint, Point} from "../../types/drawing";
+import ImageLibrary from "../tiles/imageLibrary/imageLibrary";
+import {FieldShape, FieldSymbol, ImgSymbol, LineSymbol, PlainPoint} from "../../types/drawing";
 import {WorldSettings} from "../../state/reducers/world/worldSettings/worldSettingsReducer";
 
 //const css = require('./styles.styl');
@@ -506,13 +504,17 @@ const isArJsEnabled = true
 // const gameTokenSize = isArJsEnabled ? 0.05 : 1
 
 //for isArJsEnabled: size is relative to the marker size...
-const tileSize = isArJsEnabled ? 1: 10
-const gameTokenSize = isArJsEnabled ? 0.05 : 1
+const tileSize = isArJsEnabled ? 1 : 10
+const gameTokenSize = isArJsEnabled ? 0.05 : 0.5
 
 //see https://github.com/jeromeetienne/AR.js-docs/blob/master/posts/post-XX-how-to-use-arjs-with-aframe.md
 
 function getAFrame(tileSurrogates: ReadonlyArray<WorldTileSurrogate>, tiles: ReadonlyArray<Tile>, tileImgs: string[], state?: MachineState): string {
 
+
+  console.log('disabled adblocker else ar.js will be blocked!!')
+  console.log('disabled adblocker else ar.js will be blocked!!')
+  console.log('disabled adblocker else ar.js will be blocked!!')
 
   const backgroundImgNames = 'plane'
 
@@ -558,7 +560,7 @@ function getAFrame(tileSurrogates: ReadonlyArray<WorldTileSurrogate>, tiles: Rea
         ${backgroundImgsString.join('\n')}
     </a-asset>
     
-      <a-sky color="blue"></a-sky>
+    ${isArJsEnabled ? '' : '<a-sky color="blue"></a-sky>'}
       
       ${tilePlanesString.join('\n')}            
       
@@ -646,12 +648,13 @@ function getPlayerTokenPositionsFromState(gameState: MachineState, tileSurrogate
     const token = player.tokens[0]
 
     //if to tokens are on the same field...
-    const tokenInternalPlayerOffset = (index * (gameTokenSize / 2))
+    const tokenInternalPlayerOffsetY = ((index + 1) * (gameTokenSize / 2))
+    const tokenInternalPlayerOffsetX = ((index) * (gameTokenSize / 2))
 
     if (!token.tileGuid || !token.fieldId) {
       return mapTilePosToAFramePos({//don't use 0,0 because we multiply with this
-        x: 1 + tokenInternalPlayerOffset,
-        y: 1 + tokenInternalPlayerOffset
+        x: 1 + tokenInternalPlayerOffsetY,
+        y: 1 + tokenInternalPlayerOffsetY
       }, {
         x: 0,
         y: 0,
@@ -676,8 +679,8 @@ function getPlayerTokenPositionsFromState(gameState: MachineState, tileSurrogate
 
     return {
       ...pos,
-      x: pos.x + tokenInternalPlayerOffset,
-      y: pos.y + tokenInternalPlayerOffset,
+      x: pos.x + tokenInternalPlayerOffsetY,
+      y: pos.y + tokenInternalPlayerOffsetY,
     }
   })
 
