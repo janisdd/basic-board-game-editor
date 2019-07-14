@@ -35,6 +35,10 @@ import ImageLibrary from "../tiles/imageLibrary/imageLibrary";
 import {editor_wrapper_editorInstancesMap} from "../helpers/editorWrapper";
 import {gameInstructionsEditorId} from "../gameInstructionsEditor/gameInstructionsEditor";
 import {getImageMarkdownBlock} from "../../helpers/markdownHelper";
+import {MachineState, PlayerToken, WorldTileSurrogate} from "../../../simulation/machine/machineState";
+import {WorldUnitToImgHelper} from "../../helpers/worldUnitToImgHelper";
+import {FieldShape, FieldSymbol, ImgSymbol, LineSymbol, PlainPoint, Point} from "../../types/drawing";
+import {WorldSettings} from "../../state/reducers/world/worldSettings/worldSettingsReducer";
 
 //const css = require('./styles.styl');
 
@@ -407,35 +411,30 @@ class worldActionsBar extends React.Component<Props, any> {
         </ToolTip>
 
         <Button disabled={this.props.tileSurrogatesState.present.length === 0} icon onClick={async () => {
-          // this.props.world_tileSurrogates_redo()
 
-          console.log('aaaaaaaaaaaa')
 
-          const tileImgs: string[] = []
+          const aFrame = document.getElementById('aframe-frame') as HTMLIFrameElement
+          const worldRendererCanvas = document.getElementById('world-renderer-canvas')
 
-          const canvas = document.createElement('canvas')
+          if (worldRendererCanvas.style.display === 'none') {
 
-          for (let i = 0; i < this.props.tileSurrogatesState.present.length; i++) {
-            const tileSurrogate = this.props.tileSurrogatesState.present[i];
+            worldRendererCanvas.style.display = "block"
+            aFrame.style.display = "none"
 
-            let resultCanvas = WorldUnitToImgHelper.tileByGuidToImg(tileSurrogate.tileGuid,
-              this.props.allTiles,
-              this.props.fieldSymbols,
-              this.props.imgSymbols,
-              this.props.lineSymbols,
-              {
-                ...this.props.worldSettings,
-                printAndExportScale: 2
-              },
-              canvas
-            )
-            tileImgs.push(resultCanvas.toDataURL())
+          } else {
+            worldRendererCanvas.style.display = "none"
+            aFrame.style.display = "block"
           }
 
-          const aFrameHGtml = getAFrame(this.props.tileSurrogatesState.present, this.props.allTiles, tileImgs)
 
-          console.log(aFrameHGtml)
-
+          // startAFrame(
+          //   this.props.tileSurrogatesState.present,
+          //   this.props.allTiles,
+          //   this.props.fieldSymbols,
+          //   this.props.imgSymbols,
+          //   this.props.lineSymbols,
+          //   this.props.worldSettings
+          // )
         }}>
           <Icon name="camera"/>
         </Button>
@@ -449,40 +448,136 @@ class worldActionsBar extends React.Component<Props, any> {
 export default connect(mapStateToProps, mapDispatchToProps)(worldActionsBar)
 
 
-function getAFrame(tileSurrogates: ReadonlyArray<WorldTileSurrogate>, tiles: ReadonlyArray<Tile>, tileImgs: string[]): string {
+export function startAFrame(tileSurrogatesState: ReadonlyArray<WorldTileSurrogate>,
+                            allTiles: ReadonlyArray<Tile>,
+                            fieldSymbols: ReadonlyArray<FieldSymbol>,
+                            imgSymbols: ReadonlyArray<ImgSymbol>,
+                            lineSymbols: ReadonlyArray<LineSymbol>,
+                            worldSettings: WorldSettings,
+                            state?: MachineState): void {
+
+  console.log('aaaaaaaaaaaa')
+
+  const aFrameWrapper = document.getElementById('aframe-frame-wrapper')
+  const worldRendererCanvas = document.getElementById('world-renderer-canvas')
+
+  worldRendererCanvas.style.display = "none"
+  aFrameWrapper.style.display = "block"
+
+  aFrameWrapper.innerHTML = `<iframe id="aframe-frame" class="fh fw" src="about:blank"></iframe>`
+
+  const tileImgs: string[] = []
+
+  const canvas = document.createElement('canvas')
+
+  for (let i = 0; i < tileSurrogatesState.length; i++) {
+    const tileSurrogate = tileSurrogatesState[i];
+
+    let resultCanvas = WorldUnitToImgHelper.tileByGuidToImg(tileSurrogate.tileGuid,
+      allTiles,
+      fieldSymbols,
+      imgSymbols,
+      lineSymbols,
+      {
+        ...worldSettings,
+        printAndExportScale: 2
+      },
+      canvas,
+      '#5d5d5d'
+    )
+    tileImgs.push(resultCanvas.toDataURL())
+  }
+
+  const aFrameHGtml = getAFrame(tileSurrogatesState, allTiles, tileImgs, state)
+
+  console.log(aFrameHGtml)
+
+  const aFrame = document.querySelector(`#aframe-frame`) as HTMLIFrameElement
+
+  aFrame.contentWindow.document.write(aFrameHGtml)
+  aFrame.contentWindow.document.close()
+}
 
 
-  const tileSize = 10
+//hero marker: https://stemkoski.github.io/AR-Examples/markers/hiro.png
+const isArJsEnabled = true
+
+// const tileSize = isArJsEnabled ? 1 : 10
+// const gameTokenSize = isArJsEnabled ? 0.05 : 1
+
+//for isArJsEnabled: size is relative to the marker size...
+const tileSize = isArJsEnabled ? 1: 10
+const gameTokenSize = isArJsEnabled ? 0.05 : 1
+
+//see https://github.com/jeromeetienne/AR.js-docs/blob/master/posts/post-XX-how-to-use-arjs-with-aframe.md
+
+function getAFrame(tileSurrogates: ReadonlyArray<WorldTileSurrogate>, tiles: ReadonlyArray<Tile>, tileImgs: string[], state?: MachineState): string {
+
+
   const backgroundImgNames = 'plane'
 
-
   const backgroundImgsString = tileImgs.map((p, index) => `<img id="${backgroundImgNames}-${index}" src="${p}">`)
+
+  let field: FieldShape
+  let pos: PlainPoint
 
   const tilePlanesString = tileSurrogates.map((p, index) => {
 
     const tile = tiles.find(k => k.guid === p.tileGuid)
 
+    if (!field) {
+      field = tile.fieldShapes[0]
+      pos = mapTileFieldPosToAFramePos(field, p, tile, tileSize)
+      console.log(pos)
+    }
+
     return `<a-plane src="#${backgroundImgNames}-${index}" width="${tileSize}" height="${tileSize}" rotation="-90 0 0" position="${p.x * tileSize} 0 ${p.y * tileSize}"></a-plane>`
   })
+
+  const playerTokens: PlayerToken[] = state
+    ? state.players.map<PlayerToken>(p => {
+      const token = p.tokens[0]
+      return token
+    })
+    : []
+
+  console.log(playerTokens)
+
+  const playerAFrame = playerTokens.map((p, index) => ` <a-box id="player-token-${index}" color="${p.color}" depth="${gameTokenSize}" height="${gameTokenSize}" width="${gameTokenSize}" position="${pos.x} ${gameTokenSize / 2} ${pos.y}"></a-box>`)
 
   const aFrameTemplate = `
 <html>
   <head>
     <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+    ${isArJsEnabled ? '<script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script>' : ''}
   </head>
   <body>
-    <a-scene>
+    <a-scene embedded arjs>
     
     <a-asset>
         ${backgroundImgsString.join('\n')}
     </a-asset>
     
-      <a-sky color="#ECECEC"></a-sky>
+      <a-sky color="blue"></a-sky>
       
       ${tilePlanesString.join('\n')}            
       
-      <a-entity id="cam" camera look-controls wasd-controls position="0 10 0"></a-entity>
+<!--      <a-box color="tomato" depth="${gameTokenSize}" height="${gameTokenSize}" width="${gameTokenSize}" position="${pos.x} ${gameTokenSize / 2} ${pos.y}"></a-box>-->
+        ${playerAFrame.join('\n')}
+      
+     <a-entity id="dice-value" text="align: center; color: #ff85ff; width: ${tileSize}; value: Hello World;" rotation="-45 0 0" position="${-tileSize / 2} ${gameTokenSize} ${-tileSize / 2}"></a-entity>
+      
+      
+      ${isArJsEnabled ? '' : '<a-entity id="cam" camera wasd-controls rotation="-90 0 0" position="0 10 0"></a-entity>'}
+
+    <!-- define a camera which will move according to the marker position -->
+    ${isArJsEnabled ? "<a-marker-camera preset='hiro'></a-marker-camera>" : ''}
+
     </a-scene>
+    
+    
+    <script src="iFrameAFrameHandler.js">
+    </script>
     
     <!-- from https://stackoverflow.com/questions/44459356/a-frame-zoom-on-wheel-scroll --> 
     <script>
@@ -510,4 +605,116 @@ function getAFrame(tileSurrogates: ReadonlyArray<WorldTileSurrogate>, tiles: Rea
 }
 
 
+function mapTileFieldPosToAFramePos(field: FieldShape, tileSurrogate: WorldTileSurrogate, tile: Tile, tileSizeInAFrame: number): PlainPoint {
 
+  return mapTilePosToAFramePos({x: field.x, y: field.y}, tileSurrogate, tile, tileSizeInAFrame)
+}
+
+
+function mapTilePosToAFramePos(pos: PlainPoint, tileSurrogate: WorldTileSurrogate, tile: Tile, tileSizeInAFrame: number): PlainPoint {
+
+  const offsetX = tileSurrogate.x * tileSizeInAFrame
+  const offsetY = tileSurrogate.y * tileSizeInAFrame
+
+  /*
+
+  tile.tileSettings.width     tileSizeInAFrame
+  -----------------------  =  ----------------
+  100%                        100%
+
+   tile.tileSettings.width     field.x
+   -----------------------  = ------------
+   tileSizeInAFrame           ? (AFrame x)
+  */
+
+  const aFrameX = pos.x * tileSizeInAFrame / tile.tileSettings.width
+  const aFrameY = pos.y * tileSizeInAFrame / tile.tileSettings.height
+
+  //aframe coords start from the center...
+
+
+  return {
+    x: offsetX + aFrameX - (tileSizeInAFrame / 2), //TODO offsetY ??
+    y: offsetY + aFrameY - (tileSizeInAFrame / 2)
+  }
+}
+
+
+function getPlayerTokenPositionsFromState(gameState: MachineState, tileSurrogates: ReadonlyArray<WorldTileSurrogate>, allTile: ReadonlyArray<Tile>, tileSizeInAFrame: number): PlainPoint[] {
+
+  return gameState.players.map<PlainPoint>((player, index) => {
+    const token = player.tokens[0]
+
+    //if to tokens are on the same field...
+    const tokenInternalPlayerOffset = (index * (gameTokenSize / 2))
+
+    if (!token.tileGuid || !token.fieldId) {
+      return mapTilePosToAFramePos({//don't use 0,0 because we multiply with this
+        x: 1 + tokenInternalPlayerOffset,
+        y: 1 + tokenInternalPlayerOffset
+      }, {
+        x: 0,
+        y: 0,
+      } as WorldTileSurrogate, {
+        tileSettings: {
+          width: 500,
+          height: 500
+        }
+      } as Tile, tileSizeInAFrame)
+    }
+
+    const tileSurrogate = tileSurrogates.find(p => p.tileGuid === token.tileGuid)
+
+    const tile = allTile.find(p => p.guid === token.tileGuid)
+
+    const field = tile.fieldShapes.find(p => p.id === token.fieldId)
+
+    console.log('player - ' + index)
+    console.log(`${field.x}, ${field.y}`)
+
+    const pos = mapTileFieldPosToAFramePos(field, tileSurrogate, tile, tileSizeInAFrame)
+
+    return {
+      ...pos,
+      x: pos.x + tokenInternalPlayerOffset,
+      y: pos.y + tokenInternalPlayerOffset,
+    }
+  })
+
+}
+
+
+export function sendIframeAFrameNewState(gameState: MachineState, tileSurrogates: ReadonlyArray<WorldTileSurrogate>, allTile: ReadonlyArray<Tile>, tileSizeInAFrame: number = tileSize) {
+
+  const aFrame = document.getElementById('aframe-frame') as HTMLIFrameElement
+
+  console.log('update player pos')
+
+  const tokenPositions = getPlayerTokenPositionsFromState(gameState, tileSurrogates, allTile, tileSizeInAFrame)
+
+  const palyerPosUpdateMsg: PlayerPosUpdate = {
+    kind: "playerPosUpdate",
+    positions: tokenPositions,
+    gameTokenSize,
+    rolledDiceValue: gameState.rolledDiceValue,
+    leftDiveValue: gameState.leftDiceValue,
+    activePlayerIndex: gameState.currentPlayerIndex,
+    diceValueTextOffsetY: gameTokenSize,
+    diceValueTextOffsetX: gameTokenSize
+  }
+
+  aFrame.contentWindow.postMessage(JSON.stringify(palyerPosUpdateMsg), "*")
+
+}
+
+
+interface PlayerPosUpdate {
+  kind: 'playerPosUpdate'
+  positions: (PlainPoint)[]
+  gameTokenSize: number
+  rolledDiceValue: number
+  leftDiveValue: number
+  activePlayerIndex: number
+  diceValueTextOffsetX: number
+  diceValueTextOffsetY: number
+}

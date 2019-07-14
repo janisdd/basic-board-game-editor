@@ -113,14 +113,15 @@ export class WorldUnitToImgHelper {
                                 imgSymbols: ReadonlyArray<ImgSymbol>,
                                 lineSymbols: ReadonlyArray<LineSymbol>,
                                 worldSettings: WorldSettings,
-                                canvas: HTMLCanvasElement): HTMLCanvasElement | null {
+                                canvas: HTMLCanvasElement,
+                                fillBackgroundColor: string | null = null): HTMLCanvasElement | null {
 
     const tile = allTiles.find(p => p.guid === tileGuid)
 
     if (!tile) return null
 
 
-    return WorldUnitToImgHelper.tileToImg(tile, fieldSymbols, imgSymbols, lineSymbols, worldSettings, canvas)
+    return WorldUnitToImgHelper.tileToImg(tile, fieldSymbols, imgSymbols, lineSymbols, worldSettings, canvas, fillBackgroundColor)
   }
 
 
@@ -129,7 +130,8 @@ export class WorldUnitToImgHelper {
                           imgSymbols: ReadonlyArray<ImgSymbol>,
                           lineSymbols: ReadonlyArray<LineSymbol>,
                           worldSettings: WorldSettings,
-                          canvas: HTMLCanvasElement): HTMLCanvasElement | null {
+                          canvas: HTMLCanvasElement,
+                          fillBackgroundColor: string | null): HTMLCanvasElement | null {
 
 
     canvas.style.width = `${tile.tileSettings.width * worldSettings.printAndExportScale}px`
@@ -144,7 +146,7 @@ export class WorldUnitToImgHelper {
       worldSettings.gridStrokeThicknessInPx,
       worldSettings.gridStrokeColor,
       worldSettings,
-      null,
+      fillBackgroundColor,
       worldSettings.printAndExportScale,
       worldSettings.additionalBorderWidthInPx
     )

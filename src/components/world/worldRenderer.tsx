@@ -458,6 +458,10 @@ class worldRenderer extends React.Component<Props, any> {
     return (
       <div className="fh fw" ref={p => this.canvasContainer = p}>
 
+        <div id="aframe-frame-wrapper" className="fh fw" style={{display: 'none'}}>
+
+        </div>
+
         <canvas id="world-renderer-canvas" className="tile-canvas" ref={p => this.canvas = p}
                 width={1200}
                 height={700}

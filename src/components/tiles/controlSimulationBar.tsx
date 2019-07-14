@@ -21,6 +21,7 @@ import ToolTip from '../helpers/ToolTip'
 import {getI18n} from "../../../i18n/i18nRoot";
 import {AbstractMachine, SimulationTimes} from "../../../simulation/machine/AbstractMachine";
 import * as mousetrap from "mousetrap";
+import {sendIframeAFrameNewState, startAFrame} from "../world/worldActionsBar";
 
 
 export interface MyProps {
@@ -45,6 +46,12 @@ const mapStateToProps = (rootState: RootState, props: MyProps) => {
     //test0: rootState...
     //test: props.test
     ...props,
+
+    fieldSymbols: rootState.fieldSymbolState.present,
+    imgSymbols: rootState.imgSymbolState.present,
+    lineSymbols: rootState.lineSymbolState.present,
+    worldSettings: rootState.worldSettingsState,
+
     simulationState: rootState.simulationState,
     langId: rootState.i18nState.langId
   }
@@ -132,8 +139,15 @@ class controlSimulationBar extends React.Component<Props, any> {
     const moveResult = Simulator.moveToken(this.props.tiles, this.props.tileSurrogates, state, startPos)
     state = moveResult.state
 
+    console.log('do 1 step')
+    sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+
     //the player token is now on a new field... he could have won
     if (moveResult.hasCurrentPlayerWon || Simulator.currentPlayerHasWon(state)) {
+
+      console.log('do 1 step')
+      sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+
       Logger.message(`player ${state.currentPlayerIndex} has won!`, 'Game over')
       this.props.set_simulation_simulationStatus(SimulationStatus.finished, state)
       return
@@ -164,6 +178,10 @@ class controlSimulationBar extends React.Component<Props, any> {
       }
 
       if (forceExecuteResult.hasCurrentPlayerWon || Simulator.currentPlayerHasWon(state)) {
+
+        console.log('do 1 step')
+        sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+
         Logger.message(`player ${state.currentPlayerIndex} has won!`, 'Game over')
         this.props.set_simulation_simulationStatus(SimulationStatus.finished, state)
         return
@@ -190,16 +208,14 @@ class controlSimulationBar extends React.Component<Props, any> {
       if (state.wasStateRolledBack === true) {
 
         state = Simulator.endRound(state)
-      }
-      else {
+      } else {
 
         try {
 
           //we are still on the same field & we already executed the statements because of force
           if (wasForcedField && afterMovePos.fieldId === afterForcePos.fieldId && afterMovePos.tileGuid === afterForcePos.tileGuid) {
             //do nothing
-          }
-          else {
+          } else {
 
             //the current field was not forced OR we are on another field now
             //so we are sure we don't execute anything twice
@@ -227,6 +243,10 @@ class controlSimulationBar extends React.Component<Props, any> {
         //check if current player has won after executing the current fields statement
         if (Simulator.currentPlayerHasWon(state)) {
           Logger.message(`player ${state.currentPlayerIndex} has won!`, 'Game over')
+
+          console.log('do 1 step')
+          sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+
           this.props.set_simulation_simulationStatus(SimulationStatus.finished, state)
           return
         }
@@ -286,6 +306,9 @@ class controlSimulationBar extends React.Component<Props, any> {
                       initState = Simulator.initNew(startPos, true, this.props.gameInitCmdText)
                       ignoreFirstStateUpdate = true
                       this.props.set_simulation_simulationStatus(SimulationStatus.running, initState)
+
+                      console.log('init auto simulation')
+                      sendIframeAFrameNewState(initState, this.props.tileSurrogates, this.props.tiles)
                     }
 
                     if (this.props.simulationState.simulationStatus === SimulationStatus.paused) {
@@ -312,6 +335,10 @@ class controlSimulationBar extends React.Component<Props, any> {
                           //if the simulation finished this has top most priority
                           if (proposedSimulationStatus === SimulationStatus.finished) {
                             this.props.set_simulation_simulationStatus(proposedSimulationStatus, state)
+
+                            console.log('auto simulation step')
+                            sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+
                             //in this case result is ignored
                             return {
                               shouldContinue: false,
@@ -322,6 +349,10 @@ class controlSimulationBar extends React.Component<Props, any> {
                           //after a pause (we now resume) the old prop is still paused... use ignoreFirstStateUpdate
                           if (ignoreFirstStateUpdate === false && this.props.simulationState.simulationStatus === SimulationStatus.paused) {
                             this.props.set_simulation_simulationStatus(this.props.simulationState.simulationStatus, state)
+
+                            console.log('auto simulation step')
+                            sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+
                             return {
                               shouldContinue: false,
                               simulationSpeedInDelayInMsBetweenSteps: this.props.simulationState.simulationSpeedInDelayInMsBetweenSteps
@@ -335,8 +366,7 @@ class controlSimulationBar extends React.Component<Props, any> {
                             //calculated the new props yet)
                             if (ignoreFirstStateUpdate) {
                               //ignore
-                            }
-                            else {
+                            } else {
                               return {
                                 shouldContinue: false,
                                 simulationSpeedInDelayInMsBetweenSteps: this.props.simulationState.simulationSpeedInDelayInMsBetweenSteps
@@ -349,6 +379,10 @@ class controlSimulationBar extends React.Component<Props, any> {
                           }
 
                           this.props.set_simulation_simulationStatus(proposedSimulationStatus, state)
+
+                          console.log('auto simulation step')
+                          sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+
                           return {
                             shouldContinue: true,
                             simulationSpeedInDelayInMsBetweenSteps: this.props.simulationState.simulationSpeedInDelayInMsBetweenSteps
@@ -358,8 +392,7 @@ class controlSimulationBar extends React.Component<Props, any> {
 
                       if (!lastKnownState) {
                         Logger.fatal('there was no last known state')
-                      }
-                      else {
+                      } else {
 
                         const token = lastKnownState!.players[lastKnownState!.currentPlayerIndex].tokens[lastKnownState!.currentPlayerActiveTokenIndex]
                         //in case an evaluation error occurred
@@ -431,6 +464,19 @@ class controlSimulationBar extends React.Component<Props, any> {
                     AbstractMachine.setSeed(this.props.simulationState.randomSeed)
                     const state = Simulator.initNew(startPos, true, this.props.gameInitCmdText)
                     this.props.set_simulation_simulationStatus(SimulationStatus.paused, state)
+
+                    console.log('start new game')
+
+                    startAFrame(
+                      this.props.tileSurrogates,
+                      this.props.tiles,
+                      this.props.fieldSymbols,
+                      this.props.imgSymbols,
+                      this.props.lineSymbols,
+                      this.props.worldSettings,
+                      state
+                    )
+                    // sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
 
                   }}>
             <Icon name='play'/>
