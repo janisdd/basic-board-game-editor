@@ -128,6 +128,17 @@ export const lang_en: LangObj = {
   "Value": "Value",
   "Type": "Type",
   "Range": "Range",
+
+  //--- ar simulation tab
+  "AR settings": "AR settings",
+  "Is ar.js enabled": "Is ar.js enabled",
+  "Ar settings are not exported/imported with the world as they are experimental" : "Ar settings are not exported/imported with the world as they are experimental",
+  "For Ar.js you will need a camera and a (printed) marker. When you point the camera onto the marker the ar scene will be rendered over the marker": "For Ar.js you will need a camera and a (printed) marker. When you point the camera onto the marker the ar scene will be rendered over the marker",
+  "Click here to open a hero marker for ar.js in a new tab (then you can print it). Note the world printing and export scaling is applied when printing or in the browser print settings you can set the scaling for printing. The marker size matters, see help for tile size in meters for more information" : "Click here to open a hero marker for ar.js in a new tab (then you can print it). Note the world printing and export scaling is applied when printing or in the browser print settings you can set the scaling for printing. The marker size matters, see help for tile size in meters for more information",
+  "Tile size in meters": "Tile size in meters",
+  "Player token size in meters": "Player token size in meters",
+  "If you enabled ar.js then the size will be the multiplier of the pattern size!": "If you enabled ar.js then the size will be the multiplier of the pattern size!",
+
   //--- simulation tile editor //--- simulation tile edito,
   "Additional tile editor simulation start field or empty": "Additional tile editor simulation start field or empty",
   "When you edit a tile that is not a original start tile (has no game start command) and you don't want to add one (because you might forget to remove it later for testing (simulating) the tile), then use this option to define a temporary start field. This option will be ignored for all world simulations": "When you edit a tile that is not a original start tile (has no game start command) and you don't want to add one (because you might forget to remove it later for testing (simulating) the tile), then use this option to define a temporary start field. This option will be ignored for all world simulations",

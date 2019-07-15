@@ -52,6 +52,10 @@ export const defaultGameInstructionPreviewFontSize = 12
 export const defaultGameInstructionEditorFontSize = 12
 export const minZoomedFontSize = 6
 
+//wrapper where we host ar iframe
+export const aFrameFrameWrapperId = 'aframe-frame-wrapper'
+export const worldRendererCanvasId = 'world-renderer-canvas'
+
 /**
  * we need this for the printing window
  */

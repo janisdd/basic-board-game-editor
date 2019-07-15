@@ -1,8 +1,10 @@
+/*
+  handler for receiving messages from the page (this is in the iframe aframe)
+ */
 
+window.onmessage = function (msg) {
 
-window.onmessage = function(msg) {
-
-  console.log(msg)
+  // console.log(msg)
 
   /**
    *
@@ -10,8 +12,6 @@ window.onmessage = function(msg) {
    */
   const message = JSON.parse(msg.data)
   if (message.kind === 'playerPosUpdate') {
-
-
 
 
     for (let i = 0; i < message.positions.length; i++) {
@@ -33,10 +33,8 @@ window.onmessage = function(msg) {
         })
       }
 
-      token.object3D.position.set(positionUpdate.x, message.gameTokenSize/2, positionUpdate.y)
+      token.object3D.position.set(positionUpdate.x, message.gameTokenSize / 2, positionUpdate.y)
     }
-
-
 
   }
 

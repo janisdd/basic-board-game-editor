@@ -17,6 +17,12 @@ export type State = {
   readonly isWorldSettingsModalDisplayed: boolean
 
   readonly isImageLibraryDisplayed: boolean
+
+
+  //--- ar settings are not saved in the world because very experimental...
+  readonly isArJsEnabled: boolean
+  readonly tileSizeInMeters: number
+  readonly playerTokenSizeInMeters: number
 }
 
 
@@ -26,6 +32,9 @@ export const initial: State = {
   isTileEditorDisplayed: false,
   isWorldSettingsModalDisplayed: false,
   isImageLibraryDisplayed: false,
+  isArJsEnabled: false,
+  tileSizeInMeters: 10,
+  playerTokenSizeInMeters: 0.5
 }
 
 export interface ActionBase extends Action {
@@ -42,6 +51,10 @@ export enum ActionType {
   SET_world_isWorldSettingsModalDisplayed = 'worldReducer_SET_world_isWorldSettingsModalDisplayed',
   SET_world_isImageLibraryDisplayed = 'worldReducer_SET_world_isImageLibraryDisplayed',
 
+
+  SET_isArJsEnabled = 'worldReducer_SET_isArJsEnabled',
+  SET_tileSizeInMeters = 'worldReducer_SET_tileSizeInMeters',
+  SET_playerTokenSizeInMeters = 'worldReducer_SET_playerTokenSizeInMeters',
 
   RESET = 'worldReducer_RESET',
 }
@@ -71,6 +84,25 @@ export interface SET_world_isImageLibraryDisplayedAction extends ActionBase {
   readonly isImageLibraryDisplayed: boolean
 }
 
+
+//--- ar settings are not saved in the world because very experimental...
+
+export interface SET_isArJsEnabledAction extends ActionBase {
+  readonly type: ActionType.SET_isArJsEnabled
+  readonly isArJsEnabled: boolean
+}
+
+export interface SET_tileSizeInMetersAction extends ActionBase {
+  readonly type: ActionType.SET_tileSizeInMeters
+  readonly tileSizeInMeters: number
+}
+
+export interface SET_playerTokenSizeInMetersAction extends ActionBase {
+  readonly type: ActionType.SET_playerTokenSizeInMeters
+  readonly playerTokenSizeInMeters: number
+}
+
+
 export interface ResetAction extends ActionBase {
   readonly type: ActionType.RESET
 }
@@ -83,6 +115,10 @@ export type AllActions =
   | SET_world_isTileEditorDisplayedAction
   | SET_world_isWorldSettingsModalDisplayedAction
   | SET_world_isImageLibraryDisplayedAction
+
+  | SET_isArJsEnabledAction
+  | SET_tileSizeInMetersAction
+  | SET_playerTokenSizeInMetersAction
 
 
 export function reducer(state: State = initial, action: AllActions): State {
@@ -113,6 +149,22 @@ export function reducer(state: State = initial, action: AllActions): State {
       return {
         ...state,
         isImageLibraryDisplayed: action.isImageLibraryDisplayed
+      }
+
+    case ActionType.SET_isArJsEnabled:
+      return {
+        ...state,
+        isArJsEnabled: action.isArJsEnabled
+      }
+    case ActionType.SET_tileSizeInMeters:
+      return {
+        ...state,
+        tileSizeInMeters: action.tileSizeInMeters
+      }
+    case ActionType.SET_playerTokenSizeInMeters:
+      return {
+        ...state,
+        playerTokenSizeInMeters: action.playerTokenSizeInMeters
       }
 
     case ActionType.RESET:

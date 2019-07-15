@@ -63,7 +63,8 @@ import {
 
 } from "../../../state/reducers/world/worldSettings/actions";
 import {
-  set_world_isWorldSettingsModalDisplayed
+  set_world_isArJsEnabled,
+  set_world_isWorldSettingsModalDisplayed, set_world_playerTokenSizeInMeters, set_world_tileSizeInMeters
 } from "../../../state/reducers/world/actions";
 import {getI18n, getRawI18n} from "../../../../i18n/i18nRoot";
 import {CheckboxData} from "../../../types/ui";
@@ -76,6 +77,8 @@ import {Logger} from "../../../helpers/logger";
 import {GameUnit} from "../../../../simulation/model/executionUnit";
 import {DialogHelper} from "../../../helpers/dialogHelper";
 import {ChromePicker} from "react-color";
+import {ArHelper} from "../../../helpers/arHelper";
+import {PrintHelper} from "../../../helpers/printHelper";
 
 //const css = require('./styles.styl');
 
@@ -87,6 +90,11 @@ const mapStateToProps = (rootState: RootState,/* props: MyProps*/) => {
     //test0: rootState...
     //test: props.test
     worldSettings: rootState.worldSettingsState,
+
+    isArJsEnabled: rootState.worldState.isArJsEnabled,
+    tileSizeInMeters: rootState.worldState.tileSizeInMeters,
+    playerTokenSizeInMeters: rootState.worldState.playerTokenSizeInMeters,
+
     isDisplayed: rootState.worldState.isWorldSettingsModalDisplayed,
     simulationState: rootState.simulationState,
     langId: rootState.i18nState.langId
@@ -159,6 +167,11 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_world_branchIfIsFontItalic,
   set_world_branchIfColor,
   set_world_branchIfBgColor,
+
+
+  set_world_isArJsEnabled,
+  set_world_tileSizeInMeters,
+  set_world_playerTokenSizeInMeters,
 
 }, dispatch)
 
@@ -522,7 +535,8 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                 />}
                               />
 
-                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                              <div className="hoverable mar-left-half"
+                                   style={{marginTop: 'auto', marginBottom: 'auto'}}>
                                 <IconToolTip
                                   message={getI18n(this.props.langId, "Transparent color")}
                                   icon="circle outline"
@@ -565,7 +579,8 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                 />}
                               />
 
-                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                              <div className="hoverable mar-left-half"
+                                   style={{marginTop: 'auto', marginBottom: 'auto'}}>
                                 <IconToolTip
                                   message={getI18n(this.props.langId, "Transparent color")}
                                   icon="circle outline"
@@ -711,7 +726,8 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                 />}
                               />
 
-                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                              <div className="hoverable mar-left-half"
+                                   style={{marginTop: 'auto', marginBottom: 'auto'}}>
                                 <IconToolTip
                                   message={getI18n(this.props.langId, "Transparent color")}
                                   icon="circle outline"
@@ -754,7 +770,8 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                 />}
                               />
 
-                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                              <div className="hoverable mar-left-half"
+                                   style={{marginTop: 'auto', marginBottom: 'auto'}}>
                                 <IconToolTip
                                   message={getI18n(this.props.langId, "Transparent color")}
                                   icon="circle outline"
@@ -900,7 +917,8 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                 />}
                               />
 
-                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                              <div className="hoverable mar-left-half"
+                                   style={{marginTop: 'auto', marginBottom: 'auto'}}>
                                 <IconToolTip
                                   message={getI18n(this.props.langId, "Transparent color")}
                                   icon="circle outline"
@@ -943,7 +961,8 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                 />}
                               />
 
-                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                              <div className="hoverable mar-left-half"
+                                   style={{marginTop: 'auto', marginBottom: 'auto'}}>
                                 <IconToolTip
                                   message={getI18n(this.props.langId, "Transparent color")}
                                   icon="circle outline"
@@ -1090,7 +1109,8 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                 />}
                               />
 
-                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                              <div className="hoverable mar-left-half"
+                                   style={{marginTop: 'auto', marginBottom: 'auto'}}>
                                 <IconToolTip
                                   message={getI18n(this.props.langId, "Transparent color")}
                                   icon="circle outline"
@@ -1132,7 +1152,8 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                                 />}
                               />
 
-                              <div className="hoverable mar-left-half" style={{marginTop: 'auto', marginBottom: 'auto'}}>
+                              <div className="hoverable mar-left-half"
+                                   style={{marginTop: 'auto', marginBottom: 'auto'}}>
                                 <IconToolTip
                                   message={getI18n(this.props.langId, "Transparent color")}
                                   icon="circle outline"
@@ -1479,6 +1500,86 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                     )
                   }
+                },
+                {
+                  menuItem: `${getI18n(this.props.langId, "AR settings")}`,
+                  render: () => {
+                    return (<Form as="div">
+
+
+                      <Form.Field>
+                        <IconToolTip
+                          message={getI18n(this.props.langId, "Ar settings are not exported/imported with the world as they are experimental")}/>
+                      </Form.Field>
+
+                      <Form.Field>
+                        <Checkbox className="mar-left-half" checked={this.props.isArJsEnabled}
+                                  onChange={(event, data: CheckboxData) => {
+                                    this.props.set_world_isArJsEnabled(data.checked)
+                                  }}
+                                  label={<label>
+
+                                    {getI18n(this.props.langId, "Is ar.js enabled")}
+                                    <IconToolTip
+                                      message={getI18n(this.props.langId, "For Ar.js you will need a camera and a (printed) marker. When you point the camera onto the marker the ar scene will be rendered over the marker")}/>
+
+                                  </label>}
+                        />
+
+                        <ToolTip
+                          message={getI18n(this.props.langId, "Click here to open a hero marker for ar.js in a new tab (then you can print it). Note the world printing and export scaling is applied when printing or in the browser print settings you can set the scaling for printing. The marker size matters, see help for tile size in meters for more information")}
+                        >
+                          <Button className="mar-left" icon onClick={() => {
+
+                            PrintHelper.printArMarker(
+                              this.props.worldSettings.printAndExportScale
+                              )
+
+                          }}>
+                            <Icon name="chess board"/>
+                          </Button>
+                        </ToolTip>
+
+                      </Form.Field>
+
+
+                      <Form.Field>
+                        <label>{getI18n(this.props.langId, "Tile size in meters")}
+                          <IconToolTip
+                            message={getI18n(this.props.langId, "If you enabled ar.js then the size will be the multiplier of the pattern size!")}
+                          />
+                        </label>
+                        <Input type="number" placeholder='5' value={this.props.tileSizeInMeters}
+
+                               style={{width: '100px'}}
+                               onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+                                 const val = parseInt(e.currentTarget.value)
+                                 if (isNaN(val) || val < 0) return
+                                 this.props.set_world_tileSizeInMeters(val)
+                               }}
+                        />
+                      </Form.Field>
+
+                      <Form.Field>
+                        <label>{getI18n(this.props.langId, "Player token size in meters")}
+                          <IconToolTip
+                            message={getI18n(this.props.langId, "If you enabled ar.js then the size will be the multiplier of the pattern size!")}
+                          />
+                        </label>
+                        <Input type="number" step={0.1} placeholder='5' value={this.props.playerTokenSizeInMeters}
+
+                               style={{width: '100px'}}
+                               onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+                                 const val = parseInt(e.currentTarget.value)
+                                 if (isNaN(val) || val < 0) return
+                                 this.props.set_world_playerTokenSizeInMeters(val)
+                               }}
+                        />
+                      </Form.Field>
+
+
+                    </Form>)
+                  }
                 }
               ]}/>
             </div>
@@ -1492,3 +1593,6 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(worldEditorSettingsModal)
+
+
+

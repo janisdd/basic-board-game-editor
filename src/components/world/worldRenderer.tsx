@@ -12,7 +12,13 @@ import {
   set_world_stageOffsetScaleCorrection,
   set_world_stageScale
 } from "../../state/reducers/world/worldSettings/actions";
-import {globalMinimalZoom, globalZoomStep, worldSelectedTileBorderColor, worldTileBorderColor} from "../../constants";
+import {
+  aFrameFrameWrapperId,
+  globalMinimalZoom,
+  globalZoomStep, worldRendererCanvasId,
+  worldSelectedTileBorderColor,
+  worldTileBorderColor
+} from "../../constants";
 import {set_world_selectedTilePos} from "../../state/reducers/world/actions";
 import {WorldTilesHelper} from "../../helpers/worldTilesHelper";
 import {set_world_tiles} from "../../state/reducers/world/tileSurrogates/actions";
@@ -458,11 +464,11 @@ class worldRenderer extends React.Component<Props, any> {
     return (
       <div className="fh fw" ref={p => this.canvasContainer = p}>
 
-        <div id="aframe-frame-wrapper" className="fh fw" style={{display: 'none'}}>
+        <div id={aFrameFrameWrapperId} className="fh fw" style={{display: 'none'}}>
 
         </div>
 
-        <canvas id="world-renderer-canvas" className="tile-canvas" ref={p => this.canvas = p}
+        <canvas id={worldRendererCanvasId} className="tile-canvas" ref={p => this.canvas = p}
                 width={1200}
                 height={700}
         ></canvas>

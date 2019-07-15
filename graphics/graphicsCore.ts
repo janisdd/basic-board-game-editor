@@ -1877,3 +1877,9 @@ export function drawPlayer(stage: Stage,
 
 
 }
+
+export function createMarker(stage: Stage, text: string, sizeInPx: number): void {
+
+
+
+}

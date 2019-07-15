@@ -21,7 +21,7 @@ import ToolTip from '../helpers/ToolTip'
 import {getI18n} from "../../../i18n/i18nRoot";
 import {AbstractMachine, SimulationTimes} from "../../../simulation/machine/AbstractMachine";
 import * as mousetrap from "mousetrap";
-import {sendIframeAFrameNewState, startAFrame} from "../world/worldActionsBar";
+// import {sendIframeAFrameNewState, startAFrame} from "../world/worldActionsBar";
 
 
 export interface MyProps {
@@ -84,6 +84,25 @@ class controlSimulationBar extends React.Component<Props, any> {
     mousetrap.unbind(['f10'])
   }
 
+
+  updateArFrame(state: MachineState) {
+    // sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+  }
+
+  initNewArFrame() {
+
+    // startAFrame(
+    //   this.props.tileSurrogates,
+    //   this.props.tiles,
+    //   this.props.fieldSymbols,
+    //   this.props.imgSymbols,
+    //   this.props.lineSymbols,
+    //   this.props.worldSettings,
+    //   state
+    // )
+
+  }
+
   //in own method for shortcut
   /**
    * keep this in sync with
@@ -139,14 +158,12 @@ class controlSimulationBar extends React.Component<Props, any> {
     const moveResult = Simulator.moveToken(this.props.tiles, this.props.tileSurrogates, state, startPos)
     state = moveResult.state
 
-    console.log('do 1 step')
-    sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+    this.updateArFrame(state)
 
     //the player token is now on a new field... he could have won
     if (moveResult.hasCurrentPlayerWon || Simulator.currentPlayerHasWon(state)) {
 
-      console.log('do 1 step')
-      sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+      this.updateArFrame(state)
 
       Logger.message(`player ${state.currentPlayerIndex} has won!`, 'Game over')
       this.props.set_simulation_simulationStatus(SimulationStatus.finished, state)
@@ -179,8 +196,7 @@ class controlSimulationBar extends React.Component<Props, any> {
 
       if (forceExecuteResult.hasCurrentPlayerWon || Simulator.currentPlayerHasWon(state)) {
 
-        console.log('do 1 step')
-        sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+        this.updateArFrame(state)
 
         Logger.message(`player ${state.currentPlayerIndex} has won!`, 'Game over')
         this.props.set_simulation_simulationStatus(SimulationStatus.finished, state)
@@ -244,8 +260,7 @@ class controlSimulationBar extends React.Component<Props, any> {
         if (Simulator.currentPlayerHasWon(state)) {
           Logger.message(`player ${state.currentPlayerIndex} has won!`, 'Game over')
 
-          console.log('do 1 step')
-          sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+          this.updateArFrame(state)
 
           this.props.set_simulation_simulationStatus(SimulationStatus.finished, state)
           return
@@ -307,8 +322,7 @@ class controlSimulationBar extends React.Component<Props, any> {
                       ignoreFirstStateUpdate = true
                       this.props.set_simulation_simulationStatus(SimulationStatus.running, initState)
 
-                      console.log('init auto simulation')
-                      sendIframeAFrameNewState(initState, this.props.tileSurrogates, this.props.tiles)
+                      this.updateArFrame(initState)
                     }
 
                     if (this.props.simulationState.simulationStatus === SimulationStatus.paused) {
@@ -336,8 +350,7 @@ class controlSimulationBar extends React.Component<Props, any> {
                           if (proposedSimulationStatus === SimulationStatus.finished) {
                             this.props.set_simulation_simulationStatus(proposedSimulationStatus, state)
 
-                            console.log('auto simulation step')
-                            sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+                            this.updateArFrame(state)
 
                             //in this case result is ignored
                             return {
@@ -350,8 +363,7 @@ class controlSimulationBar extends React.Component<Props, any> {
                           if (ignoreFirstStateUpdate === false && this.props.simulationState.simulationStatus === SimulationStatus.paused) {
                             this.props.set_simulation_simulationStatus(this.props.simulationState.simulationStatus, state)
 
-                            console.log('auto simulation step')
-                            sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+                            this.updateArFrame(state)
 
                             return {
                               shouldContinue: false,
@@ -380,8 +392,7 @@ class controlSimulationBar extends React.Component<Props, any> {
 
                           this.props.set_simulation_simulationStatus(proposedSimulationStatus, state)
 
-                          console.log('auto simulation step')
-                          sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+                          this.updateArFrame(state)
 
                           return {
                             shouldContinue: true,
@@ -465,18 +476,7 @@ class controlSimulationBar extends React.Component<Props, any> {
                     const state = Simulator.initNew(startPos, true, this.props.gameInitCmdText)
                     this.props.set_simulation_simulationStatus(SimulationStatus.paused, state)
 
-                    console.log('start new game')
-
-                    startAFrame(
-                      this.props.tileSurrogates,
-                      this.props.tiles,
-                      this.props.fieldSymbols,
-                      this.props.imgSymbols,
-                      this.props.lineSymbols,
-                      this.props.worldSettings,
-                      state
-                    )
-                    // sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+                    this.initNewArFrame()
 
                   }}>
             <Icon name='play'/>

@@ -21,12 +21,215 @@ import {LangHelper} from "./langHelper";
 import {VarType} from "../../simulation/model/executionUnit";
 import Stage = createjs.Stage;
 import Shape = createjs.Shape;
+import {injectFontAwesomeIconsIfNecessary} from "./markdownHelper";
 
 
 declare var SVGExporter: any
 
 export class PrintHelper {
   private constructor() {
+  }
+
+
+  //see https://github.com/jeromeetienne/AR.js/blob/master/three.js/examples/marker-training/threex-arpatternfile.js
+  /**
+   * @param
+   */
+  public static printArMarker(
+    printAndExportScale: number,
+    text: string = 'Hiro',
+    fontSizeInPx: number = 100,
+    isFontBold: boolean = true,
+    markerSizeInPx: number = 512,
+    color: string = 'black'
+  ) {
+
+    const isFontItalic = false
+    const fontName = 'Arial'
+
+
+    const pattRatio = 0.5
+    const whiteMargin = 0.1 //from 0 to 1
+    const blackMargin = (1 - 2 * whiteMargin) * ((1 - pattRatio) / 2)
+    // var blackMargin = 0.2
+
+    const innerMargin = whiteMargin + blackMargin
+
+    const html = `
+<html>
+  <head>
+  <title>Printing</title>  
+    <style>
+      @media screen {
+        .wrapper-div {
+          display: inline-flex;
+          flex-direction: column;
+        }
+        canvas {
+          /*border: 1px solid black;*/
+          margin: 0.5em;
+        }
+        .hidden {
+          display: none;
+        }
+      }
+      @media print {
+        .hidden {
+          display: none;
+        }
+        .print-hidden {
+          display: none;
+        }
+        canvas {
+          /*border: 1px solid black;*/
+          margin: 0.5em;
+        }
+      }
+    </style>
+       
+  </head>
+  <body>
+  
+ 
+  </body>
+</html>
+      `
+
+
+    text = injectFontAwesomeIconsIfNecessary(text)
+
+    let scaleFactor = 6
+    scaleFactor = scaleFactor * printAndExportScale
+
+    const printWindow = window.open()
+    printWindow.document.write(html)
+
+    printWindow.onload = async () => {
+
+      await ((printWindow.document as any).fonts.load("12px 'Font Awesome 5 Free'") as Promise<void>);
+      await ((printWindow.document as any).fonts.load("bold 12px 'Font Awesome 5 Free'") as Promise<void>);
+
+
+      const markerCanvas = printWindow.document.createElement('canvas') as HTMLCanvasElement
+
+      markerCanvas.style.width = `${markerSizeInPx * printAndExportScale}px`
+      markerCanvas.style.height = `${markerSizeInPx * printAndExportScale}px`
+
+      markerCanvas.width = markerSizeInPx * scaleFactor
+      markerCanvas.height = markerSizeInPx * scaleFactor
+
+      const stage = new createjs.Stage(markerCanvas)
+      stage.scaleX = stage.scaleY = scaleFactor
+
+      const whiteRect = new createjs.Shape()
+
+      whiteRect
+        .graphics
+        .beginFill('white')
+        .drawRect(
+          0,
+          0,
+          markerSizeInPx,
+          markerSizeInPx
+        )
+
+      //inner
+      const borderShape = new createjs.Shape()
+      borderShape.graphics
+        .beginFill(color)
+        .drawRect(
+          whiteMargin * markerSizeInPx,
+          whiteMargin * markerSizeInPx,
+          markerSizeInPx * (1 - 2 * whiteMargin),
+          markerSizeInPx * (1 - 2 * whiteMargin)
+        )
+
+      // clear the area for innerImage (in case of transparent image)
+
+      const innerRect = new createjs.Shape()
+
+      innerRect
+        .graphics
+        .beginFill('white')
+        .drawRect(
+          innerMargin * markerSizeInPx,
+          innerMargin * markerSizeInPx,
+          markerSizeInPx * (1 - 2 * innerMargin),
+          markerSizeInPx * (1 - 2 * innerMargin)
+        )
+
+      // // display innerImage in the middle
+      // var innerImage = document.createElement('img')
+      // innerImage.addEventListener('load', function(){
+      //   // draw innerImage
+      //   context.drawImage(innerImage,
+      //     innerMargin * canvas.width,
+      //     innerMargin * canvas.height,
+      //     canvas.width * (1-2*innerMargin),
+      //     canvas.height * (1-2*innerMargin)
+      //   );
+      //
+      //   var imageUrl = canvas.toDataURL()
+      //   onComplete(imageUrl)
+      // })
+      // innerImage.src = innerImageURL
+
+      const textShape = new createjs.Text()
+
+      // const container = new createjs.Container()
+
+      // container.x = innerMargin * markerSizeInPx
+      // container.y = innerMargin * markerSizeInPx
+
+      // container.setBounds(
+      //   innerMargin * markerSizeInPx,
+      //   innerMargin * markerSizeInPx,
+      //   markerSizeInPx * (1 - 2 * innerMargin),
+      //   markerSizeInPx * (1 - 2 * innerMargin)
+      // )
+
+      textShape.font = `${isFontBold ? 'bold ' : ''}${isFontItalic ? 'italic ' : ''}${fontSizeInPx}px '${fontName}', 'Font Awesome 5 Free'`
+      textShape.color = color
+      textShape.text = text
+      textShape.x = innerMargin * markerSizeInPx
+      textShape.y = innerMargin * markerSizeInPx
+
+      let textHeight = textShape.getMeasuredHeight()
+
+      // textShape.textBaseline = 'bottom'
+      //inner box bottom y
+      textShape.y = (innerMargin * markerSizeInPx + markerSizeInPx * (1 - 2 * innerMargin)) - textHeight + 12 //+12 tested...
+
+      // container.addChild(textShape)
+
+      printWindow.document.body.appendChild(markerCanvas)
+
+      stage.addChild(whiteRect)
+      // stage.update()
+
+      stage.addChild(borderShape)
+      // stage.update()
+
+      stage.addChild(innerRect)
+      // stage.update()
+
+      stage.addChild(textShape)
+
+      //draw marker...
+      stage.update()
+    }
+
+    const fontAwesomeRule = printWindow.document.createElement('link')
+    fontAwesomeRule.rel = 'stylesheet'
+    fontAwesomeRule.href = fontAwesomeLink
+
+    //works but we use window onload if we have multiple...
+    // fontAwesomeRule.onload = async function()  {}
+
+    printWindow.document.head.append(fontAwesomeRule)
+    printWindow.document.close()
+
+
   }
 
   public static async exportVariableIndicator(
@@ -380,7 +583,7 @@ export class PrintHelper {
           i * tilesWidth,
           j * tilesHeight,
           false, false,
-          null,null
+          null, null
         )
 
         graphics.drawImagesOnTile(
@@ -397,7 +600,7 @@ export class PrintHelper {
           i * tilesWidth,
           j * tilesHeight,
           false, false,
-          null,null
+          null, null
         )
 
         graphics.drawLinesOnTile(
@@ -695,7 +898,7 @@ export class PrintHelper {
     graphics.drawFieldsOnTile(stage, tile.fieldShapes, [], [], null, null, null, zIndexCache, false, false,
       worldSettings,
       fieldSymbols, 0, 0, false, false,
-      null,null
+      null, null
     )
 
     graphics.drawLinesOnTile(stage, tile.lineShapes, [], [], null, null, zIndexCache, worldSettings, lineSymbols, 0, 0,
@@ -1105,7 +1308,7 @@ export class PrintHelper {
               i * tilesWidth,
               j * tilesHeight,
               false, false,
-              null,null
+              null, null
             )
 
             graphics.drawImagesOnTile(
@@ -1122,7 +1325,7 @@ export class PrintHelper {
               i * tilesWidth,
               j * tilesHeight,
               false, false,
-              null,null
+              null, null
             )
 
             graphics.drawLinesOnTile(
@@ -1194,7 +1397,7 @@ export class PrintHelper {
           canvas.style.height = `${fillTileHeight * printAndExportScale}px`
 
           canvas.width = fullTileWidth * scaleFactor
-          canvas.height =fillTileHeight * scaleFactor
+          canvas.height = fillTileHeight * scaleFactor
 
           if (!drawGrid) {
             //we only draw border

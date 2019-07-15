@@ -1,8 +1,13 @@
 import {
   ActionBase,
-  ActionType, SET_world_isImageLibraryDisplayedAction,
+  ActionType,
+  SET_isArJsEnabledAction,
+  SET_playerTokenSizeInMetersAction,
+  SET_tileSizeInMetersAction,
+  SET_world_isImageLibraryDisplayedAction,
   SET_world_isTileEditorDisplayedAction,
-  SET_world_isTileLibraryModalDisplayedAction, SET_world_isWorldSettingsModalDisplayedAction,
+  SET_world_isTileLibraryModalDisplayedAction,
+  SET_world_isWorldSettingsModalDisplayedAction,
   SET_world_selectedTilePosAction,
 } from "./worldReducer";
 import {PlainPoint} from "../../../types/drawing";
@@ -40,6 +45,31 @@ export function set_world_isImageLibraryDisplayed(isImageLibraryDisplayed: boole
   return {
     type: ActionType.SET_world_isImageLibraryDisplayed,
     isImageLibraryDisplayed
+  }
+}
+
+
+
+//--- ar settings are not saved in the world because very experimental...
+
+export function set_world_isArJsEnabled(isArJsEnabled: boolean): SET_isArJsEnabledAction {
+  return {
+    type: ActionType.SET_isArJsEnabled,
+    isArJsEnabled
+  }
+}
+
+export function set_world_tileSizeInMeters(tileSizeInMeters: number): SET_tileSizeInMetersAction {
+  return {
+    type: ActionType.SET_tileSizeInMeters,
+    tileSizeInMeters
+  }
+}
+
+export function set_world_playerTokenSizeInMeters(playerTokenSizeInMeters: number): SET_playerTokenSizeInMetersAction {
+  return {
+    type: ActionType.SET_playerTokenSizeInMeters,
+    playerTokenSizeInMeters
   }
 }
 
