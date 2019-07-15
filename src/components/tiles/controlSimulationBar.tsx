@@ -21,6 +21,8 @@ import ToolTip from '../helpers/ToolTip'
 import {getI18n} from "../../../i18n/i18nRoot";
 import {AbstractMachine, SimulationTimes} from "../../../simulation/machine/AbstractMachine";
 import * as mousetrap from "mousetrap";
+import {ArHelper} from "../../helpers/arHelper";
+
 // import {sendIframeAFrameNewState, startAFrame} from "../world/worldActionsBar";
 
 
@@ -51,6 +53,11 @@ const mapStateToProps = (rootState: RootState, props: MyProps) => {
     imgSymbols: rootState.imgSymbolState.present,
     lineSymbols: rootState.lineSymbolState.present,
     worldSettings: rootState.worldSettingsState,
+
+    isArFrameDisplayed: rootState.worldState.isArFrameDisplayed,
+    isArJsEnabled: rootState.worldState.isArJsEnabled,
+    tileSizeInMeters: rootState.worldState.tileSizeInMeters,
+    playerTokenSizeInMeters: rootState.worldState.playerTokenSizeInMeters,
 
     simulationState: rootState.simulationState,
     langId: rootState.i18nState.langId
@@ -86,20 +93,29 @@ class controlSimulationBar extends React.Component<Props, any> {
 
 
   updateArFrame(state: MachineState) {
-    // sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles)
+
+    if (!this.props.isArFrameDisplayed) return
+
+    ArHelper.sendIframeAFrameNewState(state, this.props.tileSurrogates, this.props.tiles, this.props.tileSizeInMeters, this.props.playerTokenSizeInMeters)
   }
 
-  initNewArFrame() {
+  initNewArFrame(state: MachineState) {
 
-    // startAFrame(
-    //   this.props.tileSurrogates,
-    //   this.props.tiles,
-    //   this.props.fieldSymbols,
-    //   this.props.imgSymbols,
-    //   this.props.lineSymbols,
-    //   this.props.worldSettings,
-    //   state
-    // )
+    if (!this.props.isArFrameDisplayed) return
+
+    ArHelper.initAFrame(
+      this.props.tileSurrogates,
+      this.props.tiles,
+      this.props.fieldSymbols,
+      this.props.imgSymbols,
+      this.props.lineSymbols,
+      this.props.worldSettings,
+      this.props.isArJsEnabled,
+      this.props.tileSizeInMeters,
+      this.props.playerTokenSizeInMeters,
+      '#5d5d5d',
+      state
+    )
 
   }
 
@@ -476,7 +492,7 @@ class controlSimulationBar extends React.Component<Props, any> {
                     const state = Simulator.initNew(startPos, true, this.props.gameInitCmdText)
                     this.props.set_simulation_simulationStatus(SimulationStatus.paused, state)
 
-                    this.initNewArFrame()
+                    this.initNewArFrame(state)
 
                   }}>
             <Icon name='play'/>

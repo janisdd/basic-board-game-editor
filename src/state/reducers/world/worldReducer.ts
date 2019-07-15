@@ -20,6 +20,7 @@ export type State = {
 
 
   //--- ar settings are not saved in the world because very experimental...
+  readonly isArFrameDisplayed: boolean
   readonly isArJsEnabled: boolean
   readonly tileSizeInMeters: number
   readonly playerTokenSizeInMeters: number
@@ -32,9 +33,10 @@ export const initial: State = {
   isTileEditorDisplayed: false,
   isWorldSettingsModalDisplayed: false,
   isImageLibraryDisplayed: false,
+  isArFrameDisplayed: false,
   isArJsEnabled: false,
   tileSizeInMeters: 10,
-  playerTokenSizeInMeters: 0.5
+  playerTokenSizeInMeters: 0.5,
 }
 
 export interface ActionBase extends Action {
@@ -52,6 +54,7 @@ export enum ActionType {
   SET_world_isImageLibraryDisplayed = 'worldReducer_SET_world_isImageLibraryDisplayed',
 
 
+  SET_isArFrameDisplayed = 'worldReducer_SET_isArFrameDisplayed',
   SET_isArJsEnabled = 'worldReducer_SET_isArJsEnabled',
   SET_tileSizeInMeters = 'worldReducer_SET_tileSizeInMeters',
   SET_playerTokenSizeInMeters = 'worldReducer_SET_playerTokenSizeInMeters',
@@ -102,6 +105,11 @@ export interface SET_playerTokenSizeInMetersAction extends ActionBase {
   readonly playerTokenSizeInMeters: number
 }
 
+export interface SET_isArFrameDisplayedAction extends ActionBase {
+  readonly type: ActionType.SET_isArFrameDisplayed
+  readonly isArFrameDisplayed: boolean
+}
+
 
 export interface ResetAction extends ActionBase {
   readonly type: ActionType.RESET
@@ -116,6 +124,7 @@ export type AllActions =
   | SET_world_isWorldSettingsModalDisplayedAction
   | SET_world_isImageLibraryDisplayedAction
 
+  |SET_isArFrameDisplayedAction
   | SET_isArJsEnabledAction
   | SET_tileSizeInMetersAction
   | SET_playerTokenSizeInMetersAction
@@ -166,6 +175,12 @@ export function reducer(state: State = initial, action: AllActions): State {
         ...state,
         playerTokenSizeInMeters: action.playerTokenSizeInMeters
       }
+    case ActionType.SET_isArFrameDisplayed:
+      return {
+        ...state,
+        isArFrameDisplayed: action.isArFrameDisplayed
+      }
+
 
     case ActionType.RESET:
       return initial

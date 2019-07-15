@@ -25,6 +25,7 @@ export interface LangObj {
   "World editor": string
   "Undo the last tile placement": string
   "Redo the last tile placement": string
+  "To see the ar frame you need to enable this mode/ar view and start a new simulation (this will init the ar view) after the initiation you can switch between ar view and normal world view": string
   "Selected tile": string
   "Tile": string
   "Tile library": string
@@ -139,6 +140,7 @@ export interface LangObj {
   "Player token size in meters": string
   "If you enabled ar.js then the size will be the multiplier of the pattern size!": string
   "Click here to open a hero marker for ar.js in a new tab (then you can print it). Note the world printing and export scaling is applied when printing or in the browser print settings you can set the scaling for printing. The marker size matters, see help for tile size in meters for more information": string
+  "Click to clear the ar view. This will also disable the camera if ar.js is enabled": string
   //--- simulation tile editor additions
   "Additional tile editor simulation start field or empty": string
   "When you edit a tile that is not a original start tile (has no game start command) and you don't want to add one (because you might forget to remove it later for testing (simulating) the tile), then use this option to define a temporary start field. This option will be ignored for all world simulations" :string

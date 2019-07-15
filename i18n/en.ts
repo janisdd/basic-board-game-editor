@@ -23,6 +23,7 @@ export const lang_en: LangObj = {
   "World editor": "World editor",
   "Undo the last tile placement": "Undo the last tile placement",
   "Redo the last tile placement": "Redo the last tile placement",
+  "To see the ar frame you need to enable this mode/ar view and start a new simulation (this will init the ar view) after the initiation you can switch between ar view and normal world view" : "To see the ar frame you need to enable this mode/ar view and start a new simulation (this will init the ar view) after the initiation you can switch between ar view and normal world view",
   "Selected tile": "Selected tile",
   "Tile": "Tile",
   "Tile library": "Tile library",
@@ -138,6 +139,7 @@ export const lang_en: LangObj = {
   "Tile size in meters": "Tile size in meters",
   "Player token size in meters": "Player token size in meters",
   "If you enabled ar.js then the size will be the multiplier of the pattern size!": "If you enabled ar.js then the size will be the multiplier of the pattern size!",
+  "Click to clear the ar view. This will also disable the camera if ar.js is enabled" : "Click to clear the ar view. This will also disable the camera if ar.js is enabled",
 
   //--- simulation tile editor //--- simulation tile edito,
   "Additional tile editor simulation start field or empty": "Additional tile editor simulation start field or empty",

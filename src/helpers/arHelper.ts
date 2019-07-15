@@ -8,17 +8,12 @@ import {aFrameFrameWrapperId, worldRendererCanvasId} from "../constants";
 
 
 //hero marker: https://stemkoski.github.io/AR-Examples/markers/hiro.png
-const isArJsEnabled = true
 
 // const tileSize = isArJsEnabled ? 1 : 10
 // const gameTokenSize = isArJsEnabled ? 0.05 : 1
-
 //for isArJsEnabled: size is relative to the marker size...
-const tileSize = isArJsEnabled ? 1 : 10
-const gameTokenSize = isArJsEnabled ? 0.05 : 0.5
 
 //see https://github.com/jeromeetienne/AR.js-docs/blob/master/posts/post-XX-how-to-use-arjs-with-aframe.md
-
 
 /**
  * because the ar scene is in an iframe we need to communicate with postMessage
@@ -46,6 +41,12 @@ export class ArHelper {
   }
 
   static readonly iFrameAFrameId = 'aframe-frame'
+  static readonly defaultArTileSize = 10
+  static readonly defaultArPlayerTokenSize = 0.5
+
+  //for ar.js these numbers are scaling factors where 1 is the marker size...
+  static readonly defaultArTileSizeArJs = 1
+  static readonly defaultArPlayerTokenSizeArjs = 0.05
 
   /**
    *
@@ -58,7 +59,14 @@ export class ArHelper {
 
     worldRendererCanvas.style.display = show ? 'none' : 'block'
     aFrameWrapper.style.display = show ? 'block' : 'none'
+  }
 
+  /**
+   *
+   */
+  static clearAFrame() {
+    const aFrameWrapper = document.getElementById(aFrameFrameWrapperId)
+    aFrameWrapper.innerHTML = ""
   }
 
 
@@ -72,6 +80,8 @@ export class ArHelper {
    * @param worldSettings
    * @param isArJsEnabled true: to use ar.js (with camera and hero marker),
    *   false: only render a normal aframe scene (wasd movement is enabled)
+   * @param tileSizeOrScalingFactor tile size,when using ar js this is a scaling factor where 1 is the marker size
+   * @param playerTokenSizeOrScalingFactor player token size ,when using ar js this is a scaling factor where 1 is the marker size
    * @param tileBackgroundColor
    * @param state
    */
@@ -82,6 +92,8 @@ export class ArHelper {
                     lineSymbols: ReadonlyArray<LineSymbol>,
                     worldSettings: WorldSettings,
                     isArJsEnabled: boolean,
+                    tileSizeOrScalingFactor: number,
+                    playerTokenSizeOrScalingFactor: number,
                     tileBackgroundColor: string | null = '#5d5d5d',
                     state?: MachineState,
   ): void {
@@ -117,7 +129,7 @@ export class ArHelper {
       tileImgs.push(resultCanvas.toDataURL())
     }
 
-    const aFrameHtml = this.createAFrameScene(tileSurrogatesState, allTiles, tileImgs, isArJsEnabled,  state)
+    const aFrameHtml = this.createAFrameScene(tileSurrogatesState, allTiles, tileImgs, isArJsEnabled, tileSizeOrScalingFactor, playerTokenSizeOrScalingFactor, state)
 
     // console.log(aFrameHtml)
 
@@ -143,9 +155,17 @@ export class ArHelper {
    * @param tileImgs
    * @param isArJsEnabled true: to use ar.js (with camera and hero marker),
    *   false: only render a normal aframe scene (wasd movement is enabled)
+   * @param tileSizeOrScalingFactor tile size,when using ar js this is a scaling factor where 1 is the marker size
+   * @param playerTokenSizeOrScalingFactor player token size ,when using ar js this is a scaling factor where 1 is the marker size
    * @param state
    */
-  static createAFrameScene(tileSurrogates: ReadonlyArray<WorldTileSurrogate>, tiles: ReadonlyArray<Tile>, tileImgs: string[], isArJsEnabled: boolean, state?: MachineState): string {
+  static createAFrameScene(tileSurrogates: ReadonlyArray<WorldTileSurrogate>,
+                           tiles: ReadonlyArray<Tile>,
+                           tileImgs: string[],
+                           isArJsEnabled: boolean,
+                           tileSizeOrScalingFactor: number,
+                           playerTokenSizeOrScalingFactor: number,
+                           state?: MachineState): string {
 
 
     Logger.log('disabled adblocker else ar.js could be blocked!')
@@ -165,11 +185,11 @@ export class ArHelper {
 
       if (!field) {
         field = tile.fieldShapes[0]
-        pos = this.mapTileFieldPosToAFramePos(field, p, tile, tileSize)
+        pos = this.mapTileFieldPosToAFramePos(field, p, tile, tileSizeOrScalingFactor)
         // console.log(pos)
       }
 
-      return `<a-plane src="#${backgroundImgNames}-${index}" width="${tileSize}" height="${tileSize}" rotation="-90 0 0" position="${p.x * tileSize} 0 ${p.y * tileSize}"></a-plane>`
+      return `<a-plane src="#${backgroundImgNames}-${index}" width="${tileSizeOrScalingFactor}" height="${tileSizeOrScalingFactor}" rotation="-90 0 0" position="${p.x * tileSizeOrScalingFactor} 0 ${p.y * tileSizeOrScalingFactor}"></a-plane>`
     })
 
     const playerTokens: PlayerToken[] = state
@@ -181,7 +201,7 @@ export class ArHelper {
 
     // console.log(playerTokens)
 
-    const playerAFrame = playerTokens.map((p, index) => ` <a-box id="player-token-${index}" color="${p.color}" depth="${gameTokenSize}" height="${gameTokenSize}" width="${gameTokenSize}" position="${pos.x} ${gameTokenSize / 2} ${pos.y}"></a-box>`)
+    const playerAFrame = playerTokens.map((p, index) => ` <a-box id="player-token-${index}" color="${p.color}" depth="${playerTokenSizeOrScalingFactor}" height="${playerTokenSizeOrScalingFactor}" width="${playerTokenSizeOrScalingFactor}" position="${pos.x} ${playerTokenSizeOrScalingFactor / 2} ${pos.y}"></a-box>`)
 
     const aFrameTemplate = `
 <html>
@@ -202,7 +222,7 @@ export class ArHelper {
       
       ${playerAFrame.join('\n')}
       
-     <a-entity id="dice-value" text="align: center; color: #ff85ff; width: ${tileSize}; value: Hello World;" rotation="-45 0 0" position="${-tileSize / 2} ${gameTokenSize} ${-tileSize / 2}"></a-entity>
+     <a-entity id="dice-value" text="align: center; color: #ff85ff; width: ${tileSizeOrScalingFactor}; value: Hello World;" rotation="-45 0 0" position="${-tileSizeOrScalingFactor} ${playerTokenSizeOrScalingFactor} ${-tileSizeOrScalingFactor}"></a-entity>
       
       
       ${isArJsEnabled ? '' : '<a-entity id="cam" camera wasd-controls rotation="-90 0 0" position="0 10 0"></a-entity>'}
@@ -211,7 +231,7 @@ export class ArHelper {
     ${isArJsEnabled ? "<a-marker-camera preset='hiro'></a-marker-camera>" : ''}
 
 
-<a-entity text="align: center; color: #ff85ff; width: ${tileSize}; value: press ctrl+alt+i to inspect scene;" rotation="-45 0 0" position="${-tileSize / 2} ${gameTokenSize} ${-tileSize / 2}"></a-entity>
+<a-entity text="align: center; color: #ff85ff; width: ${tileSizeOrScalingFactor}; value: press ctrl+alt+i to inspect scene;" rotation="-45 0 0" position="${-tileSizeOrScalingFactor / 2} ${playerTokenSizeOrScalingFactor} ${-tileSizeOrScalingFactor / 2}"></a-entity>
 
     </a-scene>
     
@@ -299,15 +319,21 @@ export class ArHelper {
    * @param tileSurrogates
    * @param allTile
    * @param tileSizeInAFrame
+   * @param playerTokenSizeOrScalingFactor
    */
-  static getPlayerTokenPositionsFromState(gameState: MachineState, tileSurrogates: ReadonlyArray<WorldTileSurrogate>, allTile: ReadonlyArray<Tile>, tileSizeInAFrame: number): PlainPoint[] {
+  static getPlayerTokenPositionsFromState(gameState: MachineState,
+                                          tileSurrogates: ReadonlyArray<WorldTileSurrogate>,
+                                          allTile: ReadonlyArray<Tile>,
+                                          tileSizeInAFrame: number,
+                                          playerTokenSizeOrScalingFactor: number
+  ): PlainPoint[] {
 
     return gameState.players.map<PlainPoint>((player, index) => {
       const token = player.tokens[0]
 
       //if to tokens are on the same field...
-      const tokenInternalPlayerOffsetY = ((index + 1) * (gameTokenSize / 2))
-      const tokenInternalPlayerOffsetX = ((index) * (gameTokenSize / 2))
+      const tokenInternalPlayerOffsetY = ((index + 1) * (playerTokenSizeOrScalingFactor / 2))
+      const tokenInternalPlayerOffsetX = ((index) * (playerTokenSizeOrScalingFactor / 2))
 
       if (!token.tileGuid || !token.fieldId) {
         return this.mapTilePosToAFramePos({//don't use 0,0 because we multiply with this
@@ -344,31 +370,33 @@ export class ArHelper {
 
   }
 
-
   /**
    * updates the iframe a frame secne with the game state player (first) tokeb positions and dice value
    * @param gameState
    * @param tileSurrogates
    * @param allTile
    * @param tileSizeInAFrame
+   * @param playerTokenSizeOrScalingFactor
    */
-  static sendIframeAFrameNewState(gameState: MachineState, tileSurrogates: ReadonlyArray<WorldTileSurrogate>, allTile: ReadonlyArray<Tile>, tileSizeInAFrame: number = tileSize) {
+  static sendIframeAFrameNewState(gameState: MachineState, tileSurrogates: ReadonlyArray<WorldTileSurrogate>, allTile: ReadonlyArray<Tile>,
+                                  tileSizeInAFrame: number,
+                                  playerTokenSizeOrScalingFactor: number) {
 
     const aFrame = document.getElementById(`${this.iFrameAFrameId}`) as HTMLIFrameElement
 
     // console.log('update player pos')
 
-    const tokenPositions = this.getPlayerTokenPositionsFromState(gameState, tileSurrogates, allTile, tileSizeInAFrame)
+    const tokenPositions = this.getPlayerTokenPositionsFromState(gameState, tileSurrogates, allTile, tileSizeInAFrame, playerTokenSizeOrScalingFactor)
 
     const palyerPosUpdateMsg: PlayerPosUpdate = {
       kind: "playerPosUpdate",
       positions: tokenPositions,
-      gameTokenSize,
+      gameTokenSize: playerTokenSizeOrScalingFactor,
       rolledDiceValue: gameState.rolledDiceValue,
       leftDiveValue: gameState.leftDiceValue,
       activePlayerIndex: gameState.currentPlayerIndex,
-      diceValueTextOffsetY: gameTokenSize,
-      diceValueTextOffsetX: gameTokenSize
+      diceValueTextOffsetY: playerTokenSizeOrScalingFactor,
+      diceValueTextOffsetX: playerTokenSizeOrScalingFactor
     }
 
     aFrame.contentWindow.postMessage(JSON.stringify(palyerPosUpdateMsg), "*")

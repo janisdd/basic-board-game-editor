@@ -1,6 +1,6 @@
 import {
   ActionBase,
-  ActionType,
+  ActionType, SET_isArFrameDisplayedAction,
   SET_isArJsEnabledAction,
   SET_playerTokenSizeInMetersAction,
   SET_tileSizeInMetersAction,
@@ -51,6 +51,13 @@ export function set_world_isImageLibraryDisplayed(isImageLibraryDisplayed: boole
 
 
 //--- ar settings are not saved in the world because very experimental...
+
+export function set_world_isArFrameDisplayed(isArFrameDisplayed: boolean): SET_isArFrameDisplayedAction {
+  return {
+    type: ActionType.SET_isArFrameDisplayed,
+    isArFrameDisplayed
+  }
+}
 
 export function set_world_isArJsEnabled(isArJsEnabled: boolean): SET_isArJsEnabledAction {
   return {

@@ -1515,6 +1515,18 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                       <Form.Field>
                         <Checkbox className="mar-left-half" checked={this.props.isArJsEnabled}
                                   onChange={(event, data: CheckboxData) => {
+
+                                    if (data.checked) {
+
+                                      this.props.set_world_tileSizeInMeters(ArHelper.defaultArTileSizeArJs)
+                                      this.props.set_world_playerTokenSizeInMeters(ArHelper.defaultArPlayerTokenSizeArjs)
+
+                                    } else {
+
+                                      this.props.set_world_tileSizeInMeters(ArHelper.defaultArTileSize)
+                                      this.props.set_world_playerTokenSizeInMeters(ArHelper.defaultArPlayerTokenSize)
+                                    }
+
                                     this.props.set_world_isArJsEnabled(data.checked)
                                   }}
                                   label={<label>
@@ -1533,10 +1545,20 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
 
                             PrintHelper.printArMarker(
                               this.props.worldSettings.printAndExportScale
-                              )
+                            )
 
                           }}>
                             <Icon name="chess board"/>
+                          </Button>
+                        </ToolTip>
+
+                        <ToolTip
+                          message={getI18n(this.props.langId, "Click to clear the ar view. This will also disable the camera if ar.js is enabled")}
+                        >
+                          <Button icon onClick={() => {
+                            ArHelper.clearAFrame()
+                          }}>
+                            <Icon name="x"/>
                           </Button>
                         </ToolTip>
 

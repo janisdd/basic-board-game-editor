@@ -13,6 +13,7 @@ import {
 } from "../../constants";
 import {Button, Icon} from "semantic-ui-react";
 import {
+  set_world_isArFrameDisplayed,
   set_world_isImageLibraryDisplayed,
   set_world_isTileEditorDisplayed,
   set_world_isTileLibraryModalDisplayed
@@ -37,6 +38,7 @@ import {WorldUnitToImgHelper} from "../../helpers/worldUnitToImgHelper";
 import ImageLibrary from "../tiles/imageLibrary/imageLibrary";
 import {FieldShape, FieldSymbol, ImgSymbol, LineSymbol, PlainPoint} from "../../types/drawing";
 import {WorldSettings} from "../../state/reducers/world/worldSettings/worldSettingsReducer";
+import {ArHelper} from "../../helpers/arHelper";
 
 //const css = require('./styles.styl');
 
@@ -64,6 +66,8 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
 
     variableIndicatorState: rootState.variableIndicatorState,
 
+    isArFrameDisplayed: rootState.worldState.isArFrameDisplayed,
+
     langId: rootState.i18nState.langId,
 
 
@@ -83,6 +87,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
 
   set_tileLibrary_possibleTiles,
   set_world_isImageLibraryDisplayed,
+  set_world_isArFrameDisplayed,
 }, dispatch)
 
 
@@ -408,35 +413,21 @@ class worldActionsBar extends React.Component<Props, any> {
           </Button>
         </ToolTip>
 
-        <Button disabled={this.props.tileSurrogatesState.present.length === 0} icon onClick={async () => {
+        <ToolTip
+          message={getI18n(this.props.langId, "To see the ar frame you need to enable this mode/ar view and start a new simulation (this will init the ar view) after the initiation you can switch between ar view and normal world view")}
+        >
+          <Button className="mar-left" disabled={this.props.tileSurrogatesState.present.length === 0} icon
+                  color={this.props.isArFrameDisplayed ? 'blue' : undefined}
+                  onClick={async () => {
 
+                    let val = !this.props.isArFrameDisplayed
+                    ArHelper.showAFrame(val)
+                    this.props.set_world_isArFrameDisplayed(val)
 
-          const aFrame = document.getElementById('aframe-frame') as HTMLIFrameElement
-          const worldRendererCanvas = document.getElementById(worldRendererCanvasId)
-
-          if (worldRendererCanvas.style.display === 'none') {
-
-            worldRendererCanvas.style.display = "block"
-            aFrame.style.display = "none"
-
-          } else {
-            worldRendererCanvas.style.display = "none"
-            aFrame.style.display = "block"
-          }
-
-    //TODO ar switch
-
-          // startAFrame(
-          //   this.props.tileSurrogatesState.present,
-          //   this.props.allTiles,
-          //   this.props.fieldSymbols,
-          //   this.props.imgSymbols,
-          //   this.props.lineSymbols,
-          //   this.props.worldSettings
-          // )
-        }}>
-          <Icon name="camera"/>
-        </Button>
+                  }}>
+            <Icon name="refresh"/>
+          </Button>
+        </ToolTip>
       </div>
 
 
