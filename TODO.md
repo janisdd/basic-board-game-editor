@@ -6,6 +6,9 @@
   - in var indicator somehow show field id or something
     - this is because we need to know the block (indention) level when we hide vars...
   - also somehow show global/player local/local vars for var indicators...
+  - same for return x ... recursive functions??
+  
+- end game condition is not supported in game instructions editor
 
 - MAYBE auto game instruction editor for field command texts...
   - can we automate this?
