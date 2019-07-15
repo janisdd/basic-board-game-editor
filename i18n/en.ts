@@ -129,6 +129,7 @@ export const lang_en: LangObj = {
   "Value": "Value",
   "Type": "Type",
   "Range": "Range",
+  "Show player token opposite to field text horizontal alignment" : "Show player token opposite to field text horizontal alignment",
 
   //--- ar simulation tab
   "AR settings": "AR settings",

@@ -131,6 +131,7 @@ export interface LangObj {
   "Value": string
   "Type": string
   "Range": string
+  "Show player token opposite to field text horizontal alignment": string
   //--- ar simulation tab
   "AR settings": string
   "Ar settings are not exported/imported with the world as they are experimental": string

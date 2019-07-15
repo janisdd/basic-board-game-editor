@@ -79,7 +79,7 @@ import {
   SET_endFieldAutoBorderSizeInPxAction,
   SET_endFieldBorderColorAction,
   SET_endFieldIsFontBoldAction,
-  SET_endFieldIsFontItalicAction,
+  SET_endFieldIsFontItalicAction, SET_showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignmentAction,
 } from "./worldSettingsReducer";
 
 
@@ -446,6 +446,15 @@ export function set_world_alwaysInsertArrowHeadsWhenAutoConnectingFields(alwaysI
     alwaysInsertArrowHeadsWhenAutoConnectingFields
   }
 }
+
+export function set_world_showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment(showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment: boolean): SET_showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignmentAction {
+  return {
+    type: ActionType.SET_showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment,
+    showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment
+  }
+}
+
+
 
 //--- force field style
 

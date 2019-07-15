@@ -328,9 +328,10 @@ class tileRenderer extends React.Component<Props, any> {
   }
 
 
-  mouseMoveThrottled = _.throttle(( eventObj: MouseEvent) => {
+  mouseMoveThrottled = _.throttle((eventObj: MouseEvent) => {
     this.onMouseMove(eventObj)
   }, 100)
+
   /**
    * clears and attaches the listeners to the stage
    */
@@ -536,7 +537,7 @@ class tileRenderer extends React.Component<Props, any> {
 
         if (isImgShape(img)) {
 
-         return id === img.id
+          return id === img.id
         }
 
         return false
@@ -1044,11 +1045,15 @@ class tileRenderer extends React.Component<Props, any> {
           const field = this.props.fieldShapes.find((p: FieldShape) => p.id === playerToken.fieldId)
 
           if (playerToken.fieldId === null || !field) {
-            graphics.drawPlayer(this.renderStage, null, playerToken.color, 0, 0, 0, shiftY * i)
+            graphics.drawPlayer(this.renderStage, null, playerToken.color, 0, 0, 0, shiftY * i,
+              this.props.worldSettings.showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment,
+            )
             continue
           }
 
-          graphics.drawPlayer(this.renderStage, field, playerToken.color, 0, 0, 0, shiftY * i)
+          graphics.drawPlayer(this.renderStage, field, playerToken.color, 0, 0, 0, shiftY * i,
+            this.props.worldSettings.showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment,
+            )
         }
       }
     }
@@ -1133,8 +1138,7 @@ class tileRenderer extends React.Component<Props, any> {
         //line point + anchor points + too lazy
         this.props.setLinePointNewPos(draggingObjectId, draggingPointId, {x: 0, y: 0}, {x: x, y: y}, true)
 
-      }
-      else {
+      } else {
 
 
         //same as this.props.setPropertyEditor_FieldX()

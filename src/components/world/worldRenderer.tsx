@@ -117,7 +117,7 @@ class worldRenderer extends React.Component<Props, any> {
 
 
   componentWillUnmount() {
-  window.removeEventListener('resize', this.resizeHandler)
+    window.removeEventListener('resize', this.resizeHandler)
     mousetrap.unbind(['backspace', 'del'])
   }
 
@@ -150,8 +150,7 @@ class worldRenderer extends React.Component<Props, any> {
       const clampVal = Math.max(this.props.worldSettings.stageScaleX - globalZoomStep, globalMinimalZoom)
       newScale = clampVal
       this.props.set_world_stageScale(clampVal, clampVal)
-    }
-    else {
+    } else {
       //zoom in
       const clampVal = Math.max(this.props.worldSettings.stageScaleX + globalZoomStep, globalMinimalZoom)
       newScale = clampVal
@@ -297,7 +296,7 @@ class worldRenderer extends React.Component<Props, any> {
           i * defaultTileWidth,
           j * defaultTileHeight,
           true, false,
-          null,null
+          null, null
         )
 
         graphics.drawLinesOnTile(
@@ -420,7 +419,9 @@ class worldRenderer extends React.Component<Props, any> {
             graphics.drawPlayer(this.renderStage, null, playerToken.color,
               0,
               0,
-              0, shiftY * i)
+              0, shiftY * i,
+              this.props.worldSettings.showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment,
+            )
             continue
           }
 
@@ -430,14 +431,18 @@ class worldRenderer extends React.Component<Props, any> {
             graphics.drawPlayer(this.renderStage, null, playerToken.color,
               surrogate.x * defaultTileWidth,
               surrogate.y * defaultTileHeight,
-              0, shiftY * i)
+              0, shiftY * i,
+              this.props.worldSettings.showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment,
+            )
             continue
           }
 
           graphics.drawPlayer(this.renderStage, field, playerToken.color,
             surrogate.x * defaultTileWidth,
             surrogate.y * defaultTileHeight,
-            0, shiftY * i)
+            0, shiftY * i,
+            this.props.worldSettings.showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment,
+          )
         }
       }
     }
@@ -452,8 +457,8 @@ class worldRenderer extends React.Component<Props, any> {
 
 
     //-2 because of 1px border
-    this.canvas.height = this.canvasContainer.offsetHeight-2
-    this.canvas.width = this.canvasContainer.offsetWidth-2
+    this.canvas.height = this.canvasContainer.offsetHeight - 2
+    this.canvas.width = this.canvasContainer.offsetWidth - 2
 
     //force redraw
     this.updateCanvasModel()

@@ -59,7 +59,9 @@ import {
   set_world_endFieldIsFontItalic,
   set_world_endFieldColor,
   set_world_endFieldAutoPrefixText,
-  set_world_endFieldIsFontBold, set_world_endFieldAutoBorderSizeInPx
+  set_world_endFieldIsFontBold,
+  set_world_endFieldAutoBorderSizeInPx,
+  set_world_showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment
 
 } from "../../../state/reducers/world/worldSettings/actions";
 import {
@@ -172,6 +174,7 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   set_world_isArJsEnabled,
   set_world_tileSizeInMeters,
   set_world_playerTokenSizeInMeters,
+  set_world_showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment,
 
 }, dispatch)
 
@@ -1183,7 +1186,20 @@ class worldEditorSettingsModal extends React.Component<Props, any> {
                   menuItem: `${getI18n(this.props.langId, "Simulation")}`,
                   render: () => {
                     return (
-                      <Form as="div" className={this.props.simulationState.machineState !== null ? 'div-disabled' : ''}>
+                      //className={this.props.simulationState.machineState !== null ? 'div-disabled' : ''} //why?? not applied??
+                      <Form as="div" >
+
+                        <Form.Field>
+                          <Checkbox className="mar-left-half" checked={this.props.worldSettings.showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment}
+                                    onChange={(event, data: CheckboxData) => {
+                                      this.props.set_world_showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment(data.checked)
+                                    }}
+                                    label={<label>
+                                      {getI18n(this.props.langId, "Show player token opposite to field text horizontal alignment")}
+                                    </label>}
+                          />
+                        </Form.Field>
+
 
                         <h3>{getI18n(this.props.langId, "Time in seconds needed to...")}</h3>
 

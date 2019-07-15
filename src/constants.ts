@@ -13,7 +13,7 @@ import {getGuid} from "./helpers/guid";
 import {ActionTypes} from "redux-undo";
 
 export const appProperties = {
-  version: '1.3.3',
+  version: '1.4.0',
   appName: 'Basic board game editor',
   exportFileNamePrefix: 'bbge'
 }

@@ -309,6 +309,7 @@ class Migration_1_0_3__to__1_1_0 implements MigrationClass {
         timeInS_expr_factor: 1,
 
         alwaysInsertArrowHeadsWhenAutoConnectingFields: true,
+        showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment: false,
         anchorPointSomeConnectedColor: 'green',
 
         forcedFieldIsFontItalic: false,
@@ -362,6 +363,7 @@ class Migration_1_0_3__to__1_1_0 implements MigrationClass {
             showSequenceIds: defaultTileSettings.showSequenceIds,
             snapToGrid: defaultTileSettings.snapToGrid,
             splitLargeTileForPrint: defaultTileSettings.splitLargeTileForPrint,
+            insertLinesEvenIfFieldsIntersect: false
           }
         }
       })
@@ -922,6 +924,7 @@ class Migration_1_3_2__to__1_3_3 implements MigrationClass {
       worldSettings: {
         ...exportWorld.worldSettings,
         printAndExportScale: 1,
+        showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment: false,
       }
     };
 
@@ -983,6 +986,7 @@ export class MigrationHelper {
     createVersionShallowMigration('1.3.0', '1.3.1'),
     new Migration_1_3_1__to__1_3_2(),
     new Migration_1_3_2__to__1_3_3(),
+    createVersionShallowMigration('1.3.3', '1.4.0'),
   ]
 
   /**

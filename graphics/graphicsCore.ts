@@ -796,7 +796,7 @@ export function drawFieldShape(stage: Stage, field: FieldShape | FieldSymbol, se
 
     textShape.text = fieldText || ''
 
-    textShape.text  = injectFontAwesomeIconsIfNecessary(textShape.text )
+    textShape.text = injectFontAwesomeIconsIfNecessary(textShape.text)
 
     //vertical text align
     if ((symbolForShape !== null && symbolForShape.overwriteVerticalTextAlign ? symbolForShape.verticalTextAlign : field.verticalTextAlign) === VerticalAlign.center) {
@@ -1810,6 +1810,7 @@ export function drawImgShape(stage: Stage, imgShape: ImgShape | ImgSymbol, selec
  * @param {number} yOffset
  * @param shiftXInPx the amount if px to shift the player token because this pos contains multiple player tokens
  * @param shiftYInPx same as shiftXInPx
+ * @param showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment
  */
 export function drawPlayer(stage: Stage,
                            field: FieldBase | null,
@@ -1817,7 +1818,8 @@ export function drawPlayer(stage: Stage,
                            xOffset: number,
                            yOffset: number,
                            shiftXInPx: number,
-                           shiftYInPx: number
+                           shiftYInPx: number,
+                           showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment: boolean
 ): void {
 
 
@@ -1855,17 +1857,28 @@ export function drawPlayer(stage: Stage,
     container.y = defaultY + yOffset + shiftYInPx
   } else {
 
-    if (field.horizontalTextAlign === HorizontalAlign.left) {
 
-      container.x = field.x + field.width - playerBodyWidth + xOffset + shiftXInPx
-      container.y = field.y + yOffset + shiftYInPx
+    if (showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment) {
+      if (field.horizontalTextAlign === HorizontalAlign.left) {
 
-    } else if (field.horizontalTextAlign === HorizontalAlign.right) {
-      container.x = field.x + xOffset - shiftXInPx
-      container.y = field.y + yOffset + shiftYInPx
+        container.x = field.x + field.width - playerBodyWidth + xOffset + shiftXInPx
+        container.y = field.y + yOffset + shiftYInPx
+
+      } else if (field.horizontalTextAlign === HorizontalAlign.right) {
+
+        container.x = field.x + xOffset - shiftXInPx
+        container.y = field.y + yOffset + shiftYInPx
+
+      } else { //center
+
+        container.x = field.x + xOffset - shiftXInPx
+        container.y = field.y + yOffset + shiftYInPx
+      }
     } else {
+
       container.x = field.x + xOffset - shiftXInPx
       container.y = field.y + yOffset + shiftYInPx
+
     }
 
 
@@ -1879,7 +1892,6 @@ export function drawPlayer(stage: Stage,
 }
 
 export function createMarker(stage: Stage, text: string, sizeInPx: number): void {
-
 
 
 }

@@ -128,6 +128,12 @@ export interface WorldSettings {
    */
   readonly alwaysInsertArrowHeadsWhenAutoConnectingFields: boolean
 
+  /**
+   * true: if field text alignment is e.g. right then the text is right and we show the token left
+   * false: show token left
+   */
+  readonly showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment: boolean
+
 
   //-- language rendering settings
   // these settings overwrite the field properties for rendering when the field has cmd text
@@ -293,6 +299,7 @@ export const initial: State = {
 
 
   alwaysInsertArrowHeadsWhenAutoConnectingFields: true,
+  showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment: false,
 
   forcedFieldAutoPrefixText: '\\f071',
   forcedFieldAutoBorderSizeInPx: 2,
@@ -394,6 +401,7 @@ export enum ActionType {
   SET_world_timeInS_expr_factor = 'worldSettingsReducer_SET_timeInS_expr_factor',
 
   SET_alwaysInsertArrowHeadsWhenAutoConnectingFields = 'worldSettingsReducer_SET_alwaysInsertArrowHeadsWhenAutoConnectingFields',
+  SET_showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment = 'worldSettingsReducer_SET_showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment',
 
   SET_forcedFieldAutoPrefixText = 'worldSettingsReducer_SET_forcedFieldAutoPrefixText',
   SET_forcedFieldAutoBorderSizeInPx = 'worldSettingsReducer_SET_forcedFieldAutoBorderSizeInPx',
@@ -698,6 +706,12 @@ export interface SET_alwaysInsertArrowHeadsWhenAutoConnectingFieldsAction extend
   readonly alwaysInsertArrowHeadsWhenAutoConnectingFields: boolean
 }
 
+export interface SET_showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignmentAction extends ActionBase {
+  readonly type: ActionType.SET_showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment
+  readonly showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment: boolean
+}
+
+
 //--- forced field style
 
 export interface SET_forcedFieldAutoPrefixTextAction extends ActionBase {
@@ -903,6 +917,7 @@ export type AllActions =
   | SET_world_timeInS_expr_termAction
   | SET_world_timeInS_expr_factorAction
   | SET_alwaysInsertArrowHeadsWhenAutoConnectingFieldsAction
+  |SET_showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignmentAction
 
   | SET_forcedFieldAutoPrefixTextAction
   | SET_forcedFieldAutoBorderSizeInPxAction
@@ -1245,6 +1260,11 @@ export function reducer(state: State = initial, action: AllActions): State {
       return {
         ...state,
         alwaysInsertArrowHeadsWhenAutoConnectingFields: action.alwaysInsertArrowHeadsWhenAutoConnectingFields
+      }
+    case ActionType.SET_showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment:
+      return {
+        ...state,
+        showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment: action.showSimulationPlayerTokensOppositeToFieldTextHorizontalAlignment
       }
 
 
