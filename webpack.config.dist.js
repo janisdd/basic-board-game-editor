@@ -108,6 +108,10 @@ module.exports = {
     }),
     new CopyWebpackPlugin([
       {
+        from: 'iFrameAFrameHandler.js',
+        to: 'iFrameAFrameHandler.js'
+      },
+      {
         from: 'node_modules/react/dist/react.min.js',
         to: 'react.js',
       },
@@ -136,38 +140,43 @@ module.exports = {
         to: 'ace-builds/bbgel-mode.js',
       },
       {
-        from: 'node_modules/semantic-ui-css/semantic.min.css',
-        to: 'semantic.min.css',
+        from: 'node_modules/semantic-ui-offline/semantic.min.css',
+        to: 'semantic-offline.min.css',
       },
       //required semantic ui css icons
       {
-        from: 'node_modules/semantic-ui-css/themes/default/assets/images/flags.png',
+        from: 'node_modules/semantic-ui-offline/themes/default/assets/images/flags.png',
         to: 'themes/default/assets/images/flags.png',
       },
       {
-        from: 'node_modules/semantic-ui-css/themes/default/assets/fonts/brand-icons.woff2',
+        from: 'node_modules/semantic-ui-offline/themes/default/assets/fonts/brand-icons.woff2',
         to: 'themes/default/assets/fonts/brand-icons.woff2',
       },
       {
-        from: 'node_modules/semantic-ui-css/themes/default/assets/fonts/icons.woff2',
+        from: 'node_modules/semantic-ui-offline/themes/default/assets/fonts/icons.woff2',
         to: 'themes/default/assets/fonts/icons.woff2',
       },
       {
-        from: 'node_modules/semantic-ui-css/themes/default/assets/fonts/outline-icons.woff2',
+        from: 'node_modules/semantic-ui-offline/themes/default/assets/fonts/outline-icons.woff2',
         to: 'themes/default/assets/fonts/outline-icons.woff2',
       },
       //do we need these??
       {
-        from: 'node_modules/semantic-ui-css/themes/default/assets/fonts/brand-icons.woff',
+        from: 'node_modules/semantic-ui-offline/themes/default/assets/fonts/brand-icons.woff',
         to: 'themes/default/assets/fonts/brand-icons.woff',
       },
       {
-        from: 'node_modules/semantic-ui-css/themes/default/assets/fonts/icons.woff',
+        from: 'node_modules/semantic-ui-offline/themes/default/assets/fonts/icons.woff',
         to: 'themes/default/assets/fonts/icons.woff',
       },
       {
-        from: 'node_modules/semantic-ui-css/themes/default/assets/fonts/outline-icons.woff',
+        from: 'node_modules/semantic-ui-offline/themes/default/assets/fonts/outline-icons.woff',
         to: 'themes/default/assets/fonts/outline-icons.woff',
+      },
+      {
+        from: 'node_modules/semantic-ui-offline/font',
+        to: 'font',
+        toType: 'dir'
       },
       {
         from: 'thirdPartyFiles/fontawesome-free-5.9.0-web',

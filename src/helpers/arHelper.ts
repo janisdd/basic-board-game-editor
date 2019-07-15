@@ -18,6 +18,8 @@ import {aFrameFrameWrapperId, worldRendererCanvasId} from "../constants";
 /**
  * because the ar scene is in an iframe we need to communicate with postMessage
  * this is the message obj we send
+ *
+ * note when we use 1000px tile images it is down scaled to 512*512 (see console...)
  */
 export interface PlayerPosUpdate {
   kind: 'playerPosUpdate'

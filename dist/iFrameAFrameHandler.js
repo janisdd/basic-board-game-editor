@@ -18,7 +18,7 @@ window.onmessage = function (msg) {
       const positionUpdate = message.positions[i];
 
       const token = document.querySelector('#player-token-' + i)
-      // console.log(token)
+      console.log(token)
 
       if (i === message.activePlayerIndex) {
 

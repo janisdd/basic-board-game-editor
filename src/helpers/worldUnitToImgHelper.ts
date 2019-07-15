@@ -107,6 +107,22 @@ export class WorldUnitToImgHelper {
   }
 
 
+  /**
+   * converts a tile (by guid) to an image (canvas)
+   *
+   * note when you want high dpi you need to set the canvas.style.width/height to the tile size (tile.tileSettings.width)
+   * when you insert the canvas into the page because the canvas.style.width is the real size (not the width/height canvas attribute)
+   * so e.g. you can set the worldSettings.printAndExportScale to 6 and then set canvas.style.width/height to the real tile size
+   * you get the tile size * 6 pixels into an area of canvas.style.width/height --> higher dpi (good for e.g. printing)
+   * @param tileGuid
+   * @param allTiles
+   * @param fieldSymbols
+   * @param imgSymbols
+   * @param lineSymbols
+   * @param worldSettings
+   * @param canvas
+   * @param fillBackgroundColor
+   */
   public static tileByGuidToImg(tileGuid: string,
                                 allTiles: ReadonlyArray<Tile>,
                                 fieldSymbols: ReadonlyArray<FieldSymbol>,
@@ -125,6 +141,21 @@ export class WorldUnitToImgHelper {
   }
 
 
+  /**
+   * converts a tile to an image (canvas)
+   *
+   * note when you want high dpi you need to set the canvas.style.width/height to the tile size (tile.tileSettings.width)
+   * when you insert the canvas into the page because the canvas.style.width is the real size (not the width/height canvas attribute)
+   * so e.g. you can set the worldSettings.printAndExportScale to 6 and then set canvas.style.width/height to the real tile size
+   * you get the tile size * 6 pixels into an area of canvas.style.width/height --> higher dpi (good for e.g. printing)
+   * @param tile
+   * @param fieldSymbols
+   * @param imgSymbols
+   * @param lineSymbols
+   * @param worldSettings
+   * @param canvas
+   * @param fillBackgroundColor
+   */
   public static tileToImg(tile: Tile,
                           fieldSymbols: ReadonlyArray<FieldSymbol>,
                           imgSymbols: ReadonlyArray<ImgSymbol>,
