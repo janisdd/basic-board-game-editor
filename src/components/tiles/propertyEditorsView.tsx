@@ -101,6 +101,7 @@ import {
   set_selectedLineSymbolGuid
 } from "../../state/reducers/tileEditor/symbols/actions";
 import SymbolLibrary from './symbolModalLibrary/symbolLibrary'
+import {set_world_tileEditorRightPropertyEditorTabScrollY} from "../../state/reducers/world/actions";
 
 //const css = require('./styles.styl');
 
@@ -128,6 +129,8 @@ const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
 
     isChooseImgShapeImageLibraryDisplayed: rootState.tileEditorState.isChooseImgShapeImageLibraryDisplayed,
     isChooseFieldShapeBackgroundImageLibraryDisplayed: rootState.tileEditorState.isChooseFieldShapeBackgroundImageLibraryDisplayed,
+
+    tileEditorRightPropertyEditorTabScrollY: rootState.worldState.tileEditorRightPropertyEditorTabScrollY,
   }
 }
 
@@ -223,6 +226,8 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
 
   set_editor_isSymbolLibraryModalDisplayed,
 
+  set_world_tileEditorRightPropertyEditorTabScrollY,
+
 }, dispatch)
 
 
@@ -234,6 +239,31 @@ const nop = () => {
 }
 
 class propertyEditorsView extends React.Component<Props, any> {
+
+  scrollHost: HTMLDivElement | null = null
+  scrollHandler: (e: Event) => void
+
+  componentDidMount(): void {
+
+    if (this.scrollHost) {
+      this.scrollHandler = this.onScroll.bind(this)
+      this.scrollHost.addEventListener('scroll', this.scrollHandler)
+
+      this.scrollHost.scrollTop = this.props.tileEditorRightPropertyEditorTabScrollY
+    }
+
+  }
+
+  componentWillUnmount(): void {
+    if (this.scrollHost) {
+      this.scrollHost.removeEventListener('scroll', this.scrollHandler)
+    }
+  }
+
+  onScroll(e: Event) {
+    this.props.set_world_tileEditorRightPropertyEditorTabScrollY(this.scrollHost.scrollTop)
+  }
+
   render(): JSX.Element {
 
     const selectedFieldShapes: ReadonlyArray<FieldShape> = this.props.fieldShapes.filter(
@@ -262,7 +292,7 @@ class propertyEditorsView extends React.Component<Props, any> {
     }
 
     return (
-      <div className="property-editor-right">
+      <div ref={r => this.scrollHost = r} className="property-editor-right">
 
         {
           //used to attach a shape to a symbol

@@ -151,7 +151,7 @@ class app extends React.Component<Props, any> {
         {
           //used temporarily for printing html
         }
-        <div id={tempPrintDivId}></div>
+        <div id={tempPrintDivId} className="print-content-div"></div>
 
       </div>
     )

@@ -23,18 +23,20 @@ import ToolTip from "../helpers/ToolTip";
 import {Logger} from "../../helpers/logger";
 import {RightTileEditorTabs} from "../../state/reducers/tileEditor/tileEditorReducer";
 import {notExhaustiveThrow} from "../../state/reducers/_notExhausiveHelper";
+import {set_world_tileEditorRightBorderPointsTabScrollY} from "../../state/reducers/world/actions";
 
 //const css = require('./styles.styl');
 
 export interface MyProps {
-  //readonly test: string
 }
 
-const mapStateToProps = (rootState: RootState /*, props: MyProps*/) => {
+const mapStateToProps = (rootState: RootState, props: MyProps) => {
   return {
-    //test0: rootState...
-    //test: props.test
+    ...props,
     tileProps: rootState.tileEditorState.tileProps,
+
+    tileEditorRightBorderPointsTabScrollY: rootState.worldState.tileEditorRightBorderPointsTabScrollY,
+
     langId: rootState.i18nState.langId
   }
 }
@@ -52,6 +54,8 @@ const mapDispatchToProps = (dispatch: Dispatch<any>) => bindActionCreators({
   setSelectedLineShapeIds,
   set_editor_rightTabActiveIndex,
 
+  set_world_tileEditorRightBorderPointsTabScrollY,
+
 }, dispatch)
 
 
@@ -61,9 +65,33 @@ type Props = typeof stateProps & typeof dispatchProps;
 
 class tileBorderPointsView extends React.Component<Props, any> {
 
+  scrollHost: HTMLDivElement | null = null
+  scrollHandler: (e: Event) => void
+
+  componentDidMount(): void {
+
+    if (this.scrollHost) {
+      this.scrollHandler = this.onScroll.bind(this)
+      this.scrollHost.addEventListener('scroll', this.scrollHandler)
+
+      this.scrollHost.scrollTop = this.props.tileEditorRightBorderPointsTabScrollY
+    }
+
+  }
+
+  componentWillUnmount(): void {
+    if (this.scrollHost) {
+      this.scrollHost.removeEventListener('scroll', this.scrollHandler)
+    }
+  }
+
+  onScroll(e: Event) {
+    this.props.set_world_tileEditorRightBorderPointsTabScrollY(this.scrollHost.scrollTop)
+  }
+
   render(): JSX.Element {
     return (
-      <div className="property-editor-right">
+      <div ref={r => this.scrollHost = r} className="property-editor-right">
 
 
         <Form as="div">

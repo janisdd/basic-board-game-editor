@@ -602,7 +602,7 @@ class Migration_1_2_3__to__1_3_0 implements MigrationClass {
   oldVersion = '1.2.3'
   newVersion = '1.3.0'
 
-  warningMsg = 'We changed the connected lines system (field to lines), thus we dropped all the connected lines information in your fields. Please reconnect all your lines and fields!'
+  warningMsg = 'We changed the connected lines system (field to lines), thus we dropped all the connected lines information in your fields. Please reconnect all your lines and fields! Border point ids were also changed so you need to re-connect fields to border points!'
 
   public migrateTile(exportTile: ExportTile): ExportTile {
 
@@ -888,9 +888,6 @@ class Migration_1_3_1__to__1_3_2 implements MigrationClass {
 
 }
 
-/**
- * we migrate to a new line connection system --> drop all old
- */
 class Migration_1_3_2__to__1_3_3 implements MigrationClass {
   oldVersion = '1.3.2';
   newVersion = '1.3.3';
@@ -987,6 +984,7 @@ export class MigrationHelper {
     new Migration_1_3_1__to__1_3_2(),
     new Migration_1_3_2__to__1_3_3(),
     createVersionShallowMigration('1.3.3', '1.4.0'),
+    createVersionShallowMigration('1.4.0', '1.4.1'),
   ]
 
   /**

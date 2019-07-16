@@ -62,7 +62,7 @@ QUESTIONS
 - select multiple e.g. field height: only fixed val for all or delta?
 
 - maybe use tabs.renderActiveOnly for property editors?
-  - this way we could preserve the scroll position
+  - this way we could preserve the scroll position easier
 
 IDEAS
 - allow computed field texts

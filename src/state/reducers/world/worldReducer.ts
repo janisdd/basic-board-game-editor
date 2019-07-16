@@ -24,6 +24,11 @@ export type State = {
   readonly isArJsEnabled: boolean
   readonly tileSizeInMeters: number
   readonly playerTokenSizeInMeters: number
+
+  //--- scroll positions
+  readonly tileEditorRightPropertyEditorTabScrollY: number
+  readonly tileEditorRightBorderPointsTabScrollY: number
+  readonly tileEditorRightSimulationTabScrollY: number
 }
 
 
@@ -37,6 +42,10 @@ export const initial: State = {
   isArJsEnabled: false,
   tileSizeInMeters: 10,
   playerTokenSizeInMeters: 0.5,
+
+  tileEditorRightPropertyEditorTabScrollY: 0,
+  tileEditorRightBorderPointsTabScrollY: 0,
+  tileEditorRightSimulationTabScrollY: 0,
 }
 
 export interface ActionBase extends Action {
@@ -58,6 +67,10 @@ export enum ActionType {
   SET_isArJsEnabled = 'worldReducer_SET_isArJsEnabled',
   SET_tileSizeInMeters = 'worldReducer_SET_tileSizeInMeters',
   SET_playerTokenSizeInMeters = 'worldReducer_SET_playerTokenSizeInMeters',
+
+  SET_tileEditorRightPropertyEditorTabScrollY = 'worldReducer_SET_tileEditorRightPropertyEditorTabScrollY',
+  SET_tileEditorRightBorderPointsTabScrollY = 'worldReducer_SET_tileEditorRightBorderPointsTabScrollY',
+  SET_tileEditorRightSimulationTabScrollY = 'worldReducer_SET_tileEditorRightSimulationTabScrollY',
 
   RESET = 'worldReducer_RESET',
 }
@@ -110,6 +123,23 @@ export interface SET_isArFrameDisplayedAction extends ActionBase {
   readonly isArFrameDisplayed: boolean
 }
 
+//scroll positions
+
+export interface SET_tileEditorRightPropertyEditorTabScrollYAction extends ActionBase {
+  readonly type: ActionType.SET_tileEditorRightPropertyEditorTabScrollY
+  readonly tileEditorRightPropertyEditorTabScrollY: number
+}
+
+export interface SET_tileEditorRightBorderPointsTabScrollYAction extends ActionBase {
+  readonly type: ActionType.SET_tileEditorRightBorderPointsTabScrollY
+  readonly tileEditorRightBorderPointsTabScrollY: number
+}
+
+export interface SET_tileEditorRightSimulationTabScrollYAction extends ActionBase {
+  readonly type: ActionType.SET_tileEditorRightSimulationTabScrollY
+  readonly tileEditorRightSimulationTabScrollY: number
+}
+
 
 export interface ResetAction extends ActionBase {
   readonly type: ActionType.RESET
@@ -124,10 +154,14 @@ export type AllActions =
   | SET_world_isWorldSettingsModalDisplayedAction
   | SET_world_isImageLibraryDisplayedAction
 
-  |SET_isArFrameDisplayedAction
+  | SET_isArFrameDisplayedAction
   | SET_isArJsEnabledAction
   | SET_tileSizeInMetersAction
   | SET_playerTokenSizeInMetersAction
+
+  | SET_tileEditorRightPropertyEditorTabScrollYAction
+  | SET_tileEditorRightBorderPointsTabScrollYAction
+  | SET_tileEditorRightSimulationTabScrollYAction
 
 
 export function reducer(state: State = initial, action: AllActions): State {
@@ -181,6 +215,21 @@ export function reducer(state: State = initial, action: AllActions): State {
         isArFrameDisplayed: action.isArFrameDisplayed
       }
 
+    case ActionType.SET_tileEditorRightPropertyEditorTabScrollY:
+      return {
+        ...state,
+        tileEditorRightPropertyEditorTabScrollY: action.tileEditorRightPropertyEditorTabScrollY
+      }
+    case ActionType.SET_tileEditorRightBorderPointsTabScrollY:
+      return {
+        ...state,
+        tileEditorRightBorderPointsTabScrollY: action.tileEditorRightBorderPointsTabScrollY
+      }
+    case ActionType.SET_tileEditorRightSimulationTabScrollY:
+      return {
+        ...state,
+        tileEditorRightSimulationTabScrollY: action.tileEditorRightSimulationTabScrollY
+      }
 
     case ActionType.RESET:
       return initial

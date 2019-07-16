@@ -1,8 +1,11 @@
 import {
   ActionBase,
-  ActionType, SET_isArFrameDisplayedAction,
+  ActionType,
+  SET_isArFrameDisplayedAction,
   SET_isArJsEnabledAction,
   SET_playerTokenSizeInMetersAction,
+  SET_tileEditorRightBorderPointsTabScrollYAction,
+  SET_tileEditorRightPropertyEditorTabScrollYAction, SET_tileEditorRightSimulationTabScrollYAction,
   SET_tileSizeInMetersAction,
   SET_world_isImageLibraryDisplayedAction,
   SET_world_isTileEditorDisplayedAction,
@@ -80,3 +83,25 @@ export function set_world_playerTokenSizeInMeters(playerTokenSizeInMeters: numbe
   }
 }
 
+//--- scroll positions
+
+export function set_world_tileEditorRightPropertyEditorTabScrollY(tileEditorRightPropertyEditorTabScrollY: number): SET_tileEditorRightPropertyEditorTabScrollYAction {
+  return {
+    type: ActionType.SET_tileEditorRightPropertyEditorTabScrollY,
+    tileEditorRightPropertyEditorTabScrollY
+  }
+}
+
+export function set_world_tileEditorRightBorderPointsTabScrollY(tileEditorRightBorderPointsTabScrollY: number): SET_tileEditorRightBorderPointsTabScrollYAction {
+  return {
+    type: ActionType.SET_tileEditorRightBorderPointsTabScrollY,
+    tileEditorRightBorderPointsTabScrollY
+  }
+}
+
+export function set_world_tileEditorRightSimulationTabScrollY(tileEditorRightSimulationTabScrollY: number): SET_tileEditorRightSimulationTabScrollYAction {
+  return {
+    type: ActionType.SET_tileEditorRightSimulationTabScrollY,
+    tileEditorRightSimulationTabScrollY
+  }
+}
