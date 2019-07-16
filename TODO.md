@@ -1,6 +1,9 @@
 # TODO
 
 
+- maybe command text change is lazy... when pasting??
+  - when we fast switch fields or duplicate fields??
+
 - we can have many local variables...
   - make fields implicitly forced (else we could miss them)
   - in var indicator somehow show field id or something
