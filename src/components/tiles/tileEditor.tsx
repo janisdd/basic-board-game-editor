@@ -240,36 +240,48 @@ class tileEditor extends React.Component<Props, any> {
 
   removeSelectedShapes(e: KeyboardEvent) {
 
+
+
     if (this.props.selectedFieldShapeIds.length > 0) {
-      for (const id of this.props.selectedFieldShapeIds) {
+
+      const selectedFieldShapeIdsCopy = this.props.selectedFieldShapeIds
+
+      //make sure selected is are correctly, this will change this.props.selectedFieldShapeIds immediately
+      this.props.setSelectedFieldShapeIds([])
+
+      for (const id of selectedFieldShapeIdsCopy) {
         this.props.removeFieldShape(id)
       }
-      //make sure selected is are correctly
-      this.props.setSelectedFieldShapeIds([])
 
       renewAllZIndicesInTile()
       this.props.set_editor_restoreRightTabActiveIndex()
     }
 
     if (this.props.selectedImageShapeIds.length > 0) {
-      for (const id of this.props.selectedImageShapeIds) {
-        this.props.removeImageShape(id)
-      }
+
+      const selectedImageShapeIdsCopy = this.props.selectedImageShapeIds
 
       //make sure selected is are correctly
       this.props.setSelectedImageShapeIds([])
+
+      for (const id of selectedImageShapeIdsCopy) {
+        this.props.removeImageShape(id)
+      }
 
       renewAllZIndicesInTile()
       this.props.set_editor_restoreRightTabActiveIndex()
     }
 
     if (this.props.selectedLineShapeIds.length > 0) {
-      for (const id of this.props.selectedLineShapeIds) {
-        this.props.removeLineShape(id)
-      }
+
+      const selectedLineShapeIdsCopy = this.props.selectedLineShapeIds
 
       //make sure selected is are correctly
       this.props.setSelectedLineShapeIds([])
+
+      for (const id of selectedLineShapeIdsCopy) {
+        this.props.removeLineShape(id)
+      }
 
       renewAllZIndicesInTile()
       this.props.set_editor_restoreRightTabActiveIndex()
