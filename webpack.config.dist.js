@@ -182,6 +182,11 @@ module.exports = {
         from: 'thirdPartyFiles/fontawesome-free-5.9.0-web',
         to: 'thirdPartyFiles/fontawesome-free-5.9.0-web',
         toType: 'dir'
+      },
+      {
+        from: 'thirdPartyFiles/arjs',
+        to: 'thirdPartyFiles/arjs',
+        toType: 'dir'
       }
     ]),
     new webpack.DefinePlugin({

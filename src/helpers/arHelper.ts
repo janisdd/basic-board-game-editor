@@ -4,7 +4,7 @@ import {FieldShape, FieldSymbol, ImgSymbol, LineSymbol, PlainPoint} from "../typ
 import {WorldSettings} from "../state/reducers/world/worldSettings/worldSettingsReducer";
 import {WorldUnitToImgHelper} from "./worldUnitToImgHelper";
 import {Logger} from "./logger";
-import {aFrameFrameWrapperId, worldRendererCanvasId} from "../constants";
+import {aFrameFrameWrapperId, isProduction, worldRendererCanvasId} from "../constants";
 
 
 //hero marker: https://stemkoski.github.io/AR-Examples/markers/hiro.png
@@ -203,16 +203,23 @@ export class ArHelper {
 
     // console.log(playerTokens)
 
+
     const playerAFrame = playerTokens.map((p, index) => ` <a-box id="player-token-${index}" color="${p.color}" depth="${playerTokenSizeOrScalingFactor}" height="${playerTokenSizeOrScalingFactor}" width="${playerTokenSizeOrScalingFactor}" position="${pos.x} ${playerTokenSizeOrScalingFactor / 2} ${pos.y}"></a-box>`)
 
     const aFrameTemplate = `
 <html>
   <head>
-    <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
-    ${isArJsEnabled ? '<script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script>' : ''}
+<!--    <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>-->
+        ${isProduction
+      ? '<script src="thirdPartyFiles/arjs/aframe/aframe-v0.9.2.min.js"></script>'
+      : '<script src="thirdPartyFiles/arjs/aframe/aframe-v0.9.2.min.js"></script>'}
+        
+    ${isArJsEnabled ? '<script src="thirdPartyFiles/arjs/aframe-ar.js"></script>' : ''}
   </head>
   <body>
-    <a-scene embedded arjs>
+  <!-- see https://github.com/jeromeetienne/AR.js/tree/master/aframe -->
+  <!-- see https://github.com/jeromeetienne/AR.js/issues/355 -->
+    <a-scene embedded arjs='trackingMethod: best; debugUIEnabled: false; sourceType: webcam; cameraParametersUrl: thirdPartyFiles/arjs/camera_para.dat;'>
     
     <a-asset>
         ${backgroundImgsString.join('\n')}
@@ -224,16 +231,17 @@ export class ArHelper {
       
       ${playerAFrame.join('\n')}
       
-     <a-entity id="dice-value" text="align: center; color: #ff85ff; width: ${tileSizeOrScalingFactor}; value: Hello World;" rotation="-45 0 0" position="${-tileSizeOrScalingFactor} ${playerTokenSizeOrScalingFactor} ${-tileSizeOrScalingFactor}"></a-entity>
+     <a-entity id="dice-value" text="font: thirdPartyFiles/arjs/aframe/Roboto-msdf.json; align: center; color: #ff85ff; width: ${tileSizeOrScalingFactor}; value: Hello World;" rotation="-45 0 0" position="${-tileSizeOrScalingFactor} ${playerTokenSizeOrScalingFactor} ${-tileSizeOrScalingFactor}"></a-entity>
       
       
       ${isArJsEnabled ? '' : '<a-entity id="cam" camera wasd-controls rotation="-90 0 0" position="0 10 0"></a-entity>'}
 
     <!-- define a camera which will move according to the marker position -->
-    ${isArJsEnabled ? "<a-marker-camera preset='hiro'></a-marker-camera>" : ''}
+    <!-- preset='hiro' -->
+    ${isArJsEnabled ? "<a-marker-camera type='pattern' url='thirdPartyFiles/arjs/patt.hiro'  ></a-marker-camera>" : ''}
 
 
-<a-entity text="align: center; color: #ff85ff; width: ${tileSizeOrScalingFactor}; value: press ctrl+alt+i to inspect scene;" rotation="-45 0 0" position="${-tileSizeOrScalingFactor / 2} ${playerTokenSizeOrScalingFactor} ${-tileSizeOrScalingFactor / 2}"></a-entity>
+<a-entity text="font: thirdPartyFiles/arjs/aframe/Roboto-msdf.json; align: center; color: #ff85ff; width: ${tileSizeOrScalingFactor}; value: press ctrl+alt+i to inspect scene;" rotation="-45 0 0" position="${-tileSizeOrScalingFactor / 2} ${playerTokenSizeOrScalingFactor} ${-tileSizeOrScalingFactor / 2}"></a-entity>
 
     </a-scene>
     
